@@ -1,0 +1,101 @@
+---
+author:
+  - name: Sahir Bhatnagar *
+    affiliation: McGill Univeristy
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{sahir.bhatnagar@mail.mcgill.ca}
+    url: http://sahirbhatnagar.com/
+  - name: Maxime Turgeon *
+    affiliation: McGill University
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{maxime.turgeon@mail.mcgill.ca}
+    url: http://maxturgeon.ca/
+  - name: James Hanley
+    affiliation: McGill Univeristy
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{james.hanley@mcgill.ca}
+    url: http://www.medicine.mcgill.ca/epidemiology/hanley/
+  - name: Olli Saarela
+    affiliation: University of Toronto
+    address: >
+      Dalla Lana School of Public Health, 
+      155 College Street, 6th floor, 
+      Toronto, Ontario 
+      M5T 3M7, Canada
+    email: \email{olli.saarela@utoronto.ca}
+    url: http://individual.utoronto.ca/osaarela/
+title:
+  formatted: "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+  # If you use tex in the formatted title, also supply version without
+  plain:     "casebase: An Alternative Framework For Survival Analysis"
+  # For running headers, if needed
+  short:     "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+abstract: >
+  The abstract of the article. * joint co-authors
+keywords:
+  # at least one keyword must be supplied
+  formatted: [keywords, not capitalized, "\\proglang{Java}"]
+  plain:     [keywords, not capitalized, Java]
+preamble: >
+  \usepackage{amsmath}
+output: rticles::jss_article
+---
+
+# Code formatting
+
+Don't use markdown, instead use the more precise latex commands:
+
+* \proglang{Java}
+* \pkg{plyr}
+* \code{print("abc")}
+
+
+
+# Introduction
+
+  - Motivation
+    + Flexible 
+    + Flexible
+    + Flexible
+
+# Theoretical details
+
+# Implementation details
+
+  1. Population-tim plots
+  2. Sampling
+  3. Fitting
+  4. Absolute Risks
+
+# Population-time plots
+
+# Case study 1: Veteran data (or ERSPC if we can)
+
+  - First example
+  - Show how we can test for non-proportional hazard?
+
+# Case study 2: Bone-marrow transplant
+
+  - Competing risk example
+  - Comparison with Cox and Fine-Gray
+
+# Case study 3: Vaccination study (recurrent events)
+
+  - Give a more complex example of sampling; time-dependent exposure
+    + Sampling needs to be done manually, but fitting function can still be used 
+
+# Discussion
+
+
+
+
+
+
+
+
