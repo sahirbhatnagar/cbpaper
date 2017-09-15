@@ -42,6 +42,7 @@ keywords:
   # at least one keyword must be supplied
   formatted: [keywords, not capitalized, "\\proglang{Java}"]
   plain:     [keywords, not capitalized, Java]
+bibliography: casebase_references.bib
 preamble: >
   \usepackage{amsmath}
 output: rticles::jss_article
