@@ -93,6 +93,8 @@ Don't use markdown, instead use the more precise latex commands:
 
 # Discussion
 
+## References {-}
+<!-- placeholder for References in toc --!>
 
 
 
