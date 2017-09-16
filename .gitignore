@@ -34,3 +34,5 @@ vignettes/*.pdf
 .Rproj.user
 *.Rproj
 *.bbl
+paper/casebase_jss_cache/*
+paper/casebase_jss_files/*
