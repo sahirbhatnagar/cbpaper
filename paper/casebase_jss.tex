@@ -94,20 +94,87 @@ Don't use markdown, instead use the more precise latex commands:
 
 \section{Implementation details}\label{implementation-details}
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  Population-tim plots
-\item
-  Sampling
-\item
-  Fitting
-\item
-  Absolute Risks
-\end{enumerate}
+The functions in the casebase package can be divided into two
+categories: 1) data visualization, in the form of population-time plots;
+and 2) data analysis.
 
-\section{Population-time plots}\label{population-time-plots}
+We explicitely aimed at being compatible with both \code{data.frame}s
+and \code{data.table}s. This is evident in some of the coding choices we
+made, and it is also reflected in our testing units.
+
+\subsection{Population-time plots}\label{population-time-plots}
+
+\subsection{Data analysis}\label{data-analysis}
+
+The data analysis step was separated into three parts: 1) case-base
+sampling; 2) estimation of the smooth hazard function; and 3)
+calculation of the risk function. By separating the sampling and
+estimation functions, we allowed the possibility of users implementing
+more complex sampling scheme, as described in Saarela
+\citeyearpar{saarela2016case}.
+
+The sampling scheme selected for \code{sampleCaseBase} was described in
+Hanley and Miettinen \citeyearpar{hanley2009fitting}: we first sample
+along the ``person'' axis, proportional to each individual's total
+follow-up time, and then we sample a moment uniformly over their
+follow-up time. This sampling scheme is equivalent to the following
+picture: imagine representing the total follow-up time of all
+individuals in the study along a single dimension, where the follow-up
+time of the next individual would start exactly when the follow-up time
+of the previous individual ends. Then the base series could be sampled
+uniformly from this one-dimensional representation of the overall
+follow-up time. In any case, the output is a dataset of the same class
+as the input, where each row corresponds to a person-moment. The
+covariate profile for each such person-moment is retained, and an offset
+term is added to the dataset. This output could then be used to fit a
+smooth hazard function, or for visualization of the base series.
+
+The fitting function \code{fitSmoothHazard} starts by looking at the
+class of the dataset: if it was generated from \code{sampleCaseBase}, it
+automatically inherited the class \code{cbData}. If the dataset supplied
+to \code{fitSmoothHazard} does not inherit from \code{cbData}, then the
+fitting function starts by calling \code{sampleCaseBase} to generate the
+base series. In other words, the occasional user can bypass
+\code{sampleCaseBase} altogether and only worry about the fitting
+function \code{fitSmoothHazard}.
+
+The fitting function retains the familiar formula interface of
+\code{glm}. The left-hand side of the formula should be the name of the
+column corresponding to the event type. The right-hand side can be any
+combination of the covariates, along with an explicit functional form
+for the time variable. Note that non-proportional hazard models can be
+achieved at this stage by adding an interaction term involving time. The
+offset term does not need to be specified by the user, as it is
+automatically added to the formula.
+
+Finally, the hazard function is fitted to the data using the function
+\code{glm}, unless there is more than one type event (i.e.~in a
+competing-risk analysis), in which case it uses the multinomical
+regression capabilities of the \pkg{VGAM} package. This package was
+selected for its ability to fit multinomial regression models with an
+offset.
+
+Once a model-fit object has been returned by \code{fitSmoothHazard}, all
+the familiar summary and diagnostic functions are available:
+\code{print}, \code{summary}, \code{predict}, \code{plot}, etc. Our
+package provides one more functionality: it computes risk functions from
+the model fit. For the case of a single event, it uses the familiar
+identity \[S(t) = \exp\left(-\int_0^t h(u;X) du\right).\] The integral
+is computed using either the \code{stats::integrate} function or
+Monte-Carlo integration. For the case of a competing-event analysis, the
+event-specific risk is computed using a nested double integral; in this
+setting, Monte-Carlo integration is faster and more flexible than
+\code{stats::integrate}. This is due to the fact that the computation
+involves a double loop over the selected time points; Monte-Carlo
+integration performs this step by using the vectorized \code{rowSums}
+and \code{colSums} functions.
+
+To decide between a single-event and a competing-event analysis, we
+created \code{absoluteRisk} as an \code{S3} generic, with methods for
+both \code{glm} and \code{CompRisk} objects (the latter inherits from
+\code{vglm} as well). The method dispatch system of \proglang{R} then
+takes care of matching the correct input to the correct methodology,
+without the user's intervention.
 
 \section{Case study 1: Veteran data (or ERSPC if we
 can)}\label{case-study-1-veteran-data-or-erspc-if-we-can}
@@ -234,19 +301,19 @@ corresponding confidence intervals:
 \hline
 Covariates & HR & 95\% CI\\
 \hline
-Sex & 0.71 & (0.41, 1.24)\\
+Sex & 0.81 & (0.47, 1.41)\\
 \hline
-Disease & 0.52 & (0.28, 0.93)\\
+Disease & 0.57 & (0.31, 1.03)\\
 \hline
-Phase (CR2 vs. CR1) & 1.17 & (0.47, 2.93)\\
+Phase (CR2 vs. CR1) & 1.21 & (0.48, 3.01)\\
 \hline
-Phase (CR3 vs. CR1) & 1.78 & (0.46, 6.91)\\
+Phase (CR3 vs. CR1) & 1.75 & (0.45, 6.8)\\
 \hline
-Phase (Relapse vs. CR1) & 4.45 & (2.07, 9.57)\\
+Phase (Relapse vs. CR1) & 4.23 & (1.97, 9.09)\\
 \hline
-Source & 1.64 & (0.54, 5)\\
+Source & 1.60 & (0.53, 4.88)\\
 \hline
-Age & 0.99 & (0.97, 1.02)\\
+Age & 1.00 & (0.97, 1.02)\\
 \hline
 \end{tabular}
 
@@ -316,8 +383,7 @@ events)}\label{case-study-3-vaccination-study-recurrent-events}
   \end{itemize}
 \end{itemize}
 
-\section{Discussion}\label{discussion}
-
+\renewcommand\refname{Discussion}
 \bibliography{casebase_references.bib}
 
 
