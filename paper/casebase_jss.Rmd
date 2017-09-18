@@ -77,12 +77,30 @@ library(magrittr)
 
 # Implementation details
 
-  1. Population-tim plots
-  2. Sampling
-  3. Fitting
-  4. Absolute Risks
 
-# Population-time plots
+The functions in the casebase package can be divided into two categories: 1) data visualization, in the form of population-time plots; and 2) data analysis.
+
+We explicitely aimed at being compatible with both \code{data.frame}s and \code{data.table}s. This is evident in some of the coding choices we made, and it is also reflected in our testing units.
+
+## Population-time plots
+
+## Data analysis
+
+The data analysis step was separated into three parts: 1) case-base sampling; 2) estimation of the smooth hazard function; and 3) calculation of the risk function. By separating the sampling and estimation functions, we allowed the possibility of users implementing more complex sampling scheme, as described in Saarela.
+
+The sampling scheme selected for \code{sampleCaseBase} was described in Hanley and Miettinen: we first sample along the ``person'' axis, proportional to each individual's total follow-up time, and then we sample a moment uniformly over their follow-up time. This sampling scheme is equivalent to the following picture: imagine representing the total follow-up time of all individuals in the study along a single dimension, where the follow-up time of the next individual would start exactly when the follow-up time of the previous individual ends. Then the base series could be sampled uniformly from this one-dimensional representation of the overall follow-up time. In any case, the output is a dataset of the same class as the input, where each row corresponds to a person-moment. The covariate profile for each such person-moment is retained, and an offset term is added to the dataset. This output could then be used to fit a smooth hazard function, or for visualization of the base series.
+
+The fitting function \code{fitSmoothHazard} starts by looking at the class of the dataset: if it was generated from \code{sampleCaseBase}, it automatically inherited the class \code{cbData}. If the dataset supplied to \code{fitSmoothHazard} does not inherit from \code{cbData}, then the fitting function starts by calling \code{sampleCaseBase} to generate the base series. In other words, the occasional user can bypass \code{sampleCaseBase} altogether and only worry about the fitting function \code{fitSmoothHazard}. 
+
+The fitting function retains the familiar formula interface of \code{glm}. The left-hand side of the formula should be the name of the column corresponding to the event type. The right-hand side can be any combination of the covariates, along with an explicit functional form for the time variable. Note that non-proportional hazard models can be achieved at this stage by adding an interaction term involving time. The offset term does not need to be specified by the user, as it is automatically added to the formula.
+
+Finally, the hazard function is fitted to the data using the function \code{glm}, unless there is more than one type event (i.e. in a competing-risk analysis), in which case it uses the multinomical regression capabilities of the \pkg{VGAM} package. This package was selected for its ability to fit multinomial regression models with an offset.
+
+Once a model-fit object has been returned by \code{fitSmoothHazard}, all the familiar summary and diagnostic functions are available: \code{print}, \code{summary}, \code{predict}, \code{plot}, etc. Our package provides one more functionality: it computes risk functions from the model fit. For the case of a single event, it uses the familiar identity
+$$S(t) = \exp\left(-\int_0^t h(u;X) du\right).$$
+The integral is computed using either the \code{stats::integrate} function or Monte-Carlo integration. For the case of a competing-event analysis, the event-specific risk is computed using a nested double integral; in this setting, Monte-Carlo integration is faster and more flexible than \code{stats::integrate}. This is due to the fact that the computation involves a double loop over the selected time points; Monte-Carlo integration performs this step by using the vectorized \code{rowSums} and \code{colSums} functions.
+
+To decide between a single-event and a competing-event analysis, we created \code{absoluteRisk} as an \code{S3} generic, with methods for both \code{glm} and \code{CompRisk} objects (the latter inherits from \code{vglm} as well). The method dispatch system of \proglang{R} then takes care of matching the correct input to the correct methodology, without the user's intervention.
 
 # Case study 1: Veteran data (or ERSPC if we can)
 
