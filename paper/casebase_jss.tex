@@ -92,6 +92,48 @@ Don't use markdown, instead use the more precise latex commands:
 
 \section{Theoretical details}\label{theoretical-details}
 
+As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
+key idea behind case-base sampling is to discretize the study base into
+an infinite amount of \emph{person moments}. These person moments are
+indexed by both an individual in the study and a time point, and
+therefore each person moment has a covariate profile, an exposure status
+and an outcome status attached to it. We note that there is only a
+finite number of person moments associated with the event of interest
+(what Hanley \& Miettinen call the \emph{case series}). The case-base
+sampling refers to the sampling from the base of a representative finite
+sample called the \emph{base series}.
+
+Popular survival analysis methods, like Kaplan-Meier and Cox regression,
+rely on the notion of risk-set sampling. Case-base sampling can be seen
+as an alternative.
+
+As shown by Saarela \& Arjas \citeyearpar{saarela2015non} (and further
+expanded in Saarela \citeyearpar{saarela2016case}), writing the
+likelihood arising from this data-generating mechanism using the
+framework of non-homogenous Poisson processes, we eventually reach an
+expression where each person-moment's contribution is of the form
+\[\frac{\lambda(t)^{dN(t)}}{\rho(t) + \lambda(t)},\] where \(N(t)\) is
+the counting process associated with the event of interest,
+\(\lambda(t)\) is the corresponding hazard function, and \(\rho(t)\) is
+the hazard function for the Poisson process associated with case-base
+sampling. This parametric form suggests that we can readily estimate
+log-hazards of the form \(\log(\lambda(t)) = g(t; X)\) using logistic
+regression, where each observation corresponds to a person moment, the
+function \(g(t; X)\) is linear in a finite number of parameters, and
+where we treat \(\log(\rho(t))\) as an offset.
+
+In Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the authors
+suggest performing case-base samping \emph{uniformly}, i.e.~to sample
+the base series uniformly from the study base. In terms of Poisson
+processes, this sampling strategy corresponds to a time-homogeneous
+Poisson process with intensity equal to \(b/B\), where \(b\) is the
+number of sampled observations in the base series, and \(B\) is the
+total population-time for the study base. More complex examples are also
+available; see for example Saarela \& Arjas
+\citeyearpar{saarela2015non}, where the probabilities of the sampling
+mechanism are proportional to the cardiovascular disease event rate
+given by the Framingham score.
+
 \section{Implementation details}\label{implementation-details}
 
 The functions in the casebase package can be divided into two
@@ -301,19 +343,19 @@ corresponding confidence intervals:
 \hline
 Covariates & HR & 95\% CI\\
 \hline
-Sex & 0.81 & (0.47, 1.41)\\
+Sex & 0.82 & (0.46, 1.48)\\
 \hline
-Disease & 0.57 & (0.31, 1.03)\\
+Disease & 0.48 & (0.25, 0.92)\\
 \hline
-Phase (CR2 vs. CR1) & 1.21 & (0.48, 3.01)\\
+Phase (CR2 vs. CR1) & 1.43 & (0.56, 3.66)\\
 \hline
-Phase (CR3 vs. CR1) & 1.75 & (0.45, 6.8)\\
+Phase (CR3 vs. CR1) & 1.63 & (0.41, 6.45)\\
 \hline
-Phase (Relapse vs. CR1) & 4.23 & (1.97, 9.09)\\
+Phase (Relapse vs. CR1) & 4.73 & (2.13, 10.48)\\
 \hline
-Source & 1.60 & (0.53, 4.88)\\
+Source & 1.51 & (0.49, 4.69)\\
 \hline
-Age & 1.00 & (0.97, 1.02)\\
+Age & 0.99 & (0.97, 1.02)\\
 \hline
 \end{tabular}
 
