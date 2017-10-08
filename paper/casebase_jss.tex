@@ -218,19 +218,741 @@ both \code{glm} and \code{CompRisk} objects (the latter inherits from
 takes care of matching the correct input to the correct methodology,
 without the user's intervention.
 
-\section{Case study 1: Veteran data (or ERSPC if we
-can)}\label{case-study-1-veteran-data-or-erspc-if-we-can}
+\section{Case study 1--European Randomized Study of Prostate Cancer
+Screening
+Data}\label{case-study-1european-randomized-study-of-prostate-cancer-screening-data}
 
-\begin{itemize}
+This vignette introduces the main functions in the \texttt{casebase}
+package. The methods implemented in this package are based on the method
+developped in
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Hanley_Miettinen-2009-Inter_J_of_Biostats.pdf}{Fitting
+Smooth-in-Time Prognostic Risk Functions via Logistic Regression (Hanley
+and Miettinen, 2009)}. A rigorous treatment of the theory is developed
+in
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Saarela-2015-Lifetime_Data_Analysis.pdf}{A
+case-base sampling method for estimating recurrent event intensities
+(Saarela, 2015)} and
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Saarela_et_al-2015-Scandinavian_Journal_of_Statistics.pdf}{Non-parametric
+Bayesian Hazard Regression for Chronic Disease Risk Assessment}. The
+motivation for this work is nicely summarised by Cox:
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures/reid_cox.png}
+\caption{}
+\end{figure}
+
+The purpose of the \texttt{casebase} package is to provide practitioners
+with an easy-to-use software tool to predict the risk (or cumulative
+incidence (CI)) of an event, for a particular patient. The following
+points should be noted:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  First example
+  Time matching/risk set sampling (including Cox partial likelihood)
+  eliminates the baseline hazard from the likelihood expression for the
+  hazard ratios
 \item
-  Show how we can test for non-proportional hazard?
-\end{itemize}
+  If, however, the absolute risks are of interest, they have to be
+  recovered using the semi-parametric Breslow estimator
+\item
+  Alternative approaches for fitting flexible hazard models for
+  estimating absolute risks, not requiring this two-step approach? Yes!
+  \href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Hanley_Miettinen-2009-Inter_J_of_Biostats.pdf}{Hanley
+  and Miettinen, 2009}
+\end{enumerate}
 
-\section{Case study 2: Bone-marrow
-transplant}\label{case-study-2-bone-marrow-transplant}
+\begin{quote}
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Hanley_Miettinen-2009-Inter_J_of_Biostats.pdf}{Hanley
+and Miettinen, 2009} propose a fully parametric hazard model that can be
+fit via logistic regression. From the fitted hazard function, cumulative
+incidence and, thus, risk functions of time, treatment and profile can
+be easily derived.
+\end{quote}
+
+The \texttt{casebase} package fits the family of hazard functions of the
+form
+
+\[ h(x,t) = exp[g(x,t)] \] where \(t\) denotes the numerical value
+(number of units) of a point in prognostic/prospective time and \(x\) is
+the realization of the vector \(X\) of variates based on the patient's
+profile and intervention (if any). Different functions of \(t\) lead to
+different parametric hazard models.
+
+The simplest of these models is the one-parameter exponential
+distribution which is obtained by taking the hazard function to be
+constant over the range of \(t\).
+
+\[ h(x,t) = exp(\beta_0 + \beta_1 x) \]
+
+The instantaneous failure rate is independent of \(t\), so that the
+conditional chance of failure in a time interval of specified length is
+the same regardless of how long the individual has been on study a.k.a
+the memoryless property (Kalbfleisch and Prentice, 2002).
+
+The Gompertz hazard model is given by including a linear term for time:
+
+\[ h(x,t)  = exp(\beta_0 + \beta_1 t + \beta_2 x) \]
+
+Use of \(log(t)\) yields the Weibull hazard which allows for a power
+dependence of the hazard on time (Kalbfleisch and Prentice, 2002):
+
+\[ h(x, t)  = exp(\beta_0 + \beta_1 \log(t) + \beta_2 x) \]
+
+Recall that the relative risk model (Cox, 1972)
+
+\[ \lambda(t;x) = \lambda_0(t) exp(\mathbf{X}\boldsymbol{\beta})  \]
+where \(\lambda_0(\cdot)\) is an arbitrary unspecified baseline hazard
+function for continous time.
+
+In the following table we provide a comparison between the Cox model and
+case-base sampling:
+
+\href{https://www.fields.utoronto.ca/programs/scientific/14-15/biomarker/slides/saarela.pdf}{Slides
+from Olli Saarela}
+
+We fist load the required packages:
+
+Throughout this vignette, we make use of the European Randomized Study
+of Prostate Cancer Screening data which ships with the \texttt{casebase}
+package:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> data(ERSPC)
+R> head(ERSPC)
+\end{CodeInput}
+
+\begin{CodeOutput}
+  ScrArm Follow.Up.Time DeadOfPrCa
+1      1         0.0027          0
+2      1         0.0027          0
+3      1         0.0027          0
+4      0         0.0027          0
+5      0         0.0027          0
+6      0         0.0027          0
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+R+                        levels = c(0,1), 
+R+                        labels = c("Control group", "Screening group"))
+\end{CodeInput}
+\end{CodeChunk}
+
+The results of this study were published by
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Schroder_et_al-2009-NEJM.pdf}{Schroder
+FH, et al. N Engl J Med 2009}. There's a really interesting story on how
+this data was obtained. See \texttt{help(ERSPC)} and
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Liu_et_al-2015-Systematic_Reviews.pdf}{Liu
+Z, Rich B, Hanley JA, Recovering the raw data behind a non-parametric
+survival curve. Systematic Reviews 2014} for further details.
+
+Population time plots can be extremely informative graphical displays of
+survival data. They should be the first step in your exploratory data
+analyses. We facilitate this task in the \texttt{casebase} package using
+the \texttt{popTime} function. We first create the necessary dataset for
+producing the population time plots:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
+\end{CodeInput}
+
+\begin{CodeOutput}
+'Follow.Up.Time' will be used as the time variable
+\end{CodeOutput}
+\end{CodeChunk}
+
+We can see its contents and its class:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> head(pt_object)
+\end{CodeInput}
+
+\begin{CodeOutput}
+            ScrArm   time event original.time original.event event status
+1: Screening group 0.0027     0        0.0027              0     censored
+2: Screening group 0.0027     0        0.0027              0     censored
+3: Screening group 0.0027     0        0.0027              0     censored
+4:   Control group 0.0027     0        0.0027              0     censored
+5:   Control group 0.0027     0        0.0027              0     censored
+6:   Control group 0.0027     0        0.0027              0     censored
+   ycoord yc n_available
+1: 159893  0           0
+2: 159892  0           0
+3: 159891  0           0
+4: 159890  0           0
+5: 159889  0           0
+6: 159888  0           0
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> class(pt_object)
+\end{CodeInput}
+
+\begin{CodeOutput}
+[1] "popTime"    "data.table" "data.frame"
+\end{CodeOutput}
+\end{CodeChunk}
+
+The \texttt{casebase} package has a \texttt{plot} method for objects of
+class \texttt{popTime}:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> plot(pt_object)
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-5-1} \end{center}
+
+\end{CodeChunk}
+
+We can also create exposure stratified plots by specifying the
+\texttt{exposure} argument in the \texttt{popTime} function:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> pt_object_strat <- casebase::popTime(ERSPC, 
+R+                                      event = "DeadOfPrCa", 
+R+                                      exposure = "ScrArm")
+\end{CodeInput}
+
+\begin{CodeOutput}
+'Follow.Up.Time' will be used as the time variable
+\end{CodeOutput}
+\end{CodeChunk}
+
+We can see its contents and its class:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> head(pt_object_strat)
+\end{CodeInput}
+
+\begin{CodeOutput}
+$data
+                 ScrArm    time event original.time original.event
+     1:   Control group  0.0027     0        0.0027              0
+     2:   Control group  0.0027     0        0.0027              0
+     3:   Control group  0.0027     0        0.0027              0
+     4:   Control group  0.0027     0        0.0027              0
+     5:   Control group  0.0137     0        0.0137              0
+    ---                                                           
+159889: Screening group 14.9405     0       14.9405              0
+159890: Screening group 14.9405     0       14.9405              0
+159891: Screening group 14.9405     0       14.9405              0
+159892: Screening group 14.9405     0       14.9405              0
+159893: Screening group 14.9405     0       14.9405              0
+        event status ycoord yc n_available
+     1:     censored  88232  0           0
+     2:     censored  88231  0           0
+     3:     censored  88230  0           0
+     4:     censored  88229  0           0
+     5:     censored  88228  0           0
+    ---                                   
+159889:     censored      5  0           0
+159890:     censored      4  0           0
+159891:     censored      3  0           0
+159892:     censored      2  0           0
+159893:     censored      1  0           0
+
+$exposure
+[1] "ScrArm"
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> class(pt_object_strat)
+\end{CodeInput}
+
+\begin{CodeOutput}
+[1] "popTimeExposure" "list"           
+\end{CodeOutput}
+\end{CodeChunk}
+
+The \texttt{casebase} package also has a \texttt{plot} method for
+objects of class \texttt{popTimeExposure}:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> plot(pt_object_strat)
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-8-1} \end{center}
+
+\end{CodeChunk}
+
+We can also plot them side-by-side using the \texttt{ncol} argument:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> plot(pt_object_strat, ncol = 2)
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-9-1} \end{center}
+
+\end{CodeChunk}
+
+We first fit a Cox model, examine the hazard ratio for the screening
+group (relative to the control group), and plot the cumulative incidence
+function (CIF).
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
+R+                              data = ERSPC)
+R> (sum_cox_model <- summary(cox_model))
+\end{CodeInput}
+
+\begin{CodeOutput}
+Call:
+survival::coxph(formula = Surv(Follow.Up.Time, DeadOfPrCa) ~ 
+    ScrArm, data = ERSPC)
+
+  n= 159893, number of events= 540 
+
+                        coef exp(coef) se(coef)     z Pr(>|z|)  
+ScrArmScreening group -0.222     0.801    0.088 -2.52    0.012 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                      exp(coef) exp(-coef) lower .95 upper .95
+ScrArmScreening group     0.801       1.25     0.674     0.952
+
+Concordance= 0.519  (se = 0.011 )
+Rsquare= 0   (max possible= 0.075 )
+Likelihood ratio test= 6.45  on 1 df,   p=0.0111
+Wald test            = 6.37  on 1 df,   p=0.0116
+Score (logrank) test = 6.39  on 1 df,   p=0.0115
+\end{CodeOutput}
+\end{CodeChunk}
+
+We can plot the CIF for each group:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
+R+                        ignore = 99)
+R> 
+R> plot(survfit(cox_model, newdata = new_data),
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = F, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]))
+R> legend("topleft", 
+R+        legend = c("Control group", "Screening group"), 
+R+        col = c("red","blue"),
+R+        lty = c(1, 1), 
+R+        bg = "gray90")
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-11-1} \end{center}
+
+\end{CodeChunk}
+
+We compare it to the figure in
+\href{https://github.com/sahirbhatnagar/casebase/blob/master/references/Schroder_et_al-2009-NEJM.pdf}{Schroder
+FH, et al. N Engl J Med 2009} and see that the plots are very similar,
+as is the hazard ratio and 95\% confidence interval:
+
+\begin{figure}[htbp]
+\centering
+\includegraphics{figures/schroderNEJM_figure2.png}
+\caption{}
+\end{figure}
+
+Next we fit several models using case-base sampling. The models we fit
+differ in how we choose to model time.
+
+The \texttt{fitSmoothHazard} function provides an estimate of the hazard
+function \(h(x, t)\) is the hazard function, \(t\)) denotes the
+numerical value (number of units) of a point in prognostic/prospective
+time and \(x\) is the realization of the vector \(X\) of variates based
+on the patient's profile and intervention (if any).
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # set the seed for reproducible output
+R> set.seed(1234)
+R> 
+R> casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
+R+                                                   data = ERSPC, 
+R+                                                   ratio = 100)
+\end{CodeInput}
+
+\begin{CodeOutput}
+'Follow.Up.Time' will be used as the time variable
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> summary(casebase_exponential)
+\end{CodeInput}
+
+\begin{CodeOutput}
+
+Call:
+glm(formula = formula, family = binomial, data = sampleData)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-0.458  -0.458  -0.409  -0.409   2.246  
+
+Coefficients:
+                      Estimate Std. Error z value            Pr(>|z|)    
+(Intercept)            -7.7553     0.0584 -132.87 <0.0000000000000002 ***
+ScrArmScreening group  -0.2382     0.0921   -2.59              0.0097 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3619.1  on 5939  degrees of freedom
+Residual deviance: 3612.3  on 5938  degrees of freedom
+AIC: 3616
+
+Number of Fisher Scoring iterations: 5
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(coef(casebase_exponential)[2])
+\end{CodeInput}
+
+\begin{CodeOutput}
+ScrArmScreening group 
+                 0.79 
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(confint(casebase_exponential)[2,])
+\end{CodeInput}
+
+\begin{CodeOutput}
+Waiting for profiling to be done...
+\end{CodeOutput}
+
+\begin{CodeOutput}
+ 2.5 % 97.5 % 
+  0.66   0.94 
+\end{CodeOutput}
+\end{CodeChunk}
+
+The \texttt{absoluteRisk} function provides an estimate of the
+cumulative incidence curves for a specific risk profile using the
+following equation:
+
+\[ CI(x, t) = 1 - exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
+
+In the plot below, we overlay the estimated CIF from the casebase
+exponential model on the Cox model CIF:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
+R+                                           time = seq(0,15,0.1), 
+R+                                           newdata = new_data)
+R> 
+R> plot(survfit(cox_model, newdata = new_data),
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = F, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]))
+R> lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
+R> lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
+R> 
+R> 
+R> legend("topleft", 
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-13-1} \end{center}
+
+\end{CodeChunk}
+
+As we can see, the exponential model is not a good fit. Based on what we
+observed in the population time plot, where more events are observed
+later on in time, this poor fit is expected. A constant hazard model
+would overestimate the cumulative incidence earlier on in time, and
+underestimate it later on, which is what we see in the cumulative
+incidence plot. This example demonstrates the benefits of population
+time plots as an exploratory analysis tool.
+
+Next we enter time linearly into the model:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
+R+                                  data = ERSPC, 
+R+                                  ratio = 100)
+\end{CodeInput}
+
+\begin{CodeOutput}
+'Follow.Up.Time' will be used as the time variable
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> summary(casebase_time)
+\end{CodeInput}
+
+\begin{CodeOutput}
+
+Call:
+glm(formula = formula, family = binomial, data = sampleData)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-1.043  -0.487  -0.365  -0.275   2.744  
+
+Coefficients:
+                      Estimate Std. Error z value            Pr(>|z|)    
+(Intercept)            -9.0421     0.1183  -76.45 <0.0000000000000002 ***
+Follow.Up.Time          0.2254     0.0158   14.24 <0.0000000000000002 ***
+ScrArmScreening group  -0.2611     0.0940   -2.78              0.0055 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3619.1  on 5939  degrees of freedom
+Residual deviance: 3394.9  on 5937  degrees of freedom
+AIC: 3401
+
+Number of Fisher Scoring iterations: 5
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(coef(casebase_time))
+\end{CodeInput}
+
+\begin{CodeOutput}
+          (Intercept)        Follow.Up.Time ScrArmScreening group 
+              0.00012               1.25285               0.77023 
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(confint(casebase_time))
+\end{CodeInput}
+
+\begin{CodeOutput}
+Waiting for profiling to be done...
+\end{CodeOutput}
+
+\begin{CodeOutput}
+                         2.5 %  97.5 %
+(Intercept)           0.000093 0.00015
+Follow.Up.Time        1.214840 1.29263
+ScrArmScreening group 0.639934 0.92534
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
+R+                                           time = seq(0,15,0.1), 
+R+                                           newdata = new_data)
+R> 
+R> plot(survfit(cox_model, newdata = new_data),
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = F, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]))
+R> lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
+R> lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
+R> 
+R> legend("topleft", 
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-15-1} \end{center}
+
+\end{CodeChunk}
+
+We see that the Weibull model leads to a better fit.
+
+Next we try to enter a smooth function of time into the model using the
+\texttt{splines} package
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
+R+                                     data = ERSPC, 
+R+                                     ratio = 100)
+\end{CodeInput}
+
+\begin{CodeOutput}
+'Follow.Up.Time' will be used as the time variable
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> summary(casebase_splines)
+\end{CodeInput}
+
+\begin{CodeOutput}
+
+Call:
+glm(formula = formula, family = binomial, data = sampleData)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+-1.197  -0.522  -0.398  -0.212   3.187  
+
+Coefficients:
+                      Estimate Std. Error z value             Pr(>|z|)    
+(Intercept)           -10.5045     0.3342  -31.43 < 0.0000000000000002 ***
+bs(Follow.Up.Time)1     4.8348     0.8400    5.76     0.00000000862087 ***
+bs(Follow.Up.Time)2     1.8367     0.4859    3.78              0.00016 ***
+bs(Follow.Up.Time)3     5.0478     0.6998    7.21     0.00000000000055 ***
+ScrArmScreening group  -0.1503     0.0941   -1.60              0.11013    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3619.1  on 5939  degrees of freedom
+Residual deviance: 3356.5  on 5935  degrees of freedom
+AIC: 3367
+
+Number of Fisher Scoring iterations: 6
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(coef(casebase_splines))
+\end{CodeInput}
+
+\begin{CodeOutput}
+          (Intercept)   bs(Follow.Up.Time)1   bs(Follow.Up.Time)2 
+             0.000027            125.811140              6.275672 
+  bs(Follow.Up.Time)3 ScrArmScreening group 
+           155.673063              0.860457 
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> exp(confint(casebase_splines))
+\end{CodeInput}
+
+\begin{CodeOutput}
+Waiting for profiling to be done...
+\end{CodeOutput}
+
+\begin{CodeOutput}
+                          2.5 %     97.5 %
+(Intercept)            0.000014   0.000051
+bs(Follow.Up.Time)1   25.404219 687.891148
+bs(Follow.Up.Time)2    2.425559  16.399777
+bs(Follow.Up.Time)3   39.667300 626.079069
+ScrArmScreening group  0.714859   1.033843
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> smooth_risk_splines <- absoluteRisk(object = casebase_splines, 
+R+                                     time = seq(0,15,0.1), 
+R+                                     newdata = new_data)
+R> 
+R> plot(survfit(cox_model, newdata = new_data),
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = F, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]))
+R> lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
+R> lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
+R> 
+R> legend("topleft", 
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-17-1} \end{center}
+
+\end{CodeChunk}
+
+It looks like the best fit.
+
+Since we are in the GLM framework, we can easily test for which model
+better fits the data using a Likelihood ratio test (LRT). The null
+hypothesis here is that the linear model is just as good as the larger
+(in terms of number of parameters) splines model.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> anova(casebase_time, casebase_splines, test = "LRT")
+\end{CodeInput}
+
+\begin{CodeOutput}
+Analysis of Deviance Table
+
+Model 1: DeadOfPrCa ~ Follow.Up.Time + ScrArm + offset(offset)
+Model 2: DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm + offset(offset)
+  Resid. Df Resid. Dev Df Deviance     Pr(>Chi)    
+1      5937       3395                             
+2      5935       3357  2     38.4 0.0000000046 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{CodeOutput}
+\end{CodeChunk}
+
+We see that splines model is the better fit.
+
+\section{Case study 2--Bone-marrow
+transplant}\label{case-study-2bone-marrow-transplant}
 
 The next example shows how case-base sampling can also be used in the
 context of a competing risk analysis. For illustrative purposes, we will
@@ -343,19 +1065,19 @@ corresponding confidence intervals:
 \hline
 Covariates & HR & 95\% CI\\
 \hline
-Sex & 0.82 & (0.46, 1.48)\\
+Sex & 0.78 & (0.43, 1.41)\\
 \hline
-Disease & 0.48 & (0.25, 0.92)\\
+Disease & 0.41 & (0.22, 0.77)\\
 \hline
-Phase (CR2 vs. CR1) & 1.43 & (0.56, 3.66)\\
+Phase (CR2 vs. CR1) & 1.27 & (0.5, 3.23)\\
 \hline
-Phase (CR3 vs. CR1) & 1.63 & (0.41, 6.45)\\
+Phase (CR3 vs. CR1) & 1.77 & (0.44, 7.09)\\
 \hline
-Phase (Relapse vs. CR1) & 4.73 & (2.13, 10.48)\\
+Phase (Relapse vs. CR1) & 5.17 & (2.34, 11.43)\\
 \hline
-Source & 1.51 & (0.49, 4.69)\\
+Source & 1.87 & (0.59, 5.88)\\
 \hline
-Age & 0.99 & (0.97, 1.02)\\
+Age & 1.00 & (0.97, 1.02)\\
 \hline
 \end{tabular}
 
@@ -401,31 +1123,30 @@ R+                         method = "montecarlo", newdata = newdata)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-6-1} 
+{\centering \includegraphics{casebase_jss_files/figure-latex/unnamed-chunk-24-1} 
 
 }
 
-\caption{\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:unnamed-chunk-6}
+\caption{\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:unnamed-chunk-24}
 \end{figure}
 \end{CodeChunk}
 
-\section{Case study 3: Vaccination study (recurrent
-events)}\label{case-study-3-vaccination-study-recurrent-events}
+\section{Case study 3}\label{case-study-3}
 
 \begin{itemize}
 \tightlist
 \item
-  Give a more complex example of sampling; time-dependent exposure
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Sampling needs to be done manually, but fitting function can still
-    be used
-  \end{itemize}
+  Glmnet, gam, and gbm
 \end{itemize}
 
-\renewcommand\refname{Discussion}
+\section{Discussion}\label{discussion}
+
+\begin{itemize}
+\tightlist
+\item
+  Discuss
+\end{itemize}
+
 \bibliography{casebase_references.bib}
 
 
