@@ -2,7 +2,7 @@
 FROM rocker/verse:3.6.0
 
 # required
-MAINTAINER Your Name <your_email@somewhere.com>
+MAINTAINER Your Name <sahir.bhatnagar@gmail.com>
 
 COPY . /cbpaper
 
@@ -13,7 +13,7 @@ RUN . /etc/environment \
   # e.g. need this for ggforce::geom_sina
   # && sudo apt-get update \
   # && sudo apt-get install libudunits2-dev -y \
-  && R -e "devtools::install_github(paste0(Sys.getenv('APP_ENV'), '/casebase'))" \
+  && R -e "devtools::install_github(paste0(Sys.getenv('NAMES'), '/casebase'))" \
 
   # build this compendium package
   && R -e "devtools::install('/cbpaper', dep=TRUE)" \
