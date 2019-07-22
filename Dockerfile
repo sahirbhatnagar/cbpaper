@@ -13,7 +13,7 @@ RUN . /etc/environment \
   # e.g. need this for ggforce::geom_sina
   # && sudo apt-get update \
   # && sudo apt-get install libudunits2-dev -y \
-  && R -e "options(error = function() traceback()) ; system("echo $NAMES") ; devtools::install_github(paste0(Sys.getenv(c("NAMES")), '/casebase'))" \
+  && Rscript -e 'options(error = function() traceback()) ; system("echo $NAMES") ; devtools::install_github(paste0(Sys.getenv(c("NAMES")), "/casebase"))' \
 
   # build this compendium package
   && R -e "devtools::install('/cbpaper', dep=TRUE)" \
