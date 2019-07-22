@@ -11,10 +11,10 @@ author:
   - name: Maxime Turgeon *
     affiliation: University of Manitoba
     address: >
-      318 Machray Hall
-      Winnipeg, MB, Canada R3T 2N2
+      186 Dysart Road
+      Winnipeg, MB, Canada R3B 0S8
     email: \email{max.turgeon@umanitoba.ca}
-    url: http://maxturgeon.ca/
+    url: https://maxturgeon.ca/
   - name: Jesse Islam 
     affiliation: McGill University
     address: >
@@ -360,7 +360,8 @@ We see that the Weibull model leads to a better fit.
 Next we try to enter a smooth function of time into the model using the \code{splines} package:
 
 ```{r erspc-casebase-splines, eval = eval_cs1}
-casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
+library(splines)
+casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
                                     data = ERSPC, 
                                     ratio = 100)
 

@@ -7,11 +7,11 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Bhatnagar *\\McGill Univeristy \And Maxime Turgeon *\\McGill University \And James Hanley\\McGill Univeristy \And Olli Saarela\\University of Toronto
+Sahir Bhatnagar *\\McGill Univeristy \And Maxime Turgeon *\\University of Manitoba \And Jesse Islam\\McGill University \And James Hanley\\McGill Univeristy \And Olli Saarela\\University of Toronto
 }
 \title{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
-\Plainauthor{Sahir Bhatnagar *, Maxime Turgeon *, James Hanley, Olli Saarela}
+\Plainauthor{Sahir Bhatnagar *, Maxime Turgeon *, Jesse Islam, James Hanley, Olli Saarela}
 \Plaintitle{casebase: An Alternative Framework For Survival Analysis}
 \Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
@@ -37,10 +37,15 @@ The abstract of the article. * joint co-authors
   E-mail: \email{sahir.bhatnagar@mail.mcgill.ca}\\
   URL: \url{http://sahirbhatnagar.com/}\\~\\
       Maxime Turgeon *\\
+  University of Manitoba\\
+  186 Dysart Road Winnipeg, MB, Canada R3B 0S8\\
+  E-mail: \email{max.turgeon@umanitoba.ca}\\
+  URL: \url{https://maxturgeon.ca/}\\~\\
+      Jesse Islam\\
   McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
-  E-mail: \email{maxime.turgeon@mail.mcgill.ca}\\
-  URL: \url{http://maxturgeon.ca/}\\~\\
+  E-mail: \email{jesse.islam@mail.mcgill.ca}\\
+  
       James Hanley\\
   McGill Univeristy\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
@@ -506,7 +511,8 @@ Next we try to enter a smooth function of time into the model using the
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
+R> library(splines)
+R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
 R>                                     data = ERSPC, 
 R>                                     ratio = 100)
 R> 
@@ -702,7 +708,7 @@ case-base sampling:
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-07-22 17:17:57 using the following
+This report was generated on 2019-07-22 16:50:40 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -715,169 +721,99 @@ R> devtools::session_info()
 \begin{CodeOutput}
 #> - Session info ----------------------------------------------------------
 #>  setting  value                       
-#>  version  R version 3.6.0 (2019-04-26)
-#>  os       Pop!_OS 18.10               
+#>  version  R version 3.6.1 (2019-07-05)
+#>  os       Ubuntu 18.04.2 LTS          
 #>  system   x86_64, linux-gnu           
 #>  ui       X11                         
-#>  language en_CA:en                    
+#>  language (EN)                        
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
-#>  tz       America/Toronto             
+#>  tz       America/Winnipeg            
 #>  date     2019-07-22                  
 #> 
 #> - Packages --------------------------------------------------------------
-#>  package     * version    date       lib
-#>  assertthat    0.2.1      2019-03-21 [1]
-#>  backports     1.1.4      2019-04-10 [1]
-#>  broom         0.5.1      2018-12-05 [1]
-#>  callr         3.2.0      2019-03-15 [1]
-#>  casebase    * 0.1.1.9000 2019-07-22 [1]
-#>  cellranger    1.1.0      2016-07-27 [1]
-#>  cli           1.1.0      2019-03-19 [1]
-#>  colorspace    1.4-1      2019-03-18 [1]
-#>  crayon        1.3.4      2017-09-16 [1]
-#>  data.table    1.12.2     2019-04-07 [1]
-#>  desc          1.2.0      2018-05-01 [1]
-#>  devtools      2.0.1      2018-10-26 [1]
-#>  digest        0.6.20     2019-07-04 [1]
-#>  dplyr       * 0.8.0.1    2019-02-15 [1]
-#>  evaluate      0.14       2019-05-28 [1]
-#>  forcats     * 0.4.0      2019-02-17 [1]
-#>  fs            1.3.1      2019-05-06 [1]
-#>  generics      0.0.2      2018-11-29 [1]
-#>  ggplot2     * 3.2.0      2019-06-16 [1]
-#>  glue          1.3.1      2019-03-12 [1]
-#>  gtable        0.3.0      2019-03-25 [1]
-#>  haven         2.1.0      2019-02-19 [1]
-#>  hms           0.4.2      2018-03-10 [1]
-#>  htmltools     0.3.6      2017-04-28 [1]
-#>  httr          1.4.0      2018-12-11 [1]
-#>  jsonlite      1.6        2018-12-07 [1]
-#>  knitr         1.23       2019-05-18 [1]
-#>  lattice       0.20-38    2018-11-04 [5]
-#>  lazyeval      0.2.2      2019-03-15 [1]
-#>  lubridate     1.7.4      2018-04-11 [1]
-#>  magrittr    * 1.5        2014-11-22 [1]
-#>  Matrix        1.2-17     2019-03-22 [5]
-#>  memoise       1.1.0      2017-04-21 [1]
-#>  mgcv          1.8-28     2019-03-21 [5]
-#>  modelr        0.1.4      2019-02-18 [1]
-#>  munsell       0.5.0      2018-06-12 [1]
-#>  nlme          3.1-140    2019-05-12 [5]
-#>  pillar        1.4.2      2019-06-29 [1]
-#>  pkgbuild      1.0.3      2019-03-20 [1]
-#>  pkgconfig     2.0.2      2018-08-16 [1]
-#>  pkgload       1.0.2      2018-10-29 [1]
-#>  prettyunits   1.0.2      2015-07-13 [1]
-#>  processx      3.3.1      2019-05-08 [1]
-#>  ps            1.3.0      2018-12-21 [1]
-#>  purrr       * 0.3.2      2019-03-15 [1]
-#>  R6            2.4.0      2019-02-14 [1]
-#>  Rcpp          1.0.1      2019-03-17 [1]
-#>  readr       * 1.3.1      2018-12-21 [1]
-#>  readxl        1.3.0      2019-02-15 [1]
-#>  remotes       2.0.2      2018-10-30 [1]
-#>  rlang         0.4.0      2019-06-25 [1]
-#>  rmarkdown     1.14       2019-07-12 [1]
-#>  rprojroot     1.3-2      2018-01-03 [1]
-#>  rstudioapi    0.10       2019-03-19 [1]
-#>  rticles       0.9.1      2019-07-22 [1]
-#>  rvest         0.3.2      2016-06-17 [1]
-#>  scales        1.0.0      2018-08-09 [1]
-#>  sessioninfo   1.1.1      2018-11-05 [1]
-#>  stringi       1.4.3      2019-03-12 [1]
-#>  stringr     * 1.4.0      2019-02-10 [1]
-#>  survival    * 2.43-3     2018-11-26 [5]
-#>  testthat      2.1.1      2019-04-23 [1]
-#>  tibble      * 2.1.3      2019-06-06 [1]
-#>  tidyr       * 0.8.2      2018-10-28 [1]
-#>  tidyselect    0.2.5      2018-10-11 [1]
-#>  tidyverse   * 1.2.1      2017-11-14 [1]
-#>  usethis       1.5.0.9000 2019-06-24 [1]
-#>  VGAM          1.1-1      2019-02-18 [1]
-#>  withr         2.1.2      2018-03-15 [1]
-#>  xfun          0.8        2019-06-25 [1]
-#>  xml2          1.2.0      2018-01-24 [1]
-#>  yaml          2.2.0      2018-07-25 [1]
-#>  source                                  
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  Github (sahirbhatnagar/casebase@669a0eb)
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.3)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.3)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  Github (rstudio/rticles@8d56fc6)        
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  Github (r-lib/usethis@d4eabb9)          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
+#>  package     * version    date       lib source                          
+#>  assertthat    0.2.0      2017-04-11 [1] CRAN (R 3.5.0)                  
+#>  backports     1.1.2      2017-12-13 [1] CRAN (R 3.5.0)                  
+#>  broom         0.4.4      2018-03-29 [1] CRAN (R 3.5.0)                  
+#>  callr         3.3.0      2019-07-04 [1] CRAN (R 3.6.1)                  
+#>  casebase    * 0.1.0.9000 2019-07-19 [1] local                           
+#>  cellranger    1.1.0      2016-07-27 [1] CRAN (R 3.5.0)                  
+#>  cli           1.1.0      2019-03-19 [1] CRAN (R 3.6.1)                  
+#>  colorspace    1.3-2      2016-12-14 [1] CRAN (R 3.5.0)                  
+#>  crayon        1.3.4      2017-09-16 [1] CRAN (R 3.5.0)                  
+#>  data.table    1.11.2     2018-05-08 [1] CRAN (R 3.5.0)                  
+#>  desc          1.2.0      2018-05-01 [1] CRAN (R 3.5.0)                  
+#>  devtools      2.1.0      2019-07-06 [1] CRAN (R 3.6.1)                  
+#>  digest        0.6.20     2019-07-04 [1] CRAN (R 3.6.1)                  
+#>  dplyr       * 0.8.0.1    2019-02-15 [1] CRAN (R 3.5.2)                  
+#>  evaluate      0.14       2019-05-28 [1] CRAN (R 3.6.1)                  
+#>  forcats     * 0.3.0      2018-02-19 [1] CRAN (R 3.5.0)                  
+#>  foreign       0.8-70     2018-04-23 [1] CRAN (R 3.5.0)                  
+#>  fs            1.3.1      2019-05-06 [1] CRAN (R 3.6.1)                  
+#>  ggplot2     * 3.2.0      2019-06-16 [1] CRAN (R 3.6.1)                  
+#>  glue          1.3.1      2019-03-12 [1] CRAN (R 3.6.1)                  
+#>  gtable        0.2.0      2016-02-26 [1] CRAN (R 3.5.0)                  
+#>  haven         1.1.1      2018-01-18 [1] CRAN (R 3.5.0)                  
+#>  hms           0.4.2      2018-03-10 [1] CRAN (R 3.5.0)                  
+#>  htmltools     0.3.6      2017-04-28 [1] CRAN (R 3.5.0)                  
+#>  httr          1.3.1      2017-08-20 [1] CRAN (R 3.5.0)                  
+#>  jsonlite      1.6        2018-12-07 [1] CRAN (R 3.6.1)                  
+#>  knitr         1.23       2019-05-18 [1] CRAN (R 3.6.1)                  
+#>  lattice       0.20-38    2018-11-04 [4] CRAN (R 3.5.1)                  
+#>  lazyeval      0.2.1      2017-10-29 [1] CRAN (R 3.5.0)                  
+#>  lubridate     1.7.4      2018-04-11 [1] CRAN (R 3.5.0)                  
+#>  magrittr    * 1.5        2014-11-22 [1] CRAN (R 3.5.0)                  
+#>  Matrix        1.2-17     2019-03-22 [4] CRAN (R 3.5.3)                  
+#>  memoise       1.1.0      2017-04-21 [1] CRAN (R 3.5.0)                  
+#>  mgcv          1.8-24     2018-06-18 [1] CRAN (R 3.5.1)                  
+#>  mnormt        1.5-5      2016-10-15 [1] CRAN (R 3.5.0)                  
+#>  modelr        0.1.2      2018-05-11 [1] CRAN (R 3.5.0)                  
+#>  munsell       0.4.3      2016-02-13 [1] CRAN (R 3.5.0)                  
+#>  nlme          3.1-140    2019-05-12 [4] CRAN (R 3.6.0)                  
+#>  pillar        1.3.1      2018-12-15 [1] CRAN (R 3.5.2)                  
+#>  pkgbuild      1.0.3      2019-03-20 [1] CRAN (R 3.6.1)                  
+#>  pkgconfig     2.0.2      2018-08-16 [1] CRAN (R 3.5.2)                  
+#>  pkgload       1.0.2      2018-10-29 [1] CRAN (R 3.6.1)                  
+#>  plyr          1.8.4      2016-06-08 [1] CRAN (R 3.5.0)                  
+#>  prettyunits   1.0.2      2015-07-13 [1] CRAN (R 3.5.2)                  
+#>  processx      3.4.0      2019-07-03 [1] CRAN (R 3.6.1)                  
+#>  ps            1.3.0      2018-12-21 [1] CRAN (R 3.6.1)                  
+#>  psych         1.8.4      2018-05-06 [1] CRAN (R 3.5.0)                  
+#>  purrr       * 0.2.4      2017-10-18 [1] CRAN (R 3.5.0)                  
+#>  R6            2.2.2      2017-06-17 [1] CRAN (R 3.5.0)                  
+#>  Rcpp          1.0.1      2019-03-17 [1] CRAN (R 3.6.1)                  
+#>  readr       * 1.1.1      2017-05-16 [1] CRAN (R 3.5.0)                  
+#>  readxl        1.1.0      2018-04-20 [1] CRAN (R 3.5.0)                  
+#>  remotes       2.1.0      2019-06-24 [1] CRAN (R 3.6.1)                  
+#>  reshape2      1.4.3      2017-12-11 [1] CRAN (R 3.5.0)                  
+#>  rlang         0.4.0      2019-06-25 [1] CRAN (R 3.6.1)                  
+#>  rmarkdown     1.14       2019-07-12 [1] CRAN (R 3.6.1)                  
+#>  rprojroot     1.3-2      2018-01-03 [1] CRAN (R 3.5.0)                  
+#>  rstudioapi    0.7        2017-09-07 [1] CRAN (R 3.5.0)                  
+#>  rticles       0.9.1      2019-07-22 [1] Github (rstudio/rticles@8d56fc6)
+#>  rvest         0.3.2      2016-06-17 [1] CRAN (R 3.5.0)                  
+#>  scales        0.5.0      2017-08-24 [1] CRAN (R 3.5.0)                  
+#>  sessioninfo   1.1.1      2018-11-05 [1] CRAN (R 3.6.1)                  
+#>  stringi       1.4.3      2019-03-12 [1] CRAN (R 3.6.1)                  
+#>  stringr     * 1.4.0      2019-02-10 [1] CRAN (R 3.6.1)                  
+#>  survival    * 2.43-3     2018-11-26 [4] CRAN (R 3.5.1)                  
+#>  testthat      2.1.1      2019-04-23 [1] CRAN (R 3.6.1)                  
+#>  tibble      * 2.0.1      2019-01-12 [1] CRAN (R 3.5.2)                  
+#>  tidyr       * 0.8.1      2018-05-18 [1] CRAN (R 3.5.0)                  
+#>  tidyselect    0.2.5      2018-10-11 [1] CRAN (R 3.5.2)                  
+#>  tidyverse   * 1.2.1      2017-11-14 [1] CRAN (R 3.5.0)                  
+#>  usethis       1.5.1      2019-07-04 [1] CRAN (R 3.6.1)                  
+#>  VGAM          1.1-1      2019-02-18 [1] CRAN (R 3.6.1)                  
+#>  withr         2.1.2      2018-03-15 [1] CRAN (R 3.5.0)                  
+#>  xfun          0.8        2019-06-25 [1] CRAN (R 3.6.1)                  
+#>  xml2          1.2.0      2018-01-24 [1] CRAN (R 3.5.0)                  
+#>  yaml          2.2.0      2018-07-25 [1] CRAN (R 3.6.1)                  
 #> 
-#> [1] /home/sahir/R/x86_64-pc-linux-gnu-library/3.5
-#> [2] /home/sahir/R/x86_64-pc-linux-gnu-library/3.6
-#> [3] /usr/local/lib/R/site-library
-#> [4] /usr/lib/R/site-library
-#> [5] /usr/lib/R/library
+#> [1] /home/mturgeon/Rlibs
+#> [2] /usr/local/lib/R/site-library
+#> [3] /usr/lib/R/site-library
+#> [4] /usr/lib/R/library
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -891,8 +827,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    litreview /home/sahir/git_repositories/cbpaper
-#> Head:     [38153a4] 2019-07-22: Update README.md
+#> Local:    review-max /home/mturgeon/Documents/git_repositories/cbpaper
+#> Head:     [c8ac771] 2019-07-22: Merge pull request #5 from sahirbhatnagar/litreview
 \end{CodeOutput}
 \end{CodeChunk}
 
