@@ -1,0 +1,35 @@
+Package: casebasepaper
+Title: Repository for casebase paper
+Version: 0.0.0.9000
+Authors@R: c(
+  person("Sahir", "Bhatnagar", email = "sahir.bhatnagar@gmail.com",
+  role = c("aut", "cre"), comment = "http://sahirbhatnagar.com/"),
+  person("Maxime", "Turgeon", email = "maxime.turgeon@mail.mcgill.ca",
+  role = c("aut"), comment = "http://maxturgeon.ca/"),
+  person("Jesse", "Islam", email = "jesse.islam@mail.mcgill.ca",
+  role = c("aut")),
+  person("Olli", "Saarela", email = "olli.saarela@utoronto.ca",
+  role = c("aut"), comment = "http://individual.utoronto.ca/osaarela/"),
+  person("James", "Hanley", email = "james.hanley@mcgill.ca",
+  role = c("aut"), comment = "http://www.medicine.mcgill.ca/epidemiology/hanley/")
+  )
+Description: Source code for casebase paper
+License: MIT + file LICENSE
+ByteCompile: true
+Encoding: UTF-8
+LazyData: true
+Imports: bookdown,
+    devtools (>= 2.0.1),
+    git2r (>= 0.25.2),
+    glue (>= 1.3.1),
+    here (>= 0.1),
+    knitr (>= 1.23),
+    magrittr (>= 1.5),
+    purrr (>= 0.3.2),
+    remotes (>= 2.0.2),
+    rticles (>= 0.9.1),
+    survival (>= 2.43-3),
+    tibble (>= 2.1.3),
+    tidyverse (>= 1.2.1),
+    timereg (>= 1.9.3),
+    xtable (>= 1.8-4)

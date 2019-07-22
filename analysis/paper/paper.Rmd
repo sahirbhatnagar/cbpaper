@@ -1,4 +1,5 @@
 ---
+documentclass: jss
 author:
   - name: Sahir Bhatnagar *
     affiliation: McGill Univeristy
@@ -8,12 +9,18 @@ author:
     email: \email{sahir.bhatnagar@mail.mcgill.ca}
     url: http://sahirbhatnagar.com/
   - name: Maxime Turgeon *
+    affiliation: University of Manitoba
+    address: >
+      318 Machray Hall
+      Winnipeg, MB, Canada R3T 2N2
+    email: \email{max.turgeon@umanitoba.ca}
+    url: http://maxturgeon.ca/
+  - name: Jesse Islam 
     affiliation: McGill University
     address: >
       1020 Pine Avenue West
       Montreal, QC, Canada H3A 1A2
-    email: \email{maxime.turgeon@mail.mcgill.ca}
-    url: http://maxturgeon.ca/
+    email: \email{jesse.islam@mail.mcgill.ca}
   - name: James Hanley
     affiliation: McGill Univeristy
     address: >
@@ -42,14 +49,18 @@ keywords:
   # at least one keyword must be supplied
   formatted: [keywords, not capitalized, "\\proglang{Java}"]
   plain:     [keywords, not capitalized, Java]
-bibliography: casebase_references.bib
-biblio-style: jss
-csl: jss.csl
 preamble: >
   \usepackage{amsmath}
+  \usepackage{longtable}
 output: 
   rticles::jss_article:
-    fig_caption: true
+    number_sections: TRUE     #added argument option 
+    citation_package: "natbib"  #All my citations use biblatex, not natbib. 
+biblio-style: jss      #Listed to use in JSS Instructions for Authors, but not in template by default. 
+bibliography: references.bib  #Also not included in template by default. 
+fig_width: 7
+fig_height: 6
+fig_caption: true
 ---
 
 # Code formatting
@@ -61,7 +72,15 @@ Don't use markdown, instead use the more precise latex commands:
 * \code{print("abc")}
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  comment = "#>",
+  fig.path = "../figures/"
+)
+
 library(tidyverse)
 library(magrittr)
 library(survival)
@@ -70,6 +89,13 @@ library(splines)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
+
+eval_introduction <- TRUE
+eval_theory <- FALSE
+eval_implementation <- TRUE
+eval_cs1 <- FALSE
+eval_cs2 <- FALSE
+eval_cs3 <- FALSE
 ```
 
 # Introduction
@@ -79,9 +105,41 @@ The purpose of the `casebase` package is to provide practitioners with an easy-t
 1. Time matching/risk set sampling (including Cox partial likelihood) eliminates the baseline hazard from the likelihood expression for the
 hazard ratios
 2. If, however, the absolute risks are of interest, they have to be recovered using the semi-parametric Breslow estimator
-3. Alternative approaches for fitting flexible hazard models for estimating absolute risks, not requiring this two-step approach? Yes! [@hanley2009fitting]
+3. Alternative approaches for fitting flexible hazard models for estimating absolute risks, not requiring this two-step approach? Yes!
+[@hanley2009fitting]
+
+
 
 [@hanley2009fitting] propose a fully parametric hazard model that can be fit via logistic regression. From the fitted hazard function, cumulative incidence and, thus, risk functions of time, treatment and profile can be easily derived.
+
+
+
+
+\begin{table}
+  \begin{tabular}{p{1.8in}lll}
+\hline
+    &  Parameters &  Density \proglang{R} function & \code{dist}\\
+    & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
+\hline
+    Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
+    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
+    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
+    Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
+    Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
+    Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
+    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
+    Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
+    Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
+    Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
+    Generalized F     (original)  & \code{{\color{red}{mu}}, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
+\hline
+  \end{tabular}
+  \caption{Built-in parametric survival distributions in \pkg{flexsurv}.}
+  \label{tab:dists}
+\end{table}
+
+
+
 
 # Theoretical details
 
@@ -146,7 +204,7 @@ To decide between a single-event and a competing-event analysis, we created \cod
 
 To introduce the different features available, we make use of the European Randomized Study of Prostate Cancer Screening data; this dataset is available through the \pkg{casebase} package:
 
-```{r}
+```{r erspc-data, eval = eval_cs1}
 data(ERSPC)
 ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
                        levels = c(0,1), 
@@ -157,14 +215,14 @@ The results of this study were published by [schroder2009screening]. This data w
 
 Population time plots can be extremely informative graphical displays of survival data. They should be the first step in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function. We first create the necessary dataset for producing the population time plots, and we can produce the plot by using the corresponding \code{plot} method:
 
-```{r}
+```{r plot-erspc-data, eval = eval_cs1}
 pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
 plot(pt_object)
 ```
 
 We can also create exposure stratified plots by specifying the \code{exposure} argument in the \code{popTime} function:
 
-```{r}
+```{r plot-stratified-erspc-data, eval = eval_cs1}
 pt_object_strat <- casebase::popTime(ERSPC, 
                                      event = "DeadOfPrCa", 
                                      exposure = "ScrArm")
@@ -174,13 +232,13 @@ plot(pt_object_strat)
 
 We can also plot them side-by-side using the \code{ncol} argument:
 
-```{r}
+```{r plot-stratified-erspc-data-side, eval = eval_cs1}
 plot(pt_object_strat, ncol = 2)
 ```
 
 First, we fit a Cox model to the data, examine the hazard ratio for the screening group (relative to the control group), and plot the cumulative incidence function (CIF). 
 
-```{r}
+```{r erspc-cox, eval = eval_cs1}
 cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
                              data = ERSPC)
 summary(cox_model)
@@ -188,7 +246,7 @@ summary(cox_model)
 
 We can plot the CIF for each group:
 
-```{r}
+```{r erspc-cox-cif, eval = eval_cs1}
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
                        ignore = 99)
 
@@ -213,7 +271,7 @@ Next we fit several models using case-base sampling. The models we fit differ in
 
 The \code{fitSmoothHazard} function provides an estimate of the hazard function $h(x, t)$ is the hazard function, where $t$ denotes the numerical value of a point in prognostic/prospective time and $x$ is the realization of the vector $X$ of variates based on the patient's profile and intervention (if any).
 
-```{r}
+```{r erspc-casebase-exponential, eval = eval_cs1}
 casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
                                                   data = ERSPC, 
                                                   ratio = 100)
@@ -229,7 +287,7 @@ $$ CI(x, t) = 1 - exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$
 
 In the plot below, we overlay the estimated CIF from the casebase exponential model on the Cox model CIF:
 
-```{r}
+```{r erspc-casebase-cif, eval = eval_cs1}
 smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
                                           time = seq(0,15,0.1), 
                                           newdata = new_data)
@@ -260,7 +318,7 @@ As we can see, the exponential model is not a good fit. Based on what we observe
 
 Next we enter time linearly into the model:
 
-```{r}
+```{r erspc-casebase-weibull, eval = eval_cs1}
 casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
                                  data = ERSPC, 
                                  ratio = 100)
@@ -271,7 +329,7 @@ exp(confint(casebase_time))
 ```
 
 
-```{r}
+```{r erspc-casebase-weibull-cif, eval = eval_cs1}
 smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
                                           time = seq(0,15,0.1), 
                                           newdata = new_data)
@@ -301,7 +359,7 @@ We see that the Weibull model leads to a better fit.
 
 Next we try to enter a smooth function of time into the model using the \code{splines} package:
 
-```{r}
+```{r erspc-casebase-splines, eval = eval_cs1}
 casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
                                     data = ERSPC, 
                                     ratio = 100)
@@ -312,7 +370,7 @@ exp(confint(casebase_splines))
 ```
 
 
-```{r}
+```{r erspc-casebase-splines-cif, eval = eval_cs1}
 smooth_risk_splines <- absoluteRisk(object = casebase_splines, 
                                     time = seq(0,15,0.1), 
                                     newdata = new_data)
@@ -342,7 +400,7 @@ It looks like the best fit.
 
 Since we are within the GLM framework, we can easily test for which model better fits the data using a Likelihood Ratio Test (LRT). The null hypothesis here is that the linear model is just as good as the larger (in terms of number of parameters) splines model.
 
-```{r}
+```{r erscp-compare, eval = eval_cs1}
 anova(casebase_time, casebase_splines, test = "LRT")
 ```
 
@@ -352,7 +410,7 @@ As espected, we see that splines model provides a better fit.
 
 The next example shows how case-base sampling can also be used in the context of a competing risk analysis. For illustrative purposes, we will use the same data that was used in Scrucca *et al* [-@scrucca2010regression]. The data was downloaded from the main author's website, and it is also available as part of the \pkg{casebase} package.
 
-```{r message = FALSE}
+```{r bmtcrr-data, eval = eval_cs2, message = FALSE, echo=2}
 library(casebase)
 data(bmtcrr)
 ```
@@ -418,12 +476,12 @@ Sex & Sex & M=Male (100) \\
 
 In order to try and visualize the incidence density of relapse, we can look at the corresponding population-time plot. In Figure \ref{fig:compPop1}, failure times associated with relapse are highlighted on the plot using red points, while Figure \ref{fig:compPop2} provides a similar population-time plot for competing events.
 
-```{r compPop1, fig.cap="\\label{fig:compPop1}Population-time plot for the stem-cell transplant study. The points represent the event of interest (i.e., relapse).", echo=FALSE}
+```{r compPop1, fig.cap="\\label{fig:compPop1}Population-time plot for the stem-cell transplant study. The points represent the event of interest (i.e., relapse).", echo=FALSE, eval = eval_cs2}
 pt_object <- casebase::popTime(bmtcrr, event = "Status", time = "ftime")
 plot(pt_object)
 ```
 
-```{r compPop2, fig.cap="\\label{fig:compPop2}Population-time plot for the stem-cell transplant study. The points represent the competing events.", echo=FALSE}
+```{r compPop2, fig.cap="\\label{fig:compPop2}Population-time plot for the stem-cell transplant study. The points represent the competing events.", echo=FALSE, eval = eval_cs2}
 pt_object_comp <- bmtcrr %>% 
     mutate(Status = case_when(Status == 1 ~ 2L, 
                               Status == 2 ~ 1L, 
@@ -434,7 +492,7 @@ plot(pt_object_comp, point.colour = "blue")
 
 Our main objective is to compute the absolute risk of relapse for a given set of covariates. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time:
 
-```{r warning = FALSE}
+```{r bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2}
 model_cb <- fitSmoothHazard(
     Status ~ ftime + Sex + D + Phase + Source + Age, 
     data = bmtcrr, 
@@ -442,7 +500,7 @@ model_cb <- fitSmoothHazard(
     time = "ftime")
 ```
 
-```{r, echo = FALSE, eval = TRUE}
+```{r bmtcrr-cox, echo = FALSE, eval = eval_cs2}
 library(survival)
 # Treat competing event as censoring
 model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
@@ -451,7 +509,7 @@ model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
 
 From the fit object, we can extract both the hazard ratios and their corresponding confidence intervals:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval = eval_cs2}
 # Table of coefficients----
 z_value <- qnorm(0.975)
 foo <- summary(model_cb)@coef3
@@ -498,9 +556,9 @@ As we can see, the only significant hazard ratio is the one associated with the 
 
 Given our estimate of the hazard function, we can compute the absolute risk curve for a fixed covariate profile. We performed this computation for a 35 year old woman who received a stem-cell transplant from peripheral blood at relapse. We compared the absolute risk curve for such a woman with acute lymphoblastic leukemia with that for a similar woman with acute myeloblastic leukemia. Figure \ref{fig:compAbsrisk} shows these two curves as a function of time. This figure also shows the Kaplan-Meier estimate fitted to the two disease groups (ignoring the other covariates).
 
-```{r cb_risk, warning = FALSE, cache = TRUE}
+```{r cb_risk, warning = FALSE, cache = FALSE, eval = eval_cs2}
 # Pick 100 equidistant points between 0 and 60 months
-time_points <- seq(0, 60, length.out = 100)
+time_points <- seq(0, 60, length.out = 50)
 
 # Data.frame containing risk profile
 newdata <- data.frame("Sex" = factor(c("F", "F"), 
@@ -514,7 +572,7 @@ newdata <- data.frame("Sex" = factor(c("F", "F"),
 
 # Estimate absolute risk curve
 risk_cb <- absoluteRisk(object = model_cb, time = time_points,
-                        method = "montecarlo", newdata = newdata)
+                        method = "numerical", newdata = newdata)
 ```
 
 ```{r fg_risk, eval = FALSE, echo = FALSE}
@@ -527,7 +585,7 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
 risk_fg <- predict(model_fg, newdata, times = time_points)
 ```
 
-```{r echo = FALSE, fig.cap="\\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate."}
+```{r echo = FALSE, fig.cap="\\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2}
 risk_cb <- bind_rows(
     data.frame(Time = time_points, 
                Method = "Case-base", 
@@ -598,4 +656,21 @@ knitr::kable(data.frame(`feature` = c("model type", "time", "cumulative incidenc
            `Case Base Sampling` = c("fully parametric (logistic/multinomial regression)", "right hand side - allows flexible modeling of time",
            "smooth-in-time curve", "interaction of covariates with time", "make use of GLM framework (LRT, AIC, BIC)",
            "cause-specific cumulative incidence functions (CIFs) directly obtained via multinomial regression", "ROC, AUC, risk reclassification probabilities")), escape = FALSE)
+```
+
+
+# Environment Details
+
+This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
+
+```{r colophon, cache = FALSE}
+# which R packages and versions?
+devtools::session_info()
+```
+
+The current Git commit details are:
+
+```{r}
+# what commit is this file at? 
+git2r::repository(here::here())
 ```
