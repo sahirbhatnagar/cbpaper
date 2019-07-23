@@ -2,7 +2,7 @@
 FROM rocker/verse:3.6.0
 
 # required
-MAINTAINER Your Name <sahir.bhatnagar@gmail.com>
+MAINTAINER Sahir Bhatnagar <sahir.bhatnagar@gmail.com>
 
 COPY . /cbpaper
 
