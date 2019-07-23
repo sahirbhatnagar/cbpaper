@@ -17,6 +17,7 @@ Title <- "Title of your paper goes here"
 
 # cbpaper
 
+[![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/sahirbhatnagar/cbpaper/master?urlpath=rstudio)  
 [![Travis-CI Build Status](https://travis-ci.org/sahirbhatnagar/cbpaper.svg?branch=master)](https://travis-ci.org/sahirbhatnagar/cbpaper)
 
 Source code for Casebase paper
