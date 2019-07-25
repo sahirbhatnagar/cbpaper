@@ -63,7 +63,7 @@ fig_height: 6
 fig_caption: true
 ---
 
-# Code formatting
+# Code formatting {.unnumbered}
 
 Don't use markdown, instead use the more precise latex commands:
 
@@ -145,46 +145,52 @@ hazard ratios
 
 As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to discretize the study base into an infinite amount of *person moments*. These person moments are indexed by both an individual in the study and a time point, and therefore each person moment has a covariate profile, an exposure status and an outcome status attached to it. We note that there is only a finite number of person moments associated with the event of interest (what Hanley & Miettinen call the *case series*). The case-base sampling refers to the sampling from the base of a representative finite sample called the *base series*. 
 
-Popular survival analysis methods, like Kaplan-Meier and Cox regression, rely on the notion of risk-set sampling. Case-base sampling can be seen as an alternative.
+<!-- Popular survival analysis methods, like Kaplan-Meier and Cox regression, rely on the notion of risk-set sampling. Case-base sampling can be seen as an alternative. -->
 
 As shown by Saarela & Arjas [-@saarela2015non] (and further expanded in Saarela [-@saarela2016case]), writing the likelihood arising from this data-generating mechanism using the framework of non-homogenous Poisson processes, we eventually reach an expression where each person-moment's contribution is of the form
-$$\frac{\lambda(t)^{dN(t)}}{\rho(t) + \lambda(t)},$$
-where $N(t)$ is the counting process associated with the event of interest, $\lambda(t)$ is the corresponding hazard function, and $\rho(t)$ is the hazard function for the Poisson process associated with case-base sampling. This parametric form suggests that we can readily estimate log-hazards of the form $\log(\lambda(t)) = g(t; X)$ using logistic regression, where each observation corresponds to a person moment, the function $g(t; X)$ is linear in a finite number of parameters, and where we treat $\log(\rho(t))$ as an offset. 
+$$\frac{h(t)^{dN(t)}}{\rho(t) + h(t)},$$
+where $N(t)$ is the counting process associated with the event of interest, $h(t)$ is the corresponding hazard function, and $\rho(t)$ is the hazard function for the Poisson process associated with case-base sampling. This parametric form suggests that we can readily estimate log-hazards of the form $\log(h(t)) = g(t; X)$ using logistic regression, where each observation corresponds to a person moment, the function $g(t; X)$ is linear in a finite number of parameters, and where we treat $-\log(\rho(t))$ as an offset. 
 
-In Hanley & Miettinen [-@hanley2009fitting], the authors suggest performing case-base samping *uniformly*, i.e. to sample the base series uniformly from the study base. In terms of Poisson processes, this sampling strategy corresponds to a time-homogeneous Poisson process with intensity equal to $b/B$, where $b$ is the number of sampled observations in the base series, and $B$ is the total population-time for the study base. More complex examples are also available; see for example Saarela & Arjas [-@saarela2015non], where the probabilities of the sampling mechanism  are proportional to the cardiovascular disease event rate given by the Framingham score.
+In Hanley & Miettinen [-@hanley2009fitting], the authors suggest performing case-base samping *uniformly*, i.e. to sample the base series uniformly from the study base. In terms of Poisson processes, this sampling strategy corresponds essentially to a time-homogeneous Poisson process with intensity equal to $b/B$, where $b$ is the number of sampled observations in the base series, and $B$ is the total population-time for the study base. More complex examples are also available; see for example Saarela & Arjas [-@saarela2015non], where the probabilities of the sampling mechanism  are proportional to the cardiovascular disease event rate given by the Framingham score.
 
 The `casebase` package fits the family of hazard functions of the form
 
-$$ h(x,t) = exp[g(x,t)] $$
-where $t$ denotes the numerical value (number of units) of a point in prognostic/prospective time and $x$ is the realization of the vector $X$ of variates based on the patient's profile and intervention (if any). Different functions of $t$ lead to different parametric hazard models. 
+$$ h(t;X) = \exp[g(t;X)] $$
+where $t$ denotes time and $X$, the individual's covariate profile. Different functions of $t$ lead to different parametric hazard models. The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$. 
 
-The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$. 
+$$ h(t;X) = \exp(\beta_0 + \beta_1 X) $$
 
-$$ h(x,t) = exp(\beta_0 + \beta_1 x) $$
-
-The instantaneous failure rate is independent of $t$, so that the conditional chance of failure in a time interval of specified length is the same regardless of how long the individual has been on study a.k.a the memoryless property (Kalbfleisch and Prentice, 2002).
-
+The instantaneous failure rate is independent of $t$, so that the conditional chance of failure in a time interval of specified length is the same regardless of how long the individual has been in the study. This is also known as the *memoryless property* (Kalbfleisch and Prentice, 2002).
 
 The Gompertz hazard model is given by including a linear term for time:
 
-$$ h(x,t)  = exp(\beta_0 + \beta_1 t + \beta_2 x) $$
+$$ h(t;X)  = \exp(\beta_0 + \beta_1 t + \beta_2 X) $$
 
-Use of $log(t)$ yields the Weibull hazard which allows for a power dependence of the hazard on time (Kalbfleisch and Prentice, 2002):
+Use of $\log(t)$ yields the Weibull hazard which allows for a power dependence of the hazard on time (Kalbfleisch and Prentice, 2002):
 
-$$ h(x, t)  = exp(\beta_0 + \beta_1 \log(t) + \beta_2 x) $$
+$$ h(t;X)  = \exp(\beta_0 + \beta_1 \log(t) + \beta_2 X) $$
 
+For competing-risk analyses with $J$ possible events, we can show that each person-moment's contribution of the likelihood is of the form
+
+$$\frac{h_j(t)^{dN_j(t)}}{\rho(t) + \sum_{j=1}^Jh_j(t)},$$
+
+where $N_j(t)$ is the counting process associated with the event of type $j$ and $h_j(t)$ is the corresponding hazard function. As may be expected, this functional form is similar to the terms appearing in the likelihood function for multinomial regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1\end{align*}}
 
 # Implementation details
 
-The functions in the casebase package can be divided into two categories: 1) data visualization, in the form of population-time plots; and 2) data analysis.
-
-We explicitely aimed at being compatible with both \code{data.frame}s and \code{data.table}s. This is evident in some of the coding choices we made, and it is also reflected in our testing units.
+The functions in the casebase package can be divided into two categories: 1) data visualization, in the form of population-time plots; and 2) parametric modeling. We explicitely aimed at being compatible with both \code{data.frame}s and \code{data.table}s. This is evident in some of the coding choices we made, and it is also reflected in our unit tests.
 
 ## Population-time plots
 
-## Data analysis
+## Parametric modeling
 
-The data analysis step was separated into three parts: 1) case-base sampling; 2) estimation of the smooth hazard function; and 3) calculation of the risk function. By separating the sampling and estimation functions, we allowed the possibility of users implementing more complex sampling scheme, as described in Saarela [-@saarela2016case].
+The parametric modeling step was separated into three parts: 
+
+  1. case-base sampling; 
+  2. estimation of the smooth hazard function; 
+  3. calculation of the risk function. 
+  
+By separating the sampling and estimation functions, we allowed the possibility of users implementing more complex sampling scheme, as described in Saarela [-@saarela2016case].
 
 The sampling scheme selected for \code{sampleCaseBase} was described in Hanley and Miettinen [-@hanley2009fitting]: we first sample along the ``person'' axis, proportional to each individual's total follow-up time, and then we sample a moment uniformly over their follow-up time. This sampling scheme is equivalent to the following picture: imagine representing the total follow-up time of all individuals in the study along a single dimension, where the follow-up time of the next individual would start exactly when the follow-up time of the previous individual ends. Then the base series could be sampled uniformly from this one-dimensional representation of the overall follow-up time. In any case, the output is a dataset of the same class as the input, where each row corresponds to a person-moment. The covariate profile for each such person-moment is retained, and an offset term is added to the dataset. This output could then be used to fit a smooth hazard function, or for visualization of the base series.
 
@@ -192,13 +198,35 @@ The fitting function \code{fitSmoothHazard} starts by looking at the class of th
 
 The fitting function retains the familiar formula interface of \code{glm}. The left-hand side of the formula should be the name of the column corresponding to the event type. The right-hand side can be any combination of the covariates, along with an explicit functional form for the time variable. Note that non-proportional hazard models can be achieved at this stage by adding an interaction term involving time. The offset term does not need to be specified by the user, as it is automatically added to the formula.
 
-Finally, the hazard function is fitted to the data using the function \code{glm}, unless there is more than one type event (i.e. in a competing-risk analysis), in which case it uses the multinomical regression capabilities of the \pkg{VGAM} package. This package was selected for its ability to fit multinomial regression models with an offset.
+To fit the hazard function, we provide several approaches that are available via the \code{family} parameter. These approaches are:
+
+  - \code{glm}: This is the familiar logistic regression.
+  - \code{glmnet}: This option allows for variable selection using Lasso or elastic-net. This functionality is provided through the \code{glmnet} package [@friedman2010jss].
+  - \code{gam}: This option provides support for *Generalized Additive Models* via the \code{gam} package [@hastie1987generalized].
+  - \code{gbm}: This option provides support for *Gradient Boosted Trees* via the \code{gbm} package. This feature is still experimental.
+  
+In the case of multiple events, the hazard is fitted via multinomial regression as performed by the \pkg{VGAM} package. This package was selected for its ability to fit multinomial regression models with an offset.
 
 Once a model-fit object has been returned by \code{fitSmoothHazard}, all the familiar summary and diagnostic functions are available: \code{print}, \code{summary}, \code{predict}, \code{plot}, etc. Our package provides one more functionality: it computes risk functions from the model fit. For the case of a single event, it uses the familiar identity
 $$S(t) = \exp\left(-\int_0^t h(u;X) du\right).$$
-The integral is computed using either the \code{stats::integrate} function or Monte-Carlo integration. For the case of a competing-event analysis, the event-specific risk is computed using a nested double integral; in this setting, Monte-Carlo integration is faster and more flexible than \code{stats::integrate}. This is due to the fact that the computation involves a double loop over the selected time points; Monte-Carlo integration performs this step by using the vectorized \code{rowSums} and \code{colSums} functions.
+The integral is computed using either the \code{stats::integrate} function or Monte-Carlo integration. The risk function (or cumulative incidence function) is then defined as
 
-To decide between a single-event and a competing-event analysis, we created \code{absoluteRisk} as an \code{S3} generic, with methods for both \code{glm} and \code{CompRisk} objects (the latter inherits from \code{vglm} as well). The method dispatch system of \proglang{R} then takes care of matching the correct input to the correct methodology, without the user's intervention.
+$$ CI(t) = 1 - S(t).$$
+
+For the case of a competing-event analysis, the event-specific risk is computed using the following procedure: first, we compute the overall survival function (i.e. for all event types):
+
+$$ S(t) = \exp\left(-\int_0^t H(u;X) du\right),\qquad H(t;X) = \sum_{j=1}^J h_j(t;X).$$
+From this, we can derive the event-specific subdensities:
+
+$$ f_j(t) = h_j(t)S(t).$$
+
+Finally, by integrating these subdensities, we obtain the event-specific cumulative incidence functions:
+
+$$ CI_j(t) = \int_0^t f_j(u)du.$$
+
+We created \code{absoluteRisk} as an \code{S3} generic, with methods for the different types of outputs of \code{fitSmoothHazard}. The method dispatch system of \proglang{R} then takes care of matching the correct output to the correct methodology for calculating the cumulative incidence function, without the user's intervention.
+
+In the following sections, we illustrate these functionalities in the context of three case studies.
 
 # Case study 1--European Randomized Study of Prostate Cancer Screening
 
@@ -283,7 +311,7 @@ exp(confint(casebase_exponential)[2,])
 
 The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation:
 
-$$ CI(x, t) = 1 - exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$
+$$ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$
 
 In the plot below, we overlay the estimated CIF from the casebase exponential model on the Cox model CIF:
 
@@ -360,7 +388,7 @@ We see that the Weibull model leads to a better fit.
 Next we try to enter a smooth function of time into the model using the \code{splines} package:
 
 ```{r erspc-casebase-splines, eval = eval_cs1}
-casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
+casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
                                     data = ERSPC, 
                                     ratio = 100)
 
@@ -642,9 +670,9 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
     xlab("Time (in Months)") + ylab("Relapse risk")
 ```
 
-# Case study 3
+# Case study 3--The Cancer Genome Atlas
 
-  - Glmnet, gam, and gbm
+  - Glmnet and TCGA data
 
 # Discussion
 

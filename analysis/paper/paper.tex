@@ -7,11 +7,11 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Bhatnagar *\\McGill Univeristy \And Maxime Turgeon *\\McGill University \And James Hanley\\McGill Univeristy \And Olli Saarela\\University of Toronto
+Sahir Bhatnagar *\\McGill Univeristy \And Maxime Turgeon *\\University of Manitoba \And Jesse Islam\\McGill University \And James Hanley\\McGill Univeristy \And Olli Saarela\\University of Toronto
 }
 \title{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
-\Plainauthor{Sahir Bhatnagar *, Maxime Turgeon *, James Hanley, Olli Saarela}
+\Plainauthor{Sahir Bhatnagar *, Maxime Turgeon *, Jesse Islam, James Hanley, Olli Saarela}
 \Plaintitle{casebase: An Alternative Framework For Survival Analysis}
 \Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
@@ -37,10 +37,15 @@ The abstract of the article. * joint co-authors
   E-mail: \email{sahir.bhatnagar@mail.mcgill.ca}\\
   URL: \url{http://sahirbhatnagar.com/}\\~\\
       Maxime Turgeon *\\
+  University of Manitoba\\
+  318 Machray Hall Winnipeg, MB, Canada R3T 2N2\\
+  E-mail: \email{max.turgeon@umanitoba.ca}\\
+  URL: \url{http://maxturgeon.ca/}\\~\\
+      Jesse Islam\\
   McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
-  E-mail: \email{maxime.turgeon@mail.mcgill.ca}\\
-  URL: \url{http://maxturgeon.ca/}\\~\\
+  E-mail: \email{jesse.islam@mail.mcgill.ca}\\
+  
       James Hanley\\
   McGill Univeristy\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
@@ -61,7 +66,8 @@ The abstract of the article. * joint co-authors
 \begin{document}
 
 \hypertarget{code-formatting}{%
-\section{Code formatting}\label{code-formatting}}
+\section*{Code formatting}\label{code-formatting}}
+\addcontentsline{toc}{section}{Code formatting}
 
 Don't use markdown, instead use the more precise latex commands:
 
@@ -140,33 +146,29 @@ finite number of person moments associated with the event of interest
 sampling refers to the sampling from the base of a representative finite
 sample called the \emph{base series}.
 
-Popular survival analysis methods, like Kaplan-Meier and Cox regression,
-rely on the notion of risk-set sampling. Case-base sampling can be seen
-as an alternative.
-
 As shown by Saarela \& Arjas \citeyearpar{saarela2015non} (and further
 expanded in Saarela \citeyearpar{saarela2016case}), writing the
 likelihood arising from this data-generating mechanism using the
 framework of non-homogenous Poisson processes, we eventually reach an
 expression where each person-moment's contribution is of the form
-\[\frac{\lambda(t)^{dN(t)}}{\rho(t) + \lambda(t)},\] where \(N(t)\) is
-the counting process associated with the event of interest,
-\(\lambda(t)\) is the corresponding hazard function, and \(\rho(t)\) is
-the hazard function for the Poisson process associated with case-base
-sampling. This parametric form suggests that we can readily estimate
-log-hazards of the form \(\log(\lambda(t)) = g(t; X)\) using logistic
-regression, where each observation corresponds to a person moment, the
-function \(g(t; X)\) is linear in a finite number of parameters, and
-where we treat \(\log(\rho(t))\) as an offset.
+\[\frac{h(t)^{dN(t)}}{\rho(t) + h(t)},\] where \(N(t)\) is the counting
+process associated with the event of interest, \(h(t)\) is the
+corresponding hazard function, and \(\rho(t)\) is the hazard function
+for the Poisson process associated with case-base sampling. This
+parametric form suggests that we can readily estimate log-hazards of the
+form \(\log(h(t)) = g(t; X)\) using logistic regression, where each
+observation corresponds to a person moment, the function \(g(t; X)\) is
+linear in a finite number of parameters, and where we treat
+\(-\log(\rho(t))\) as an offset.
 
 In Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the authors
 suggest performing case-base samping \emph{uniformly}, i.e.~to sample
 the base series uniformly from the study base. In terms of Poisson
-processes, this sampling strategy corresponds to a time-homogeneous
-Poisson process with intensity equal to \(b/B\), where \(b\) is the
-number of sampled observations in the base series, and \(B\) is the
-total population-time for the study base. More complex examples are also
-available; see for example Saarela \& Arjas
+processes, this sampling strategy corresponds essentially to a
+time-homogeneous Poisson process with intensity equal to \(b/B\), where
+\(b\) is the number of sampled observations in the base series, and
+\(B\) is the total population-time for the study base. More complex
+examples are also available; see for example Saarela \& Arjas
 \citeyearpar{saarela2015non}, where the probabilities of the sampling
 mechanism are proportional to the cardiovascular disease event rate
 given by the Framingham score.
@@ -174,55 +176,72 @@ given by the Framingham score.
 The \texttt{casebase} package fits the family of hazard functions of the
 form
 
-\[ h(x,t) = exp[g(x,t)] \] where \(t\) denotes the numerical value
-(number of units) of a point in prognostic/prospective time and \(x\) is
-the realization of the vector \(X\) of variates based on the patient's
-profile and intervention (if any). Different functions of \(t\) lead to
-different parametric hazard models.
+\[ h(t;X) = \exp[g(t;X)] \] where \(t\) denotes time and \(X\), the
+individual's covariate profile. Different functions of \(t\) lead to
+different parametric hazard models. The simplest of these models is the
+one-parameter exponential distribution which is obtained by taking the
+hazard function to be constant over the range of \(t\).
 
-The simplest of these models is the one-parameter exponential
-distribution which is obtained by taking the hazard function to be
-constant over the range of \(t\).
-
-\[ h(x,t) = exp(\beta_0 + \beta_1 x) \]
+\[ h(t;X) = \exp(\beta_0 + \beta_1 X) \]
 
 The instantaneous failure rate is independent of \(t\), so that the
 conditional chance of failure in a time interval of specified length is
-the same regardless of how long the individual has been on study a.k.a
-the memoryless property (Kalbfleisch and Prentice, 2002).
+the same regardless of how long the individual has been in the study.
+This is also known as the \emph{memoryless property} (Kalbfleisch and
+Prentice, 2002).
 
 The Gompertz hazard model is given by including a linear term for time:
 
-\[ h(x,t)  = exp(\beta_0 + \beta_1 t + \beta_2 x) \]
+\[ h(t;X)  = \exp(\beta_0 + \beta_1 t + \beta_2 X) \]
 
-Use of \(log(t)\) yields the Weibull hazard which allows for a power
+Use of \(\log(t)\) yields the Weibull hazard which allows for a power
 dependence of the hazard on time (Kalbfleisch and Prentice, 2002):
 
-\[ h(x, t)  = exp(\beta_0 + \beta_1 \log(t) + \beta_2 x) \]
+\[ h(t;X)  = \exp(\beta_0 + \beta_1 \log(t) + \beta_2 X) \]
+
+For competing-risk analyses with \(J\) possible events, we can show that
+each person-moment's contribution of the likelihood is of the form
+
+\[\frac{h_j(t)^{dN_j(t)}}{\rho(t) + \sum_{j=1}^Jh_j(t)},\]
+
+where \(N_j(t)\) is the counting process associated with the event of
+type \(j\) and \(h_j(t)\) is the corresponding hazard function. As may
+be expected, this functional form is similar to the terms appearing in
+the likelihood function for multinomial
+regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1\end{align*}}
 
 \hypertarget{implementation-details}{%
 \section{Implementation details}\label{implementation-details}}
 
 The functions in the casebase package can be divided into two
 categories: 1) data visualization, in the form of population-time plots;
-and 2) data analysis.
-
-We explicitely aimed at being compatible with both \code{data.frame}s
-and \code{data.table}s. This is evident in some of the coding choices we
-made, and it is also reflected in our testing units.
+and 2) parametric modeling. We explicitely aimed at being compatible
+with both \code{data.frame}s and \code{data.table}s. This is evident in
+some of the coding choices we made, and it is also reflected in our unit
+tests.
 
 \hypertarget{population-time-plots}{%
 \subsection{Population-time plots}\label{population-time-plots}}
 
-\hypertarget{data-analysis}{%
-\subsection{Data analysis}\label{data-analysis}}
+\hypertarget{parametric-modeling}{%
+\subsection{Parametric modeling}\label{parametric-modeling}}
 
-The data analysis step was separated into three parts: 1) case-base
-sampling; 2) estimation of the smooth hazard function; and 3)
-calculation of the risk function. By separating the sampling and
-estimation functions, we allowed the possibility of users implementing
-more complex sampling scheme, as described in Saarela
-\citeyearpar{saarela2016case}.
+The parametric modeling step was separated into three parts:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  case-base sampling;
+\item
+  estimation of the smooth hazard function;
+\item
+  calculation of the risk function.
+\end{enumerate}
+
+By separating the sampling and estimation functions, we allowed the
+possibility of users implementing more complex sampling scheme, as
+described in Saarela \citeyearpar{saarela2016case}.
 
 The sampling scheme selected for \code{sampleCaseBase} was described in
 Hanley and Miettinen \citeyearpar{hanley2009fitting}: we first sample
@@ -258,10 +277,28 @@ achieved at this stage by adding an interaction term involving time. The
 offset term does not need to be specified by the user, as it is
 automatically added to the formula.
 
-Finally, the hazard function is fitted to the data using the function
-\code{glm}, unless there is more than one type event (i.e.~in a
-competing-risk analysis), in which case it uses the multinomical
-regression capabilities of the \pkg{VGAM} package. This package was
+To fit the hazard function, we provide several approaches that are
+available via the \code{family} parameter. These approaches are:
+
+\begin{itemize}
+\tightlist
+\item
+  \code{glm}: This is the familiar logistic regression.
+\item
+  \code{glmnet}: This option allows for variable selection using Lasso
+  or elastic-net. This functionality is provided through the
+  \code{glmnet} package \citep{friedman2010jss}.
+\item
+  \code{gam}: This option provides support for \emph{Generalized
+  Additive Models} via the \code{gam} package
+  \citep{hastie1987generalized}.
+\item
+  \code{gbm}: This option provides support for \emph{Gradient Boosted
+  Trees} via the \code{gbm} package. This feature is still experimental.
+\end{itemize}
+
+In the case of multiple events, the hazard is fitted via multinomial
+regression as performed by the \pkg{VGAM} package. This package was
 selected for its ability to fit multinomial regression models with an
 offset.
 
@@ -272,20 +309,33 @@ package provides one more functionality: it computes risk functions from
 the model fit. For the case of a single event, it uses the familiar
 identity \[S(t) = \exp\left(-\int_0^t h(u;X) du\right).\] The integral
 is computed using either the \code{stats::integrate} function or
-Monte-Carlo integration. For the case of a competing-event analysis, the
-event-specific risk is computed using a nested double integral; in this
-setting, Monte-Carlo integration is faster and more flexible than
-\code{stats::integrate}. This is due to the fact that the computation
-involves a double loop over the selected time points; Monte-Carlo
-integration performs this step by using the vectorized \code{rowSums}
-and \code{colSums} functions.
+Monte-Carlo integration. The risk function (or cumulative incidence
+function) is then defined as
 
-To decide between a single-event and a competing-event analysis, we
-created \code{absoluteRisk} as an \code{S3} generic, with methods for
-both \code{glm} and \code{CompRisk} objects (the latter inherits from
-\code{vglm} as well). The method dispatch system of \proglang{R} then
-takes care of matching the correct input to the correct methodology,
-without the user's intervention.
+\[ CI(t) = 1 - S(t).\]
+
+For the case of a competing-event analysis, the event-specific risk is
+computed using the following procedure: first, we compute the overall
+survival function (i.e.~for all event types):
+
+\[ S(t) = \exp\left(-\int_0^t H(u;X) du\right),\qquad H(t;X) = \sum_{j=1}^J h_j(t;X).\]
+From this, we can derive the event-specific subdensities:
+
+\[ f_j(t) = h_j(t)S(t).\]
+
+Finally, by integrating these subdensities, we obtain the event-specific
+cumulative incidence functions:
+
+\[ CI_j(t) = \int_0^t f_j(u)du.\]
+
+We created \code{absoluteRisk} as an \code{S3} generic, with methods for
+the different types of outputs of \code{fitSmoothHazard}. The method
+dispatch system of \proglang{R} then takes care of matching the correct
+output to the correct methodology for calculating the cumulative
+incidence function, without the user's intervention.
+
+In the following sections, we illustrate these functionalities in the
+context of three case studies.
 
 \hypertarget{case-study-1european-randomized-study-of-prostate-cancer-screening}{%
 \section{Case study 1--European Randomized Study of Prostate Cancer
@@ -411,7 +461,7 @@ The \code{absoluteRisk} function provides an estimate of the cumulative
 incidence curves for a specific risk profile using the following
 equation:
 
-\[ CI(x, t) = 1 - exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
+\[ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
 
 In the plot below, we overlay the estimated CIF from the casebase
 exponential model on the Cox model CIF:
@@ -506,7 +556,7 @@ Next we try to enter a smooth function of time into the model using the
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
+R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
 R>                                     data = ERSPC, 
 R>                                     ratio = 100)
 R> 
@@ -684,13 +734,14 @@ R>                         method = "numerical", newdata = newdata)
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{case-study-3}{%
-\section{Case study 3}\label{case-study-3}}
+\hypertarget{case-study-3the-cancer-genome-atlas}{%
+\section{Case study 3--The Cancer Genome
+Atlas}\label{case-study-3the-cancer-genome-atlas}}
 
 \begin{itemize}
 \tightlist
 \item
-  Glmnet, gam, and gbm
+  Glmnet and TCGA data
 \end{itemize}
 
 \hypertarget{discussion}{%
@@ -702,7 +753,7 @@ case-base sampling:
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-07-22 17:17:57 using the following
+This report was generated on 2019-07-25 16:51:47 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -715,169 +766,97 @@ R> devtools::session_info()
 \begin{CodeOutput}
 #> - Session info ----------------------------------------------------------
 #>  setting  value                       
-#>  version  R version 3.6.0 (2019-04-26)
-#>  os       Pop!_OS 18.10               
+#>  version  R version 3.6.1 (2019-07-05)
+#>  os       Ubuntu 18.04.2 LTS          
 #>  system   x86_64, linux-gnu           
 #>  ui       X11                         
 #>  language en_CA:en                    
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
-#>  tz       America/Toronto             
-#>  date     2019-07-22                  
+#>  tz       America/Winnipeg            
+#>  date     2019-07-25                  
 #> 
 #> - Packages --------------------------------------------------------------
-#>  package     * version    date       lib
-#>  assertthat    0.2.1      2019-03-21 [1]
-#>  backports     1.1.4      2019-04-10 [1]
-#>  broom         0.5.1      2018-12-05 [1]
-#>  callr         3.2.0      2019-03-15 [1]
-#>  casebase    * 0.1.1.9000 2019-07-22 [1]
-#>  cellranger    1.1.0      2016-07-27 [1]
-#>  cli           1.1.0      2019-03-19 [1]
-#>  colorspace    1.4-1      2019-03-18 [1]
-#>  crayon        1.3.4      2017-09-16 [1]
-#>  data.table    1.12.2     2019-04-07 [1]
-#>  desc          1.2.0      2018-05-01 [1]
-#>  devtools      2.0.1      2018-10-26 [1]
-#>  digest        0.6.20     2019-07-04 [1]
-#>  dplyr       * 0.8.0.1    2019-02-15 [1]
-#>  evaluate      0.14       2019-05-28 [1]
-#>  forcats     * 0.4.0      2019-02-17 [1]
-#>  fs            1.3.1      2019-05-06 [1]
-#>  generics      0.0.2      2018-11-29 [1]
-#>  ggplot2     * 3.2.0      2019-06-16 [1]
-#>  glue          1.3.1      2019-03-12 [1]
-#>  gtable        0.3.0      2019-03-25 [1]
-#>  haven         2.1.0      2019-02-19 [1]
-#>  hms           0.4.2      2018-03-10 [1]
-#>  htmltools     0.3.6      2017-04-28 [1]
-#>  httr          1.4.0      2018-12-11 [1]
-#>  jsonlite      1.6        2018-12-07 [1]
-#>  knitr         1.23       2019-05-18 [1]
-#>  lattice       0.20-38    2018-11-04 [5]
-#>  lazyeval      0.2.2      2019-03-15 [1]
-#>  lubridate     1.7.4      2018-04-11 [1]
-#>  magrittr    * 1.5        2014-11-22 [1]
-#>  Matrix        1.2-17     2019-03-22 [5]
-#>  memoise       1.1.0      2017-04-21 [1]
-#>  mgcv          1.8-28     2019-03-21 [5]
-#>  modelr        0.1.4      2019-02-18 [1]
-#>  munsell       0.5.0      2018-06-12 [1]
-#>  nlme          3.1-140    2019-05-12 [5]
-#>  pillar        1.4.2      2019-06-29 [1]
-#>  pkgbuild      1.0.3      2019-03-20 [1]
-#>  pkgconfig     2.0.2      2018-08-16 [1]
-#>  pkgload       1.0.2      2018-10-29 [1]
-#>  prettyunits   1.0.2      2015-07-13 [1]
-#>  processx      3.3.1      2019-05-08 [1]
-#>  ps            1.3.0      2018-12-21 [1]
-#>  purrr       * 0.3.2      2019-03-15 [1]
-#>  R6            2.4.0      2019-02-14 [1]
-#>  Rcpp          1.0.1      2019-03-17 [1]
-#>  readr       * 1.3.1      2018-12-21 [1]
-#>  readxl        1.3.0      2019-02-15 [1]
-#>  remotes       2.0.2      2018-10-30 [1]
-#>  rlang         0.4.0      2019-06-25 [1]
-#>  rmarkdown     1.14       2019-07-12 [1]
-#>  rprojroot     1.3-2      2018-01-03 [1]
-#>  rstudioapi    0.10       2019-03-19 [1]
-#>  rticles       0.9.1      2019-07-22 [1]
-#>  rvest         0.3.2      2016-06-17 [1]
-#>  scales        1.0.0      2018-08-09 [1]
-#>  sessioninfo   1.1.1      2018-11-05 [1]
-#>  stringi       1.4.3      2019-03-12 [1]
-#>  stringr     * 1.4.0      2019-02-10 [1]
-#>  survival    * 2.43-3     2018-11-26 [5]
-#>  testthat      2.1.1      2019-04-23 [1]
-#>  tibble      * 2.1.3      2019-06-06 [1]
-#>  tidyr       * 0.8.2      2018-10-28 [1]
-#>  tidyselect    0.2.5      2018-10-11 [1]
-#>  tidyverse   * 1.2.1      2017-11-14 [1]
-#>  usethis       1.5.0.9000 2019-06-24 [1]
-#>  VGAM          1.1-1      2019-02-18 [1]
-#>  withr         2.1.2      2018-03-15 [1]
-#>  xfun          0.8        2019-06-25 [1]
-#>  xml2          1.2.0      2018-01-24 [1]
-#>  yaml          2.2.0      2018-07-25 [1]
-#>  source                                  
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  Github (sahirbhatnagar/casebase@669a0eb)
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.3)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.3)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  Github (rstudio/rticles@8d56fc6)        
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  Github (r-lib/usethis@d4eabb9)          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.5.1)                          
+#>  package     * version    date       lib source        
+#>  assertthat    0.2.1      2019-03-21 [1] CRAN (R 3.6.1)
+#>  backports     1.1.4      2019-04-10 [1] CRAN (R 3.6.1)
+#>  broom         0.5.2      2019-04-07 [1] CRAN (R 3.6.1)
+#>  callr         3.3.1      2019-07-18 [1] CRAN (R 3.6.1)
+#>  casebase    * 0.2.1.9000 2019-07-25 [1] local         
+#>  cellranger    1.1.0      2016-07-27 [1] CRAN (R 3.6.1)
+#>  cli           1.1.0      2019-03-19 [1] CRAN (R 3.6.1)
+#>  colorspace    1.4-1      2019-03-18 [1] CRAN (R 3.6.1)
+#>  crayon        1.3.4      2017-09-16 [1] CRAN (R 3.6.1)
+#>  data.table    1.12.2     2019-04-07 [1] CRAN (R 3.6.1)
+#>  desc          1.2.0      2018-05-01 [1] CRAN (R 3.6.1)
+#>  devtools      2.1.0      2019-07-06 [1] CRAN (R 3.6.1)
+#>  digest        0.6.20     2019-07-04 [1] CRAN (R 3.6.1)
+#>  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.1)
+#>  evaluate      0.14       2019-05-28 [1] CRAN (R 3.6.1)
+#>  forcats     * 0.4.0      2019-02-17 [1] CRAN (R 3.6.1)
+#>  fs            1.3.1      2019-05-06 [1] CRAN (R 3.6.1)
+#>  generics      0.0.2      2018-11-29 [1] CRAN (R 3.6.1)
+#>  ggplot2     * 3.2.0      2019-06-16 [1] CRAN (R 3.6.1)
+#>  glue          1.3.1      2019-03-12 [1] CRAN (R 3.6.1)
+#>  gtable        0.3.0      2019-03-25 [1] CRAN (R 3.6.1)
+#>  haven         2.1.1      2019-07-04 [1] CRAN (R 3.6.1)
+#>  hms           0.5.0      2019-07-09 [1] CRAN (R 3.6.1)
+#>  htmltools     0.3.6      2017-04-28 [1] CRAN (R 3.6.1)
+#>  httr          1.4.0      2018-12-11 [1] CRAN (R 3.6.1)
+#>  jsonlite      1.6        2018-12-07 [1] CRAN (R 3.6.1)
+#>  knitr         1.23       2019-05-18 [1] CRAN (R 3.6.1)
+#>  lattice       0.20-38    2018-11-04 [4] CRAN (R 3.5.1)
+#>  lazyeval      0.2.2      2019-03-15 [1] CRAN (R 3.6.1)
+#>  lubridate     1.7.4      2018-04-11 [1] CRAN (R 3.6.1)
+#>  magrittr    * 1.5        2014-11-22 [1] CRAN (R 3.6.1)
+#>  Matrix        1.2-17     2019-03-22 [4] CRAN (R 3.5.3)
+#>  memoise       1.1.0      2017-04-21 [1] CRAN (R 3.6.1)
+#>  mgcv          1.8-28     2019-03-21 [4] CRAN (R 3.5.3)
+#>  modelr        0.1.4      2019-02-18 [1] CRAN (R 3.6.1)
+#>  munsell       0.5.0      2018-06-12 [1] CRAN (R 3.6.1)
+#>  nlme          3.1-140    2019-05-12 [4] CRAN (R 3.6.0)
+#>  pillar        1.4.2      2019-06-29 [1] CRAN (R 3.6.1)
+#>  pkgbuild      1.0.3      2019-03-20 [1] CRAN (R 3.6.1)
+#>  pkgconfig     2.0.2      2018-08-16 [1] CRAN (R 3.6.1)
+#>  pkgload       1.0.2      2018-10-29 [1] CRAN (R 3.6.1)
+#>  prettyunits   1.0.2      2015-07-13 [1] CRAN (R 3.6.1)
+#>  processx      3.4.1      2019-07-18 [1] CRAN (R 3.6.1)
+#>  ps            1.3.0      2018-12-21 [1] CRAN (R 3.6.1)
+#>  purrr       * 0.3.2      2019-03-15 [1] CRAN (R 3.6.1)
+#>  R6            2.4.0      2019-02-14 [1] CRAN (R 3.6.1)
+#>  Rcpp          1.0.1      2019-03-17 [1] CRAN (R 3.6.1)
+#>  readr       * 1.3.1      2018-12-21 [1] CRAN (R 3.6.1)
+#>  readxl        1.3.1      2019-03-13 [1] CRAN (R 3.6.1)
+#>  remotes       2.1.0      2019-06-24 [1] CRAN (R 3.6.1)
+#>  rlang         0.4.0      2019-06-25 [1] CRAN (R 3.6.1)
+#>  rmarkdown     1.14       2019-07-12 [1] CRAN (R 3.6.1)
+#>  rprojroot     1.3-2      2018-01-03 [1] CRAN (R 3.6.1)
+#>  rstudioapi    0.10       2019-03-19 [1] CRAN (R 3.6.1)
+#>  rticles       0.9        2019-07-12 [1] CRAN (R 3.6.1)
+#>  rvest         0.3.4      2019-05-15 [1] CRAN (R 3.6.1)
+#>  scales        1.0.0      2018-08-09 [1] CRAN (R 3.6.1)
+#>  sessioninfo   1.1.1      2018-11-05 [1] CRAN (R 3.6.1)
+#>  stringi       1.4.3      2019-03-12 [1] CRAN (R 3.6.1)
+#>  stringr     * 1.4.0      2019-02-10 [1] CRAN (R 3.6.1)
+#>  survival    * 2.43-3     2018-11-26 [4] CRAN (R 3.5.1)
+#>  testthat      2.2.0      2019-07-22 [1] CRAN (R 3.6.1)
+#>  tibble      * 2.1.3      2019-06-06 [1] CRAN (R 3.6.1)
+#>  tidyr       * 0.8.3      2019-03-01 [1] CRAN (R 3.6.1)
+#>  tidyselect    0.2.5      2018-10-11 [1] CRAN (R 3.6.1)
+#>  tidyverse   * 1.2.1      2017-11-14 [1] CRAN (R 3.6.1)
+#>  usethis       1.5.1      2019-07-04 [1] CRAN (R 3.6.1)
+#>  vctrs         0.2.0      2019-07-05 [1] CRAN (R 3.6.1)
+#>  VGAM          1.1-1      2019-02-18 [1] CRAN (R 3.6.1)
+#>  withr         2.1.2      2018-03-15 [1] CRAN (R 3.6.1)
+#>  xfun          0.8        2019-06-25 [1] CRAN (R 3.6.1)
+#>  xml2          1.2.0      2018-01-24 [1] CRAN (R 3.6.1)
+#>  yaml          2.2.0      2018-07-25 [1] CRAN (R 3.6.1)
+#>  zeallot       0.1.0      2018-01-28 [1] CRAN (R 3.6.1)
 #> 
-#> [1] /home/sahir/R/x86_64-pc-linux-gnu-library/3.5
-#> [2] /home/sahir/R/x86_64-pc-linux-gnu-library/3.6
-#> [3] /usr/local/lib/R/site-library
-#> [4] /usr/lib/R/site-library
-#> [5] /usr/lib/R/library
+#> [1] /home/turgeonm/R/x86_64-pc-linux-gnu-library/3.6
+#> [2] /usr/local/lib/R/site-library
+#> [3] /usr/lib/R/site-library
+#> [4] /usr/lib/R/library
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -891,8 +870,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    litreview /home/sahir/git_repositories/cbpaper
-#> Head:     [38153a4] 2019-07-22: Update README.md
+#> Local:    review-max /home/turgeonm/Documents/git_repos/cbpaper
+#> Head:     [c0cb26d] 2019-07-23: Merge pull request #6 from sahirbhatnagar/fixdocker
 \end{CodeOutput}
 \end{CodeChunk}
 
