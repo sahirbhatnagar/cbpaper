@@ -52,6 +52,7 @@ keywords:
 preamble: >
   \usepackage{amsmath}
   \usepackage{longtable}
+  \usepackage{booktabs}
 output: 
   rticles::jss_article:
     number_sections: TRUE     #added argument option 
@@ -115,28 +116,25 @@ hazard ratios
 
 
 
-\begin{table}
-  \begin{tabular}{p{1.8in}lll}
+\begin{longtable}{lp{1in}p{2in}p{1.1in}}
+%  \begin{tabular}{lp{1in}p{2in}p{1.1in}}
 \hline
-    &  Parameters &  Density \proglang{R} function & \code{dist}\\
-    & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
+    Package &    documentation  & Type & Function Call\\
+    % & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
 \hline
-    Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
-    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
-    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
-    Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
-    Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
-    Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
-    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
-    Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
-    Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
-    Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
-    Generalized F     (original)  & \code{{\color{red}{mu}}, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
+    \href{https://cran.r-project.org/package=flexsurv}{flexsurv}  & \href{https://cran.r-project.org/web/packages/flexsurv/vignettes/flexsurv.pdf}{Vignette}, \href{https://www.jstatsoft.org/article/view/v070i08}{Jackson, C. JSS 2016}  & Fully-parametric. Also includes the spline model of Royston and Parmar (2002), in which both baseline survival and covariate effects can be arbitrarily flexible parametric functions of time. &   \texttt{flexsurvreg(Surv(recyrs, censrec) ~ group, data = bc, dist = "gengamma")}   \texttt{flexsurvspline(Surv(recyrs, censrec) ~ group, data = bc, k = 1, scale = "odds")}  \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% \\
+    \href{https://cran.r-project.org/package=AdapEnetClass}{AdapEnetClass}  & \href{https://link.springer.com/article/10.1007/s11222-015-9555-8}{Khan et al. Statistics and Computing 2016}  & Variable selection in AFT models using elastic net. No absolute risk estimates.    &   \texttt{cv.AWEnet(x, y, delta, weight=wt, lambda2=0.001, maxit=10, plot.it = T, AEnet=T)}  \\
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% \\
+    \href{https://cran.r-project.org/package=eha}{eha}  & \href{https://cran.r-project.org/web/packages/eha/vignettes/parametric.pdf}{Vignette}  & AFT model. Automatic produces plot of estimated smooth hazard function.    &   \texttt{phreg(Surv(enter + 40, exit + 40, event) ~ I(birthdate - 1810) + strata(ses), data = mort, dist = "gompertz")}  \\
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% \\
+    \href{https://cran.r-project.org/package=smoothSurv}{smoothSurv}  & \href{https://cran.r-project.org/web/packages/smoothSurv/smoothSurv.pdf}{R manual}  & An AFT model with an error distribution assumed to be a mixture of G-splines    &   \texttt{smoothSurvReg(surv ~ x1 * x2, logscale = ~1, info = FALSE, lambda = exp(2:(-1)))}  \\
 \hline
-  \end{tabular}
+%  \end{tabular}
   \caption{Built-in parametric survival distributions in \pkg{flexsurv}.}
   \label{tab:dists}
-\end{table}
+\end{longtable}
+
 
 
 
