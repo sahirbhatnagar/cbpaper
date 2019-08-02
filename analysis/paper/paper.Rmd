@@ -9,9 +9,9 @@ author:
     email: \email{sahir.bhatnagar@mail.mcgill.ca}
     url: http://sahirbhatnagar.com/
   - name: Maxime Turgeon *
-    affiliation: University of Manitoba
+    affiliation: 'University of Manitoba \AND'
     address: >
-      318 Machray Hall
+      186 Dysart Road
       Winnipeg, MB, Canada R3T 2N2
     email: \email{max.turgeon@umanitoba.ca}
     url: http://maxturgeon.ca/
@@ -91,16 +91,16 @@ options(digits = 2, scipen = 999)
 set.seed(1234)
 
 eval_introduction <- TRUE
-eval_theory <- FALSE
+eval_theory <- TRUE
 eval_implementation <- TRUE
-eval_cs1 <- FALSE
-eval_cs2 <- FALSE
+eval_cs1 <- TRUE
+eval_cs2 <- TRUE
 eval_cs3 <- FALSE
 ```
 
 # Introduction
 
-The purpose of the `casebase` package is to provide practitioners with an easy-to-use software tool to predict the risk (or cumulative incidence (CI)) of an event, for a particular patient. The following points should be noted:
+The purpose of the \pkg{casebase} package is to provide practitioners with an easy-to-use software tool to predict the risk (or cumulative incidence (CI)) of an event, for a particular patient. The following points should be noted:
 
 1. Time matching/risk set sampling (including Cox partial likelihood) eliminates the baseline hazard from the likelihood expression for the
 hazard ratios
@@ -504,12 +504,12 @@ Sex & Sex & M=Male (100) \\
 
 In order to try and visualize the incidence density of relapse, we can look at the corresponding population-time plot. In Figure \ref{fig:compPop1}, failure times associated with relapse are highlighted on the plot using red points, while Figure \ref{fig:compPop2} provides a similar population-time plot for competing events.
 
-```{r compPop1, fig.cap="\\label{fig:compPop1}Population-time plot for the stem-cell transplant study. The points represent the event of interest (i.e., relapse).", echo=FALSE, eval = eval_cs2}
+```{r compPop1, fig.cap="Population-time plot for the stem-cell transplant study. The points represent the event of interest (i.e., relapse).", echo=FALSE, eval = eval_cs2}
 pt_object <- casebase::popTime(bmtcrr, event = "Status", time = "ftime")
 plot(pt_object)
 ```
 
-```{r compPop2, fig.cap="\\label{fig:compPop2}Population-time plot for the stem-cell transplant study. The points represent the competing events.", echo=FALSE, eval = eval_cs2}
+```{r compPop2, fig.cap="Population-time plot for the stem-cell transplant study. The points represent the competing events.", echo=FALSE, eval = eval_cs2}
 pt_object_comp <- bmtcrr %>% 
     mutate(Status = case_when(Status == 1 ~ 2L, 
                               Status == 2 ~ 1L, 
@@ -675,6 +675,8 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   - Glmnet and TCGA data
 
 # Discussion
+
+In this article, we presented the \proglang{R} package \pkg{casebase} that provides functions to fit smooth parametric hazards and estimate cumulative incidence functions using case-base sampling. We outlined the theoretical underpinnings of the approach, we provided details about our implementation, and we illustrated the merits of the approach and the package through three case studies. 
 
 In the following table we provide a comparison between the Cox model and case-base sampling:
 
