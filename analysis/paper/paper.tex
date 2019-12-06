@@ -741,11 +741,31 @@ capabilities of \pkg{casebase}, they all have two properties in common:
   \item The estimated hazard functions satisfy the "proportional hazard" assumption.
 \end{itemize}
 
+Case-base sampling has been used in the literature to study vaccination
+safety, where the exposure period was defined as the week following
+vaccination \citep{saarela2015case}. Hence, the main covariate of
+interest, i.e.~exposure to the vaccine, was changing over time. In this
+context, case-base sampling offers an efficient alternative to nested
+case-control designs or self-matching.
+
 The purpose of the next case study is to show how \pkg{casebase} can
-also be used for survival analysis problems that do not share these
-properties. To this end, we will use the Stanford Heart Transplant Data
-\citep[\citet{crowley1977covariance}]{clark1971cardiac}; we will use the
-version available in the \pkg{survival} package.
+also be used for survival analysis problems that do not share the
+properties above. To this end, we will use the Stanford Heart Transplant
+Data \citep[\citet{crowley1977covariance}]{clark1971cardiac}; we will
+use the version available in the \pkg{survival} package.
+
+Recall the setting of this study: patients were admitted to the Stanford
+program after meeting with their physician and determining that they
+were unlikely to respond to other forms of treatment. After enrollment,
+the program searches for a suitable donor for the patient, which can
+take anywhere between a few days to almost a year. We are interested in
+the effect of a heart transplant on survival; therefore, the patient is
+considered exposed only after the transplant has occured.
+
+As before, we can look at the population-time plot for a graphical
+summary of the event incidence. As we can see, most events occur early
+during the follow-up period, and therefore we do not expect the hazard
+to be constant.
 
 \begin{CodeChunk}
 
@@ -763,7 +783,7 @@ R> plot(stanford_popTime)
 
 \end{CodeChunk}
 
-Since the exposure is time dependent, we need to manually define the
+Since the exposure is time-dependent, we need to manually define the
 exposure variable \emph{after} case-base sampling and \emph{before}
 fitting the hazard function. For this reason, we will use the
 \texttt{sampleCaseBase} function directly.
@@ -818,8 +838,12 @@ R+                         data = cb_data, time = "futime")
 
 Note that the fourth model (i.e. \texttt{fit4}) includes an interaction
 term between exposure and follow-up time. In other words, this model no
-longer exhibit proportional hazards. We can then compare the goodness of
-fit of these four models using the Akaike Information Criterion (AIC).
+longer exhibit proportional hazards. The evidence of non-proportionality
+of hazards in the Stanford Heart Transplant data has been widely
+discussed \citep{arjas1988graphical}.
+
+We can then compare the goodness of fit of these four models using the
+Akaike Information Criterion (AIC).
 
 \begin{CodeChunk}
 
@@ -980,7 +1004,7 @@ case-base sampling:
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-05 17:15:04 using the following
+This report was generated on 2019-12-06 10:11:23 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1001,7 +1025,7 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Winnipeg            
-#>  date     2019-12-05                  
+#>  date     2019-12-06                  
 #> 
 #> - Packages -------------------------------------------------------------------
 #>  package     * version    date       lib
@@ -1187,7 +1211,7 @@ R> git2r::repository(here::here())
 
 \begin{CodeOutput}
 #> Local:    review-max /home/turgeonm/Documents/git_repos/cbpaper
-#> Head:     [77f5e41] 2019-08-02: fix overlapping author names
+#> Head:     [d0d7b8a] 2019-12-05: add analysis of stanford data
 \end{CodeOutput}
 \end{CodeChunk}
 

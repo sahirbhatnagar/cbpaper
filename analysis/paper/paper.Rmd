@@ -683,7 +683,13 @@ Although the previous case studies provide a broad overview of the capabilities 
   \item The estimated hazard functions satisfy the "proportional hazard" assumption.
 \end{itemize}
 
-The purpose of the next case study is to show how \pkg{casebase} can also be used for survival analysis problems that do not share these properties. To this end, we will use the Stanford Heart Transplant Data [@clark1971cardiac,@crowley1977covariance]; we will use the version available in the \pkg{survival} package. 
+Case-base sampling has been used in the literature to study vaccination safety, where the exposure period was defined as the week following vaccination [@saarela2015case]. Hence, the main covariate of interest, i.e. exposure to the vaccine, was changing over time. In this context, case-base sampling offers an efficient alternative to nested case-control designs or self-matching.
+
+The purpose of the next case study is to show how \pkg{casebase} can also be used for survival analysis problems that do not share the properties above. To this end, we will use the Stanford Heart Transplant Data [@clark1971cardiac,@crowley1977covariance]; we will use the version available in the \pkg{survival} package. 
+
+Recall the setting of this study: patients were admitted to the Stanford program after meeting with their physician and determining that they were unlikely to respond to other forms of treatment. After enrollment, the program searches for a suitable donor for the patient, which can take anywhere between a few days to almost a year. We are interested in the effect of a heart transplant on survival; therefore, the patient is considered exposed only after the transplant has occured. 
+
+As before, we can look at the population-time plot for a graphical summary of the event incidence. As we can see, most events occur early during the follow-up period, and therefore we do not expect the hazard to be constant.
 
 ```{r stanford-poptime, eval = eval_cs4}
 library(survival)
@@ -694,7 +700,7 @@ stanford_popTime <- popTime(jasa, time = "futime",
 plot(stanford_popTime)
 ```
 
-Since the exposure is time dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we will use the `sampleCaseBase` function directly.
+Since the exposure is time-dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we will use the `sampleCaseBase` function directly.
 
 ```{r, eval = eval_cs4}
 library(tidyverse)
@@ -733,7 +739,9 @@ fit4 <- fitSmoothHazard(fustat ~ exposure*bs(futime),
                         data = cb_data, time = "futime")
 ```
 
-Note that the fourth model (i.e. `fit4`) includes an interaction term between exposure and follow-up time. In other words, this model no longer exhibit proportional hazards. We can then compare the goodness of fit of these four models using the Akaike Information Criterion (AIC).
+Note that the fourth model (i.e. `fit4`) includes an interaction term between exposure and follow-up time. In other words, this model no longer exhibit proportional hazards. The evidence of non-proportionality of hazards in the Stanford Heart Transplant data has been widely discussed [@arjas1988graphical].
+
+We can then compare the goodness of fit of these four models using the Akaike Information Criterion (AIC).
 
 ```{r, eval = eval_cs4}
 # Compute AIC
