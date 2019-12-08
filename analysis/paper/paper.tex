@@ -7,7 +7,7 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Bhatnagar *\\McGill Univeristy \And Maxime Turgeon *\\University of Manitoba \And Jesse Islam\\McGill University \And James Hanley\\McGill Univeristy \And Olli Saarela\\University of Toronto
+Sahir Bhatnagar *\\McGill University \And Maxime Turgeon *\\University of Manitoba \AND Jesse Islam\\McGill University \And James Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
 \title{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
@@ -32,22 +32,22 @@ The abstract of the article. * joint co-authors
 
 \Address{
     Sahir Bhatnagar *\\
-  McGill Univeristy\\
+  McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{sahir.bhatnagar@mail.mcgill.ca}\\
   URL: \url{http://sahirbhatnagar.com/}\\~\\
       Maxime Turgeon *\\
   University of Manitoba\\
-  318 Machray Hall Winnipeg, MB, Canada R3T 2N2\\
+  186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
   E-mail: \email{max.turgeon@umanitoba.ca}\\
-  URL: \url{http://maxturgeon.ca/}\\~\\
+  URL: \url{https://maxturgeon.ca/}\\~\\
       Jesse Islam\\
   McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{jesse.islam@mail.mcgill.ca}\\
   
       James Hanley\\
-  McGill Univeristy\\
+  McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{james.hanley@mcgill.ca}\\
   URL: \url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\~\\
@@ -68,7 +68,7 @@ The abstract of the article. * joint co-authors
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-The purpose of the \texttt{casebase} package is to provide practitioners
+The purpose of the \pkg{casebase} package is to provide practitioners
 with an easy-to-use software tool to predict the risk (or cumulative
 incidence (CI)) of an event, for a particular patient. The following
 points should be noted:
@@ -235,33 +235,29 @@ finite number of person moments associated with the event of interest
 sampling refers to the sampling from the base of a representative finite
 sample called the \emph{base series}.
 
-Popular survival analysis methods, like Kaplan-Meier and Cox regression,
-rely on the notion of risk-set sampling. Case-base sampling can be seen
-as an alternative.
-
 As shown by Saarela \& Arjas \citeyearpar{saarela2015non} (and further
 expanded in Saarela \citeyearpar{saarela2016case}), writing the
 likelihood arising from this data-generating mechanism using the
-framework of non-homogenous Poisson processes, we eventually reach an
+framework of non-homogeneous Poisson processes, we eventually reach an
 expression where each person-moment's contribution is of the form
-\[\frac{\lambda(t)^{dN(t)}}{\rho(t) + \lambda(t)},\] where \(N(t)\) is
-the counting process associated with the event of interest,
-\(\lambda(t)\) is the corresponding hazard function, and \(\rho(t)\) is
-the hazard function for the Poisson process associated with case-base
-sampling. This parametric form suggests that we can readily estimate
-log-hazards of the form \(\log(\lambda(t)) = g(t; X)\) using logistic
-regression, where each observation corresponds to a person moment, the
-function \(g(t; X)\) is linear in a finite number of parameters, and
-where we treat \(\log(\rho(t))\) as an offset.
+\[\frac{h(t)^{dN(t)}}{\rho(t) + h(t)},\] where \(N(t)\) is the counting
+process associated with the event of interest, \(h(t)\) is the
+corresponding hazard function, and \(\rho(t)\) is the hazard function
+for the Poisson process associated with case-base sampling. This
+parametric form suggests that we can readily estimate log-hazards of the
+form \(\log(h(t)) = g(t; X)\) using logistic regression, where each
+observation corresponds to a person moment, the function \(g(t; X)\) is
+linear in a finite number of parameters, and where we treat
+\(-\log(\rho(t))\) as an offset.
 
 In Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the authors
-suggest performing case-base samping \emph{uniformly}, i.e.~to sample
+suggest performing case-base sampling \emph{uniformly}, i.e.~to sample
 the base series uniformly from the study base. In terms of Poisson
-processes, this sampling strategy corresponds to a time-homogeneous
-Poisson process with intensity equal to \(b/B\), where \(b\) is the
-number of sampled observations in the base series, and \(B\) is the
-total population-time for the study base. More complex examples are also
-available; see for example Saarela \& Arjas
+processes, this sampling strategy corresponds essentially to a
+time-homogeneous Poisson process with intensity equal to \(b/B\), where
+\(b\) is the number of sampled observations in the base series, and
+\(B\) is the total population-time for the study base. More complex
+examples are also available; see for example Saarela \& Arjas
 \citeyearpar{saarela2015non}, where the probabilities of the sampling
 mechanism are proportional to the cardiovascular disease event rate
 given by the Framingham score.
@@ -269,55 +265,72 @@ given by the Framingham score.
 The \texttt{casebase} package fits the family of hazard functions of the
 form
 
-\[ h(x,t) = exp[g(x,t)] \] where \(t\) denotes the numerical value
-(number of units) of a point in prognostic/prospective time and \(x\) is
-the realization of the vector \(X\) of variates based on the patient's
-profile and intervention (if any). Different functions of \(t\) lead to
-different parametric hazard models.
+\[ h(t;X) = \exp[g(t;X)] \] where \(t\) denotes time and \(X\), the
+individual's covariate profile. Different functions of \(t\) lead to
+different parametric hazard models. The simplest of these models is the
+one-parameter exponential distribution which is obtained by taking the
+hazard function to be constant over the range of \(t\).
 
-The simplest of these models is the one-parameter exponential
-distribution which is obtained by taking the hazard function to be
-constant over the range of \(t\).
-
-\[ h(x,t) = exp(\beta_0 + \beta_1 x) \]
+\[ h(t;X) = \exp(\beta_0 + \beta_1 X) \]
 
 The instantaneous failure rate is independent of \(t\), so that the
 conditional chance of failure in a time interval of specified length is
-the same regardless of how long the individual has been on study a.k.a
-the memoryless property (Kalbfleisch and Prentice, 2002).
+the same regardless of how long the individual has been in the study.
+This is also known as the \emph{memoryless property} (Kalbfleisch and
+Prentice, 2002).
 
 The Gompertz hazard model is given by including a linear term for time:
 
-\[ h(x,t)  = exp(\beta_0 + \beta_1 t + \beta_2 x) \]
+\[ h(t;X)  = \exp(\beta_0 + \beta_1 t + \beta_2 X) \]
 
-Use of \(log(t)\) yields the Weibull hazard which allows for a power
+Use of \(\log(t)\) yields the Weibull hazard which allows for a power
 dependence of the hazard on time (Kalbfleisch and Prentice, 2002):
 
-\[ h(x, t)  = exp(\beta_0 + \beta_1 \log(t) + \beta_2 x) \]
+\[ h(t;X)  = \exp(\beta_0 + \beta_1 \log(t) + \beta_2 X) \]
+
+For competing-risk analyses with \(J\) possible events, we can show that
+each person-moment's contribution of the likelihood is of the form
+
+\[\frac{h_j(t)^{dN_j(t)}}{\rho(t) + \sum_{j=1}^Jh_j(t)},\]
+
+where \(N_j(t)\) is the counting process associated with the event of
+type \(j\) and \(h_j(t)\) is the corresponding hazard function. As may
+be expected, this functional form is similar to the terms appearing in
+the likelihood function for multinomial
+regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1\end{align*}}
 
 \hypertarget{implementation-details}{%
 \section{Implementation details}\label{implementation-details}}
 
 The functions in the casebase package can be divided into two
 categories: 1) data visualization, in the form of population-time plots;
-and 2) data analysis.
-
-We explicitely aimed at being compatible with both \code{data.frame}s
-and \code{data.table}s. This is evident in some of the coding choices we
-made, and it is also reflected in our testing units.
+and 2) parametric modeling. We explicitly aimed at being compatible with
+both \code{data.frame}s and \code{data.table}s. This is evident in some
+of the coding choices we made, and it is also reflected in our unit
+tests.
 
 \hypertarget{population-time-plots}{%
 \subsection{Population-time plots}\label{population-time-plots}}
 
-\hypertarget{data-analysis}{%
-\subsection{Data analysis}\label{data-analysis}}
+\hypertarget{parametric-modeling}{%
+\subsection{Parametric modeling}\label{parametric-modeling}}
 
-The data analysis step was separated into three parts: 1) case-base
-sampling; 2) estimation of the smooth hazard function; and 3)
-calculation of the risk function. By separating the sampling and
-estimation functions, we allowed the possibility of users implementing
-more complex sampling scheme, as described in Saarela
-\citeyearpar{saarela2016case}.
+The parametric modeling step was separated into three parts:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  case-base sampling;
+\item
+  estimation of the smooth hazard function;
+\item
+  calculation of the risk function.
+\end{enumerate}
+
+By separating the sampling and estimation functions, we allowed the
+possibility of users implementing more complex sampling scheme, as
+described in Saarela \citeyearpar{saarela2016case}.
 
 The sampling scheme selected for \code{sampleCaseBase} was described in
 Hanley and Miettinen \citeyearpar{hanley2009fitting}: we first sample
@@ -353,10 +366,28 @@ achieved at this stage by adding an interaction term involving time. The
 offset term does not need to be specified by the user, as it is
 automatically added to the formula.
 
-Finally, the hazard function is fitted to the data using the function
-\code{glm}, unless there is more than one type event (i.e.~in a
-competing-risk analysis), in which case it uses the multinomical
-regression capabilities of the \pkg{VGAM} package. This package was
+To fit the hazard function, we provide several approaches that are
+available via the \code{family} parameter. These approaches are:
+
+\begin{itemize}
+\tightlist
+\item
+  \code{glm}: This is the familiar logistic regression.
+\item
+  \code{glmnet}: This option allows for variable selection using Lasso
+  or elastic-net. This functionality is provided through the
+  \code{glmnet} package \citep{friedman2010jss}.
+\item
+  \code{gam}: This option provides support for \emph{Generalized
+  Additive Models} via the \code{gam} package
+  \citep{hastie1987generalized}.
+\item
+  \code{gbm}: This option provides support for \emph{Gradient Boosted
+  Trees} via the \code{gbm} package. This feature is still experimental.
+\end{itemize}
+
+In the case of multiple events, the hazard is fitted via multinomial
+regression as performed by the \pkg{VGAM} package. This package was
 selected for its ability to fit multinomial regression models with an
 offset.
 
@@ -367,20 +398,33 @@ package provides one more functionality: it computes risk functions from
 the model fit. For the case of a single event, it uses the familiar
 identity \[S(t) = \exp\left(-\int_0^t h(u;X) du\right).\] The integral
 is computed using either the \code{stats::integrate} function or
-Monte-Carlo integration. For the case of a competing-event analysis, the
-event-specific risk is computed using a nested double integral; in this
-setting, Monte-Carlo integration is faster and more flexible than
-\code{stats::integrate}. This is due to the fact that the computation
-involves a double loop over the selected time points; Monte-Carlo
-integration performs this step by using the vectorized \code{rowSums}
-and \code{colSums} functions.
+Monte-Carlo integration. The risk function (or cumulative incidence
+function) is then defined as
 
-To decide between a single-event and a competing-event analysis, we
-created \code{absoluteRisk} as an \code{S3} generic, with methods for
-both \code{glm} and \code{CompRisk} objects (the latter inherits from
-\code{vglm} as well). The method dispatch system of \proglang{R} then
-takes care of matching the correct input to the correct methodology,
-without the user's intervention.
+\[ CI(t) = 1 - S(t).\]
+
+For the case of a competing-event analysis, the event-specific risk is
+computed using the following procedure: first, we compute the overall
+survival function (i.e.~for all event types):
+
+\[ S(t) = \exp\left(-\int_0^t H(u;X) du\right),\qquad H(t;X) = \sum_{j=1}^J h_j(t;X).\]
+From this, we can derive the event-specific subdensities:
+
+\[ f_j(t) = h_j(t)S(t).\]
+
+Finally, by integrating these subdensities, we obtain the event-specific
+cumulative incidence functions:
+
+\[ CI_j(t) = \int_0^t f_j(u)du.\]
+
+We created \code{absoluteRisk} as an \code{S3} generic, with methods for
+the different types of outputs of \code{fitSmoothHazard}. The method
+dispatch system of \proglang{R} then takes care of matching the correct
+output to the correct methodology for calculating the cumulative
+incidence function, without the user's intervention.
+
+In the following sections, we illustrate these functionalities in the
+context of three case studies.
 
 \hypertarget{case-study-1european-randomized-study-of-prostate-cancer-screening}{%
 \section{Case study 1--European Randomized Study of Prostate Cancer
@@ -506,7 +550,7 @@ The \code{absoluteRisk} function provides an estimate of the cumulative
 incidence curves for a specific risk profile using the following
 equation:
 
-\[ CI(x, t) = 1 - exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
+\[ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
 
 In the plot below, we overlay the estimated CIF from the casebase
 exponential model on the Cox model CIF:
@@ -601,7 +645,7 @@ Next we try to enter a smooth function of time into the model using the
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ splines::bs(Follow.Up.Time) + ScrArm, 
+R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
 R>                                     data = ERSPC, 
 R>                                     ratio = 100)
 R> 
@@ -654,7 +698,7 @@ R> anova(casebase_time, casebase_splines, test = "LRT")
 \end{CodeInput}
 \end{CodeChunk}
 
-As espected, we see that splines model provides a better fit.
+As expected, we see that splines model provides a better fit.
 
 \hypertarget{case-study-2bone-marrow-transplant}{%
 \section{Case study 2--Bone-marrow
@@ -1021,8 +1065,274 @@ R>        bg = "gray90")
 \end{CodeInput}
 \end{CodeChunk}
 
+\hypertarget{case-study-4stanford-heart-transplant-data}{%
+\section{Case study 4--Stanford Heart Transplant
+Data}\label{case-study-4stanford-heart-transplant-data}}
+
+Although the previous case studies provide a broad overview of the
+capabilities of \pkg{casebase}, they all have two properties in common:
+
+\begin{itemize}
+  \item All covariates are fixed, i.e. they do not change over time;
+  \item The estimated hazard functions satisfy the "proportional hazard" assumption.
+\end{itemize}
+
+Case-base sampling has been used in the literature to study vaccination
+safety, where the exposure period was defined as the week following
+vaccination \citep{saarela2015case}. Hence, the main covariate of
+interest, i.e.~exposure to the vaccine, was changing over time. In this
+context, case-base sampling offers an efficient alternative to nested
+case-control designs or self-matching.
+
+The purpose of the next case study is to show how \pkg{casebase} can
+also be used for survival analysis problems that do not share the
+properties above. To this end, we will use the Stanford Heart Transplant
+Data \citep[\citet{crowley1977covariance}]{clark1971cardiac}; we will
+use the version available in the \pkg{survival} package.
+
+Recall the setting of this study: patients were admitted to the Stanford
+program after meeting with their physician and determining that they
+were unlikely to respond to other forms of treatment. After enrollment,
+the program searches for a suitable donor for the patient, which can
+take anywhere between a few days to almost a year. We are interested in
+the effect of a heart transplant on survival; therefore, the patient is
+considered exposed only after the transplant has occured.
+
+As before, we can look at the population-time plot for a graphical
+summary of the event incidence. As we can see, most events occur early
+during the follow-up period, and therefore we do not expect the hazard
+to be constant.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> library(survival)
+R> library(casebase)
+R> 
+R> stanford_popTime <- popTime(jasa, time = "futime", 
+R+                             event = "fustat")
+R> plot(stanford_popTime)
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-poptime-1} \end{center}
+
+\end{CodeChunk}
+
+Since the exposure is time-dependent, we need to manually define the
+exposure variable \emph{after} case-base sampling and \emph{before}
+fitting the hazard function. For this reason, we will use the
+\texttt{sampleCaseBase} function directly.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> library(tidyverse)
+R> library(lubridate)
+R> 
+R> cb_data <- sampleCaseBase(jasa, time = "futime", 
+R+                           event = "fustat", ratio = 10)
+\end{CodeInput}
+\end{CodeChunk}
+
+Next, we will compute the number of days from acceptance into the
+program to transplant, and we use this variable to determine whether
+each population-moment is exposed or not.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Define exposure variable
+R> cb_data <- mutate(cb_data,
+R+                   txtime = time_length(accept.dt %--% tx.date, 
+R+                                        unit = "days"),
+R+                   exposure = case_when(
+R+                     is.na(txtime) ~ 0L,
+R+                     txtime > futime ~ 0L,
+R+                     txtime <= futime ~ 1L
+R+                   ))
+\end{CodeInput}
+\end{CodeChunk}
+
+Finally, we can fit the hazard using various linear predictors.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> library(splines)
+R> # Fit several models
+R> fit1 <- fitSmoothHazard(fustat ~ exposure,
+R+                         data = cb_data, time = "futime")
+R> fit2 <- fitSmoothHazard(fustat ~ exposure + futime,
+R+                         data = cb_data, time = "futime")
+R> fit3 <- fitSmoothHazard(fustat ~ exposure + bs(futime),
+R+                         data = cb_data, time = "futime")
+R> fit4 <- fitSmoothHazard(fustat ~ exposure*bs(futime),
+R+                         data = cb_data, time = "futime")
+\end{CodeInput}
+\end{CodeChunk}
+
+Note that the fourth model (i.e.~\texttt{fit4}) includes an interaction
+term between exposure and follow-up time. In other words, this model no
+longer exhibit proportional hazards. The evidence of non-proportionality
+of hazards in the Stanford Heart Transplant data has been widely
+discussed \citep{arjas1988graphical}.
+
+We can then compare the goodness of fit of these four models using the
+Akaike Information Criterion (AIC).
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Compute AIC
+R> c("Model1" = AIC(fit1),
+R+   "Model2" = AIC(fit2),
+R+   "Model3" = AIC(fit3),
+R+   "Model4" = AIC(fit4))
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> Model1 Model2 Model3 Model4 
+#>    798    759    737    708
+\end{CodeOutput}
+\end{CodeChunk}
+
+As we can, the best fit is the fourth model. By visualizing the hazard
+functions for both exposed and unexposed individuals, we can more
+clearly see how the hazards are no longer proportional.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Compute hazards---
+R> # First, create a list of time points for both exposure status
+R> hazard_data <- expand.grid(exposure = c(0, 1),
+R+                            futime = seq(0, 1000,
+R+                                         length.out = 100))
+R> # Set the offset to zero
+R> hazard_data$offset <- 0 
+R> # Use predict to get the fitted values, and exponentiate to 
+R> # transform to the right scale
+R> hazard_data$hazard = exp(predict(fit4, newdata = hazard_data,
+R+                                  type = "link"))
+R> # Add labels for plots
+R> hazard_data$Status = factor(hazard_data$exposure,
+R+                             labels = c("NoTrans", "Trans"))
+R> 
+R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
+R+     geom_line() +
+R+     theme_minimal() +
+R+     theme(legend.position = 'top') +
+R+     ylab('Hazard') + xlab('Follow-up time')
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-hazard-1} \end{center}
+
+\end{CodeChunk}
+
+The non-proportionality seems to be more pronounced at the beginning of
+follow-up than the end. Finally, we can turn these estimate of the
+hazard function into estimates of the cumulative incidence functions.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Compute absolute risk curves
+R> newdata <- data.frame(exposure = c(0, 1))
+R> absrisk <- absoluteRisk(fit4, newdata = newdata, 
+R+                         time = seq(0, 1000, length.out = 100))
+R> 
+R> colnames(absrisk) <- c("Time", "NoTrans", "Trans")
+R> 
+R> # Rearrange the data
+R> absrisk <- gather(as.data.frame(absrisk),
+R+                   "Status", "Risk", -Time)
+R>  
+R> ggplot(absrisk, aes(Time, Risk, colour = Status)) +
+R+   geom_line() +
+R+   theme_minimal() +
+R+   theme(legend.position = 'top') +
+R+   expand_limits(y = 0.5) +
+R+   xlab('Follow-up time') + ylab('Cum. Incidence')
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-risk-1} \end{center}
+
+\end{CodeChunk}
+
+Note that we can easily adapt the code above to the situation where a
+patient receives a heart transplant at a point in time of interest, for
+example after 30 days.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Compute hazards---
+R> # First, create a list of time points for both exposure status
+R> one_yr_haz <- data.frame(futime = seq(0, 365,
+R+                                       length.out = 100))
+R> one_yr_haz <- mutate(one_yr_haz,
+R+                      offset = 0,
+R+                      exposure = if_else(futime < 30, 0, 1))
+R> one_yr_haz$hazard = exp(predict(fit4, newdata = one_yr_haz,
+R+                                 type = "link"))
+R> ggplot(one_yr_haz, aes(futime, hazard)) +
+R+   geom_line() +
+R+   theme_minimal() +
+R+   theme(legend.position = 'top') +
+R+   ylab('Hazard') + xlab('Follow-up time') +
+R+   geom_vline(xintercept = 30, linetype = 'dashed')
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-1y-haz-1} \end{center}
+
+\end{CodeChunk}
+
+We can then compare the 1-year mortality risk without transplant and
+with transplant at 30 days.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> absoluteRisk(fit4, newdata = data.frame(exposure = 0),
+R+              time = 365)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>         
+#> 365 0.32
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> 
+R> # Use the trapezoidal rule to estimate the cumulative hazard
+R> min_hazard <- min(one_yr_haz$hazard)
+R> max_hazard <- max(one_yr_haz$hazard)
+R> increment <- 365/99
+R> cumhaz_est <- 0.5*increment*(sum(2*one_yr_haz$hazard) - min_hazard - max_hazard)
+R> 1 - exp(-cumhaz_est)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> [1] 0.24
+\end{CodeOutput}
+\end{CodeChunk}
+
+As we can see, the risk estimate at 1-year is about 30\% lower if the
+patient receives a heart transplant at 30 days.
+
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
+
+In this article, we presented the \proglang{R} package \pkg{casebase}
+that provides functions to fit smooth parametric hazards and estimate
+cumulative incidence functions using case-base sampling. We outlined the
+theoretical underpinnings of the approach, we provided details about our
+implementation, and we illustrated the merits of the approach and the
+package through three case studies.
 
 In the following table we provide a comparison between the Cox model and
 case-base sampling:
@@ -1030,7 +1340,7 @@ case-base sampling:
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-08 12:21:42 using the following
+This report was generated on 2019-12-08 12:31:41 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1070,6 +1380,7 @@ R> devtools::session_info()
 #>  devtools      2.1.0      2019-07-06 [1] CRAN (R 3.6.1)                  
 #>  digest        0.6.22     2019-10-21 [1] CRAN (R 3.6.1)                  
 #>  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.1)                  
+#>  ellipsis      0.3.0      2019-09-20 [1] CRAN (R 3.6.1)                  
 #>  evaluate      0.14       2019-05-28 [1] CRAN (R 3.6.1)                  
 #>  forcats     * 0.4.0      2019-02-17 [1] CRAN (R 3.6.1)                  
 #>  foreach     * 1.4.4      2017-12-12 [1] CRAN (R 3.5.0)                  
@@ -1086,10 +1397,11 @@ R> devtools::session_info()
 #>  iterators     1.0.9      2017-12-12 [1] CRAN (R 3.5.0)                  
 #>  jsonlite      1.6        2018-12-07 [1] CRAN (R 3.6.1)                  
 #>  knitr         1.23       2019-05-18 [1] CRAN (R 3.6.1)                  
+#>  labeling      0.3        2014-08-23 [1] CRAN (R 3.5.0)                  
 #>  lattice       0.20-38    2018-11-04 [4] CRAN (R 3.5.1)                  
 #>  lazyeval      0.2.2      2019-03-15 [1] CRAN (R 3.6.1)                  
 #>  lifecycle     0.1.0      2019-08-01 [1] CRAN (R 3.6.1)                  
-#>  lubridate     1.7.4      2018-04-11 [1] CRAN (R 3.5.0)                  
+#>  lubridate   * 1.7.4      2018-04-11 [1] CRAN (R 3.5.0)                  
 #>  magrittr    * 1.5        2014-11-22 [1] CRAN (R 3.5.0)                  
 #>  Matrix      * 1.2-18     2019-11-27 [4] CRAN (R 3.6.1)                  
 #>  memoise       1.1.0      2017-04-21 [1] CRAN (R 3.5.0)                  
@@ -1152,8 +1464,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    Jesse-Islam-master /home/mturgeon/Documents/git_repositories/cbpaper
-#> Head:     [71a5a9c] 2019-12-06: Lit-Review Edits
+#> Local:    review-max /home/mturgeon/Documents/git_repositories/cbpaper
+#> Head:     [69663bb] 2019-12-08: Merge branch 'review-max' of https://github.com/sahirbhatnagar/cbpaper into review-max
 \end{CodeOutput}
 \end{CodeChunk}
 
