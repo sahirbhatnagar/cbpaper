@@ -2,7 +2,7 @@
 documentclass: jss
 author:
   - name: Sahir Bhatnagar *
-    affiliation: McGill Univeristy
+    affiliation: McGill University
     address: >
       1020 Pine Avenue West
       Montreal, QC, Canada H3A 1A2
@@ -22,7 +22,7 @@ author:
       Montreal, QC, Canada H3A 1A2
     email: \email{jesse.islam@mail.mcgill.ca}
   - name: James Hanley
-    affiliation: McGill Univeristy
+    affiliation: McGill University
     address: >
       1020 Pine Avenue West
       Montreal, QC, Canada H3A 1A2
@@ -63,13 +63,13 @@ fig_height: 6
 fig_caption: true
 ---
 
-# Code formatting {.unnumbered}
+<!-- # Code formatting {.unnumbered} -->
 
-Don't use markdown, instead use the more precise latex commands:
+<!-- Don't use markdown, instead use the more precise latex commands: -->
 
-* \proglang{Java}
-* \pkg{plyr}
-* \code{print("abc")}
+<!-- * \proglang{Java} -->
+<!-- * \pkg{plyr} -->
+<!-- * \code{print("abc")} -->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -93,9 +93,10 @@ set.seed(1234)
 eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
-eval_cs1 <- TRUE
-eval_cs2 <- TRUE
+eval_cs1 <- FALSE
+eval_cs2 <- FALSE
 eval_cs3 <- FALSE
+eval_cs4 <- TRUE
 ```
 
 # Introduction
@@ -147,11 +148,11 @@ As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind ca
 
 <!-- Popular survival analysis methods, like Kaplan-Meier and Cox regression, rely on the notion of risk-set sampling. Case-base sampling can be seen as an alternative. -->
 
-As shown by Saarela & Arjas [-@saarela2015non] (and further expanded in Saarela [-@saarela2016case]), writing the likelihood arising from this data-generating mechanism using the framework of non-homogenous Poisson processes, we eventually reach an expression where each person-moment's contribution is of the form
+As shown by Saarela & Arjas [-@saarela2015non] (and further expanded in Saarela [-@saarela2016case]), writing the likelihood arising from this data-generating mechanism using the framework of non-homogeneous Poisson processes, we eventually reach an expression where each person-moment's contribution is of the form
 $$\frac{h(t)^{dN(t)}}{\rho(t) + h(t)},$$
 where $N(t)$ is the counting process associated with the event of interest, $h(t)$ is the corresponding hazard function, and $\rho(t)$ is the hazard function for the Poisson process associated with case-base sampling. This parametric form suggests that we can readily estimate log-hazards of the form $\log(h(t)) = g(t; X)$ using logistic regression, where each observation corresponds to a person moment, the function $g(t; X)$ is linear in a finite number of parameters, and where we treat $-\log(\rho(t))$ as an offset. 
 
-In Hanley & Miettinen [-@hanley2009fitting], the authors suggest performing case-base samping *uniformly*, i.e. to sample the base series uniformly from the study base. In terms of Poisson processes, this sampling strategy corresponds essentially to a time-homogeneous Poisson process with intensity equal to $b/B$, where $b$ is the number of sampled observations in the base series, and $B$ is the total population-time for the study base. More complex examples are also available; see for example Saarela & Arjas [-@saarela2015non], where the probabilities of the sampling mechanism  are proportional to the cardiovascular disease event rate given by the Framingham score.
+In Hanley & Miettinen [-@hanley2009fitting], the authors suggest performing case-base sampling *uniformly*, i.e. to sample the base series uniformly from the study base. In terms of Poisson processes, this sampling strategy corresponds essentially to a time-homogeneous Poisson process with intensity equal to $b/B$, where $b$ is the number of sampled observations in the base series, and $B$ is the total population-time for the study base. More complex examples are also available; see for example Saarela & Arjas [-@saarela2015non], where the probabilities of the sampling mechanism  are proportional to the cardiovascular disease event rate given by the Framingham score.
 
 The `casebase` package fits the family of hazard functions of the form
 
@@ -178,7 +179,7 @@ where $N_j(t)$ is the counting process associated with the event of type $j$ and
 
 # Implementation details
 
-The functions in the casebase package can be divided into two categories: 1) data visualization, in the form of population-time plots; and 2) parametric modeling. We explicitely aimed at being compatible with both \code{data.frame}s and \code{data.table}s. This is evident in some of the coding choices we made, and it is also reflected in our unit tests.
+The functions in the casebase package can be divided into two categories: 1) data visualization, in the form of population-time plots; and 2) parametric modeling. We explicitly aimed at being compatible with both \code{data.frame}s and \code{data.table}s. This is evident in some of the coding choices we made, and it is also reflected in our unit tests.
 
 ## Population-time plots
 
@@ -432,7 +433,7 @@ Since we are within the GLM framework, we can easily test for which model better
 anova(casebase_time, casebase_splines, test = "LRT")
 ```
 
-As espected, we see that splines model provides a better fit.
+As expected, we see that splines model provides a better fit.
 
 # Case study 2--Bone-marrow transplant
 
@@ -673,6 +674,165 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
 # Case study 3--The Cancer Genome Atlas
 
   - Glmnet and TCGA data
+  
+# Case study 4--Stanford Heart Transplant Data
+
+Although the previous case studies provide a broad overview of the capabilities of \pkg{casebase}, they all have two properties in common:
+\begin{itemize}
+  \item All covariates are fixed, i.e. they do not change over time;
+  \item The estimated hazard functions satisfy the "proportional hazard" assumption.
+\end{itemize}
+
+Case-base sampling has been used in the literature to study vaccination safety, where the exposure period was defined as the week following vaccination [@saarela2015case]. Hence, the main covariate of interest, i.e. exposure to the vaccine, was changing over time. In this context, case-base sampling offers an efficient alternative to nested case-control designs or self-matching.
+
+The purpose of the next case study is to show how \pkg{casebase} can also be used for survival analysis problems that do not share the properties above. To this end, we will use the Stanford Heart Transplant Data [@clark1971cardiac,@crowley1977covariance]; we will use the version available in the \pkg{survival} package. 
+
+Recall the setting of this study: patients were admitted to the Stanford program after meeting with their physician and determining that they were unlikely to respond to other forms of treatment. After enrollment, the program searches for a suitable donor for the patient, which can take anywhere between a few days to almost a year. We are interested in the effect of a heart transplant on survival; therefore, the patient is considered exposed only after the transplant has occured. 
+
+As before, we can look at the population-time plot for a graphical summary of the event incidence. As we can see, most events occur early during the follow-up period, and therefore we do not expect the hazard to be constant.
+
+```{r stanford-poptime, eval = eval_cs4}
+library(survival)
+library(casebase)
+
+stanford_popTime <- popTime(jasa, time = "futime", 
+                            event = "fustat")
+plot(stanford_popTime)
+```
+
+Since the exposure is time-dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we will use the `sampleCaseBase` function directly.
+
+```{r, eval = eval_cs4}
+library(tidyverse)
+library(lubridate)
+
+cb_data <- sampleCaseBase(jasa, time = "futime", 
+                          event = "fustat", ratio = 10)
+```
+
+Next, we will compute the number of days from acceptance into the program to transplant, and we use this variable to determine whether each population-moment is exposed or not.
+
+```{r, eval = eval_cs4}
+# Define exposure variable
+cb_data <- mutate(cb_data,
+                  txtime = time_length(accept.dt %--% tx.date, 
+                                       unit = "days"),
+                  exposure = case_when(
+                    is.na(txtime) ~ 0L,
+                    txtime > futime ~ 0L,
+                    txtime <= futime ~ 1L
+                  ))
+```
+
+Finally, we can fit the hazard using various linear predictors.
+
+```{r, eval = eval_cs4, warning = FALSE}
+library(splines)
+# Fit several models
+fit1 <- fitSmoothHazard(fustat ~ exposure,
+                        data = cb_data, time = "futime")
+fit2 <- fitSmoothHazard(fustat ~ exposure + futime,
+                        data = cb_data, time = "futime")
+fit3 <- fitSmoothHazard(fustat ~ exposure + bs(futime),
+                        data = cb_data, time = "futime")
+fit4 <- fitSmoothHazard(fustat ~ exposure*bs(futime),
+                        data = cb_data, time = "futime")
+```
+
+Note that the fourth model (i.e. `fit4`) includes an interaction term between exposure and follow-up time. In other words, this model no longer exhibit proportional hazards. The evidence of non-proportionality of hazards in the Stanford Heart Transplant data has been widely discussed [@arjas1988graphical].
+
+We can then compare the goodness of fit of these four models using the Akaike Information Criterion (AIC).
+
+```{r, eval = eval_cs4}
+# Compute AIC
+c("Model1" = AIC(fit1),
+  "Model2" = AIC(fit2),
+  "Model3" = AIC(fit3),
+  "Model4" = AIC(fit4))
+```
+
+As we can, the best fit is the fourth model. By visualizing the hazard functions for both exposed and unexposed individuals, we can more clearly see how the hazards are no longer proportional.
+
+```{r stanford-hazard, eval = eval_cs4}
+# Compute hazards---
+# First, create a list of time points for both exposure status
+hazard_data <- expand.grid(exposure = c(0, 1),
+                           futime = seq(0, 1000,
+                                        length.out = 100))
+# Set the offset to zero
+hazard_data$offset <- 0 
+# Use predict to get the fitted values, and exponentiate to 
+# transform to the right scale
+hazard_data$hazard = exp(predict(fit4, newdata = hazard_data,
+                                 type = "link"))
+# Add labels for plots
+hazard_data$Status = factor(hazard_data$exposure,
+                            labels = c("NoTrans", "Trans"))
+
+ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
+    geom_line() +
+    theme_minimal() +
+    theme(legend.position = 'top') +
+    ylab('Hazard') + xlab('Follow-up time')
+```
+
+The non-proportionality seems to be more pronounced at the beginning of follow-up than the end. Finally, we can turn these estimate of the hazard function into estimates of the cumulative incidence functions.
+
+```{r stanford-risk, eval = eval_cs4}
+# Compute absolute risk curves
+newdata <- data.frame(exposure = c(0, 1))
+absrisk <- absoluteRisk(fit4, newdata = newdata, 
+                        time = seq(0, 1000, length.out = 100))
+
+colnames(absrisk) <- c("Time", "NoTrans", "Trans")
+
+# Rearrange the data
+absrisk <- gather(as.data.frame(absrisk),
+                  "Status", "Risk", -Time)
+ 
+ggplot(absrisk, aes(Time, Risk, colour = Status)) +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = 'top') +
+  expand_limits(y = 0.5) +
+  xlab('Follow-up time') + ylab('Cum. Incidence')
+```
+
+Note that we can easily adapt the code above to the situation where a patient receives a heart transplant at a point in time of interest, for example after 30 days.
+
+```{r stanford-1y-haz, eval = eval_cs4}
+# Compute hazards---
+# First, create a list of time points for both exposure status
+one_yr_haz <- data.frame(futime = seq(0, 365,
+                                      length.out = 100))
+one_yr_haz <- mutate(one_yr_haz,
+                     offset = 0,
+                     exposure = if_else(futime < 30, 0, 1))
+one_yr_haz$hazard = exp(predict(fit4, newdata = one_yr_haz,
+                                type = "link"))
+ggplot(one_yr_haz, aes(futime, hazard)) +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = 'top') +
+  ylab('Hazard') + xlab('Follow-up time') +
+  geom_vline(xintercept = 30, linetype = 'dashed')
+```
+
+We can then compare the 1-year mortality risk without transplant and with transplant at 30 days.
+
+```{r stanford-1y-risk, eval = eval_cs4}
+absoluteRisk(fit4, newdata = data.frame(exposure = 0),
+             time = 365)
+
+# Use the trapezoidal rule to estimate the cumulative hazard
+min_hazard <- min(one_yr_haz$hazard)
+max_hazard <- max(one_yr_haz$hazard)
+increment <- 365/99
+cumhaz_est <- 0.5*increment*(sum(2*one_yr_haz$hazard) - min_hazard - max_hazard)
+1 - exp(-cumhaz_est)
+```
+
+As we can see, the risk estimate at 1-year is about 30% lower if the patient receives a heart transplant at 30 days.
 
 # Discussion
 
