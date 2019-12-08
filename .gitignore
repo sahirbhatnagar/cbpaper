@@ -28,7 +28,7 @@ vignettes/*.pdf
 /*_cache/
 /cache/
 
-# Temporary files created by R markdown
+# Temporary files created by R markdown and Pandoc
 *.utf8.md
 *.knit.md
 .Rproj.user
@@ -36,3 +36,5 @@ vignettes/*.pdf
 *.bbl
 paper/casebase_jss_cache/*
 paper/casebase_jss_files/*
+analysis/paper/*.log
+analysis/figures/*
