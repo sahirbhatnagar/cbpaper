@@ -28,6 +28,9 @@ vignettes/*.pdf
 /*_cache/
 /cache/
 
+# Garbage from macOS
+.DS_Store
+
 # Temporary files created by R markdown and Pandoc
 *.utf8.md
 *.knit.md

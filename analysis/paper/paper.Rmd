@@ -52,6 +52,7 @@ keywords:
 preamble: >
   \usepackage{amsmath}
   \usepackage{longtable}
+  \usepackage{graphicx}
 output: 
   rticles::jss_article:
     number_sections: TRUE     #added argument option 
@@ -63,7 +64,7 @@ fig_height: 6
 fig_caption: true
 ---
 
-<!-- # Code formatting {.unnumbered} -->
+<!-- # Code formatting -->
 
 <!-- Don't use markdown, instead use the more precise latex commands: -->
 
@@ -86,9 +87,12 @@ library(magrittr)
 library(survival)
 library(casebase)
 library(splines)
+#library(readr)
+#library(tibble)
+library(glmnet)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
-set.seed(1234)
+set.seed(2)
 
 eval_introduction <- TRUE
 eval_theory <- TRUE
@@ -103,12 +107,9 @@ eval_cs4 <- TRUE
 
 The purpose of the \pkg{casebase} package is to provide practitioners with an easy-to-use software tool to predict the risk (or cumulative incidence (CI)) of an event, for a particular patient. The following points should be noted:
 
-1. Time matching/risk set sampling (including Cox partial likelihood) eliminates the baseline hazard from the likelihood expression for the
-hazard ratios
-2. If, however, the absolute risks are of interest, they have to be recovered using the semi-parametric Breslow estimator
-3. Alternative approaches for fitting flexible hazard models for estimating absolute risks, not requiring this two-step approach? Yes!
-[@hanley2009fitting]
-
+  1. hazard ratios
+  2. If, however, the absolute risks are of interest, they have to be recovered using the semi-parametric Breslow estimator
+  3. Alternative approaches for fitting flexible hazard models for estimating absolute risks, not requiring this two-step approach? Yes! [@hanley2009fitting]
 
 
 [@hanley2009fitting] propose a fully parametric hazard model that can be fit via logistic regression. From the fitted hazard function, cumulative incidence and, thus, risk functions of time, treatment and profile can be easily derived.
@@ -139,8 +140,46 @@ hazard ratios
   \label{tab:dists}
 \end{table}
 
+# Literature review
+To conduct our review on current methods available in survival analysis, a scraper was coded to examine all packages in the survival task view on CRAN [-@survTaskView]. There was a total of 259 packages, many of which are not relevant to the problems casebase addresses. To filter these packages, a scraper was used to search for competing risks, cumulative incidence functions, non- proportional hazards and penalization. This reduced our set of 259 packages down to 60. From here, we manually examined each package to determine which ones are comparable to casebase, with either a different approach to the same problems or future features we would like to add to casebase. 
 
+These packages can belong to three main categories: non-proportional hazards, regularization and competing risks. Besides these three main categories, there are extra features of interest as well. Table \ref{tab:surv-pkgs} summarizes the findings. 
 
+Many packages exist that implement semi-parametric Cox models. Of those, \pkg{glmnet} [-@regpathcox]???, \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche] introduce penalization in their model fitting. \pkg{CoxRidge} [-@perperoglou], \pkg{rstpm2} [-@clements_liu] and \pkg{survival} [-@survival-package] include penalization, but they implement the extended cox model permitting intuitive non proportional hazard modeling while the previous four do not. In terms of penalization, the benefits of \pkg{casebase} comes from its flexibility. Linear models have a wide tool set, considerably larger than those made for Cox regression. <!--(*reference for number of packages between their task views, regression is spread out across Multivariate, SocialSciences, Robust among others. The focus of this task view is on Optimization Infrastructure Packages , General Purpose Continuous Solvers , Mathematical Programming Solvers , and Specific Applications in Optimization , or Multi Objective Optimization*)--> \pkg{casebase} permits many regularization tools developed for linear regression to be repurposed within a survival context. 
+
+Parametric models permit non-proportional hazards and are implemented in a handful of packages. Of interest are \pkg{CFC} [-@sharabiani_mahani_2019], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu] and \pkg{survival} [-@survival-package]. \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas \pkg{flexsurv} and \pkg{survival} contain implementations for users to supply any distribution they would like [-@survival-package], [-@flexsurv]. \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} can use splines, permitting a flexible fit over time [-@flexsurv], [-@smoothHazard], [-@scheike2014estimating], [-@clements_liu]. Though \pkg{casebase} is limited to three distributions at the moment, it also uses splines allowing for distributions that may not be consistent over survival time. 
+
+Of the methods mentioned so far, only \pkg{CFC}, \pkg{flexsurv}, \pkg{mets} and \pkg{survival} contain implementations for competing risks [-@sharabiani_mahani_2019], [-@flexsurv], [-@scheike2014estimating], [-@survival-package]. The differentiating factor between these packages and \pkg{casebase} is that \pkg{casebase} handles competing risks through multiple logistic regression. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2} can handle interval censoring, whereas \pkg{casebase} currently cannot. Interval censoring is a simple feature to implement and is a potential improvement to add to \pkg{casebase}.
+
+Of all the packages listed in Table \ref{tab:surv-pkgs}, \pkg{CFC}, \pkg{Flexsurv}, \pkg{mets}, \pkg{RiskRegression}, \pkg{rstpm2} and \pkg{survival} have implementations for cumulative incidence [-@sharabiani_mahani_2019], [-@flexsurv], [-@scheike2014estimating], [-@gerds_blanche], [-@clements_liu], [-@survival-package]. Since \pkg{casebase} is parametric, the baseline hazard is known and requires integration to retrieve the cumulative incidence. This is similar to the approaches of \pkg{CFC} and \pkg{flexsurv} [-@sharabiani_mahani_2019], [-@flexsurv], while the other packages use semi-parametric approaches to retrieve the baseline after fitting [-@scheike2014estimating], [-@gerds_blanche]. \pkg{rstpm2} and \pkg{survival} use both for their respective parametric and semi-parametric model implementations [-@clements_liu], [-@survival-package].
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccccccc}
+\hline
+\textbf{Package}        & \textbf{Competing Risks} & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \textbf{Interval/left Censoring} & \textbf{Absolute Risk}           \\
+\hline
+\textbf{casebase} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
+\textbf{CFC} \cite{sharabiani_mahani_2019}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
+\textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
+\textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
+\textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
+\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & Cumm haz                         \\
+\textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
+\textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               
+\end{tabular}%
+}
+\caption{Different features of interest in various survival packages.}
+\label{tab:surv-pkgs}
+\end{table}
 
 # Theoretical details
 
@@ -476,7 +515,7 @@ xtable::xtable(table1) %>%
 <!-- Sun Sep 17 16:03:22 2017 -->
 \begin{table}[ht]
 \centering
-\begin{tabular}{lll}
+\begin{tabular}{ccc}
   \hline
 Variable & Description & Statistical summary \\ 
   \hline
@@ -671,9 +710,185 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
     xlab("Time (in Months)") + ylab("Relapse risk")
 ```
 
-# Case study 3--The Cancer Genome Atlas
+# Case study 3--Study to Understand Prognoses Preferences Outcomes and Risks of Treatment
 
-  - Glmnet and TCGA data
+We examined the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset (REF from main site). the SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital.  Imputation was conducted using the default methods in the mice package in R, available on CRAN. Before imputation, there was a total of 1000 individuals and 35 variables. After imputation, we have 474 observations where 67.5% of individuals in the study experience the event of interest. The SUPPORT dataset will be used to demonstrate regularization within casebase (REF), while comparing their absolute risk preditions for a new individual. A description of each variable can be found in Table~\ref{tab:support1} and a breakdown of each categorical variable in Table~\ref{tab:support2}. The data was downloaded from the main author's website, and it is also available as part of the casebase package.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{ccccc}
+\hline
+\textbf{Name} & \textbf{Labels}                          & \textbf{Levels} & \textbf{Storage} & \textbf{NAs} \\
+\hline
+age           & Age                                      &                 & double           & 0            \\
+death         & Death at any time up to NDI date:31DEC94 &                 & double           & 0            \\
+sex           &                                          & 2               & integer          & 0            \\
+hospdead      & Death in Hospital                        &                 & double           & 0            \\
+slos          & Days from Study Entry to Discharge       &                 & double           & 0            \\
+d.time        & Days of Follow-Up                        &                 & double           & 0            \\
+dzgroup       &                                          & 8               & integer          & 0            \\
+dzclass       &                                          & 4               & integer          & 0            \\
+num.co        & number of comorbidities                  &                 & double           & 0            \\
+edu           & Years of Education                       &                 & double           & 202          \\
+income        &                                          & 4               & integer          & 349          \\
+scoma         & SUPPORT Coma Score based on Glasgow D3   &                 & double           & 0            \\
+charges       & Hospital Charges                         &                 & double           & 25           \\
+totcst        & Total RCC cost                           &                 & double           & 105          \\
+totmcst       & Total micro-cost                         &                 & double           & 372          \\
+avtisst       & Average TISS, Days 3-25                  &                 & double           & 6            \\
+race          &                                          & 5               & integer          & 5            \\
+meanbp        & Mean Arterial Blood Pressure Day 3       &                 & double           & 0            \\
+wblc          & White Blood Cell Count Day 3             &                 & double           & 24           \\
+hrt           & Heart Rate Day 3                         &                 & double           & 0            \\
+resp          & Respiration Rate Day 3                   &                 & double           & 0            \\
+temp          & Temperature (celcius) Day 3              &                 & double           & 0            \\
+pafi          & PaO2/(.01*FiO2) Day 3                    &                 & double           & 253          \\
+alb           & Serum Albumin Day 3                      &                 & double           & 378          \\
+bili          & Bilirubin Day 3                          &                 & double           & 297          \\
+crea          & Serum creatinine Day 3                   &                 & double           & 3            \\
+sod           & Serum sodium Day 3                       &                 & double           & 0            \\
+ph            & Serum pH (arterial) Day 3                &                 & double           & 250          \\
+glucose       & Glucose Day 3                            &                 & double           & 470          \\
+bun           & BUN Day 3                                &                 & double           & 455          \\
+urine         & Urine Output Day 3                       &                 & double           & 517          \\
+adlp          & ADL Patient Day 3                        &                 & double           & 634          \\
+adls          & ADL Surrogate Day 3                      &                 & double           & 310          \\
+sfdm2         &                                          & 5               & integer          & 159          \\
+adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
+\end{tabular}
+\caption{A description of each variable in the SUPPORT dataset, taken from (REF).}
+\label{tab:support1}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{cc}
+\hline
+\textbf{Variable} & \textbf{Levels}                      \\
+\hline
+sex      & female                                        \\
+         & male                                          \\
+dzgroup  & ARF/MOSF w/Sepsis                             \\
+         & COPD                                          \\
+         & CHF                                           \\
+         & Cirrhosis                                     \\
+         & Coma                                          \\
+         & Colon Cancer                                  \\
+         & Lung Cancer                                   \\
+         & MOSF w/Malig                                  \\
+dzclass  & ARF/MOSF                                      \\
+         & COPD/CHF/Cirrhosis                            \\
+         & Coma                                          \\
+         & Cancer                                        \\
+income   & under \$11k                                   \\
+         & $11-$25k                                      \\
+         & $25-$50k                                      \\
+         & \textgreater{}\$50k                           \\
+race     & white                                         \\
+         & black                                         \\
+         & asian                                         \\
+         & other                                         \\
+         & hispanic                                      \\
+sfdm2    & no(M2 and SIP pres)                           \\
+         & adl\textgreater{}=4 (\textgreater{}=5 if sur) \\
+         & SIP\textgreater{}=30                          \\
+         & Coma or Intub                                 \\
+         & \textless{}2 mo. follow-up                   
+\end{tabular}
+\caption{A description of each level within each categorical variable in the dataset, taken from REF.}
+\label{tab:support2}
+\end{table}
+
+Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package(REF) on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase. To visualize the effect of imputation on incidence density, we can refer to the pre-imputation population-time plot in Figure \ref{fig:ptPreI} and post-imputation population time plot in Figure \ref{fig:ptPostI}. The incidence density is consistent between imputed and complete datasets.
+
+```{r supportSetUp, echo = FALSE, eval = eval_cs3}
+completeData=casebase::support
+#keep one individual out, at random, for which we will develop an 
+#absolute risk curve.
+sam=sample(1:nrow(completeData), 1)
+#Set workingData to the remaining individuals in the data
+#workingData=completeData[-c(sam),]
+workingCompleteData=as.matrix(sparse.model.matrix(death~ .-d.time,data=completeData))[,-c(1)]
+#Create u and xCox, which will be used when fitting Cox with glmnet.
+newData=workingCompleteData[sam,]
+x=workingCompleteData[-c(sam),]
+#x and y will be used to fit the casebase model under glmnet.
+#x=as.matrix(sparse.model.matrix(death~ .-d.time+0,data=workingData))
+y=data.matrix(completeData[-c(sam),c(34,4)])
+```
+
+```{r poptimePreImputation, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:ptPreI} Population-time plot before imputation. Red dots demonstrate death, while each gray dot makes up all the person moments spent in the study."}
+#demonstrating incidence density before imputation
+plot(casebase::popTime(as.data.frame(support),time = "d.time",event = "death"))
+```
+
+```{r poptimePostImputation, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:ptPostI} Population-time plot before imputation. Red dots demonstrate death, while each gray dot makes up all the person moments spent in the study."}
+#demonstrating incidence density after imputation
+plot(casebase::popTime(as.data.frame(workingCompleteData),time = "d.time",event = "death"))
+```
+Our main objective is to compute the absolute risk of death for a given set of covariates, using regularization when fitting our model. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1.
+```{r CBhazard, echo = TRUE, eval = eval_cs3}
+#Using casebase's glmnet implementation, using splines and a case to base ratio of 100,
+#to determine the hazard function
+cb.Model=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="death",
+                             formula_time = ~d.time,alpha=1,ratio=100)
+```
+Then, we take our model and use the absoluteRisk function to integrate and retrieve our absolute risk function.
+```{r CBabsolute, echo = TRUE, eval = eval_cs3}
+#Estimating the absolute risk curve using the newData parameter.
+casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) ,
+                              s="lambda.1se",method=c("numerical"))
+```
+We will compare this curve to a regularized version of cox regression, and a kaplan-meier survival curve. The regularized cox regression absolute risk curve required two extra steps to retrive. Coxnet from the glmnet package has tools to fit a regularized cox model, but requires that a survival object skeleton of the selected variables, so that the survival package tools can be used to retrive the absolute risk. We handle this by fitting a regularized cox model with the glmnet package, and a cox model from the survival package with the selected variables from the regularized fit. This second model serves as a skeleton that permits the use of survival package functions. The coefficients from the regularized model will replace the coeficients in our skeleton. the resulting model will have the correct coefficients when integrating, but will have an incorrect standard error. For the purposes of this case study, we are only interested in the absolute risk curve itself and not the standard error.
+
+```{r coxHazAbsolute, echo = TRUE, eval = eval_cs3}
+#Create u and xCox, which will be used when fitting Cox with glmnet.
+u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
+xCox=as.matrix(sparse.model.matrix(death~ .-d.time,data=completeData))[-c(sam),]
+#hazard for cox using glmnet
+coxglmFit=glmnet::cv.glmnet(x=xCox,y=u, family="cox",alpha=1)
+#convergence demonstrated in plot
+plot(coxglmFit)
+#taking the coefficient estimates for later use
+nonzero_covariate_cox <- predict(coxglmFit, type = "nonzero", s = "lambda.1se")
+nonzero_coef_cox <- coef(coxglmFit, s = "lambda.1se")
+#creating a new dataset that only contains the covariates chosen through glmnet.
+#cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
+cleanCoxData<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCox[,nonzero_covariate_cox$X1]))
+#newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
+#fitting a cox model using regular estimation, however we will not keep it.
+#this is used more as an object place holder.
+coxFit <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxData)
+#The coefficients of this object will be replaced with the estimates from coxglmFit.
+#Doing so makes it so that everything is invalid aside from the coefficients.
+#In this case, all we need to estimate the absolute risk is the coefficients.
+#Std. error would be incorrect here, if we were to draw error bars.
+coxFit$coefficients<-nonzero_coef_cox@x
+#Fitting absolute risk curve for cox+glmnet
+newDataCox=newData[nonzero_covariate_cox$X1-1]
+
+abCoxFit<-survival::survfit(coxFit,newdata=as.data.frame(t(newDataCox)),time = seq(0,max(completeData$d.time), 1),type="breslow")
+```
+We used the survival package to calculate the kaplan-meier absolute risk function. 
+```{r fitKM+abRisk, echo = TRUE, eval = eval_cs3}
+#creating a surv object to be used to fit an unadjusted absolute risk curve.
+# (Kaplan-Meier risk curve)
+km <- survival::Surv(time = completeData$d.time, event = completeData$death)
+abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
+```
+
+Now that our three absolute risk functions have been calculated, we compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase decrease the absolute risk by the end of the study, in comparison to kaplan-meier.
+```{r abSupportComparison, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:abSC} Compares regularized casebase in black, regularized cox in red and Kaplan meier in blue."}
+# A plot to compare all three Absolute risk (Commulative Incidence)
+plot(casebaseAbsolute,type='l',col="black",lwd=2,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
+lines(abCoxFit ,col="red",fun="event",lwd=3,conf.int = FALSE)
+lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
+legend("bottom", 
+       legend = c( "Casebase (Lasso+linear)","semi-parametric (Cox)+glmnet","KM curve"), 
+       col = c("black","red","Blue"),
+       lty = c(1, 1, 1), 
+       bg = "gray90")
+```
   
 # Case study 4--Stanford Heart Transplant Data
 
@@ -834,6 +1049,7 @@ cumhaz_est <- 0.5*increment*(sum(2*one_yr_haz$hazard) - min_hazard - max_hazard)
 
 As we can see, the risk estimate at 1-year is about 30% lower if the patient receives a heart transplant at 30 days.
 
+
 # Discussion
 
 In this article, we presented the \proglang{R} package \pkg{casebase} that provides functions to fit smooth parametric hazards and estimate cumulative incidence functions using case-base sampling. We outlined the theoretical underpinnings of the approach, we provided details about our implementation, and we illustrated the merits of the approach and the package through three case studies. 
@@ -859,7 +1075,6 @@ devtools::session_info()
 ```
 
 The current Git commit details are:
-
 ```{r}
 # what commit is this file at? 
 git2r::repository(here::here())
