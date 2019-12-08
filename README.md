@@ -3,6 +3,7 @@
 
 # cbpaper
 
+[![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/sahirbhatnagar/cbpaper/master?urlpath=rstudio)  
 [![Travis-CI Build
 Status](https://travis-ci.org/sahirbhatnagar/cbpaper.svg?branch=master)](https://travis-ci.org/sahirbhatnagar/cbpaper)
 
@@ -44,7 +45,8 @@ devtools::install_github("rstudio/rticles")
     casebase+glmnet, and glmnet+cox
 3)  Sahir: Implementation details (population time plots), check issue.
 4)  Sahir: Review existing literature. What exists in terms of package.
-    Look at Hanley and Miettinen. CRAN task view.
+    Look at Hanley and Miettinen. CRAN task
+view.
 
 | Package                                                 |       on CRAN        |                                    documentation                                    |                               Published                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |                                                                        Function call                                                                         |
 | :------------------------------------------------------ | :------------------: | :---------------------------------------------------------------------------------: | :--------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------: |
