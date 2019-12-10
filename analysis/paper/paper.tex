@@ -92,135 +92,6 @@ can be fit via logistic regression. From the fitted hazard function,
 cumulative incidence and, thus, risk functions of time, treatment and
 profile can be easily derived.
 
-\begin{table}
-  \begin{tabular}{p{1.8in}lll}
-\hline
-    &  Parameters &  Density \proglang{R} function & \code{dist}\\
-    & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
-\hline
-    Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
-    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
-    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
-    Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
-    Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
-    Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
-    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
-    Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
-    Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
-    Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
-    Generalized F     (original)  & \code{{\color{red}{mu}}, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
-\hline
-  \end{tabular}
-  \caption{Built-in parametric survival distributions in \pkg{flexsurv}.}
-  \label{tab:dists}
-\end{table}
-
-\hypertarget{literature-review}{%
-\section{Literature review}\label{literature-review}}
-
-To conduct our review on current methods available in survival analysis,
-a scraper was coded to examine all packages in the survival task view on
-CRAN \citeyearpar{survTaskView}. There was a total of 259 packages, many
-of which are not relevant to the problems casebase addresses. To filter
-these packages, a scraper was used to search for competing risks,
-cumulative incidence functions, non- proportional hazards and
-penalization. This reduced our set of 259 packages down to 60. From
-here, we manually examined each package to determine which ones are
-comparable to casebase, with either a different approach to the same
-problems or future features we would like to add to casebase.
-
-These packages can belong to three main categories: non-proportional
-hazards, regularization and competing risks. Besides these three main
-categories, there are extra features of interest as well. Table
-\ref{tab:surv-pkgs} summarizes the findings.
-
-Many packages exist that implement semi-parametric Cox models. Of those,
-\pkg{glmnet} \citeyearpar{regpathcox}???, \pkg{glmpath}
-\citeyearpar{park_hastie}, \pkg{penalized} \citeyearpar{l1penal},
-\pkg{RiskRegression} \citeyearpar{gerds_blanche} introduce penalization
-in their model fitting. \pkg{CoxRidge} \citeyearpar{perperoglou},
-\pkg{rstpm2} \citeyearpar{clements_liu} and \pkg{survival}
-\citeyearpar{survival-package} include penalization, but they implement
-the extended cox model permitting intuitive non proportional hazard
-modeling while the previous four do not. In terms of penalization, the
-benefits of \pkg{casebase} comes from its flexibility. Linear models
-have a wide tool set, considerably larger than those made for Cox
-regression. \pkg{casebase} permits many regularization tools developed
-for linear regression to be repurposed within a survival context.
-
-Parametric models permit non-proportional hazards and are implemented in
-a handful of packages. Of interest are \pkg{CFC}
-\citeyearpar{sharabiani_mahani_2019}, \pkg{flexsurv}
-\citeyearpar{flexsurv}, \pkg{SmoothHazard} \citeyearpar{smoothHazard},
-\pkg{rsptm2} \citeyearpar{clements_liu} and \pkg{survival}
-\citeyearpar{survival-package}. \pkg{SmoothHazard} is limited to Weibull
-distributions \citeyearpar{smoothHazard}, whereas \pkg{flexsurv} and
-\pkg{survival} contain implementations for users to supply any
-distribution they would like \citeyearpar{survival-package},
-\citeyearpar{flexsurv}. \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets}
-and \pkg{rstpm2} can use splines, permitting a flexible fit over time
-\citeyearpar{flexsurv}, \citeyearpar{smoothHazard},
-\citeyearpar{scheike2014estimating}, \citeyearpar{clements_liu}. Though
-\pkg{casebase} is limited to three distributions at the moment, it also
-uses splines allowing for distributions that may not be consistent over
-survival time.
-
-Of the methods mentioned so far, only \pkg{CFC}, \pkg{flexsurv},
-\pkg{mets} and \pkg{survival} contain implementations for competing
-risks \citeyearpar{sharabiani_mahani_2019}, \citeyearpar{flexsurv},
-\citeyearpar{scheike2014estimating}, \citeyearpar{survival-package}. The
-differentiating factor between these packages and \pkg{casebase} is that
-\pkg{casebase} handles competing risks through multiple logistic
-regression. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2} can
-handle interval censoring, whereas \pkg{casebase} currently cannot.
-Interval censoring is a simple feature to implement and is a potential
-improvement to add to \pkg{casebase}.
-
-Of all the packages listed in Table \ref{tab:surv-pkgs}, \pkg{CFC},
-\pkg{Flexsurv}, \pkg{mets}, \pkg{RiskRegression}, \pkg{rstpm2} and
-\pkg{survival} have implementations for cumulative incidence
-\citeyearpar{sharabiani_mahani_2019}, \citeyearpar{flexsurv},
-\citeyearpar{scheike2014estimating}, \citeyearpar{gerds_blanche},
-\citeyearpar{clements_liu}, \citeyearpar{survival-package}. Since
-\pkg{casebase} is parametric, the baseline hazard is known and requires
-integration to retrieve the cumulative incidence. This is similar to the
-approaches of \pkg{CFC} and \pkg{flexsurv}
-\citeyearpar{sharabiani_mahani_2019}, \citeyearpar{flexsurv}, while the
-other packages use semi-parametric approaches to retrieve the baseline
-after fitting \citeyearpar{scheike2014estimating},
-\citeyearpar{gerds_blanche}. \pkg{rstpm2} and \pkg{survival} use both
-for their respective parametric and semi-parametric model
-implementations \citeyearpar{clements_liu},
-\citeyearpar{survival-package}.
-
-\begin{table}[ht]
-\centering
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{ccccccccc}
-\hline
-\textbf{Package}        & \textbf{Competing Risks} & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \textbf{Interval/left Censoring} & \textbf{Absolute Risk}           \\
-\hline
-\textbf{casebase} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
-\textbf{CFC} \cite{sharabiani_mahani_2019}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
-\textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
-\textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
-\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
-\textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
-\textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & Cumm haz                         \\
-\textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
-\textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               
-\end{tabular}%
-}
-\caption{Different features of interest in various survival packages.}
-\label{tab:surv-pkgs}
-\end{table}
-
 \hypertarget{theoretical-details}{%
 \section{Theoretical details}\label{theoretical-details}}
 
@@ -298,6 +169,143 @@ type \(j\) and \(h_j(t)\) is the corresponding hazard function. As may
 be expected, this functional form is similar to the terms appearing in
 the likelihood function for multinomial
 regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1\end{align*}}
+
+\hypertarget{existing-packages}{%
+\section{Existing packages}\label{existing-packages}}
+
+Survival analysis is an important branch of applied statistics and
+epidemiology. Accordingly, there is a vast ecosystem of \code{R}
+packages implementing different methods. In this section, we describe
+how the functionalities of \pkg{casebase} compare to these packages.
+
+At the time of writing, a cursory examination of CRAN's task view on
+survival analysis reveals that there are over 250 packages related to
+survival analysis \citeyearpar{survTaskView}. For the purposes of this
+article, we restricted our description to packages that implement at
+least one of the following features: parametric modeling,
+non-proportional hazard models, competing risk analysis, penalized
+estimation, and cumulative incidence curve estimation. By searching for
+appropriate keywords in the \code{DESCRIPTION} file of these packages,
+we found 60 relevant packages. These 60 packages were further reduced
+through manual curation to a subset of 14 packages. These packages
+appears in Table \ref{tab:surv-pkgs}, along with some of the
+functionalities they offer.
+\textcolor{red}{JESSE: It's not clear how you selected this subset, going from 60 to 14 is a big drop.}
+
+Several packages implement penalized estimation for the Cox model:
+\pkg{glmnet} \citeyearpar{regpathcox}, \pkg{glmpath}
+\citeyearpar{park_hastie}, \pkg{penalized} \citeyearpar{l1penal},
+\pkg{RiskRegression} \citeyearpar{gerds_blanche}. Moreover, some
+packages also include penalized estimation in the context of Cox models
+with time-varying coefficients: \pkg{CoxRidge}
+\citeyearpar{perperoglou}, \pkg{rstpm2} \citeyearpar{clements_liu} and
+\pkg{survival} \citeyearpar{survival-package}. On the other hand,
+\pkg{casebase} provides penalized estimation in the context of
+parametric hazards. To our knowledge, this is the only package to offer
+this functionality.
+\textcolor{red}{JESSE: Is this true? Because it seems to be a logical conclusion from your paragraph.}
+
+Parametric survival models are implemented in a handful of packages:
+\pkg{CFC} \citeyearpar{sharabiani_mahani_2019}, \pkg{flexsurv}
+\citeyearpar{flexsurv}, \pkg{SmoothHazard} \citeyearpar{smoothHazard},
+\pkg{rsptm2} \citeyearpar{clements_liu}, \pkg{mets}
+\citeyearpar{scheike2014estimating}, and \pkg{survival}. The types of
+models they allow vary for each package. For example, \pkg{SmoothHazard}
+is limited to Weibull distributions \citeyearpar{smoothHazard}, whereas
+both \pkg{flexsurv} and \pkg{survival} allow users to supply any
+distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard},
+\pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of
+time using splines, which allows flexible modeling of the hazard
+function. Moreover, \pkg{flexsurv} has the ability to estimate both
+scale and shape parameters for a variety of parametric families (see
+Table \ref{tab:dists}). As discussed above, \pkg{casebase} can model any
+parametric family whose log-hazard can be expressed as a linear model of
+covariates (including time). Therefore, our package allows the user to
+model the effect of time using splines, and through interaction terms
+involving covariates and time, it also allows user to fit time-varying
+coefficient models. However, we do not explicitly model any shape
+parameter, unlike \pkg{flexsurv}.
+
+Of the methods mentioned so far, only \pkg{CFC}, \pkg{flexsurv},
+\pkg{mets} and \pkg{survival} contain implementations for competing
+risks. The differentiating factor between these packages and
+\pkg{casebase} is that \pkg{casebase} handles competing risks through
+multiple logistic regression.
+\textcolor{red}{JESSE: There's a literature review of packages for competing-risk analysis in the paper for \pkg{CFC}. Could you incorporate some of their discussion, with proper citations? The biggest omission right now is \pkg{cmprsk}, which we actually use below.}
+
+Finally, several packages include functions to estimate the cumulative
+incidence function. The corresponding methods generally fall into two
+categories: transformation of the estimated hazard function, and
+semi-parametric estimation of the baseline hazard. The first category
+broadly corresponds to parametric survival models, where the full hazard
+is explictly modeled. Using this estimate, the survival function and the
+cumulative incidence function can be obtained using their functional
+relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below).
+Packages including this functionality include \pkg{CFC}, \pkg{Flexsurv},
+\pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows
+this approach for both single-event and competing-event analyses. The
+second category outlined above broadly corresponds to Cox models. These
+models do not model the full hazard function, and therefore the baseline
+hazard needs to be estimated separately in order to estimate the
+survival function. This is achieved using semi-parametric estimators
+(e.g.~Breslow's estimator). Packages that implement this approach
+include \pkg{RiskRegression}, \pkg{rstpm2}, and \pkg{survival}. As
+mentioned in the introduction, a key distinguishing factor between these
+two approaches is that the first category leads to smooth estimates of
+the cumulative incidence function, whereas the second category produces
+estimates in the form of step-wise functions. This was one of the main
+motivations for introducting case-base sampling in survival analysis.
+
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{ccccccccc}
+\hline
+\textbf{Package}        & \textbf{Competing Risks} & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \textbf{Interval/left Censoring} & \textbf{Absolute Risk}           \\
+\hline
+\textbf{casebasee} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
+\textbf{CFC} \cite{sharabiani_mahani_2019}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
+\textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
+\textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
+\textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
+\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & Cumm haz                         \\
+\textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
+\textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               
+\end{tabular}%
+}
+\caption{Different features of interest in various survival packages.}
+\label{tab:surv-pkgs}
+\end{table}
+
+\begin{table}
+  \begin{tabular}{p{1.8in}lll}
+\hline
+    &  Parameters &  Density \proglang{R} function & \code{dist}\\
+    & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
+\hline
+    Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
+    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
+    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
+    Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
+    Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
+    Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
+    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
+    Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
+    Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
+    Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
+    Generalized F     (original)  & \code{{\color{red}{mu}}, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
+\hline
+  \end{tabular}
+  \caption{Built-in parametric survival distributions in \pkg{flexsurv}.}
+  \label{tab:dists}
+\end{table}
 
 \hypertarget{implementation-details}{%
 \section{Implementation details}\label{implementation-details}}
@@ -396,12 +404,14 @@ the familiar summary and diagnostic functions are available:
 \code{print}, \code{summary}, \code{predict}, \code{plot}, etc. Our
 package provides one more functionality: it computes risk functions from
 the model fit. For the case of a single event, it uses the familiar
-identity \[S(t) = \exp\left(-\int_0^t h(u;X) du\right).\] The integral
-is computed using either the \code{stats::integrate} function or
-Monte-Carlo integration. The risk function (or cumulative incidence
-function) is then defined as
-
-\[ CI(t) = 1 - S(t).\]
+identity \begin{equation}\label{eqn:surv}
+S(t) = \exp\left(-\int_0^t h(u;X) du\right).
+\end{equation} The integral is computed using either the
+\code{stats::integrate} function or Monte-Carlo integration. The risk
+function (or cumulative incidence function) is then defined as
+\begin{equation}\label{eqn:CI}
+CI(t) = 1 - S(t).
+\end{equation}
 
 For the case of a competing-event analysis, the event-specific risk is
 computed using the following procedure: first, we compute the overall
@@ -837,11 +847,12 @@ total of 1000 individuals and 35 variables. After imputation, we have
 474 observations where 67.5\% of individuals in the study experience the
 event of interest. The SUPPORT dataset will be used to demonstrate
 regularization within casebase (REF), while comparing their absolute
-risk preditions for a new individual. A description of each variable can
-be found in Table\textasciitilde{}\ref{tab:support1} and a breakdown of
-each categorical variable in Table\textasciitilde{}\ref{tab:support2}.
-The data was downloaded from the main author's website, and it is also
-available as part of the casebase package.
+risk predictions for a new individual. A description of each variable
+can be found in Table\textasciitilde{}\ref{tab:support1} and a breakdown
+of each categorical variable in
+Table\textasciitilde{}\ref{tab:support2}. The data was downloaded from
+the main author's website, and it is also available as part of the
+casebase package.
 
 \begin{table}[ht]
 \centering
@@ -870,7 +881,7 @@ meanbp        & Mean Arterial Blood Pressure Day 3       &                 & dou
 wblc          & White Blood Cell Count Day 3             &                 & double           & 24           \\
 hrt           & Heart Rate Day 3                         &                 & double           & 0            \\
 resp          & Respiration Rate Day 3                   &                 & double           & 0            \\
-temp          & Temperature (celcius) Day 3              &                 & double           & 0            \\
+temp          & Temperature (Celsius) Day 3              &                 & double           & 0            \\
 pafi          & PaO2/(.01*FiO2) Day 3                    &                 & double           & 253          \\
 alb           & Serum Albumin Day 3                      &                 & double           & 378          \\
 bili          & Bilirubin Day 3                          &                 & double           & 297          \\
@@ -986,19 +997,19 @@ R>                               s="lambda.1se",method=c("numerical"))
 
 We will compare this curve to a regularized version of cox regression,
 and a kaplan-meier survival curve. The regularized cox regression
-absolute risk curve required two extra steps to retrive. Coxnet from the
-glmnet package has tools to fit a regularized cox model, but requires
-that a survival object skeleton of the selected variables, so that the
-survival package tools can be used to retrive the absolute risk. We
-handle this by fitting a regularized cox model with the glmnet package,
-and a cox model from the survival package with the selected variables
-from the regularized fit. This second model serves as a skeleton that
-permits the use of survival package functions. The coefficients from the
-regularized model will replace the coeficients in our skeleton. the
-resulting model will have the correct coefficients when integrating, but
-will have an incorrect standard error. For the purposes of this case
-study, we are only interested in the absolute risk curve itself and not
-the standard error.
+absolute risk curve required two extra steps to retrieve. Coxnet from
+the glmnet package has tools to fit a regularized cox model, but
+requires that a survival object skeleton of the selected variables, so
+that the survival package tools can be used to retrieve the absolute
+risk. We handle this by fitting a regularized cox model with the glmnet
+package, and a cox model from the survival package with the selected
+variables from the regularized fit. This second model serves as a
+skeleton that permits the use of survival package functions. The
+coefficients from the regularized model will replace the coefficients in
+our skeleton. the resulting model will have the correct coefficients
+when integrating, but will have an incorrect standard error. For the
+purposes of this case study, we are only interested in the absolute risk
+curve itself and not the standard error.
 
 \begin{CodeChunk}
 
@@ -1096,7 +1107,7 @@ were unlikely to respond to other forms of treatment. After enrollment,
 the program searches for a suitable donor for the patient, which can
 take anywhere between a few days to almost a year. We are interested in
 the effect of a heart transplant on survival; therefore, the patient is
-considered exposed only after the transplant has occured.
+considered exposed only after the transplant has occurred.
 
 As before, we can look at the population-time plot for a graphical
 summary of the event incidence. As we can see, most events occur early
@@ -1337,10 +1348,15 @@ package through three case studies.
 In the following table we provide a comparison between the Cox model and
 case-base sampling:
 
+\pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2} can handle interval
+censoring, whereas \pkg{casebase} currently cannot. Interval censoring
+is a simple feature to implement and is a potential improvement to add
+to \pkg{casebase}.
+
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-08 12:31:41 using the following
+This report was generated on 2019-12-10 12:28:40 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1361,7 +1377,7 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Winnipeg            
-#>  date     2019-12-08                  
+#>  date     2019-12-10                  
 #> 
 #> - Packages --------------------------------------------------------------
 #>  package     * version    date       lib source                          
@@ -1464,8 +1480,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    review-max /home/mturgeon/Documents/git_repositories/cbpaper
-#> Head:     [69663bb] 2019-12-08: Merge branch 'review-max' of https://github.com/sahirbhatnagar/cbpaper into review-max
+#> Local:    review /home/mturgeon/Documents/git_repositories/cbpaper
+#> Head:     [4435e71] 2019-12-08: Merge branch 'review-max'
 \end{CodeOutput}
 \end{CodeChunk}
 
