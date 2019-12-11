@@ -53,6 +53,8 @@ preamble: >
   \usepackage{amsmath}
   \usepackage{longtable}
   \usepackage{graphicx}
+  \DeclareUnicodeCharacter{2500}{}
+  \usepackage{tabularx}
 output: 
   rticles::jss_article:
     number_sections: TRUE     #added argument option 
@@ -86,16 +88,15 @@ library(magrittr)
 library(survival)
 library(casebase)
 library(splines)
-#library(readr)
-#library(tibble)
+library(tibble)
 library(glmnet)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
-set.seed(2)
+set.seed(1234)
 
 eval_introduction <- TRUE
 eval_theory <- FALSE
-eval_implementation <- TRUE
+eval_implementation <- FALSE
 eval_cs1 <- FALSE
 eval_cs2 <- FALSE
 eval_cs3 <- FALSE
@@ -141,7 +142,7 @@ hazard ratios
 \end{table}
 
 # Literature review
-To conduct our review on current methods available in survival analysis, a scraper was coded to examine all packages in the survival task view on CRAN [-@survTaskView]. There was a total of 259 packages, many of which are not relevant to the problems casebase addresses. To filter these packages, a scraper was used to search for competing risks, cumulative incidence functions, non- proportional hazards and penalization. This reduced our set of 259 packages down to 60. From here, we manually examined each package to determine which ones are comparable to casebase, with either a different approach to the same problems or future features we would like to add to casebase. 
+To conduct our review on current methods available in survival analysis, a scraper was coded to examine all packages in the survival task view on CRAN [-@survTaskView]. There was a total of 259 packages, many of which are not relevant to the problems casebase addresses. To filter these packages, a scraper was used to search for competing risks, cumulative incidence functions, non- proportional hazards and penalization. This reduced our set of 259 packages down to 60. From here, we manually examined each package to determine which ones are comparable to casebase, with either a different approach to the same problems or future features we would like to add to casebase. In particular, we excluded packages that were focused on a different set of problems, such as frailty and multi-state models, as casebase is currently focused on absolute-risk, competing events and single event analysis. 
 
 These packages can belong to three main categories: non-proportional hazards, regularization and competing risks. Besides these three main categories, there are extra features of interest as well. Table XXX summarizes the findings. 
 
@@ -159,21 +160,21 @@ Of all the packages listed in the table, CFC , Flexsurv, mets, RiskRegression, r
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
 \hline
-\textbf{Package}        & \textbf{Competing Risks} & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \textbf{Interval/left Censoring} & \textbf{Absolute Risk}           \\
+\textbf{Package}        & \vtop{\hbox{\strut \textbf{Competing}}\hbox{\strut \textbf{risks}}}  & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \vtop{\hbox{\strut \textbf{Interval/left}}\hbox{\strut \textbf{censoring}}} & \vtop{\hbox{\strut \textbf{Absolute}}\hbox{\strut \textbf{risk}}}           \\
 \hline
 \textbf{casebase} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
 \textbf{CFC} \cite{sharabiani_mahani_2019}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
 \textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
 \textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
-\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
+\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
 \textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
 \textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & Cumm haz                         \\
+\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
 \textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
 \textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               
 \end{tabular}%
@@ -772,10 +773,11 @@ sfdm2    & no(M2 and SIP pres)                           \\
 \label{tab:my-table}
 \end{table}
 
-Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package(REF) on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase. To visualize the effect of imputation on incidence density, we can refer to the pre-imputation population-time plot in Figure \ref{fig:ptPreI} and post-imputation population time plot in Figure \ref{fig:ptPostI}. The incidence density is consistent between imputed and complete datasets.
+Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package(REF) on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase. To visualize the incidence density, we can refer to the post-imputation population-time plot in Figure \ref{fig:ptPostI}.
 
 ```{r supportSetUp, echo = FALSE, eval = eval_cs3}
 completeData=casebase::support
+completeData<-completeData[,-c(3)]
 #keep one individual out, at random, for which we will develop an 
 #absolute risk curve.
 sam=sample(1:nrow(completeData), 1)
@@ -790,14 +792,9 @@ x=workingCompleteData[-c(sam),]
 y=data.matrix(completeData[-c(sam),c(34,4)])
 ```
 
-```{r poptimePreImputation, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:ptPreI} Population-time plot before imputation. Red dots demonstrate death, while each gray dot makes up all the person moments spent in the study."}
-#demonstrating incidence density before imputation
-plot(casebase::popTime(as.data.frame(support),time = "d.time",event = "death"))
-```
-
 ```{r poptimePostImputation, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:ptPostI} Population-time plot before imputation. Red dots demonstrate death, while each gray dot makes up all the person moments spent in the study."}
 #demonstrating incidence density after imputation
-plot(casebase::popTime(as.data.frame(workingCompleteData),time = "d.time",event = "death"))
+plot(casebase::popTime(as.data.frame(completeData),time = "d.time",event = "death"))
 ```
 Our main objective is to compute the absolute risk of death for a given set of covariates, using regularization when fitting our model. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1.
 ```{r CBhazard, echo = TRUE, eval = eval_cs3}
@@ -809,8 +806,7 @@ cb.Model=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="
 Then, we take our model and use the absoluteRisk function to integrate and retrieve our absolute risk function.
 ```{r CBabsolute, echo = TRUE, eval = eval_cs3}
 #Estimating the absolute risk curve using the newData parameter.
-casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) ,
-                              s="lambda.1se",method=c("numerical"))
+casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) , s="lambda.1se",method=c("numerical"))
 ```
 We will compare this curve to a regularized version of cox regression, and a kaplan-meier survival curve. The regularized cox regression absolute risk curve required two extra steps to retrive. Coxnet from the glmnet package has tools to fit a regularized cox model, but requires that a survival object skeleton of the selected variables, so that the survival package tools can be used to retrive the absolute risk. We handle this by fitting a regularized cox model with the glmnet package, and a cox model from the survival package with the selected variables from the regularized fit. This second model serves as a skeleton that permits the use of survival package functions. The coefficients from the regularized model will replace the coeficients in our skeleton. the resulting model will have the correct coefficients when integrating, but will have an incorrect standard error. For the purposes of this case study, we are only interested in the absolute risk curve itself and not the standard error.
 

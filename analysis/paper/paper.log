@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  6 DEC 2019 16:16
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.5.8)  11 DEC 2019 12:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -425,6 +425,27 @@ Package: longtable 2014/10/28 v4.11 Multi-page Table package (DPC)+ FMi change
 \c@LT@tables=\count117
 \c@LT@chunks=\count118
 \LT@p@ftn=\toks22
+)
+   defining Unicode char U+2500 (decimal 9472)
+(/usr/local/texlive/2019/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2016/02/03 v2.11b `tabularx' package (DPC)
+(/usr/local/texlive/2019/texmf-dist/tex/latex/tools/array.sty
+Package: array 2018/12/30 v2.4k Tabular extension package (FMi)
+\col@sep=\dimen119
+\ar@mcellbox=\box34
+\extrarowheight=\dimen120
+\NC@list=\toks23
+\extratabsurround=\skip60
+\backup@length=\skip61
+\ar@cellbox=\box35
+)
+\TX@col@width=\dimen121
+\TX@old@table=\dimen122
+\TX@old@col=\dimen123
+\TX@target=\dimen124
+\TX@delta=\dimen125
+\TX@cols=\count119
+\TX@ftn=\toks24
 ) (./paper.aux
 
 LaTeX Warning: Label `tab:my-table' multiply defined.
@@ -435,39 +456,39 @@ LaTeX Warning: Label `tab:my-table' multiply defined.
 )
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 66.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 66.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 70.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 70.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
 (/usr/local/texlive/2019/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count119
-\scratchdimen=\dimen119
-\scratchbox=\box34
-\nofMPsegments=\count120
-\nofMParguments=\count121
-\everyMPshowfont=\toks23
-\MPscratchCnt=\count122
-\MPscratchDim=\dimen120
-\MPnumerator=\count123
-\makeMPintoPDFobject=\count124
-\everyMPtoPDFconversion=\toks24
+\scratchcounter=\count120
+\scratchdimen=\dimen126
+\scratchbox=\box36
+\nofMPsegments=\count121
+\nofMParguments=\count122
+\everyMPshowfont=\toks25
+\MPscratchCnt=\count123
+\MPscratchDim=\dimen127
+\MPnumerator=\count124
+\makeMPintoPDFobject=\count125
+\everyMPtoPDFconversion=\toks26
 ) (/usr/local/texlive/2019/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 (/usr/local/texlive/2019/texmf-dist/tex/latex/oberdiek/grfext.sty
@@ -483,18 +504,18 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\AtBeginShipoutBox=\box35
-Package hyperref Info: Link coloring ON on input line 66.
+\AtBeginShipoutBox=\box37
+Package hyperref Info: Link coloring ON on input line 70.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 (/usr/local/texlive/2019/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count125
+\c@section@level=\count126
 )
-LaTeX Info: Redefining \ref on input line 66.
-LaTeX Info: Redefining \pageref on input line 66.
-LaTeX Info: Redefining \nameref on input line 66.
+LaTeX Info: Redefining \ref on input line 70.
+LaTeX Info: Redefining \pageref on input line 70.
+LaTeX Info: Redefining \nameref on input line 70.
 (./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
@@ -502,30 +523,30 @@ LaTeX Info: Redefining \nameref on input line 66.
 <jsslogo.jpg, id=52, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
-Package pdftex.def Info: jsslogo.jpg  used on input line 66.
+Package pdftex.def Info: jsslogo.jpg  used on input line 70.
 (pdftex.def)             Requested size: 89.80768pt x 65.43607pt.
-LaTeX Font Info:    Try loading font information for T1+pzc on input line 66.
+LaTeX Font Info:    Try loading font information for T1+pzc on input line 70.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/psnfss/t1pzc.fd
 File: t1pzc.fd 2001/06/04 font definitions for T1/pzc.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <28> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 66.
-LaTeX Font Info:    Try loading font information for T1+aess on input line 66.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 70.
+LaTeX Font Info:    Try loading font information for T1+aess on input line 70.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/ae/t1aess.fd
 File: t1aess.fd 1997/11/16 Font definitions for T1/aess.
 )
-LaTeX Font Info:    Try loading font information for TS1+aer on input line 75.
-LaTeX Font Info:    No file TS1aer.fd. on input line 75.
+LaTeX Font Info:    Try loading font information for TS1+aer on input line 79.
+LaTeX Font Info:    No file TS1aer.fd. on input line 79.
 
 LaTeX Font Warning: Font shape `TS1/aer/m/n' undefined
 (Font)              using `TS1/cmr/m/n' instead
-(Font)              for symbol `textbullet' on input line 75.
+(Font)              for symbol `textbullet' on input line 79.
 
-LaTeX Font Info:    Try loading font information for T1+aett on input line 79.
+LaTeX Font Info:    Try loading font information for T1+aett on input line 83.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 )
-Overfull \hbox (9.09254pt too wide) in paragraph at lines 102--120
+Overfull \hbox (9.09254pt too wide) in paragraph at lines 106--124
 [][] 
  []
 
@@ -534,7 +555,7 @@ Overfull \hbox (9.09254pt too wide) in paragraph at lines 102--120
 {/usr/local/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./jsslo
 go.jpg>]
 LaTeX Font Info:    Font shape `T1/aer/b/sl' in size <10.95> not available
-(Font)              Font shape `T1/aer/bx/sl' tried instead on input line 161.
+(Font)              Font shape `T1/aer/bx/sl' tried instead on input line 165.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 2 []
@@ -543,7 +564,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [2]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 206.
+               Default added (so using `tbp') on input line 210.
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -556,9 +577,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [4]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 5
  []
@@ -585,11 +603,11 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [9]
 
-LaTeX Warning: Reference `fig:compPop1' on page 10 undefined on input line 732.
+LaTeX Warning: Reference `fig:compPop1' on page 10 undefined on input line 736.
 
 
 
-LaTeX Warning: Reference `fig:compPop2' on page 10 undefined on input line 734.
+LaTeX Warning: Reference `fig:compPop2' on page 10 undefined on input line 738.
 
 
 
@@ -600,7 +618,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [10]
 
 LaTeX Warning: Reference `fig:compAbsrisk' on page 11 undefined on input line 7
-65.
+69.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -610,17 +628,22 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [11]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 811.
+               Default added (so using `tbp') on input line 815.
 
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 857.
+               Default added (so using `tbp') on input line 861.
 
 
-LaTeX Warning: Reference `fig:ptPreI' on page 12 undefined on input line 900.
+LaTeX Warning: Reference `fig:ptPostI' on page 12 undefined on input line 904.
 
+LaTeX Font Info:    Try loading font information for TS1+aett on input line 927
+.
+LaTeX Font Info:    No file TS1aett.fd. on input line 927.
 
-LaTeX Warning: Reference `fig:ptPostI' on page 12 undefined on input line 901.
+LaTeX Font Warning: Font shape `TS1/aett/m/sl' undefined
+(Font)              using `TS1/cmr/m/n' instead
+(Font)              for symbol `textquotesingle' on input line 927.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -638,22 +661,13 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [14]
-LaTeX Font Info:    Try loading font information for TS1+aett on input line 933
-.
-LaTeX Font Info:    No file TS1aett.fd. on input line 933.
-
-LaTeX Font Warning: Font shape `TS1/aett/m/sl' undefined
-(Font)              using `TS1/cmr/m/n' instead
-(Font)              for symbol `textquotesingle' on input line 933.
-
-
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 15
  []
 
 [15]
 
-LaTeX Warning: Reference `fig:abSC' on page 16 undefined on input line 1014.
+LaTeX Warning: Reference `fig:abSC' on page 16 undefined on input line 1007.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -675,47 +689,47 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 19
  []
 
-[19]
+[19] (./paper.bbl
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 20 []
  []
 
-[20] (./paper.bbl
+[20]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 21
  []
 
 [21])
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1255--1255
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1255--1255
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1255--1255
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1255--1255
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1260--1260
+Underfull \hbox (badness 10000) in paragraph at lines 1255--1255
 
  []
 
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1260.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1255.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1260.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1255.
 
-Underfull \vbox (badness 1383) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -728,10 +742,10 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1260.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1255.
 (./paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1260.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1260.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1255.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1255.
 
 Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: 08C47EAF4652078135D9C86159EB7818;1221.
@@ -744,16 +758,16 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: There were multiply-defined labels.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1260.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1255.
  ) 
 Here is how much of TeX's memory you used:
- 7685 strings out of 492616
- 110868 string characters out of 6129482
- 213621 words of memory out of 5000000
- 11360 multiletter control sequences out of 15000+600000
+ 7778 strings out of 492616
+ 111978 string characters out of 6129482
+ 216517 words of memory out of 5000000
+ 11448 multiletter control sequences out of 15000+600000
  56583 words of font info for 100 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 35i,10n,34p,345b,476s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,11n,34p,385b,483s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 }{/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/te
 xlive/2019/texmf-dist/fonts/type1/public/amsfonts/cm/cmb10.pfb></usr/local/texl
@@ -775,10 +789,10 @@ ist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2019/texmf-di
 st/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2019/texmf-dist
 /fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2019/texmf-dist/f
 onts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on paper.pdf (23 pages, 321225 bytes).
+Output written on paper.pdf (23 pages, 320076 bytes).
 PDF statistics:
- 419 PDF objects out of 1000 (max. 8388607)
- 370 compressed objects within 4 object streams
+ 421 PDF objects out of 1000 (max. 8388607)
+ 372 compressed objects within 4 object streams
  85 named destinations out of 1000 (max. 500000)
  102 words of extra memory for PDF output out of 10000 (max. 10000000)
 

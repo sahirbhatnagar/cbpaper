@@ -63,6 +63,10 @@ The abstract of the article. * joint co-authors
 
 \usepackage{amsmath} \usepackage{longtable} \usepackage{graphicx}
 
+\DeclareUnicodeCharacter{2500}{}
+
+\usepackage{tabularx}
+
 \begin{document}
 
 \hypertarget{code-formatting}{%
@@ -208,21 +212,21 @@ semi-parametric model implementations \citeyearpar{clements_liu},
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
 \hline
-\textbf{Package}        & \textbf{Competing Risks} & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \textbf{Interval/left Censoring} & \textbf{Absolute Risk}           \\
+\textbf{Package}        & \vtop{\hbox{\strut \textbf{Competing}}\hbox{\strut \textbf{risks}}}  & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \vtop{\hbox{\strut \textbf{Interval/left}}\hbox{\strut \textbf{censoring}}} & \vtop{\hbox{\strut \textbf{Absolute}}\hbox{\strut \textbf{risk}}}           \\
 \hline
 \textbf{casebase} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
 \textbf{CFC} \cite{sharabiani_mahani_2019}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
 \textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
 \textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
-\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & Cumulative hazard?               \\
+\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
+\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
 \textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
 \textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & Cumm haz                         \\
+\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
 \textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
 \textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               
 \end{tabular}%
@@ -896,24 +900,14 @@ sfdm2    & no(M2 and SIP pres)                           \\
 Hospital death as a covariate was removed, as this is directly
 informative of death. The glmnet package(REF) on CRAN was used to
 introduce elastic net, lasso and ridge regressions to casebase. To
-visualize the effect of imputation on incidence density, we can refer to
-the pre-imputation population-time plot in Figure \ref{fig:ptPreI} and
-post-imputation population time plot in Figure \ref{fig:ptPostI}. The
-incidence density is consistent between imputed and complete datasets.
-
-\begin{CodeChunk}
-
-\begin{CodeInput}
-R> #demonstrating incidence density before imputation
-R> plot(casebase::popTime(as.data.frame(support),time = "d.time",event = "death"))
-\end{CodeInput}
-\end{CodeChunk}
+visualize the incidence density, we can refer to the post-imputation
+population-time plot in Figure \ref{fig:ptPostI}.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> #demonstrating incidence density after imputation
-R> plot(casebase::popTime(as.data.frame(workingCompleteData),time = "d.time",event = "death"))
+R> plot(casebase::popTime(as.data.frame(completeData),time = "d.time",event = "death"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -944,8 +938,7 @@ and retrieve our absolute risk function.
 
 \begin{CodeInput}
 R> #Estimating the absolute risk curve using the newData parameter.
-R> casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) ,
-R>                               s="lambda.1se",method=c("numerical"))
+R> casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) , s="lambda.1se",method=c("numerical"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1039,7 +1032,7 @@ case-base sampling:
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-06 16:16:07 using the following
+This report was generated on 2019-12-11 12:28:29 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1050,7 +1043,7 @@ R> devtools::session_info()
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> - Session info ---------------------------------------------------------------
+#> ─ Session info ───────────────────────────────────────────────────────────────
 #>  setting  value                       
 #>  version  R version 3.6.0 (2019-04-26)
 #>  os       macOS High Sierra 10.13.6   
@@ -1060,21 +1053,21 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Montreal            
-#>  date     2019-12-06                  
+#>  date     2019-12-11                  
 #> 
-#> - Packages -------------------------------------------------------------------
+#> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package     * version    date       lib
 #>  assertthat    0.2.1      2019-03-21 [1]
 #>  backports     1.1.5      2019-10-02 [1]
 #>  broom         0.5.2      2019-04-07 [1]
-#>  callr         3.3.2      2019-09-22 [1]
-#>  casebase    * 0.2.1.9001 2019-08-20 [1]
+#>  callr         3.4.0      2019-12-09 [1]
+#>  casebase    * 0.2.1.9001 2019-12-11 [1]
 #>  cellranger    1.1.0      2016-07-27 [1]
-#>  cli           1.1.0      2019-03-19 [1]
+#>  cli           2.0.0      2019-12-09 [1]
 #>  codetools     0.2-16     2018-12-24 [1]
 #>  colorspace    1.4-1      2019-03-18 [1]
 #>  crayon        1.3.4      2017-09-16 [1]
-#>  data.table    1.12.6     2019-10-18 [1]
+#>  data.table    1.12.8     2019-12-09 [1]
 #>  DBI           1.0.0      2018-05-02 [1]
 #>  dbplyr        1.4.2      2019-06-17 [1]
 #>  desc          1.2.0      2018-05-01 [1]
@@ -1083,6 +1076,7 @@ R> devtools::session_info()
 #>  dplyr       * 0.8.3      2019-07-04 [1]
 #>  ellipsis      0.3.0      2019-09-20 [1]
 #>  evaluate      0.14       2019-05-28 [1]
+#>  fansi         0.4.0      2018-10-05 [1]
 #>  forcats     * 0.4.0      2019-02-17 [1]
 #>  foreach       1.4.7      2019-07-27 [1]
 #>  fs            1.3.1      2019-05-06 [1]
@@ -1124,7 +1118,7 @@ R> devtools::session_info()
 #>  remotes       2.1.0      2019-06-24 [1]
 #>  reprex        0.3.0      2019-05-16 [1]
 #>  rlang         0.4.2      2019-11-23 [1]
-#>  rmarkdown     1.17       2019-11-13 [1]
+#>  rmarkdown     1.18       2019-11-27 [1]
 #>  rprojroot     1.3-2      2018-01-03 [1]
 #>  rstudioapi    0.10       2019-03-19 [1]
 #>  rticles       0.12       2019-11-12 [1]
@@ -1135,7 +1129,7 @@ R> devtools::session_info()
 #>  stringi       1.4.3      2019-03-12 [1]
 #>  stringr     * 1.4.0      2019-02-10 [1]
 #>  survival    * 3.1-7      2019-11-09 [1]
-#>  testthat      2.3.0      2019-11-05 [1]
+#>  testthat      2.3.1      2019-12-01 [1]
 #>  tibble      * 2.1.3      2019-06-06 [1]
 #>  tidyr       * 1.0.0      2019-09-11 [1]
 #>  tidyselect    0.2.5      2018-10-11 [1]
@@ -1153,7 +1147,8 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
-#>  Github (sahirbhatnagar/casebase@aecb816)
+#>  Github (sahirbhatnagar/casebase@e2e73fe)
+#>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
@@ -1250,7 +1245,7 @@ R> git2r::repository(here::here())
 \begin{CodeOutput}
 #> Local:    master /Users/jislam/Desktop/Gits/cbpaper
 #> Remote:   master @ origin (https://github.com/Jesse-Islam/cbpaper.git)
-#> Head:     [22bfed0] 2019-12-06: currentDraftEdits
+#> Head:     [71a5a9c] 2019-12-06: Lit-Review Edits
 \end{CodeOutput}
 \end{CodeChunk}
 
