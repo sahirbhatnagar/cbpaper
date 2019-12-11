@@ -61,7 +61,7 @@ The abstract of the article. * joint co-authors
 
 % Pandoc header
 
-\usepackage{amsmath} \usepackage{longtable} \usepackage{graphicx}
+\usepackage{amsmath} \usepackage{longtable} \usepackage{graphicx} \DeclareUnicodeCharacter{2500}{-}
 
 \begin{document}
 
@@ -758,9 +758,9 @@ Sex & Sex & M=Male (100) \\
    &  & Relapse (73) \\ 
   Source & Type of transplant & BM+PB (21) \\ 
    &  & PB (156) \\ 
-  Age & Age of patient (years) & 4–62 \\ 
+  Age & Age of patient (years) & 4--62 \\ 
    &  & 30.47 (13.04) \\ 
-  Ftime & Failure time (months) & 0.13–131.77 \\ 
+  Ftime & Failure time (months) & 0.13--131.77 \\ 
    &  & 20.28 (30.78) \\ 
   Status & Status indicator & 0=censored (46) \\ 
    &  & 1=relapse (56) \\ 
@@ -833,26 +833,26 @@ R>                         method = "numerical", newdata = newdata)
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{case-study-3study-to-understand-prognoses-preferences-outcomes-and-risks-of-treatment}{%
-\section{Case study 3--Study to Understand Prognoses Preferences
-Outcomes and Risks of
-Treatment}\label{case-study-3study-to-understand-prognoses-preferences-outcomes-and-risks-of-treatment}}
+\hypertarget{case-study-3support-data}{%
+\section{Case study 3--SUPPORT Data}\label{case-study-3support-data}}
 
 We examined the Study to Understand Prognoses Preferences Outcomes and
-Risks of Treatment (SUPPORT) dataset (REF from main site). the SUPPORT
-dataset tracks death for individuals who are considered seriously ill
-within a hospital. Imputation was conducted using the default methods in
-the mice package in R, available on CRAN. Before imputation, there was a
-total of 1000 individuals and 35 variables. After imputation, we have
-474 observations where 67.5\% of individuals in the study experience the
-event of interest. The SUPPORT dataset will be used to demonstrate
-regularization within casebase (REF), while comparing their absolute
-risk predictions for a new individual. A description of each variable
-can be found in Table\textasciitilde{}\ref{tab:support1} and a breakdown
-of each categorical variable in
-Table\textasciitilde{}\ref{tab:support2}. The data was downloaded from
-the main author's website, and it is also available as part of the
-casebase package.
+Risks of Treatment (SUPPORT) dataset \citeyearpar{knaus1995support}. The
+SUPPORT dataset tracks death for individuals who are considered
+seriously ill within a hospital. Imputation was conducted using the
+default methods in the \pkg{mice} package in \proglang{R}, available on
+CRAN.
+\textcolor{red}{Why was this method used? The Vanderbilt University website lists describes another method for imputation that we could have used.}
+Before imputation, there was a total of 1000 individuals and 35
+variables. After imputation, we have 474 observations where 67.5\% of
+individuals in the study experience the event of interest. The SUPPORT
+dataset will be used to demonstrate regularization within casebase,
+while comparing their absolute risk predictions for a new individual. A
+description of each variable can be found in
+Table\textasciitilde{}\ref{tab:support1} and a breakdown of each
+categorical variable in Table\textasciitilde{}\ref{tab:support2}. The
+data was downloaded from the main author's website, and it is also
+available as part of the \pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -896,7 +896,7 @@ adls          & ADL Surrogate Day 3                      &                 & dou
 sfdm2         &                                          & 5               & integer          & 159          \\
 adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
 \end{tabular}
-\caption{A description of each variable in the SUPPORT dataset, taken from (REF).}
+\caption{A description of each variable in the SUPPORT dataset.}
 \label{tab:support1}
 \end{table}
 
@@ -935,13 +935,13 @@ sfdm2    & no(M2 and SIP pres)                           \\
          & Coma or Intub                                 \\
          & \textless{}2 mo. follow-up                   
 \end{tabular}
-\caption{A description of each level within each categorical variable in the dataset, taken from REF.}
+\caption{A description of each level within each categorical variable in the dataset.}
 \label{tab:support2}
 \end{table}
 
 Hospital death as a covariate was removed, as this is directly
-informative of death. The glmnet package(REF) on CRAN was used to
-introduce elastic net, lasso and ridge regressions to casebase. To
+informative of death. The \pkg{glmnet} package on CRAN was used to
+introduce elastic net, lasso and ridge regressions to \pkg{casebase}. To
 visualize the effect of imputation on incidence density, we can refer to
 the pre-imputation population-time plot in Figure \ref{fig:ptPreI} and
 post-imputation population time plot in Figure \ref{fig:ptPostI}. The
@@ -950,129 +950,135 @@ incidence density is consistent between imputed and complete datasets.
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #demonstrating incidence density before imputation
-R> plot(casebase::popTime(as.data.frame(support),time = "d.time",event = "death"))
+R> popTime_pre <- popTime(as.data.frame(support),
+R>                        time = "d.time", event = "death")
+R> plot(popTime_pre)
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #demonstrating incidence density after imputation
-R> plot(casebase::popTime(as.data.frame(workingCompleteData),time = "d.time",event = "death"))
+R> popTime_post <- popTime(as.data.frame(workingCompleteData),
+R>                         time = "d.time", event = "death")
+R> plot(popTime_post)
 \end{CodeInput}
 \end{CodeChunk}
 
-Our main objective is to compute the absolute risk of death for a given
-set of covariates, using regularization when fitting our model. First,
-we fit a smooth hazard to the data; for the sake of this example, we
-opted for a linear term for time. As casebase makes use of the glmnet
-package, we interact with the fitsmoothhazard.fit function using a
-matrix interface, where y contains the time and event variables and x
+Our main objective is to estimate the cumulative incidence of death for
+a given covariate profile. Given th number of covariates available, we
+will do this using regularized estimation. First, we fit the hazard
+function; for the sake of simplicity, we opted for a linear term for
+time. As \pkg{casebase} makes use of the \pkg{glmnet} package, we will
+use the function \code{fitsmoothhazard.fit}, which follows the syntax
+from \code{glmnet}. Specifically, we input a matrix \code{y}, which
+contains the time and event variables, and a matrix \code{x}, which
 contains all other variables we would like to include in the model. For
 the SUPPORT dataset, all factor variables were converted into dummy
-variables. Here, we used lasso penalization by setting alpha to 1.
+variables. Here, we used lasso penalization by setting \code{alpha} to
+1.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #Using casebase's glmnet implementation, using splines and a case to base ratio of 100,
-R> #to determine the hazard function
-R> cb.Model=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="death",
-R>                              formula_time = ~d.time,alpha=1,ratio=100)
+R> cb.Model <- fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", 
+R>                                 event = "death", formula_time = ~ d.time, 
+R>                                 alpha = 1, ratio = 100)
 \end{CodeInput}
 \end{CodeChunk}
 
-Then, we take our model and use the absoluteRisk function to integrate
-and retrieve our absolute risk function.
+Then, we take our model object and use the \code{absoluteRisk} function
+to compute our estimate of the cumulative incidence function.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #Estimating the absolute risk curve using the newData parameter.
-R> casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 0.5),newdata = t(newData) ,
-R>                               s="lambda.1se",method=c("numerical"))
+R> casebaseAbsolute <- absoluteRisk(cb.Model,
+R>                                  time = seq(1, max(completeData$d.time), 0.5),
+R>                                  newdata = t(newData),
+R>                                  s = "lambda.1se", method = "numerical")
 \end{CodeInput}
 \end{CodeChunk}
 
-We will compare this curve to a regularized version of cox regression,
-and a kaplan-meier survival curve. The regularized cox regression
-absolute risk curve required two extra steps to retrieve. Coxnet from
-the glmnet package has tools to fit a regularized cox model, but
-requires that a survival object skeleton of the selected variables, so
-that the survival package tools can be used to retrieve the absolute
-risk. We handle this by fitting a regularized cox model with the glmnet
-package, and a cox model from the survival package with the selected
-variables from the regularized fit. This second model serves as a
-skeleton that permits the use of survival package functions. The
-coefficients from the regularized model will replace the coefficients in
-our skeleton. the resulting model will have the correct coefficients
-when integrating, but will have an incorrect standard error. For the
-purposes of this case study, we are only interested in the absolute risk
-curve itself and not the standard error.
+We will compare this curve to a regularized version of Cox regression,
+and a Kaplan-Meier survival curve. Using the \pkg{glmnet} package, we
+can fit the Cox regression model using regularized estimation. However,
+\pkg{glmnet} does not provide any functionality for estimating the
+baseline hazard, and the functionalities in the \pkg{survival} package
+do not work on the output from \code{cv.glmnet}. To circumvent this
+issue and estimate the baseline hazard, we followed the following steps.
+First, we fitted a non-regularized Cox model using only the variables
+selected by \pkg{glmnet}; the baseline hazard will be estimated using
+this object. Then, we replaced the estimates of the regression
+coefficients by the estimates from \pkg{glmnet}. Finally, this modified
+\code{coxph} object is fed to the \code{survival::survfit} function to
+obtain the estimated survival function.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #Create u and xCox, which will be used when fitting Cox with glmnet.
-R> u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
-R> xCox=as.matrix(sparse.model.matrix(death~ .-d.time,data=completeData))[-c(sam),]
-R> #hazard for cox using glmnet
-R> coxglmFit=glmnet::cv.glmnet(x=xCox,y=u, family="cox",alpha=1)
-R> #convergence demonstrated in plot
-R> plot(coxglmFit)
+R> # Create u and xCox, which will be used when fitting Cox with glmnet.
+R> u <- survival::Surv(time = as.numeric(y[,2]), 
+R>                     event = as.factor(y[,1]))
+R> xCox <- as.matrix(sparse.model.matrix(death~ . - d.time,
+R>                                       data = completeData))[-c(sam),]
+R> # hazard for cox using glmnet
+R> coxglmFit <- glmnet::cv.glmnet(x = xCox, y = u,
+R>                                family = "cox", alpha = 1)
+R> # convergence demonstrated in plot
+R> # plot(coxglmFit)
 R> #taking the coefficient estimates for later use
 R> nonzero_covariate_cox <- predict(coxglmFit, type = "nonzero", s = "lambda.1se")
 R> nonzero_coef_cox <- coef(coxglmFit, s = "lambda.1se")
-R> #creating a new dataset that only contains the covariates chosen through glmnet.
-R> #cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
-R> cleanCoxData<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCox[,nonzero_covariate_cox$X1]))
-R> #newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
-R> #fitting a cox model using regular estimation, however we will not keep it.
-R> #this is used more as an object place holder.
-R> coxFit <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxData)
-R> #The coefficients of this object will be replaced with the estimates from coxglmFit.
-R> #Doing so makes it so that everything is invalid aside from the coefficients.
-R> #In this case, all we need to estimate the absolute risk is the coefficients.
-R> #Std. error would be incorrect here, if we were to draw error bars.
-R> coxFit$coefficients<-nonzero_coef_cox@x
-R> #Fitting absolute risk curve for cox+glmnet
-R> newDataCox=newData[nonzero_covariate_cox$X1-1]
+R> # creating a new dataset that only contains the covariates chosen through glmnet.
+R> cleanCoxData <- as.data.frame(cbind(as.numeric(y[,2]),
+R>                                     as.numeric(y[,1]),
+R>                                     xCox[, nonzero_covariate_cox$X1]))
+R> # fitting a cox model using regular estimation, however we will not keep it.
+R> # this is used more as an object place holder.
+R> coxFit <- survival::coxph(Surv(time = V1, event = V2) ~ ., 
+R>                           data = cleanCoxData)
+R> # The coefficients of this object will be replaced 
+R> # with the estimates from coxglmFit.
+R> coxFit$coefficients <- nonzero_coef_cox@x
+R> # Fitting CI curve for cox+glmnet
+R> newDataCox <- newData[nonzero_covariate_cox$X1 - 1]
 R> 
-R> abCoxFit<-survival::survfit(coxFit,newdata=as.data.frame(t(newDataCox)),time = seq(0,max(completeData$d.time), 1),type="breslow")
+R> abCoxFit <- survival::survfit(coxFit, newdata = as.data.frame(t(newDataCox)),
+R>                               time = seq(0, max(completeData$d.time), 1),
+R>                               type = "breslow")
 \end{CodeInput}
 \end{CodeChunk}
 
-We used the survival package to calculate the kaplan-meier absolute risk
-function.
+We used the \pkg{survival} package to calculate the Kaplan-Meier
+estimate of the survival function.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #creating a surv object to be used to fit an unadjusted absolute risk curve.
-R> # (Kaplan-Meier risk curve)
-R> km <- survival::Surv(time = completeData$d.time, event = completeData$death)
-R> abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
+R> km <- survival::Surv(time = completeData$d.time, 
+R>                      event = completeData$death)
+R> abKm <- survival::survfit(km ~ 1,
+R>                           type = 'kaplan-meier')
 \end{CodeInput}
 \end{CodeChunk}
 
-Now that our three absolute risk functions have been calculated, we
-compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase
-decrease the absolute risk by the end of the study, in comparison to
-kaplan-meier.
+Now that our three cumulative incidence functions have been calculated,
+we compare them all in Figure \ref{fig:abSC}. Both \pkg{glmnet} and
+\pkg{casebase} have a lower estimated cumulative incidence by the end of
+the study, when compared to Kaplan-Meier.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> # A plot to compare all three Absolute risk (Commulative Incidence)
-R> plot(casebaseAbsolute,type='l',col="black",lwd=2,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
-R> lines(abCoxFit ,col="red",fun="event",lwd=3,conf.int = FALSE)
-R> lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
+R> plot(casebaseAbsolute, type='l', col = "black", lwd = 2, 
+R>      main = "Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves", 
+R>      xlab = "Survival-Time", ylab = "Cumulative Incidence", ylim = c(0,1))
+R> lines(abCoxFit, col = "red", fun = "event", lwd = 3, conf.int = FALSE)
+R> lines(abKm, col = "blue", fun = "event", lwd = 3, conf.int = FALSE)
 R> legend("bottom", 
-R>        legend = c( "Casebase (Lasso+linear)","semi-parametric (Cox)+glmnet","KM curve"), 
-R>        col = c("black","red","Blue"),
-R>        lty = c(1, 1, 1), 
-R>        bg = "gray90")
+R>        legend = c("casebase", "Cox+glmnet", "KM curve"), 
+R>        col = c("black", "red", "blue"), lty = c(1, 1, 1), bg = "gray90")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1099,7 +1105,7 @@ The purpose of the next case study is to show how \pkg{casebase} can
 also be used for survival analysis problems that do not share the
 properties above. To this end, we will use the Stanford Heart Transplant
 Data \citep[\citet{crowley1977covariance}]{clark1971cardiac}; we will
-use the version available in the \pkg{survival} package.
+use the version available in the \pkg{surivival} package.
 
 Recall the setting of this study: patients were admitted to the Stanford
 program after meeting with their physician and determining that they
@@ -1345,9 +1351,6 @@ theoretical underpinnings of the approach, we provided details about our
 implementation, and we illustrated the merits of the approach and the
 package through three case studies.
 
-In the following table we provide a comparison between the Cox model and
-case-base sampling:
-
 \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2} can handle interval
 censoring, whereas \pkg{casebase} currently cannot. Interval censoring
 is a simple feature to implement and is a potential improvement to add
@@ -1356,7 +1359,7 @@ to \pkg{casebase}.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-10 12:28:40 using the following
+This report was generated on 2019-12-11 10:31:00 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1367,7 +1370,7 @@ R> devtools::session_info()
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> - Session info ----------------------------------------------------------
+#> ─ Session info ──────────────────────────────────────────────────────────
 #>  setting  value                       
 #>  version  R version 3.6.1 (2019-07-05)
 #>  os       Ubuntu 18.04.3 LTS          
@@ -1377,91 +1380,177 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Winnipeg            
-#>  date     2019-12-10                  
+#>  date     2019-12-11                  
 #> 
-#> - Packages --------------------------------------------------------------
-#>  package     * version    date       lib source                          
-#>  assertthat    0.2.1      2019-03-21 [1] CRAN (R 3.6.1)                  
-#>  backports     1.1.5      2019-10-02 [1] CRAN (R 3.6.1)                  
-#>  broom         0.5.2      2019-04-07 [1] CRAN (R 3.6.1)                  
-#>  callr         3.3.1      2019-07-18 [1] CRAN (R 3.6.1)                  
-#>  casebase    * 0.2.1.9001 2019-07-29 [1] local                           
-#>  cellranger    1.1.0      2016-07-27 [1] CRAN (R 3.5.0)                  
-#>  cli           1.1.0      2019-03-19 [1] CRAN (R 3.6.1)                  
-#>  codetools     0.2-16     2018-12-24 [4] CRAN (R 3.5.2)                  
-#>  colorspace    1.4-1      2019-03-18 [1] CRAN (R 3.6.1)                  
-#>  crayon        1.3.4      2017-09-16 [1] CRAN (R 3.5.0)                  
-#>  data.table    1.12.2     2019-04-07 [1] CRAN (R 3.6.1)                  
-#>  desc          1.2.0      2018-05-01 [1] CRAN (R 3.5.0)                  
-#>  devtools      2.1.0      2019-07-06 [1] CRAN (R 3.6.1)                  
-#>  digest        0.6.22     2019-10-21 [1] CRAN (R 3.6.1)                  
-#>  dplyr       * 0.8.3      2019-07-04 [1] CRAN (R 3.6.1)                  
-#>  ellipsis      0.3.0      2019-09-20 [1] CRAN (R 3.6.1)                  
-#>  evaluate      0.14       2019-05-28 [1] CRAN (R 3.6.1)                  
-#>  forcats     * 0.4.0      2019-02-17 [1] CRAN (R 3.6.1)                  
-#>  foreach     * 1.4.4      2017-12-12 [1] CRAN (R 3.5.0)                  
-#>  fs            1.3.1      2019-05-06 [1] CRAN (R 3.6.1)                  
-#>  generics      0.0.2      2018-11-29 [1] CRAN (R 3.6.1)                  
-#>  ggplot2     * 3.2.1      2019-08-10 [1] CRAN (R 3.6.1)                  
-#>  glmnet      * 2.0-18     2019-05-20 [1] CRAN (R 3.6.1)                  
-#>  glue          1.3.1      2019-03-12 [1] CRAN (R 3.6.1)                  
-#>  gtable        0.3.0      2019-03-25 [1] CRAN (R 3.6.1)                  
-#>  haven         2.1.1      2019-07-04 [1] CRAN (R 3.6.1)                  
-#>  hms           0.5.2      2019-10-30 [1] CRAN (R 3.6.1)                  
-#>  htmltools     0.3.6      2017-04-28 [1] CRAN (R 3.5.0)                  
-#>  httr          1.4.1      2019-08-05 [1] CRAN (R 3.6.1)                  
-#>  iterators     1.0.9      2017-12-12 [1] CRAN (R 3.5.0)                  
-#>  jsonlite      1.6        2018-12-07 [1] CRAN (R 3.6.1)                  
-#>  knitr         1.23       2019-05-18 [1] CRAN (R 3.6.1)                  
-#>  labeling      0.3        2014-08-23 [1] CRAN (R 3.5.0)                  
-#>  lattice       0.20-38    2018-11-04 [4] CRAN (R 3.5.1)                  
-#>  lazyeval      0.2.2      2019-03-15 [1] CRAN (R 3.6.1)                  
-#>  lifecycle     0.1.0      2019-08-01 [1] CRAN (R 3.6.1)                  
-#>  lubridate   * 1.7.4      2018-04-11 [1] CRAN (R 3.5.0)                  
-#>  magrittr    * 1.5        2014-11-22 [1] CRAN (R 3.5.0)                  
-#>  Matrix      * 1.2-18     2019-11-27 [4] CRAN (R 3.6.1)                  
-#>  memoise       1.1.0      2017-04-21 [1] CRAN (R 3.5.0)                  
-#>  mgcv          1.8-24     2018-06-18 [1] CRAN (R 3.5.1)                  
-#>  modelr        0.1.5      2019-08-08 [1] CRAN (R 3.6.1)                  
-#>  munsell       0.5.0      2018-06-12 [1] CRAN (R 3.6.1)                  
-#>  nlme          3.1-142    2019-11-07 [4] CRAN (R 3.6.1)                  
-#>  pillar        1.4.2      2019-06-29 [1] CRAN (R 3.6.1)                  
-#>  pkgbuild      1.0.3      2019-03-20 [1] CRAN (R 3.6.1)                  
-#>  pkgconfig     2.0.3      2019-09-22 [1] CRAN (R 3.6.1)                  
-#>  pkgload       1.0.2      2018-10-29 [1] CRAN (R 3.6.1)                  
-#>  prettyunits   1.0.2      2015-07-13 [1] CRAN (R 3.5.2)                  
-#>  processx      3.4.1      2019-07-18 [1] CRAN (R 3.6.1)                  
-#>  ps            1.3.0      2018-12-21 [1] CRAN (R 3.6.1)                  
-#>  purrr       * 0.3.3      2019-10-18 [1] CRAN (R 3.6.1)                  
-#>  R6            2.4.1      2019-11-12 [1] CRAN (R 3.6.1)                  
-#>  Rcpp          1.0.3      2019-11-08 [1] CRAN (R 3.6.1)                  
-#>  readr       * 1.3.1      2018-12-21 [1] CRAN (R 3.6.1)                  
-#>  readxl        1.3.1      2019-03-13 [1] CRAN (R 3.6.1)                  
-#>  remotes       2.1.0      2019-06-24 [1] CRAN (R 3.6.1)                  
-#>  rlang         0.4.1      2019-10-24 [1] CRAN (R 3.6.1)                  
-#>  rmarkdown     1.16       2019-10-01 [1] CRAN (R 3.6.1)                  
-#>  rprojroot     1.3-2      2018-01-03 [1] CRAN (R 3.5.0)                  
-#>  rstudioapi    0.10       2019-03-19 [1] CRAN (R 3.6.1)                  
-#>  rticles       0.9.1      2019-07-22 [1] Github (rstudio/rticles@8d56fc6)
-#>  rvest         0.3.5      2019-11-08 [1] CRAN (R 3.6.1)                  
-#>  scales        1.0.0      2018-08-09 [1] CRAN (R 3.6.1)                  
-#>  sessioninfo   1.1.1      2018-11-05 [1] CRAN (R 3.6.1)                  
-#>  stringi       1.4.3      2019-03-12 [1] CRAN (R 3.6.1)                  
-#>  stringr     * 1.4.0      2019-02-10 [1] CRAN (R 3.6.1)                  
-#>  survival    * 2.44-1.1   2019-04-01 [4] CRAN (R 3.6.1)                  
-#>  testthat      2.2.0      2019-07-22 [1] CRAN (R 3.6.1)                  
-#>  tibble      * 2.1.3      2019-06-06 [1] CRAN (R 3.6.1)                  
-#>  tidyr       * 1.0.0      2019-09-11 [1] CRAN (R 3.6.1)                  
-#>  tidyselect    0.2.5      2018-10-11 [1] CRAN (R 3.5.2)                  
-#>  tidyverse   * 1.2.1      2017-11-14 [1] CRAN (R 3.5.0)                  
-#>  usethis       1.5.1      2019-07-04 [1] CRAN (R 3.6.1)                  
-#>  vctrs         0.2.0      2019-07-05 [1] CRAN (R 3.6.1)                  
-#>  VGAM          1.1-1      2019-02-18 [1] CRAN (R 3.6.1)                  
-#>  withr         2.1.2      2018-03-15 [1] CRAN (R 3.5.0)                  
-#>  xfun          0.8        2019-06-25 [1] CRAN (R 3.6.1)                  
-#>  xml2          1.2.2      2019-08-09 [1] CRAN (R 3.6.1)                  
-#>  yaml          2.2.0      2018-07-25 [1] CRAN (R 3.6.1)                  
-#>  zeallot       0.1.0      2018-01-28 [1] CRAN (R 3.5.1)                  
+#> ─ Packages ──────────────────────────────────────────────────────────────
+#>  package     * version    date       lib
+#>  assertthat    0.2.1      2019-03-21 [1]
+#>  backports     1.1.5      2019-10-02 [1]
+#>  broom         0.5.2      2019-04-07 [1]
+#>  callr         3.3.1      2019-07-18 [1]
+#>  casebase    * 0.2.1.9001 2019-12-11 [1]
+#>  cellranger    1.1.0      2016-07-27 [1]
+#>  cli           2.0.0      2019-12-09 [1]
+#>  codetools     0.2-16     2018-12-24 [4]
+#>  colorspace    1.4-1      2019-03-18 [1]
+#>  crayon        1.3.4      2017-09-16 [1]
+#>  data.table    1.12.8     2019-12-09 [1]
+#>  desc          1.2.0      2018-05-01 [1]
+#>  devtools      2.1.0      2019-07-06 [1]
+#>  digest        0.6.23     2019-11-23 [1]
+#>  dplyr       * 0.8.3      2019-07-04 [1]
+#>  ellipsis      0.3.0      2019-09-20 [1]
+#>  evaluate      0.14       2019-05-28 [1]
+#>  fansi         0.4.0      2018-10-05 [1]
+#>  farver        2.0.1      2019-11-13 [1]
+#>  forcats     * 0.4.0      2019-02-17 [1]
+#>  foreach     * 1.4.4      2017-12-12 [1]
+#>  fs            1.3.1      2019-05-06 [1]
+#>  generics      0.0.2      2018-11-29 [1]
+#>  ggplot2     * 3.2.1      2019-08-10 [1]
+#>  glmnet      * 2.0-18     2019-05-20 [1]
+#>  glue          1.3.1      2019-03-12 [1]
+#>  gtable        0.3.0      2019-03-25 [1]
+#>  haven         2.1.1      2019-07-04 [1]
+#>  hms           0.5.2      2019-10-30 [1]
+#>  htmltools     0.3.6      2017-04-28 [1]
+#>  httr          1.4.1      2019-08-05 [1]
+#>  iterators     1.0.9      2017-12-12 [1]
+#>  jsonlite      1.6        2018-12-07 [1]
+#>  knitr         1.23       2019-05-18 [1]
+#>  labeling      0.3        2014-08-23 [1]
+#>  lattice       0.20-38    2018-11-04 [4]
+#>  lazyeval      0.2.2      2019-03-15 [1]
+#>  lifecycle     0.1.0      2019-08-01 [1]
+#>  lubridate   * 1.7.4      2018-04-11 [1]
+#>  magrittr    * 1.5        2014-11-22 [1]
+#>  Matrix      * 1.2-18     2019-11-27 [4]
+#>  memoise       1.1.0      2017-04-21 [1]
+#>  mgcv          1.8-24     2018-06-18 [1]
+#>  modelr        0.1.5      2019-08-08 [1]
+#>  munsell       0.5.0      2018-06-12 [1]
+#>  nlme          3.1-142    2019-11-07 [4]
+#>  pillar        1.4.2      2019-06-29 [1]
+#>  pkgbuild      1.0.3      2019-03-20 [1]
+#>  pkgconfig     2.0.3      2019-09-22 [1]
+#>  pkgload       1.0.2      2018-10-29 [1]
+#>  prettyunits   1.0.2      2015-07-13 [1]
+#>  processx      3.4.1      2019-07-18 [1]
+#>  ps            1.3.0      2018-12-21 [1]
+#>  purrr       * 0.3.3      2019-10-18 [1]
+#>  R6            2.4.1      2019-11-12 [1]
+#>  Rcpp          1.0.3      2019-11-08 [1]
+#>  readr       * 1.3.1      2018-12-21 [1]
+#>  readxl        1.3.1      2019-03-13 [1]
+#>  remotes       2.1.0      2019-06-24 [1]
+#>  rlang         0.4.2      2019-11-23 [1]
+#>  rmarkdown     1.16       2019-10-01 [1]
+#>  rprojroot     1.3-2      2018-01-03 [1]
+#>  rstudioapi    0.10       2019-03-19 [1]
+#>  rticles       0.9.1      2019-07-22 [1]
+#>  rvest         0.3.5      2019-11-08 [1]
+#>  scales        1.1.0      2019-11-18 [1]
+#>  sessioninfo   1.1.1      2018-11-05 [1]
+#>  stringi       1.4.3      2019-03-12 [1]
+#>  stringr     * 1.4.0      2019-02-10 [1]
+#>  survival    * 2.44-1.1   2019-04-01 [4]
+#>  testthat      2.2.0      2019-07-22 [1]
+#>  tibble      * 2.1.3      2019-06-06 [1]
+#>  tidyr       * 1.0.0      2019-09-11 [1]
+#>  tidyselect    0.2.5      2018-10-11 [1]
+#>  tidyverse   * 1.2.1      2017-11-14 [1]
+#>  usethis       1.5.1      2019-07-04 [1]
+#>  vctrs         0.2.0      2019-07-05 [1]
+#>  VGAM          1.1-2      2019-11-21 [1]
+#>  withr         2.1.2      2018-03-15 [1]
+#>  xfun          0.8        2019-06-25 [1]
+#>  xml2          1.2.2      2019-08-09 [1]
+#>  yaml          2.2.0      2018-07-25 [1]
+#>  zeallot       0.1.0      2018-01-28 [1]
+#>  source                                  
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  Github (sahirbhatnagar/casebase@e2e73fe)
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.2)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.2)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.5.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.5.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.2)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  Github (rstudio/rticles@8d56fc6)        
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.2)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.0)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.5.1)                          
 #> 
 #> [1] /home/mturgeon/Rlibs
 #> [2] /usr/local/lib/R/site-library
@@ -1480,8 +1569,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    review /home/mturgeon/Documents/git_repositories/cbpaper
-#> Head:     [4435e71] 2019-12-08: Merge branch 'review-max'
+#> Local:    review-glmnet /home/mturgeon/Documents/git_repositories/cbpaper
+#> Head:     [b7e23a6] 2019-12-10: Merge branch 'master' into review-glmnet
 \end{CodeOutput}
 \end{CodeChunk}
 
