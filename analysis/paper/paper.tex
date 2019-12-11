@@ -440,29 +440,29 @@ context of three case studies.
 \section{Case study 1--European Randomized Study of Prostate Cancer
 Screening}\label{case-study-1european-randomized-study-of-prostate-cancer-screening}}
 
-To introduce the different features available, we make use of the
-European Randomized Study of Prostate Cancer Screening data; this
-dataset is available through the \pkg{casebase} package:
+For the first case study, we will use of the European Randomized Study
+of Prostate Cancer Screening data. This dataset is available through the
+\pkg{casebase} package:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> data(ERSPC)
 R> ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
-R>                        levels = c(0,1), 
-R>                        labels = c("Control group", "Screening group"))
+R+                        levels = c(0, 1), 
+R+                        labels = c("Control group", "Screening group"))
 \end{CodeInput}
 \end{CodeChunk}
 
-The results of this study were published by {[}schroder2009screening{]}.
-This data was obtained using the approach described in
-{[}liu2014recovering{]}.
+The results of this study were published by
+\citep{schroder2009screening}, and the dataset itself was obtained using
+the approach described in \citep{liu2014recovering}.
 
 Population time plots can be extremely informative graphical displays of
 survival data. They should be the first step in an exploratory data
 analysis. We facilitate this task in the \pkg{casebase} package using
 the \code{popTime} function. We first create the necessary dataset for
-producing the population time plots, and we can produce the plot by
+producing the population time plots, and we can generate the plot by
 using the corresponding \code{plot} method:
 
 \begin{CodeChunk}
@@ -471,6 +471,10 @@ using the corresponding \code{plot} method:
 R> pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
 R> plot(pt_object)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-erspc-data-1} \end{center}
+
 \end{CodeChunk}
 
 We can also create exposure stratified plots by specifying the
@@ -480,10 +484,14 @@ We can also create exposure stratified plots by specifying the
 
 \begin{CodeInput}
 R> pt_object_strat <- casebase::popTime(ERSPC, 
-R>                                      event = "DeadOfPrCa", 
-R>                                      exposure = "ScrArm")
+R+                                      event = "DeadOfPrCa", 
+R+                                      exposure = "ScrArm")
 R> plot(pt_object_strat)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-1} \end{center}
+
 \end{CodeChunk}
 
 We can also plot them side-by-side using the \code{ncol} argument:
@@ -493,222 +501,489 @@ We can also plot them side-by-side using the \code{ncol} argument:
 \begin{CodeInput}
 R> plot(pt_object_strat, ncol = 2)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-side-1} \end{center}
+
 \end{CodeChunk}
 
-First, we fit a Cox model to the data, examine the hazard ratio for the
-screening group (relative to the control group), and plot the cumulative
-incidence function (CIF).
+ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
+
+Next, we investigate the differences between the control and the
+screening arms. A common choice for this type of analysis is to use a
+Cox regression model and estimate the hazard ratio for the screening
+group (relative to the control group). In \proglang{R}, it can be done
+as follows:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
-R>                              data = ERSPC)
+R+                              data = ERSPC)
 R> summary(cox_model)
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> Call:
+#> survival::coxph(formula = Surv(Follow.Up.Time, DeadOfPrCa) ~ 
+#>     ScrArm, data = ERSPC)
+#> 
+#>   n= 159893, number of events= 540 
+#> 
+#>                         coef exp(coef) se(coef)     z Pr(>|z|)  
+#> ScrArmScreening group -0.222     0.801    0.088 -2.52    0.012 *
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#>                       exp(coef) exp(-coef) lower .95 upper .95
+#> ScrArmScreening group     0.801       1.25     0.674     0.952
+#> 
+#> Concordance= 0.519  (se = 0.011 )
+#> Likelihood ratio test= 6.45  on 1 df,   p=0.01
+#> Wald test            = 6.37  on 1 df,   p=0.01
+#> Score (logrank) test = 6.39  on 1 df,   p=0.01
+\end{CodeOutput}
 \end{CodeChunk}
 
-We can plot the CIF for each group:
+We can also plot the cumulative incidence function (CIF) for each group.
+However, this involves estimating the baseline hazard, which Cox
+regression treated as a nuisance parameter.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
-R>                        ignore = 99)
+R+                        ignore = 99)
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>      xlab = "Years since Randomization", 
-R>      ylab = "Cumulative Incidence", 
-R>      fun = "event",
-R>      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-R>      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>                     exp(coef(cox_model)), 
-R>                     exp(confint(cox_model))[1], 
-R>                     exp(confint(cox_model))[2]))
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence (%)", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]),
+R+      ylim = c(0, 2), yscale = 100)
 R> legend("topleft", 
-R>        legend = c("Control group", "Screening group"), 
-R>        col = c("red","blue"),
-R>        lty = c(1, 1), 
-R>        bg = "gray90")
+R+        legend = c("Control group", "Screening group"), 
+R+        col = c("red","blue"),
+R+        lty = c(1, 1), 
+R+        bg = "gray90")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-cox-cif-1} \end{center}
+
 \end{CodeChunk}
 
-Next we fit several models using case-base sampling. The models we fit
-differ in how we choose to model time.
+Next, we show how case-base sampling can be used to carry out a similar
+analysis. We fit several models that differ in how we choose to model
+time.
 
-The \code{fitSmoothHazard} function provides an estimate of the hazard
-function \(h(x, t)\) is the hazard function, where \(t\) denotes the
-numerical value of a point in prognostic/prospective time and \(x\) is
-the realization of the vector \(X\) of variates based on the patient's
-profile and intervention (if any).
+First, we will fit an exponential model. Recall that this corresponds to
+excluding time from the linear predictor.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
-R>                                                   data = ERSPC, 
-R>                                                   ratio = 100)
+R+                                                   data = ERSPC, 
+R+                                                   ratio = 100)
 R> 
 R> summary(casebase_exponential)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.148  -0.148  -0.148  -0.133   3.079  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value            Pr(>|z|)    
+#> (Intercept)            -7.7650     0.0557 -139.44 <0.0000000000000002 ***
+#> ScrArmScreening group  -0.2166     0.0884   -2.45               0.014 *  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059.0  on 54539  degrees of freedom
+#> Residual deviance: 6052.9  on 54538  degrees of freedom
+#> AIC: 6057
+#> 
+#> Number of Fisher Scoring iterations: 7
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_exponential)[2])
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> ScrArmScreening group 
+#>                  0.81
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_exponential)[2,])
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>  2.5 % 97.5 % 
+#>   0.68   0.96
+\end{CodeOutput}
 \end{CodeChunk}
 
-The \code{absoluteRisk} function provides an estimate of the cumulative
-incidence curves for a specific risk profile using the following
-equation:
-
-\[ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) \]
-
-In the plot below, we overlay the estimated CIF from the casebase
-exponential model on the Cox model CIF:
+We can then use the \code{absoluteRisk} function to get an estimate of
+the cumulative incidence curve for a specific covariate profile. In the
+plot below, we overlay the estimated CIF from the exponential model on
+the Cox model CIF:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
-R>                                           time = seq(0,15,0.1), 
-R>                                           newdata = new_data)
+R+                                           time = seq(0,15,0.1), 
+R+                                           newdata = new_data)
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>      xlab = "Years since Randomization", 
-R>      ylab = "Cumulative Incidence", 
-R>      fun = "event",
-R>      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-R>      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>                     exp(coef(cox_model)), 
-R>                     exp(confint(cox_model))[1], 
-R>                     exp(confint(cox_model))[2]))
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence (%)", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]),
+R+      ylim = c(0, 2), yscale = 100)
 R> lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
 R> lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
 R> 
 R> 
 R> legend("topleft", 
-R>        legend = c("Control group (Cox)","Control group (Casebase)",
-R>                   "Screening group (Cox)", "Screening group (Casebase)"), 
-R>        col = c("red","red", "blue","blue"),
-R>        lty = c(1, 2, 1, 2), 
-R>        bg = "gray90")
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-cif-1} \end{center}
+
 \end{CodeChunk}
 
-As we can see, the exponential model is not a good fit. Based on what we
-observed in the population time plot, where more events are observed
-later on in time, this poor fit is expected. A constant hazard model
-would overestimate the cumulative incidence earlier on in time, and
-underestimate it later on; this is what we see on the cumulative
-incidence plot. This example demonstrates the benefits of population
-time plots as an exploratory analysis tool.
+As we can see, the exponential model gives us an estimate of the hazard
+ratio that is similar to the one obtained using Cox regression. However,
+the CIF estimates are quite different. Based on what we observed in the
+population time plot, where more events are observed later on in time,
+we do not expect a constant hazard would be a good description for this
+data. In other words, this poor fit for the exponential hazard is
+expected. A constant hazard model would overestimate the cumulative
+incidence earlier on in time, and underestimate it later on; this is
+what we see on the cumulative incidence plot. This example demonstrates
+the benefits of population time plots as an exploratory analysis tool.
 
-Next we enter time linearly into the model:
+For the next model, we include time as a linear term. Recall that this
+corresponds to a Weibull model.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
-R>                                  data = ERSPC, 
-R>                                  ratio = 100)
+R+                                  data = ERSPC, 
+R+                                  ratio = 100)
 R> 
 R> summary(casebase_time)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.389  -0.161  -0.122  -0.095   3.464  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value            Pr(>|z|)    
+#> (Intercept)            -9.0257     0.1122  -80.42 <0.0000000000000002 ***
+#> Follow.Up.Time          0.2207     0.0145   15.18 <0.0000000000000002 ***
+#> ScrArmScreening group  -0.2311     0.0886   -2.61              0.0091 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059  on 54539  degrees of freedom
+#> Residual deviance: 5815  on 54537  degrees of freedom
+#> AIC: 5821
+#> 
+#> Number of Fisher Scoring iterations: 8
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_time))
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>           (Intercept)        Follow.Up.Time ScrArmScreening group 
+#>               0.00012               1.24701               0.79370
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_time))
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>                          2.5 %  97.5 %
+#> (Intercept)           0.000096 0.00015
+#> Follow.Up.Time        1.212086 1.28321
+#> ScrArmScreening group 0.666385 0.94341
+\end{CodeOutput}
 \end{CodeChunk}
+
+Again, the estimate of the hazard ratio is similar to that obtained from
+Cox regression. We then look at the estimate of the CIF:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
-R>                                           time = seq(0,15,0.1), 
-R>                                           newdata = new_data)
+R+                                           time = seq(0,15,0.1), 
+R+                                           newdata = new_data)
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>      xlab = "Years since Randomization", 
-R>      ylab = "Cumulative Incidence", 
-R>      fun = "event",
-R>      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-R>      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>                     exp(coef(cox_model)), 
-R>                     exp(confint(cox_model))[1], 
-R>                     exp(confint(cox_model))[2]))
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence (%)", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]),
+R+      ylim = c(0, 2), yscale = 100)
 R> lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
 R> lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
 R> 
 R> legend("topleft", 
-R>        legend = c("Control group (Cox)","Control group (Casebase)",
-R>                   "Screening group (Cox)", "Screening group (Casebase)"), 
-R>        col = c("red","red", "blue","blue"),
-R>        lty = c(1, 2, 1, 2), 
-R>        bg = "gray90")
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-weibull-cif-1} \end{center}
+
 \end{CodeChunk}
 
-We see that the Weibull model leads to a better fit.
+We see that the Weibull model leads to a better fit of the CIF than the
+Exponential model, when compared with the semi-parametric approach.
 
-Next we try to enter a smooth function of time into the model using the
+Finally, we can model the hazard as a smooth function of time using the
 \code{splines} package:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
-R>                                     data = ERSPC, 
-R>                                     ratio = 100)
+R+                                     data = ERSPC, 
+R+                                     ratio = 100)
 R> 
 R> summary(casebase_splines)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.397  -0.173  -0.136  -0.085   3.797  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value             Pr(>|z|)    
+#> (Intercept)           -10.2787     0.3175  -32.38 < 0.0000000000000002 ***
+#> bs(Follow.Up.Time)1     4.3191     0.8062    5.36        0.00000008456 ***
+#> bs(Follow.Up.Time)2     2.1061     0.4878    4.32        0.00001580161 ***
+#> bs(Follow.Up.Time)3     4.5310     0.7160    6.33        0.00000000025 ***
+#> ScrArmScreening group  -0.2068     0.0886   -2.33                 0.02 *  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059.0  on 54539  degrees of freedom
+#> Residual deviance: 5792.2  on 54535  degrees of freedom
+#> AIC: 5802
+#> 
+#> Number of Fisher Scoring iterations: 9
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_splines))
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>           (Intercept)   bs(Follow.Up.Time)1   bs(Follow.Up.Time)2 
+#>              0.000034             75.119228              8.216108 
+#>   bs(Follow.Up.Time)3 ScrArmScreening group 
+#>             92.847641              0.813203
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_splines))
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>                           2.5 %     97.5 %
+#> (Intercept)            0.000018   0.000062
+#> bs(Follow.Up.Time)1   15.997506 378.737706
+#> bs(Follow.Up.Time)2    3.256838  22.143147
+#> bs(Follow.Up.Time)3   21.638298 362.098155
+#> ScrArmScreening group  0.682786   0.966562
+\end{CodeOutput}
 \end{CodeChunk}
+
+Once again, we can see that the estimate of the hazard ratio is similar
+to that from the Cox regression. We then look at the estimate of the
+CIF:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> smooth_risk_splines <- absoluteRisk(object = casebase_splines, 
-R>                                     time = seq(0,15,0.1), 
-R>                                     newdata = new_data)
+R+                                     time = seq(0,15,0.1), 
+R+                                     newdata = new_data)
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>      xlab = "Years since Randomization", 
-R>      ylab = "Cumulative Incidence", 
-R>      fun = "event",
-R>      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-R>      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>                     exp(coef(cox_model)), 
-R>                     exp(confint(cox_model))[1], 
-R>                     exp(confint(cox_model))[2]))
+R+      xlab = "Years since Randomization", 
+R+      ylab = "Cumulative Incidence (%)", 
+R+      fun = "event",
+R+      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
+R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+                     exp(coef(cox_model)), 
+R+                     exp(confint(cox_model))[1], 
+R+                     exp(confint(cox_model))[2]),
+R+      ylim = c(0, 2), yscale = 100)
 R> lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
 R> lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
 R> 
 R> legend("topleft", 
-R>        legend = c("Control group (Cox)","Control group (Casebase)",
-R>                   "Screening group (Cox)", "Screening group (Casebase)"), 
-R>        col = c("red","red", "blue","blue"),
-R>        lty = c(1, 2, 1, 2), 
-R>        bg = "gray90")
+R+        legend = c("Control group (Cox)","Control group (Casebase)",
+R+                   "Screening group (Cox)", "Screening group (Casebase)"), 
+R+        col = c("red","red", "blue","blue"),
+R+        lty = c(1, 2, 1, 2), 
+R+        bg = "gray90")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-splines-cif-1} \end{center}
+
 \end{CodeChunk}
 
-It looks like the best fit.
+Qualitatively, the combination of splines and case-base sampling
+produces the parametric model that most closely resembles the Cox model.
+In the following table, we see that the confidence intervals are also
+similar across all four models. In other words, this reinforces the idea
+that, under proportional hazards, we do not need to model the full
+hazard to obtain reliable estimates of the hazard ratio. Of course,
+different parametric models for the hazards give rise to qualitatively
+different estimates for the CIF.
 
-Since we are within the GLM framework, we can easily test for which
-model better fits the data using a Likelihood Ratio Test (LRT). The null
-hypothesis here is that the linear model is just as good as the larger
-(in terms of number of parameters) splines model.
+\begin{CodeChunk}
+
+\begin{tabular}{l|r|l|r}
+\hline
+Model & HR & CI & Width\\
+\hline
+Cox & 0.80 & (0.67, 0.95) & 0.28\\
+\hline
+Exponential & 0.81 & (0.68, 0.96) & 0.28\\
+\hline
+Weibull & 0.79 & (0.67, 0.94) & 0.28\\
+\hline
+Splines & 0.81 & (0.68, 0.97) & 0.28\\
+\hline
+\end{tabular}
+
+\end{CodeChunk}
+
+As noted above, the usual asymptotic results hold for likelihood ratio
+tests built using case-base sampling models. Therefore, we can easily
+test the null hypothesis that the exponential model is just as good as
+the larger (in terms of number of parameters) splines model.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> anova(casebase_time, casebase_splines, test = "LRT")
+R> anova(casebase_exponential, casebase_splines, test = "LRT")
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> Analysis of Deviance Table
+#> 
+#> Model 1: DeadOfPrCa ~ ScrArm + offset(offset)
+#> Model 2: DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm + offset(offset)
+#>   Resid. Df Resid. Dev Df Deviance            Pr(>Chi)    
+#> 1     54538       6053                                    
+#> 2     54535       5792  3      261 <0.0000000000000002 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{CodeOutput}
 \end{CodeChunk}
 
-As expected, we see that splines model provides a better fit.
+As expected, we see that splines model provides a better fit. Similarly,
+we can compare the AIC for all three case-base models:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> AIC(casebase_exponential)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> [1] 6057
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> AIC(casebase_time)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> [1] 5821
+\end{CodeOutput}
+
+\begin{CodeInput}
+R> AIC(casebase_splines)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> [1] 5802
+\end{CodeOutput}
+\end{CodeChunk}
+
+Once again, we have evidence that the splines model provides the best
+fit.
+
+With this first case study, we saw how population-time plots can provide
+a useful summary of the incidence for our event of interests. In
+particular, we saw how it can provide evidence against an exponential
+hazard model. We then explored how different parametric models can
+provide different estimates of the CIF, even though they all give
+similar estimates for the hazard ratios.
 
 \hypertarget{case-study-2bone-marrow-transplant}{%
 \section{Case study 2--Bone-marrow
@@ -1210,7 +1485,7 @@ R+   "Model4" = AIC(fit4))
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 Model4 
-#>    798    759    737    708
+#>    810    772    741    722
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1320,7 +1595,7 @@ R+              time = 365)
 
 \begin{CodeOutput}
 #>         
-#> 365 0.32
+#> 365 0.25
 \end{CodeOutput}
 
 \begin{CodeInput}
@@ -1334,7 +1609,7 @@ R> 1 - exp(-cumhaz_est)
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> [1] 0.24
+#> [1] 0.2
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1359,7 +1634,7 @@ to \pkg{casebase}.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-11 10:31:00 using the following
+This report was generated on 2019-12-11 15:19:04 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1424,6 +1699,7 @@ R> devtools::session_info()
 #>  lifecycle     0.1.0      2019-08-01 [1]
 #>  lubridate   * 1.7.4      2018-04-11 [1]
 #>  magrittr    * 1.5        2014-11-22 [1]
+#>  MASS          7.3-51.4   2019-04-26 [4]
 #>  Matrix      * 1.2-18     2019-11-27 [4]
 #>  memoise       1.1.0      2017-04-21 [1]
 #>  mgcv          1.8-24     2018-06-18 [1]
@@ -1509,6 +1785,7 @@ R> devtools::session_info()
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.5.1)                          
 #>  CRAN (R 3.6.1)                          
@@ -1570,7 +1847,7 @@ R> git2r::repository(here::here())
 
 \begin{CodeOutput}
 #> Local:    review-glmnet /home/mturgeon/Documents/git_repositories/cbpaper
-#> Head:     [b7e23a6] 2019-12-10: Merge branch 'master' into review-glmnet
+#> Head:     [491ef55] 2019-12-11: edit third case study
 \end{CodeOutput}
 \end{CodeChunk}
 

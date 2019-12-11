@@ -98,7 +98,7 @@ set.seed(2)
 eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
-eval_cs1 <- FALSE
+eval_cs1 <- TRUE
 eval_cs2 <- FALSE
 eval_cs3 <- FALSE
 eval_cs4 <- TRUE
@@ -272,18 +272,18 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1--European Randomized Study of Prostate Cancer Screening
 
-To introduce the different features available, we make use of the European Randomized Study of Prostate Cancer Screening data; this dataset is available through the \pkg{casebase} package:
+For the first case study, we will use of the European Randomized Study of Prostate Cancer Screening data. This dataset is available through the \pkg{casebase} package:
 
 ```{r erspc-data, eval = eval_cs1}
 data(ERSPC)
 ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
-                       levels = c(0,1), 
+                       levels = c(0, 1), 
                        labels = c("Control group", "Screening group"))
 ```
 
-The results of this study were published by [schroder2009screening]. This data was obtained using the approach described in [liu2014recovering].
+The results of this study were published by [@schroder2009screening], and the dataset itself was obtained using the approach described in [@liu2014recovering].
 
-Population time plots can be extremely informative graphical displays of survival data. They should be the first step in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function. We first create the necessary dataset for producing the population time plots, and we can produce the plot by using the corresponding \code{plot} method:
+Population time plots can be extremely informative graphical displays of survival data. They should be the first step in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function. We first create the necessary dataset for producing the population time plots, and we can generate the plot by using the corresponding \code{plot} method:
 
 ```{r plot-erspc-data, eval = eval_cs1}
 pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
@@ -299,14 +299,15 @@ pt_object_strat <- casebase::popTime(ERSPC,
 plot(pt_object_strat)
 ```
 
-
 We can also plot them side-by-side using the \code{ncol} argument:
 
 ```{r plot-stratified-erspc-data-side, eval = eval_cs1}
 plot(pt_object_strat, ncol = 2)
 ```
 
-First, we fit a Cox model to the data, examine the hazard ratio for the screening group (relative to the control group), and plot the cumulative incidence function (CIF). 
+ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
+
+Next, we investigate the differences between the control and the screening arms. A common choice for this type of analysis is to use a Cox regression model and estimate the hazard ratio for the screening group (relative to the control group). In \proglang{R}, it can be done as follows:
 
 ```{r erspc-cox, eval = eval_cs1}
 cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
@@ -314,7 +315,7 @@ cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
 summary(cox_model)
 ```
 
-We can plot the CIF for each group:
+We can also plot the cumulative incidence function (CIF) for each group. However, this involves estimating the baseline hazard, which Cox regression treated as a nuisance parameter.
 
 ```{r erspc-cox-cif, eval = eval_cs1}
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
@@ -322,14 +323,15 @@ new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence", 
+     ylab = "Cumulative Incidence (%)", 
      fun = "event",
      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]))
+                    exp(confint(cox_model))[2]),
+     ylim = c(0, 2), yscale = 100)
 legend("topleft", 
        legend = c("Control group", "Screening group"), 
        col = c("red","blue"),
@@ -337,9 +339,11 @@ legend("topleft",
        bg = "gray90")
 ```
 
-Next we fit several models using case-base sampling. The models we fit differ in how we choose to model time. 
+Next, we show how case-base sampling can be used to carry out a similar analysis. We fit several models that differ in how we choose to model time. 
 
-The \code{fitSmoothHazard} function provides an estimate of the hazard function $h(x, t)$ is the hazard function, where $t$ denotes the numerical value of a point in prognostic/prospective time and $x$ is the realization of the vector $X$ of variates based on the patient's profile and intervention (if any).
+<!-- The \code{fitSmoothHazard} function provides an estimate of the hazard function $h(x, t)$ is the hazard function, where $t$ denotes the numerical value of a point in prognostic/prospective time and $x$ is the realization of the vector $X$ of variates based on the patient's profile and intervention (if any). -->
+
+First, we will fit an exponential model. Recall that this corresponds to excluding time from the linear predictor.
 
 ```{r erspc-casebase-exponential, eval = eval_cs1}
 casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
@@ -351,11 +355,11 @@ exp(coef(casebase_exponential)[2])
 exp(confint(casebase_exponential)[2,])
 ```
 
-The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation:
+<!-- The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation: -->
 
-$$ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$
+<!-- $$ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$ -->
 
-In the plot below, we overlay the estimated CIF from the casebase exponential model on the Cox model CIF:
+We can then use the \code{absoluteRisk} function to get an estimate of the cumulative incidence curve for a specific covariate profile. In the plot below, we overlay the estimated CIF from the exponential model on the Cox model CIF:
 
 ```{r erspc-casebase-cif, eval = eval_cs1}
 smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
@@ -364,14 +368,15 @@ smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential,
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence", 
+     ylab = "Cumulative Incidence (%)", 
      fun = "event",
      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]))
+                    exp(confint(cox_model))[2]),
+     ylim = c(0, 2), yscale = 100)
 lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
 lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
 
@@ -384,9 +389,9 @@ legend("topleft",
        bg = "gray90")
 ```
 
-As we can see, the exponential model is not a good fit. Based on what we observed in the population time plot, where more events are observed later on in time, this poor fit is expected. A constant hazard model would overestimate the cumulative incidence earlier on in time, and underestimate it later on; this is what we see on the cumulative incidence plot. This example demonstrates the benefits of population time plots as an exploratory analysis tool. 
+As we can see, the exponential model gives us an estimate of the hazard ratio that is similar to the one obtained using Cox regression. However, the CIF estimates are quite different. Based on what we observed in the population time plot, where more events are observed later on in time, we do not expect a constant hazard would be a good description for this data. In other words, this poor fit for the exponential hazard is expected. A constant hazard model would overestimate the cumulative incidence earlier on in time, and underestimate it later on; this is what we see on the cumulative incidence plot. This example demonstrates the benefits of population time plots as an exploratory analysis tool. 
 
-Next we enter time linearly into the model:
+For the next model, we include time as a linear term. Recall that this corresponds to a Weibull model.
 
 ```{r erspc-casebase-weibull, eval = eval_cs1}
 casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
@@ -398,6 +403,7 @@ exp(coef(casebase_time))
 exp(confint(casebase_time))
 ```
 
+Again, the estimate of the hazard ratio is similar to that obtained from Cox regression. We then look at the estimate of the CIF:
 
 ```{r erspc-casebase-weibull-cif, eval = eval_cs1}
 smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
@@ -406,14 +412,15 @@ smooth_risk_time <- casebase::absoluteRisk(object = casebase_time,
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence", 
+     ylab = "Cumulative Incidence (%)", 
      fun = "event",
      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]))
+                    exp(confint(cox_model))[2]),
+     ylim = c(0, 2), yscale = 100)
 lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
 lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
 
@@ -425,9 +432,9 @@ legend("topleft",
        bg = "gray90")
 ```
 
-We see that the Weibull model leads to a better fit.
+We see that the Weibull model leads to a better fit of the CIF than the Exponential model, when compared with the semi-parametric approach.
 
-Next we try to enter a smooth function of time into the model using the \code{splines} package:
+Finally, we can model the hazard as a smooth function of time using the \code{splines} package:
 
 ```{r erspc-casebase-splines, eval = eval_cs1}
 casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
@@ -439,6 +446,7 @@ exp(coef(casebase_splines))
 exp(confint(casebase_splines))
 ```
 
+Once again, we can see that the estimate of the hazard ratio is similar to that from the Cox regression. We then look at the estimate of the CIF:
 
 ```{r erspc-casebase-splines-cif, eval = eval_cs1}
 smooth_risk_splines <- absoluteRisk(object = casebase_splines, 
@@ -447,14 +455,15 @@ smooth_risk_splines <- absoluteRisk(object = casebase_splines,
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence", 
+     ylab = "Cumulative Incidence (%)", 
      fun = "event",
      xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]))
+                    exp(confint(cox_model))[2]),
+     ylim = c(0, 2), yscale = 100)
 lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
 lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
 
@@ -466,15 +475,43 @@ legend("topleft",
        bg = "gray90")
 ```
 
-It looks like the best fit. 
+Qualitatively, the combination of splines and case-base sampling produces the parametric model that most closely resembles the Cox model. In the following table, we see that the confidence intervals are also similar across all four models. In other words, this reinforces the idea that, under proportional hazards, we do not need to model the full hazard to obtain reliable estimates of the hazard ratio. Of course, different parametric models for the hazards give rise to qualitatively different estimates for the CIF.
 
-Since we are within the GLM framework, we can easily test for which model better fits the data using a Likelihood Ratio Test (LRT). The null hypothesis here is that the linear model is just as good as the larger (in terms of number of parameters) splines model.
+```{r echo = FALSE}
+CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
+CI_exp <- c(exp(coef(casebase_exponential))["ScrArmScreening group"], exp(confint(casebase_exponential))["ScrArmScreening group",])
+CI_time <- c(exp(coef(casebase_time))["ScrArmScreening group"], exp(confint(casebase_time))["ScrArmScreening group",])
+CI_splines <- c(exp(coef(casebase_splines))["ScrArmScreening group"], exp(confint(casebase_splines))["ScrArmScreening group",])
 
-```{r erscp-compare, eval = eval_cs1}
-anova(casebase_time, casebase_splines, test = "LRT")
+table_ci <- rbind(CI_cox, CI_exp, CI_time, CI_splines)
+colnames(table_ci) <- c("HR", "LB", "UB")
+
+data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>% 
+  bind_cols(as.data.frame(table_ci)) %>% 
+  mutate(CI = paste0("(", round(LB, 2), ", ",
+                     round(UB, 2), ")"),
+         Width = UB - LB) %>% 
+  dplyr::select(-LB, -UB) %>% 
+  knitr::kable(format = "latex")
 ```
 
-As expected, we see that splines model provides a better fit.
+As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) splines model.
+
+```{r erscp-compare, eval = eval_cs1}
+anova(casebase_exponential, casebase_splines, test = "LRT")
+```
+
+As expected, we see that splines model provides a better fit. Similarly, we can compare the AIC for all three case-base models:
+
+```{r erscp-aic, eval = eval_cs1}
+AIC(casebase_exponential)
+AIC(casebase_time)
+AIC(casebase_splines)
+```
+
+Once again, we have evidence that the splines model provides the best fit.
+
+With this first case study, we saw how population-time plots can provide a useful summary of the incidence for our event of interests. In particular, we saw how it can provide evidence against an exponential hazard model. We then explored how different parametric models can provide different estimates of the CIF, even though they all give similar estimates for the hazard ratios.
 
 # Case study 2--Bone-marrow transplant
 
