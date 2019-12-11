@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.12.8)  8 DEC 2019 12:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.12.8)  11 DEC 2019 15:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -428,30 +428,51 @@ Package: longtable 2019/02/06 v4.12 Multi-page Table package (DPC)
 \c@LT@tables=\count117
 \c@LT@chunks=\count118
 \LT@p@ftn=\toks22
+)
+   defining Unicode char U+2500 (decimal 9472)
+(/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2016/02/03 v2.11b `tabularx' package (DPC)
+(/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/tools/array.sty
+Package: array 2019/08/31 v2.4l Tabular extension package (FMi)
+\col@sep=\dimen119
+\ar@mcellbox=\box34
+\extrarowheight=\dimen120
+\NC@list=\toks23
+\extratabsurround=\skip60
+\backup@length=\skip61
+\ar@cellbox=\box35
+)
+\TX@col@width=\dimen121
+\TX@old@table=\dimen122
+\TX@old@col=\dimen123
+\TX@target=\dimen124
+\TX@delta=\dimen125
+\TX@cols=\count119
+\TX@ftn=\toks24
 ) (./paper.aux)
 \openout1 = `paper.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 66.
-LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 6
-6.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 70.
+LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 7
+0.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
+LaTeX Font Info:    ... okay on input line 70.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 70.
+LaTeX Font Info:    ... okay on input line 70.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/oberdiek/grfext.sty
@@ -467,18 +488,18 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-\AtBeginShipoutBox=\box34
-Package hyperref Info: Link coloring ON on input line 66.
+\AtBeginShipoutBox=\box36
+Package hyperref Info: Link coloring ON on input line 70.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count119
+\c@section@level=\count120
 )
-LaTeX Info: Redefining \ref on input line 66.
-LaTeX Info: Redefining \pageref on input line 66.
-LaTeX Info: Redefining \nameref on input line 66.
+LaTeX Info: Redefining \ref on input line 70.
+LaTeX Info: Redefining \pageref on input line 70.
+LaTeX Info: Redefining \nameref on input line 70.
 (./paper.out) (./paper.out)
 \@outlinefile=\write4
 \openout4 = `paper.out'.
@@ -486,26 +507,26 @@ LaTeX Info: Redefining \nameref on input line 66.
 <jsslogo.jpg, id=48, 540.0175pt x 393.47pt>
 File: jsslogo.jpg Graphic file (type jpg)
 <use jsslogo.jpg>
-Package pdftex.def Info: jsslogo.jpg  used on input line 66.
+Package pdftex.def Info: jsslogo.jpg  used on input line 70.
 (pdftex.def)             Requested size: 89.80768pt x 65.43607pt.
-LaTeX Font Info:    Trying to load font information for T1+pzc on input line 66
+LaTeX Font Info:    Trying to load font information for T1+pzc on input line 70
 .
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/psnfss/t1pzc.fd
 File: t1pzc.fd 2001/06/04 font definitions for T1/pzc.
 )
 LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <28> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 66.
-LaTeX Font Info:    Trying to load font information for T1+aess on input line 6
-6.
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 70.
+LaTeX Font Info:    Trying to load font information for T1+aess on input line 7
+0.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/ae/t1aess.fd
 File: t1aess.fd 1997/11/16 Font definitions for T1/aess.
 )
 LaTeX Font Info:    Trying to load font information for T1+aett on input line 7
-1.
+5.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/ae/t1aett.fd
 File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
 )
-Overfull \hbox (9.09254pt too wide) in paragraph at lines 96--114
+Overfull \hbox (9.09254pt too wide) in paragraph at lines 100--118
 [][] 
  []
 
@@ -513,28 +534,20 @@ Overfull \hbox (9.09254pt too wide) in paragraph at lines 96--114
 
 {/home/mturgeon/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./jsslo
 go.jpg>]
-Overfull \hbox (0.8721pt too wide) in paragraph at lines 137--150
+Overfull \hbox (0.8721pt too wide) in paragraph at lines 145--158
 []\T1/aer/m/n/10.95 Many pack-ages ex-ist that im-ple-ment semi-parametric Cox 
 mod-els. Of those, \T1/aer/b/n/10.95 glm-net \T1/aer/m/n/10.95 ([][]2011[][])??
 ?,
  []
 
 LaTeX Font Info:    Font shape `T1/aer/b/sl' in size <10.95> not available
-(Font)              Font shape `T1/aer/bx/sl' tried instead on input line 178.
+(Font)              Font shape `T1/aer/bx/sl' tried instead on input line 186.
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 2 []
  []
 
 [2]
-LaTeX Font Info:    Trying to load font information for TS1+aer on input line 2
-19.
-(/usr/share/R/share/texmf/tex/latex/ts1aer.fd
-File: ts1aer.fd 
-)
-LaTeX Font Info:    Font shape `TS1/aer/m/n' in size <10.95> not available
-(Font)              Font shape `TS1/cmr/m/n' tried instead on input line 219.
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 3
  []
@@ -545,9 +558,6 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
  []
 
 [4]
-Underfull \vbox (badness 5374) has occurred while \output is active []
-
-
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 5
  []
@@ -574,16 +584,12 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 [9]
 
-LaTeX Warning: Reference `fig:compPop1' on page 10 undefined on input line 722.
+LaTeX Warning: Reference `fig:compPop1' on page 10 undefined on input line 730.
 
 
 
-LaTeX Warning: Reference `fig:compPop2' on page 10 undefined on input line 724.
+LaTeX Warning: Reference `fig:compPop2' on page 10 undefined on input line 732.
 
-
-
-LaTeX Warning: Reference `fig:compAbsrisk' on page 10 undefined on input line 7
-55.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -591,29 +597,31 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [10]
+
+LaTeX Warning: Reference `fig:compAbsrisk' on page 11 undefined on input line 7
+63.
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 11
  []
 
 [11]
 
-LaTeX Warning: Reference `fig:ptPreI' on page 12 undefined on input line 891.
-
-
-LaTeX Warning: Reference `fig:ptPostI' on page 12 undefined on input line 892.
+LaTeX Warning: Reference `fig:ptPostI' on page 12 undefined on input line 899.
 
 LaTeX Font Info:    Trying to load font information for TS1+aett on input line 
-924.
+922.
 (/usr/share/R/share/texmf/tex/latex/ts1aett.fd
 File: ts1aett.fd 
 )
 LaTeX Font Info:    Trying to load font information for TS1+cmtt on input line 
-924.
+922.
 (/home/mturgeon/.TinyTeX/texmf-dist/tex/latex/base/ts1cmtt.fd
 File: ts1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `TS1/aett/m/sl' in size <10.95> not available
-(Font)              Font shape `TS1/cmtt/m/sl' tried instead on input line 924.
+(Font)              Font shape `TS1/cmtt/m/sl' tried instead on input line 922.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -622,7 +630,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 [12]
 
-LaTeX Warning: Reference `fig:abSC' on page 13 undefined on input line 1005.
+LaTeX Warning: Reference `fig:abSC' on page 13 undefined on input line 1002.
 
 
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
@@ -639,7 +647,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 15
  []
 
-[15] (./paper.bbl
+[15]
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 16 []
  []
@@ -649,49 +657,46 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 17
  []
 
-[17])
-Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1163--1163
-
- []
-
-LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
-(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1163.
-
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1163.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
+[17] (./paper.bbl
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 18 []
  []
 
-[18]
+[18])
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
+
+ []
+
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 [] \T1/aer/m/n/10.95 19
  []
 
 [19]
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1242--1242
+
+ []
+
+LaTeX Font Info:    Font shape `T1/pzc/m/n' in size <13> not available
+(Font)              Font shape `T1/pzc/mb/it' tried instead on input line 1242.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1242.
+
 Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 \T1/aer/m/n/10.95 20 []
  []
@@ -702,28 +707,32 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [21]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 1163.
+Overfull \hbox (10.94998pt too wide) has occurred while \output is active
+\T1/aer/m/n/10.95 22 []
+ []
+
+[22]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 1242.
 (./paper.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1163.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1163.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1242.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1242.
 
 Package rerunfilecheck Info: File `paper.out' has not changed.
 (rerunfilecheck)             Checksum: 3DC001D7DCBFF7CDB19465506DE9F42E;1152.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1163.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1242.
  ) 
 Here is how much of TeX's memory you used:
- 7514 strings out of 494111
- 108755 string characters out of 6173324
- 212990 words of memory out of 5000000
- 11380 multiletter control sequences out of 15000+600000
- 56882 words of font info for 101 fonts, out of 8000000 for 9000
+ 7587 strings out of 494111
+ 109530 string characters out of 6173324
+ 215898 words of memory out of 5000000
+ 11451 multiletter control sequences out of 15000+600000
+ 56541 words of font info for 100 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 39i,10n,38p,344b,468s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 39i,11n,38p,385b,469s stack positions out of 5000i,500n,10000p,200000b,80000s
  </home/mturgeon/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcst1095.600p
-k> </home/mturgeon/.TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1095.600p
 k>{/home/mturgeon/.TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}</home/mturge
 on/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmb10.pfb></home/mturgeon
 /.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></home/mturgeon/
@@ -743,10 +752,10 @@ f-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/mturgeon/.TinyTeX/texmf
 dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></home/mturgeon/.TinyTeX/texmf-d
 ist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></home/mturgeon/.TinyTeX/texmf-dis
 t/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on paper.pdf (21 pages, 311178 bytes).
+Output written on paper.pdf (22 pages, 310503 bytes).
 PDF statistics:
  416 PDF objects out of 1000 (max. 8388607)
- 367 compressed objects within 4 object streams
- 83 named destinations out of 1000 (max. 500000)
+ 368 compressed objects within 4 object streams
+ 84 named destinations out of 1000 (max. 500000)
  94 words of extra memory for PDF output out of 10000 (max. 10000000)
 
