@@ -762,7 +762,7 @@ In the next case study, we show how case-base sampling can also be used
 in the context of a competing risk analysis. For illustrative purposes,
 we will use the same data that was used in Scrucca \emph{et al}
 \citeyearpar{scrucca2010regression}. The data was downloaded from the
-main author's website, and it is also available as part of the
+first author's website, and it is also available as part of the
 \pkg{casebase} package.
 
 \begin{CodeChunk}
@@ -787,41 +787,6 @@ different variable types: for continuous variables, we gave the range,
 followed by the mean and standard deviation; for categorical variables,
 we gave the counts for each category.
 
-\begin{CodeChunk}
-\begin{table}[t]
-
-\caption{\label{tab:table1bmtcrr}Baseline characteristics of patients in the stem-cell transplant study.}
-\centering
-\begin{tabular}{lll}
-\toprule
-Variable & Description & Statistical summary\\
-\midrule
-\code{Sex} & Sex & M=Male (100)\\
- &  & F=Female (77)\\
-\code{D} & Disease & ALL (73)\\
- &  & AML (104)\\
-\code{Phase} & Phase & CR1 (47)\\
-\addlinespace
- &  & CR2 (45)\\
- &  & CR3 (12)\\
- &  & Relapse (73)\\
-\code{Source} & Type of transplant & BM+PB (21)\\
- &  & PB (156)\\
-\addlinespace
-\code{Age} & Age of patient (years) & 4--62\\
- &  & 30.47 (13.04)\\
-\code{ftime} & Failure time (months) & 0.13--131.77\\
- &  & 20.28 (30.78)\\
-\code{Status} & Status indicator & 0=censored (46)\\
-\addlinespace
- &  & 1=relapse (56)\\
- &  & 2=competing event (75)\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\end{CodeChunk}
-
 First, we can look at a population-time plot to visualize the incidence
 density of both relapse and the competing events. In Figure
 \ref{fig:compPop}, failure times are highlighted on the plot using red
@@ -829,17 +794,6 @@ points for the event of interest (panel A) and blue dots for competing
 events (panel B). In both panels, we see evidence of a non-constant
 hazard function: the density of points is larger at the beginning of
 follow-up than at the end.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{../figures/compPop-1} 
-
-}
-
-\caption[Population-time plot for the stem-cell transplant study]{Population-time plot for the stem-cell transplant study. A) The red points represent relapse events. B) The blue points represent the competing events.}\label{fig:compPop}
-\end{figure}
-\end{CodeChunk}
 
 Our main objective is to compute the absolute risk of relapse for a
 given set of covariates. First, we fit a smooth hazard to the data using
@@ -849,10 +803,10 @@ a linear term for time:
 
 \begin{CodeInput}
 R> model_cb <- fitSmoothHazard(
-R+     Status ~ ftime + Sex + D + Phase + Source + Age, 
-R+     data = bmtcrr, 
-R+     ratio = 100, 
-R+     time = "ftime")
+R>     Status ~ ftime + Sex + D + Phase + Source + Age, 
+R>     data = bmtcrr, 
+R>     ratio = 100, 
+R>     time = "ftime")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -865,33 +819,8 @@ regression. To do so, we need to treat the competing event as censoring.
 R> library(survival)
 R> # Treat competing event as censoring
 R> model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-R+                    data = bmtcrr)
+R>                    data = bmtcrr)
 \end{CodeInput}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-\begin{table}[t]
-
-\caption{\label{tab:bmtcrr-cis}ADD CAPTION}
-\centering
-\begin{tabular}{lrlrl}
-\toprule
-\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Case-Base} & \multicolumn{2}{c}{Cox} \\
-\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
-Covariates & HR & 95\% CI & HR & 95\% CI\\
-\midrule
-Sex & 0.77 & (0.45, 1.35) & 0.68 & (0.39, 1.19)\\
-Disease & 0.58 & (0.32, 1.04) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.11 & (0.45, 2.76) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.58 & (0.41, 6.04) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 3.89 & (1.81, 8.35) & 4.55 & (2.09, 9.9)\\
-\addlinespace
-Source & 1.48 & (0.49, 4.46) & 1.46 & (0.47, 4.54)\\
-Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \end{CodeChunk}
 
 From the fit object, we can extract both the hazard ratios and their
@@ -918,17 +847,17 @@ R> time_points <- seq(0, 60, length.out = 50)
 R> 
 R> # Data.frame containing risk profile
 R> newdata <- data.frame("Sex" = factor(c("F", "F"), 
-R+                                      levels = levels(bmtcrr[,"Sex"])),
-R+                       "D" = c("ALL", "AML"), # Both diseases
-R+                       "Phase" = factor(c("Relapse", "Relapse"), 
-R+                                        levels = levels(bmtcrr[,"Phase"])),
-R+                       "Age" = c(35, 35),
-R+                       "Source" = factor(c("PB", "PB"), 
-R+                                         levels = levels(bmtcrr[,"Source"])))
+R>                                      levels = levels(bmtcrr[,"Sex"])),
+R>                       "D" = c("ALL", "AML"), # Both diseases
+R>                       "Phase" = factor(c("Relapse", "Relapse"), 
+R>                                        levels = levels(bmtcrr[,"Phase"])),
+R>                       "Age" = c(35, 35),
+R>                       "Source" = factor(c("PB", "PB"), 
+R>                                         levels = levels(bmtcrr[,"Source"])))
 R> 
 R> # Estimate absolute risk curve
 R> risk_cb <- absoluteRisk(object = model_cb, time = time_points,
-R+                         method = "numerical", newdata = newdata)
+R>                         method = "numerical", newdata = newdata)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -947,23 +876,12 @@ use the \pkg{timereg} package \citep{timereg}.
 \begin{CodeInput}
 R> library(timereg)
 R> model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) + 
-R+                           const(Phase) + const(Source) + const(Age), 
-R+                       data = bmtcrr, cause = 1, model = "fg")
+R>                           const(Phase) + const(Source) + const(Age), 
+R>                       data = bmtcrr, cause = 1, model = "fg")
 R> 
 R> # Estimate absolute risk curve
 R> risk_fg <- predict(model_fg, newdata, times = time_points)
 \end{CodeInput}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{../figures/bmtcrr-risk-1} 
-
-}
-
-\caption{\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
-\end{figure}
 \end{CodeChunk}
 
 Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both
@@ -978,21 +896,30 @@ not shown).
 \hypertarget{case-study-3support-data}{%
 \section{Case study 3--SUPPORT Data}\label{case-study-3support-data}}
 
-We examined the Study to Understand Prognoses Preferences Outcomes and
-Risks of Treatment (SUPPORT) dataset \citeyearpar{knaus1995support}. The
-SUPPORT dataset tracks death for individuals who are considered
-seriously ill within a hospital. Imputation was conducted using
-predictive mean matching and using the \pkg{mice} package in
-\proglang{R}. Before imputation, there was a total of 1000 individuals
-and 35 variables. After imputation, we have 474 observations where
-67.5\% of individuals in the study experience the event of interest.
-\textcolor{red}{How come we lose individuals during imputation?} The
-SUPPORT dataset will be used to demonstrate regularization within
-casebase, while comparing their absolute risk predictions for a new
-individual. A description of each variable can be found in Table
-\ref{tab:support1} and a breakdown of each categorical variable in Table
-\ref{tab:support2}. The data was downloaded from the main author's
-website, and it is also available as part of the \pkg{casebase} package.
+In the first two case studies, we described the basic functionalities of
+the \pkg{casebase} package: creating population-time plots, fitting
+parametric models for hazard functions, and estimating the corresponding
+cumulative incidence curves. In the next two case studies, we explore
+more advanced features.
+
+For the third case study, we will look at regularized estimation for the
+hazard function. This can be performed using a combination of case-base
+sampling and regularized logistic regression. To demonstrate this
+capability, we examine the Study to Understand Prognoses Preferences
+Outcomes and Risks of Treatment (SUPPORT) dataset
+\citep{knaus1995support}. The SUPPORT dataset tracks death for
+individuals who are considered seriously ill within a hospital.
+Imputation was conducted using predictive mean matching and using the
+\pkg{mice} package in \proglang{R} \citep{mice}. Before imputation,
+there was a total of 1000 individuals and 35 variables. After
+imputation, we have 474 individuals.
+\textcolor{red}{How come we lose individuals during imputation?} Of
+these, 67.5\% experienced the event of interest. A description of each
+variable can be found in Table \ref{tab:support1} and a breakdown of
+each categorical variable in Table \ref{tab:support2}. The original data
+was obtained from the website of the Department of Biostatistics at
+Vanderbilt University. The imputed dataset is available as part of the
+\pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -1079,113 +1006,154 @@ sfdm2    & no(M2 and SIP pres)                           \\
 \label{tab:support2}
 \end{table}
 
-Hospital death as a covariate was removed, as this is directly
-informative of death. The glmnet package on CRAN was used to introduce
-elastic net, lasso and ridge regressions to casebase. To visualize the
-incidence density, we can refer to the post-imputation population-time
-plot in Figure \ref{fig:ptPostI}.
+As before, the first step is to visualize the incidence density. The
+population-time plot for the SUPPORT data appears in Figure
+\ref{fig:support-poptime}.
+\textcolor{red}{This population-time plot is strange. The red dots never seem to go above 200.}
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> popTime_pre <- popTime(as.data.frame(support),
-R>                        time = "d.time", event = "death")
-R> plot(popTime_pre)
+R> data(support)
+R> support_popTime <- popTime(support,
+R+                            time = "d.time", event = "death")
+R> plot(support_popTime)
 \end{CodeInput}
+\begin{figure}
+
+{\centering \includegraphics{../figures/support-poptime-1} 
+
+}
+
+\caption{\label{fig:support-poptime} Population-time plot for tje SUPPORT data.}\label{fig:support-poptime}
+\end{figure}
 \end{CodeChunk}
 
+Before we proceed with the analysis, we first remove hospital death as a
+covariate, as this is directly informative of death and cannot be used
+as a predictor. Then we select one observation at random. We will
+estimate the cumulative incidence curve for this individual. The other
+observations will be used to fit the hazard function.
+
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> popTime_post <- popTime(as.data.frame(completeData),
-R>                         time = "d.time", event = "death")
-R> plot(popTime_post)
+R> support <- dplyr::select(support, -hospdead)
+R> 
+R> # Randomly select one observation
+R> indiv <- sample(1:nrow(support), size = 1)
 \end{CodeInput}
 \end{CodeChunk}
 
 Our main objective is to estimate the cumulative incidence of death for
-a given covariate profile. Given th number of covariates available, we
-will do this using regularized estimation. First, we fit the hazard
-function; for the sake of simplicity, we opted for a linear term for
-time. As \pkg{casebase} makes use of the \pkg{glmnet} package, we will
-use the function \code{fitsmoothhazard.fit}, which follows the syntax
-from \code{glmnet}. Specifically, we input a matrix \code{y}, which
-contains the time and event variables, and a matrix \code{x}, which
-contains all other variables we would like to include in the model. For
-the SUPPORT dataset, all factor variables were converted into dummy
-variables. Here, we used lasso penalization by setting \code{alpha} to
-1.
+a given covariate profile. Given the number of covariates available, we
+will do this using regularized estimation. As \pkg{casebase} makes use
+of the \pkg{glmnet} package, we will use the function
+\code{fitsmoothhazard.fit}, which follows the syntax from \code{glmnet}.
+Specifically, we input a matrix \code{y}, which contains the time and
+event variables, and a matrix \code{x}, which contains all other
+variables we would like to include in the model. For the SUPPORT
+dataset, all factor variables were converted into dummy variables.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> cb.Model <- fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", 
-R>                                 event = "death", formula_time = ~ d.time, 
-R>                                 alpha = 1, ratio = 100)
+R> # Create design matrix without the time variable
+R> support_matrix <- model.matrix(death ~ . - d.time, 
+R+                                data = support)
+R> # Remove intercept term
+R> support_matrix <- support_matrix[,colnames(support_matrix) != "(Intercept)"]
+R> 
+R> # Create test and train dataset
+R> support_test <- support_matrix[indiv,,drop = FALSE]
+R> 
+R> support_train <- support_matrix[-indiv,]
+R> y <- as.matrix(support[-indiv, c("death", "d.time")])
+\end{CodeInput}
+\end{CodeChunk}
+
+We are now ready to estimate the hazard function. We use lasso
+penalization; this is achieved by setting \code{alpha} to 1. Also, note
+that the argument \code{formula_time} can be used to specify the
+function form for time; in our example, we model time linearly.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> support_cb <- fitSmoothHazard.fit(support_train, y, 
+R+                                   formula_time = ~ d.time, 
+R+                                   family = "glmnet", 
+R+                                   event = "death", time = "d.time", 
+R+                                   alpha = 1, ratio = 100)
 \end{CodeInput}
 \end{CodeChunk}
 
 Then, we take our model object and use the \code{absoluteRisk} function
-to compute our estimate of the cumulative incidence function.
+to compute our estimate of the cumulative incidence function. Since
+\code{glmnet} fitted the penalized logistic regression for a range of
+penalty terms, we need to specify which one we want to use for our
+prediction. We select \code{s = "lambda.1se"}, as recommended.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> 
-R> casebaseAbsolute <- absoluteRisk(cb.Model,
-R>                                  time = seq(1, max(completeData$d.time), 0.5),
-R>                                  newdata = t(newData),
-R>                                  s = "lambda.1se", method = "numerical")
+R> time_points <- seq(1, max(support$d.time), by = 0.5)
+R> support_risk <- absoluteRisk(support_cb,
+R+                              time = time_points,
+R+                              newdata = support_test,
+R+                              s = "lambda.1se", method = "numerical")
 \end{CodeInput}
 \end{CodeChunk}
 
 We will compare this curve to a regularized version of Cox regression,
 and a Kaplan-Meier survival curve. Using the \pkg{glmnet} package, we
-can fit the Cox regression model using regularized estimation. However,
-\pkg{glmnet} does not provide any functionality for estimating the
-baseline hazard, and the functionalities in the \pkg{survival} package
-do not work on the output from \code{cv.glmnet}. To circumvent this
-issue and estimate the baseline hazard, we followed the following steps.
-First, we fitted a non-regularized Cox model using only the variables
-selected by \pkg{glmnet}; the baseline hazard will be estimated using
-this object. Then, we replaced the estimates of the regression
-coefficients by the estimates from \pkg{glmnet}. Finally, this modified
-\code{coxph} object is fed to the \code{survival::survfit} function to
-obtain the estimated survival function.
+can fit the Cox regression model using regularized estimation.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> # Create u and xCox, which will be used when fitting Cox with glmnet.
-R> u <- survival::Surv(time = as.numeric(y[,2]), 
-R>                     event = as.factor(y[,1]))
-R> xCox <- as.matrix(sparse.model.matrix(death~ . - d.time,
-R>                                       data = completeData))[-c(sam),]
-R> # hazard for cox using glmnet
-R> coxglmFit <- glmnet::cv.glmnet(x = xCox, y = u,
-R>                                family = "cox", alpha = 1)
-R> # convergence demonstrated in plot
-R> # plot(coxglmFit)
-R> #taking the coefficient estimates for later use
-R> nonzero_covariate_cox <- predict(coxglmFit, type = "nonzero", s = "lambda.1se")
-R> nonzero_coef_cox <- coef(coxglmFit, s = "lambda.1se")
-R> # creating a new dataset that only contains the covariates chosen through glmnet.
-R> cleanCoxData <- as.data.frame(cbind(as.numeric(y[,2]),
-R>                                     as.numeric(y[,1]),
-R>                                     xCox[, nonzero_covariate_cox$X1]))
-R> # fitting a cox model using regular estimation, however we will not keep it.
-R> # this is used more as an object place holder.
-R> coxFit <- survival::coxph(Surv(time = V1, event = V2) ~ ., 
-R>                           data = cleanCoxData)
-R> # The coefficients of this object will be replaced 
-R> # with the estimates from coxglmFit.
-R> coxFit$coefficients <- nonzero_coef_cox@x
-R> # Fitting CI curve for cox+glmnet
-R> newDataCox <- newData[nonzero_covariate_cox$X1 - 1]
+R> # Create survival object for glmnet
+R> surv_glmnet <- survival::Surv(time = y[, "d.time"], 
+R+                               event = y[, "death"])
 R> 
-R> abCoxFit <- survival::survfit(coxFit, newdata = as.data.frame(t(newDataCox)),
-R>                               time = seq(0, max(completeData$d.time), 1),
-R>                               type = "breslow")
+R> support_cox <- glmnet::cv.glmnet(x = support_train, 
+R+                                  y = surv_glmnet,
+R+                                  family = "cox", alpha = 1)
+\end{CodeInput}
+\end{CodeChunk}
+
+However, \pkg{glmnet} does not provide any functionality for estimating
+the baseline hazard, and the functionalities in the \pkg{survival}
+package do not work on the output from \code{cv.glmnet}. To circumvent
+this issue and get an estimate of the baseline hazard, we followed the
+following steps. First, we fitted a non-regularized Cox model using only
+the variables selected by \pkg{glmnet}; the baseline hazard will be
+estimated using this object. Then, we replaced the estimates of the
+regression coefficients by the estimates from \pkg{glmnet}. Finally,
+this modified \code{coxph} object is fed to the \code{survival::survfit}
+function to obtain the estimated survival function.
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Identifying selected covariates
+R> nonzero_covariates_cox <- predict(support_cox, type = "nonzero", 
+R+                                   s = "lambda.1se")
+R> nonzero_coef_cox <- coef(support_cox, s = "lambda.1se")
+R> # Creating a new dataset that only contains the covariates selected by glmnet
+R> support_cox_data <- as.data.frame(cbind(y,
+R+                                         support_train[, nonzero_covariates_cox$X1]))
+R> # Fitting a cox model
+R> support_cox <- survival::coxph(Surv(time = d.time, event = death) ~ ., 
+R+                           data = support_cox_data)
+R> # Replace the estimate with those obtained by glmnet
+R> support_cox$coefficients <- nonzero_coef_cox@x
+R> 
+R> # Fitting CI curve for cox+glmnet
+R> support_cox_risk <- survival::survfit(support_cox,
+R+                                       newdata = as.data.frame(support_test),
+R+                                       time = time_points,
+R+                                       type = "breslow")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1195,10 +1163,10 @@ estimate of the survival function.
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> km <- survival::Surv(time = completeData$d.time, 
-R>                      event = completeData$death)
+R> km <- survival::Surv(time = support$d.time, 
+R+                      event = support$death)
 R> abKm <- survival::survfit(km ~ 1,
-R>                           type = 'kaplan-meier')
+R+                           type = 'kaplan-meier')
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1206,19 +1174,17 @@ Now that our three cumulative incidence functions have been calculated,
 we compare them all in Figure \ref{fig:abSC}. Both \pkg{glmnet} and
 \pkg{casebase} have a lower estimated cumulative incidence by the end of
 the study, when compared to Kaplan-Meier.
+\textcolor{red}{It would be good to have an idea of why the case-base and Coxnet curves are so different. At the very least, I think we should compare the select covariates.}
 
 \begin{CodeChunk}
+\begin{figure}
 
-\begin{CodeInput}
-R> plot(casebaseAbsolute, type='l', col = "black", lwd = 2, 
-R>      main = "Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves", 
-R>      xlab = "Survival-Time", ylab = "Cumulative Incidence", ylim = c(0,1))
-R> lines(abCoxFit, col = "red", fun = "event", lwd = 3, conf.int = FALSE)
-R> lines(abKm, col = "blue", fun = "event", lwd = 3, conf.int = FALSE)
-R> legend("bottom", 
-R>        legend = c("casebase", "Cox+glmnet", "KM curve"), 
-R>        col = c("black", "red", "blue"), lty = c(1, 1, 1), bg = "gray90")
-\end{CodeInput}
+{\centering \includegraphics{../figures/abSupportComparison-1} 
+
+}
+
+\caption{\label{fig:abSC} Comparison of cumulative incidence curves between regularized casebase in black, regularized Cox regression in red and Kaplan-Meier in blue.}\label{fig:abSupportComparison}
+\end{figure}
 \end{CodeChunk}
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
@@ -1465,7 +1431,7 @@ to \pkg{casebase}.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2019-12-12 13:11:14 using the following
+This report was generated on 2019-12-12 15:16:14 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1499,7 +1465,6 @@ R> devtools::session_info()
 #>  cli           2.0.0      2019-12-09 [1]
 #>  codetools     0.2-16     2018-12-24 [4]
 #>  colorspace    1.4-1      2019-03-18 [1]
-#>  cowplot     * 1.0.0      2019-07-11 [1]
 #>  crayon        1.3.4      2017-09-16 [1]
 #>  data.table    1.12.8     2019-12-09 [1]
 #>  desc          1.2.0      2018-05-01 [1]
@@ -1515,7 +1480,7 @@ R> devtools::session_info()
 #>  generics      0.0.2      2018-11-29 [1]
 #>  ggplot2     * 3.2.1      2019-08-10 [1]
 #>  glmnet      * 2.0-18     2019-05-20 [1]
-#>  glue        * 1.3.1      2019-03-12 [1]
+#>  glue          1.3.1      2019-03-12 [1]
 #>  gtable        0.3.0      2019-03-25 [1]
 #>  haven         2.1.1      2019-07-04 [1]
 #>  hms           0.5.2      2019-10-30 [1]
@@ -1527,7 +1492,6 @@ R> devtools::session_info()
 #>  knitr         1.23       2019-05-18 [1]
 #>  labeling      0.3        2014-08-23 [1]
 #>  lattice       0.20-38    2018-11-04 [4]
-#>  lava          1.6.5      2019-02-12 [1]
 #>  lazyeval      0.2.2      2019-03-15 [1]
 #>  lifecycle     0.1.0      2019-08-01 [1]
 #>  lubridate     1.7.4      2018-04-11 [1]
@@ -1538,12 +1502,10 @@ R> devtools::session_info()
 #>  modelr        0.1.5      2019-08-08 [1]
 #>  munsell       0.5.0      2018-06-12 [1]
 #>  nlme          3.1-142    2019-11-07 [4]
-#>  numDeriv      2016.8-1   2016-08-27 [1]
 #>  pillar        1.4.2      2019-06-29 [1]
 #>  pkgbuild      1.0.3      2019-03-20 [1]
 #>  pkgconfig     2.0.3      2019-09-22 [1]
 #>  pkgload       1.0.2      2018-10-29 [1]
-#>  plyr          1.8.5      2019-12-10 [1]
 #>  prettyunits   1.0.2      2015-07-13 [1]
 #>  processx      3.4.1      2019-07-18 [1]
 #>  ps            1.3.0      2018-12-21 [1]
@@ -1553,7 +1515,6 @@ R> devtools::session_info()
 #>  readr       * 1.3.1      2018-12-21 [1]
 #>  readxl        1.3.1      2019-03-13 [1]
 #>  remotes       2.1.0      2019-06-24 [1]
-#>  reshape2      1.4.3      2017-12-11 [1]
 #>  rlang         0.4.2      2019-11-23 [1]
 #>  rmarkdown     1.16       2019-10-01 [1]
 #>  rprojroot     1.3-2      2018-01-03 [1]
@@ -1570,7 +1531,6 @@ R> devtools::session_info()
 #>  tidyr       * 1.0.0      2019-09-11 [1]
 #>  tidyselect    0.2.5      2018-10-11 [1]
 #>  tidyverse   * 1.2.1      2017-11-14 [1]
-#>  timereg     * 1.9.4      2019-07-30 [1]
 #>  usethis       1.5.1      2019-07-04 [1]
 #>  vctrs         0.2.0      2019-07-05 [1]
 #>  VGAM          1.1-2      2019-11-21 [1]
@@ -1591,7 +1551,6 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.2)                          
 #>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.0)                          
@@ -1621,7 +1580,6 @@ R> devtools::session_info()
 #>  CRAN (R 3.5.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.6.1)                          
@@ -1630,22 +1588,19 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.2)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.5.2)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.5.0)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.0)                          
@@ -1662,7 +1617,6 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.5.2)                          
 #>  CRAN (R 3.5.0)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.1)                          
@@ -1692,7 +1646,7 @@ R> git2r::repository(here::here())
 
 \begin{CodeOutput}
 #> Local:    review /home/mturgeon/Documents/git_repositories/cbpaper
-#> Head:     [c4f42a9] 2019-12-11: Merge branch 'review-glmnet' into review
+#> Head:     [c095709] 2019-12-12: review 2nd case study
 \end{CodeOutput}
 \end{CodeChunk}
 
