@@ -54,6 +54,9 @@ preamble: >
   \usepackage{longtable}
   \usepackage{graphicx}
   \usepackage{tabularx}
+  \usepackage{float}
+  \usepackage{booktabs}
+  \usepackage{makecell}
   \DeclareUnicodeCharacter{2500}{-}
 output: 
   rticles::jss_article:
@@ -83,7 +86,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "../figures/"
 )
-
+options(kableExtra.latex.load_packages = FALSE)
 library(tidyverse)
 library(magrittr)
 library(survival)
@@ -91,6 +94,7 @@ library(casebase)
 library(splines)
 library(tibble)
 library(glmnet)
+library(kableExtra)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
@@ -99,7 +103,7 @@ eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- FALSE
-eval_cs2 <- FALSE
+eval_cs2 <- TRUE
 eval_cs3 <- FALSE
 eval_cs4 <- FALSE
 ```
@@ -493,7 +497,8 @@ data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>%
                      round(UB, 2), ")"),
          Width = UB - LB) %>% 
   dplyr::select(-LB, -UB) %>% 
-  knitr::kable(format = "latex")
+  knitr::kable(format = "latex", booktabs = TRUE)  %>%
+  kable_styling()
 ```
 
 As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) splines model.
@@ -505,9 +510,9 @@ anova(casebase_exponential, casebase_splines, test = "LRT")
 As expected, we see that splines model provides a better fit. Similarly, we can compare the AIC for all three case-base models:
 
 ```{r erscp-aic, eval = eval_cs1}
-AIC(casebase_exponential)
-AIC(casebase_time)
-AIC(casebase_splines)
+c("Exp." = AIC(casebase_exponential),
+  "Weib." = AIC(casebase_time),
+  "Splines" = AIC(casebase_splines))
 ```
 
 Once again, we have evidence that the splines model provides the best fit.
@@ -516,89 +521,62 @@ With this first case study, we saw how population-time plots can provide a usefu
 
 # Case study 2--Bone-marrow transplant
 
-The next example shows how case-base sampling can also be used in the context of a competing risk analysis. For illustrative purposes, we will use the same data that was used in Scrucca *et al* [-@scrucca2010regression]. The data was downloaded from the main author's website, and it is also available as part of the \pkg{casebase} package.
+In the next case study, we show how case-base sampling can also be used in the context of a competing risk analysis. For illustrative purposes, we will use the same data that was used in Scrucca *et al* [-@scrucca2010regression]. The data was downloaded from the main author's website, and it is also available as part of the \pkg{casebase} package.
 
-```{r bmtcrr-data, eval = eval_cs2, message = FALSE, echo=2}
+```{r bmtcrr-data, eval = eval_cs2, message = FALSE}
 library(casebase)
 data(bmtcrr)
 ```
 
-The data contains information on 177 patients who received a stem-cell transplant for acute leukemia. The event of interest is relapse, but other competing causes (e.g. transplant-related death) were also recorded Several covariates were also captured at baseline: sex, disease type (acute lymphoblastic or myeloblastic leukemia, abbreviated as ALL and AML, respectively), disease phase at transplant (Relapse, CR1, CR2, CR3), source of stem cells (bone marrow and peripheral blood, coded as BM+PB, or only peripheral blood, coded as PB), and age. A summary of these baseline characteristics appear in Table \ref{tab:table1bmtcrr}. We note that the statistical summaries were generated differently for different variable types: for continuous variables, we gave the range, followed by the mean and standard deviation; for categorical variables, we gave the counts for each category.
+The data contains information on 177 patients who received a stem-cell transplant for acute leukemia. The event of interest is relapse, but other competing causes (e.g. transplant-related death) were also recorded. Several covariates were captured at baseline: sex, disease type (acute lymphoblastic or myeloblastic leukemia, abbreviated as ALL and AML, respectively), disease phase at transplant (Relapse, CR1, CR2, CR3), source of stem cells (bone marrow and peripheral blood, coded as BM+PB, or only peripheral blood, coded as PB), and age. A summary of these baseline characteristics appear in Table \ref{tab:table1bmtcrr}. We note that the statistical summaries were generated differently for different variable types: for continuous variables, we gave the range, followed by the mean and standard deviation; for categorical variables, we gave the counts for each category.
 
-```{r echo=FALSE, eval = FALSE}
-table1 <- tibble::tribble(
+```{r echo = FALSE, eval = eval_cs2}
+tibble::tribble(
     ~Variable, ~Description, ~`Statistical summary`,
-    "Sex", "Sex", "M=Male (100)",
+    "\\code{Sex}", "Sex", "M=Male (100)",
     "", "", "F=Female (77)",
-    "D", "Disease", "ALL (73)",
+    "\\code{D}", "Disease", "ALL (73)",
     "", "", "AML (104)",
-    "Phase", "Phase", "CR1 (47)", 
+    "\\code{Phase}", "Phase", "CR1 (47)", 
     "", "", "CR2 (45)", 
     "", "", "CR3 (12)", 
     "", "", "Relapse (73)",
-    "Source", "Type of transplant", "BM+PB (21)", 
+    "\\code{Source}", "Type of transplant", "BM+PB (21)", 
     "", "", "PB (156)",
-    "Age", "Age of patient (years)", "4--62", 
+    "\\code{Age}", "Age of patient (years)", "4--62", 
     "", "", "30.47 (13.04)",
-    "Ftime", "Failure time (months)", "0.13--131.77",
+    "\\code{ftime}", "Failure time (months)", "0.13--131.77",
     "", "", "20.28 (30.78)",
-    "Status", "Status indicator", "0=censored (46)", 
+    "\\code{Status}", "Status indicator", "0=censored (46)", 
     "", "", "1=relapse (56)", 
     "", "", "2=competing event (75)"
-)
-
-xtable::xtable(table1) %>%
-    print(include.rownames = FALSE)
+) %>% 
+  knitr::kable(format = "latex", booktabs = TRUE,
+               caption = "Baseline characteristics of patients in the stem-cell transplant study.", 
+               label = "table1bmtcrr",
+               escape = FALSE) %>%
+  kable_styling()
 ```
 
-<!-- latex table generated in R 3.4.1 by xtable 1.8-2 package -->
-<!-- Sun Sep 17 16:03:22 2017 -->
-\begin{table}[ht]
-\centering
-\begin{tabular}{ccc}
-  \hline
-Variable & Description & Statistical summary \\ 
-  \hline
-Sex & Sex & M=Male (100) \\ 
-   &  & F=Female (77) \\ 
-  D & Disease & ALL (73) \\ 
-   &  & AML (104) \\ 
-  Phase & Phase & CR1 (47) \\ 
-   &  & CR2 (45) \\ 
-   &  & CR3 (12) \\ 
-   &  & Relapse (73) \\ 
-  Source & Type of transplant & BM+PB (21) \\ 
-   &  & PB (156) \\ 
-  Age & Age of patient (years) & 4--62 \\ 
-   &  & 30.47 (13.04) \\ 
-  Ftime & Failure time (months) & 0.13--131.77 \\ 
-   &  & 20.28 (30.78) \\ 
-  Status & Status indicator & 0=censored (46) \\ 
-   &  & 1=relapse (56) \\ 
-   &  & 2=competing event (75) \\ 
-   \hline
-\end{tabular}
-\caption{Baseline characteristics of patients in the stem-cell transplant study.}
-\label{tab:table1bmtcrr}
-\end{table}
+First, we can look at a population-time plot to visualize the incidence density of both relapse and the competing events. In Figure \ref{fig:compPop}, failure times are highlighted on the plot using red points for the event of interest (panel A) and blue dots for competing events (panel B). In both panels, we see evidence of a non-constant hazard function: the density of points is larger at the beginning of follow-up than at the end.
 
-In order to try and visualize the incidence density of relapse, we can look at the corresponding population-time plot. In Figure \ref{fig:compPop1}, failure times associated with relapse are highlighted on the plot using red points, while Figure \ref{fig:compPop2} provides a similar population-time plot for competing events.
-
-```{r compPop1, fig.cap="Population-time plot for the stem-cell transplant study. The points represent the event of interest (i.e., relapse).", echo=FALSE, eval = eval_cs2}
+```{r compPop, fig.cap="Population-time plot for the stem-cell transplant study. A) The red points represent relapse events. B) The blue points represent the competing events.", echo=FALSE, eval = eval_cs2}
+library(cowplot)
 pt_object <- casebase::popTime(bmtcrr, event = "Status", time = "ftime")
-plot(pt_object)
-```
 
-```{r compPop2, fig.cap="Population-time plot for the stem-cell transplant study. The points represent the competing events.", echo=FALSE, eval = eval_cs2}
 pt_object_comp <- bmtcrr %>% 
     mutate(Status = case_when(Status == 1 ~ 2L, 
                               Status == 2 ~ 1L, 
                               TRUE ~ Status)) %>% 
     casebase::popTime(event = "Status", time = "ftime")
-plot(pt_object_comp, point.colour = "blue")
+
+plot_grid(plot(pt_object) + ggtitle("Relapse"), 
+          plot(pt_object_comp, point.colour = "blue") +
+            ggtitle("Competing events"), 
+          labels = c('A', 'B'))
 ```
 
-Our main objective is to compute the absolute risk of relapse for a given set of covariates. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time:
+Our main objective is to compute the absolute risk of relapse for a given set of covariates. First, we fit a smooth hazard to the data using a linear term for time:
 
 ```{r bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2}
 model_cb <- fitSmoothHazard(
@@ -608,17 +586,18 @@ model_cb <- fitSmoothHazard(
     time = "ftime")
 ```
 
-```{r bmtcrr-cox, echo = FALSE, eval = eval_cs2}
+We will compare our hazard ratio estimates to that obtained from a Cox regression. To do so, we need to treat the competing event as censoring.
+ 
+```{r bmtcrr-cox, echo = TRUE, eval = eval_cs2}
 library(survival)
 # Treat competing event as censoring
 model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
                    data = bmtcrr)
 ```
 
-From the fit object, we can extract both the hazard ratios and their corresponding confidence intervals:
-
-```{r, echo=FALSE, eval = eval_cs2}
+```{r bmtcrr-cis, echo=FALSE, eval = eval_cs2}
 # Table of coefficients----
+library(glue)
 z_value <- qnorm(0.975)
 foo <- summary(model_cb)@coef3
 table_cb <- foo[!grepl("Intercept", rownames(foo)) & 
@@ -634,35 +613,39 @@ table_cox <- round(summary(model_cox)$conf.int[,-2], 2)
 rownames(table_cb) <- rownames(table_cox)
 colnames(table_cb) <- colnames(table_cox)
 
-table_cb %<>% as.data.frame %>% 
-    mutate(Covariates = rownames(.)) %>% 
-    mutate(`95% CI` = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>% 
+table_cb <- as.data.frame(table_cb) %>%
+  tibble::rownames_to_column("Covariates") %>% 
+    mutate(CI = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>% 
     rename(HR = `exp(coef)`) %>% 
-    select(Covariates, HR, `95% CI`)
+    select(Covariates, HR, CI)
 
-# table_cox %<>% as.data.frame %>% 
-#     mutate(Covariates = rownames(.)) %>% 
-#     mutate(`CI (Cox)` = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>% 
-#     rename(`HR (Cox)` = `exp(coef)`) %>% 
-#     select(Covariates, `HR (Cox)`, `CI (Cox)`)
+table_cox <- as.data.frame(table_cox) %>%
+  tibble::rownames_to_column("Covariates") %>% 
+  dplyr::mutate(CI_Cox = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
+  dplyr::rename(HR_Cox = `exp(coef)`) %>%
+  dplyr::select(Covariates, HR_Cox, CI_Cox)
 
 table_cb %>% 
-# inner_join(table_cb, table_cox, by = "Covariates") %>%
-    mutate(Covariates = case_when(
-        Covariates == "SexM" ~ "Sex",
-        Covariates == "DAML" ~ "Disease",
-        Covariates == "PhaseCR2" ~ "Phase (CR2 vs. CR1)",
-        Covariates == "PhaseCR3" ~ "Phase (CR3 vs. CR1)",
-        Covariates == "PhaseRelapse" ~ "Phase (Relapse vs. CR1)",
-        Covariates == "SourcePB" ~ "Source",
-        TRUE ~ Covariates
+  dplyr::inner_join(table_cox, by = "Covariates") %>%
+  dplyr::mutate(Covariates = dplyr::case_when(
+    Covariates == "SexM" ~ "Sex",
+    Covariates == "DAML" ~ "Disease",
+    Covariates == "PhaseCR2" ~ "Phase (CR2 vs. CR1)",
+    Covariates == "PhaseCR3" ~ "Phase (CR3 vs. CR1)",
+    Covariates == "PhaseRelapse" ~ "Phase (Relapse vs. CR1)",
+    Covariates == "SourcePB" ~ "Source",
+    TRUE ~ Covariates
     )) %>% 
-    knitr::kable(format = "latex")
+  knitr::kable(format = "latex", booktabs = TRUE,
+               col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
+               caption = "ADD CAPTION") %>% 
+  kable_styling() %>% 
+  add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
 ```
 
-As we can see, the only significant hazard ratio is the one associated with the phase of the disease at transplant. More precisely, being in relapse at transplant is associated with a hazard ratio of 3.92 when compared to CR1.
+From the fit object, we can extract both the hazard ratios and their corresponding confidence intervals. These quantities appear in Table \ref{tab:bmtcrr-cis}. As we can see, the only significant hazard ratio identified by case-base sampling is the one associated with the phase of the disease at transplant. More precisely, being in relapse at transplant is associated with a hazard ratio of 3.89 when compared to CR1.
 
-Given our estimate of the hazard function, we can compute the absolute risk curve for a fixed covariate profile. We performed this computation for a 35 year old woman who received a stem-cell transplant from peripheral blood at relapse. We compared the absolute risk curve for such a woman with acute lymphoblastic leukemia with that for a similar woman with acute myeloblastic leukemia. Figure \ref{fig:compAbsrisk} shows these two curves as a function of time. This figure also shows the Kaplan-Meier estimate fitted to the two disease groups (ignoring the other covariates).
+Given the estimate of the hazard function obtained using case-base sampling, we can compute the absolute risk curve for a fixed covariate profile. We perform this computation for a 35 year old woman who received a stem-cell transplant from peripheral blood at relapse. We compared the absolute risk curve for such a woman with acute lymphoblastic leukemia with that for a similar woman with acute myeloblastic leukemia. We will estimate the curve from 0 to 60 months.
 
 ```{r cb_risk, warning = FALSE, cache = FALSE, eval = eval_cs2}
 # Pick 100 equidistant points between 0 and 60 months
@@ -671,7 +654,7 @@ time_points <- seq(0, 60, length.out = 50)
 # Data.frame containing risk profile
 newdata <- data.frame("Sex" = factor(c("F", "F"), 
                                      levels = levels(bmtcrr[,"Sex"])),
-                      "D" = c("ALL", "AML"),
+                      "D" = c("ALL", "AML"), # Both diseases
                       "Phase" = factor(c("Relapse", "Relapse"), 
                                        levels = levels(bmtcrr[,"Phase"])),
                       "Age" = c(35, 35),
@@ -683,7 +666,11 @@ risk_cb <- absoluteRisk(object = model_cb, time = time_points,
                         method = "numerical", newdata = newdata)
 ```
 
-```{r fg_risk, eval = FALSE, echo = FALSE}
+We will compare our estimates to that obtained from a corresponding Fine-Gray model [@fine1999proportional]. The Fine-Gray model is a semiparametric model for the cause-specific *subdistribution*, i.e. the function $f_k(t)$ such that
+$$CI_k(t) =1 - \exp\left( - \int_0^t f_k(u) \textrm{d}u \right),$$
+where $CI_k(t)$ is the cause-specific cumulative indicence. The Fine-Gray model allows to directly assess the effect of a covariate on the subdistribution, as opposed to the hazard. For the computation, we will use the \pkg{timereg} package [@timereg].
+
+```{r fg_risk, eval = eval_cs2, echo = TRUE}
 library(timereg)
 model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) + 
                           const(Phase) + const(Source) + const(Age), 
@@ -693,8 +680,9 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
 risk_fg <- predict(model_fg, newdata, times = time_points)
 ```
 
-```{r echo = FALSE, fig.cap="\\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2}
-risk_cb <- bind_rows(
+```{r bmtcrr-risk, echo = FALSE, fig.cap="\\label{fig:compAbsrisk}Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2}
+library(ggplot2)
+risk_all <- dplyr::bind_rows(
     data.frame(Time = time_points, 
                Method = "Case-base", 
                Risk = risk_cb[,2], 
@@ -704,55 +692,36 @@ risk_cb <- bind_rows(
                Method = "Case-base", 
                Risk = risk_cb[,3], 
                Disease = "AML",
+               stringsAsFactors = FALSE),
+    data.frame(Time = time_points,
+               Method = "Fine-Gray",
+               Risk = risk_fg$P1[1,],
+               Disease = "ALL",
+               stringsAsFactors = FALSE),
+    data.frame(Time = time_points,
+               Method = "Fine-Gray",
+               Risk = risk_fg$P1[2,],
+               Disease = "AML",
                stringsAsFactors = FALSE)
     )
 
-# risk_fg <- bind_rows(
-#     data.frame(Time = time_points, 
-#                Method = "Fine-Gray", 
-#                Risk = risk_fg$P1[1,], 
-#                Disease = "ALL",
-#                stringsAsFactors = FALSE),
-#     data.frame(Time = time_points, 
-#                Method = "Fine-Gray", 
-#                Risk = risk_fg$P1[2,], 
-#                Disease = "AML",
-#                stringsAsFactors = FALSE)
-#     )
-
-risk_km <- purrr::map_df(c("ALL", "AML"), 
-                         function(disease) {
-    tmp <- bmtcrr %>% 
-        filter(D == disease) %>% 
-        survival::survfit(survival::Surv(ftime,Status == 1) ~ 1, 
-                data = .)
-    data.frame(Time = tmp$time, 
-               Method = "Kaplan-Meier", 
-               Risk = 1 - tmp$surv, 
-               Disease = disease,
-               stringsAsFactors = FALSE) %>%
-        filter(Time <= 60)
-})
-
-risk_all <- bind_rows(
-    risk_cb,
-    risk_km
-    ) %>% arrange(Disease, Risk)
-
 ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) + 
-    # geom_line for smooth curve
-    geom_line(data = filter(risk_all, Method == "Case-base")) + 
-    # geom_step for step function
-    geom_step(data = filter(risk_all, Method != "Case-base")) + 
-    facet_grid(Disease ~ .) +
-    ylim(c(0,1)) +
-    theme(legend.position = "top") +
-    xlab("Time (in Months)") + ylab("Relapse risk")
+  # geom_line for smooth curve
+  geom_line(data = dplyr::filter(risk_all, Method == "Case-base")) + 
+  # geom_step for step function
+  geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) + 
+  facet_grid(Disease ~ .) +
+  ylim(c(0,1)) +
+  theme_minimal() +
+  theme(legend.position = 'top') +    
+  xlab("Time (in Months)") + ylab("Relapse risk")
 ```
+
+Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base sampling and the Fine-Gray model. As we can see, the two approaches agree quite well for acute myeloblastic leukemia; however, there seems to be a difference of about 5% between the two curves for acute lymphoblastic leukemia. This difference does not appear to be significant: the curve from case-base sampling is contained within a 95% confidence band around the Fine-Gray absolute risk curve (figure not shown).
 
 # Case study 3--SUPPORT Data
 
-We examined the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [-@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital. Imputation was conducted using the default methods in the \pkg{mice} package in \proglang{R}, available on CRAN. Before imputation, there was a total of 1000 individuals and 35 variables. After imputation, we have 474 observations where 67.5% of individuals in the study experience the event of interest. The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual. A description of each variable can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The data was downloaded from the main author's website, and it is also available as part of the \pkg{casebase} package.
+We examined the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [-@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital. Imputation was conducted using predictive mean matching and using the \pkg{mice} package in \proglang{R}. Before imputation, there was a total of 1000 individuals and 35 variables. After imputation, we have 474 observations where 67.5% of individuals in the study experience the event of interest. \textcolor{red}{How come we lose individuals during imputation?} The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual. A description of each variable can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The data was downloaded from the main author's website, and it is also available as part of the \pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -839,8 +808,7 @@ sfdm2    & no(M2 and SIP pres)                           \\
 \label{tab:support2}
 \end{table}
 
-
-Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package(REF) on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase. To visualize the incidence density, we can refer to the post-imputation population-time plot in Figure \ref{fig:ptPostI}.
+Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase. To visualize the incidence density, we can refer to the post-imputation population-time plot in Figure \ref{fig:ptPostI}.
 
 ```{r supportSetUp, echo = FALSE, eval = eval_cs3}
 completeData=casebase::support

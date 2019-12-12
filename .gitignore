@@ -40,3 +40,4 @@ vignettes/*.pdf
 paper/casebase_jss_cache/*
 paper/casebase_jss_files/*
 analysis/paper/*.log
+analysis/paper/tmp*.tex
