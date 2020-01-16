@@ -90,8 +90,8 @@ options(kableExtra.latex.load_packages = FALSE)
 library(tidyverse)
 library(magrittr)
 library(survival)
-#library(casebase)
-devtools::load_all('../../../casebase')#testing
+library(casebase)
+#devtools::load_all('../../../casebase')#testing
 library(splines)
 library(tibble)
 library(glmnet)
