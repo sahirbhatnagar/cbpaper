@@ -95,6 +95,7 @@ library(splines)
 library(tibble)
 library(glmnet)
 library(kableExtra)
+library(pracma)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
