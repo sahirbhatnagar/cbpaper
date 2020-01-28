@@ -59,6 +59,7 @@ The abstract of the article. * joint co-authors
   URL: \url{http://individual.utoronto.ca/osaarela/}\\~\\
   }
 
+
 % Pandoc header
 
 \usepackage{amsmath} \usepackage{longtable} \usepackage{graphicx} \usepackage{tabularx} \usepackage{float} \usepackage{booktabs} \usepackage{makecell} \DeclareUnicodeCharacter{2500}{-}
@@ -565,8 +566,8 @@ R+      main = sprintf("Estimated Cumulative Incidence (risk) of Death from Pros
 R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
 R+                     exp(coef(cox_model)), 
 R+                     exp(confint(cox_model))[1], 
-R+                     exp(confint(cox_model))[2]),
-R+      ylim = c(0, 2), yscale = 100)
+R+                     exp(confint(cox_model))[2]), 
+R+      yscale = 100)
 R> legend("topleft", 
 R+        legend = c("Control group", "Screening group"), 
 R+        col = c("red","blue"),
@@ -662,7 +663,7 @@ R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
 R+                     exp(coef(cox_model)), 
 R+                     exp(confint(cox_model))[1], 
 R+                     exp(confint(cox_model))[2]),
-R+      ylim = c(0, 2), yscale = 100)
+R+      yscale = 100)
 R> lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
 R> lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
 R> 
@@ -771,7 +772,7 @@ R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
 R+                     exp(coef(cox_model)), 
 R+                     exp(confint(cox_model))[1], 
 R+                     exp(confint(cox_model))[2]),
-R+      ylim = c(0, 2), yscale = 100)
+R+      yscale = 100)
 R> lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
 R> lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
 R> 
@@ -878,7 +879,7 @@ R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
 R+                     exp(coef(cox_model)), 
 R+                     exp(confint(cox_model))[1], 
 R+                     exp(confint(cox_model))[2]),
-R+      ylim = c(0, 2), yscale = 100)
+R+      yscale = 100)
 R> lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
 R> lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
 R> 
@@ -1615,7 +1616,7 @@ R+   "Model4" = AIC(fit4))
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 Model4 
-#>    795    760    729    724
+#>    803    760    733    716
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1725,7 +1726,7 @@ R+              time = 365)
 
 \begin{CodeOutput}
 #>         
-#> 365 0.27
+#> 365 0.29
 \end{CodeOutput}
 
 \begin{CodeInput}
@@ -1736,7 +1737,7 @@ R> 1 - exp(-cumhaz_est)
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> [1] 0.19
+#> [1] 0.21
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1879,7 +1880,7 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-01-21 11:25:53 using the following
+This report was generated on 2020-01-28 14:29:58 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1893,22 +1894,22 @@ R> devtools::session_info()
 #> - Session info ---------------------------------------------------------------
 #>  setting  value                       
 #>  version  R version 3.6.2 (2019-12-12)
-#>  os       Ubuntu 18.04.3 LTS          
+#>  os       Pop!_OS 19.10               
 #>  system   x86_64, linux-gnu           
 #>  ui       X11                         
-#>  language en_CA:en                    
-#>  collate  en_CA.UTF-8                 
-#>  ctype    en_CA.UTF-8                 
-#>  tz       America/Winnipeg            
-#>  date     2020-01-21                  
+#>  language en_US:en                    
+#>  collate  en_US.UTF-8                 
+#>  ctype    en_US.UTF-8                 
+#>  tz       America/Toronto             
+#>  date     2020-01-28                  
 #> 
 #> - Packages -------------------------------------------------------------------
 #>  package     * version    date       lib
 #>  assertthat    0.2.1      2019-03-21 [1]
 #>  backports     1.1.5      2019-10-02 [1]
-#>  broom         0.5.2      2019-04-07 [1]
-#>  callr         3.3.2      2019-09-22 [1]
-#>  casebase    * 0.2.1.9001 2020-01-10 [1]
+#>  broom         0.5.4      2020-01-27 [1]
+#>  callr         3.4.1      2020-01-24 [1]
+#>  casebase    * 0.2.1.9001 2020-01-27 [1]
 #>  cellranger    1.1.0      2016-07-27 [1]
 #>  cli           2.0.1      2020-01-08 [1]
 #>  codetools     0.2-16     2018-12-24 [4]
@@ -1916,7 +1917,7 @@ R> devtools::session_info()
 #>  cowplot     * 1.0.0      2019-07-11 [1]
 #>  crayon        1.3.4      2017-09-16 [1]
 #>  data.table    1.12.8     2019-12-09 [1]
-#>  DBI           1.0.0      2018-05-02 [1]
+#>  DBI           1.1.0      2019-12-15 [1]
 #>  dbplyr        1.4.2      2019-06-17 [1]
 #>  desc          1.2.0      2018-05-01 [1]
 #>  devtools      2.2.1      2019-09-24 [1]
@@ -1925,23 +1926,23 @@ R> devtools::session_info()
 #>  ellipsis      0.3.0      2019-09-20 [1]
 #>  evaluate      0.14       2019-05-28 [1]
 #>  fansi         0.4.1      2020-01-08 [1]
-#>  farver        2.0.1      2019-11-13 [1]
+#>  farver        2.0.3      2020-01-16 [1]
 #>  forcats     * 0.4.0      2019-02-17 [1]
 #>  foreach       1.4.7      2019-07-27 [1]
 #>  fs            1.3.1      2019-05-06 [1]
 #>  generics      0.0.2      2018-11-29 [1]
 #>  ggplot2     * 3.2.1      2019-08-10 [1]
-#>  glmnet      * 3.0-1      2019-11-15 [1]
+#>  glmnet      * 3.0-2      2019-12-11 [1]
 #>  glue        * 1.3.1      2019-03-12 [1]
 #>  gtable        0.3.0      2019-03-25 [1]
 #>  haven         2.2.0      2019-11-08 [1]
-#>  hms           0.5.2      2019-10-30 [1]
+#>  hms           0.5.3      2020-01-08 [1]
 #>  htmltools     0.4.0      2019-10-04 [1]
 #>  httr          1.4.1      2019-08-05 [1]
 #>  iterators     1.0.12     2019-07-26 [1]
 #>  jsonlite      1.6        2018-12-07 [1]
 #>  kableExtra  * 1.1.0      2019-03-16 [1]
-#>  knitr         1.26       2019-11-12 [1]
+#>  knitr         1.27       2020-01-16 [1]
 #>  labeling      0.3        2014-08-23 [1]
 #>  lattice       0.20-38    2018-11-04 [4]
 #>  lava          1.6.6      2019-08-01 [1]
@@ -1962,8 +1963,8 @@ R> devtools::session_info()
 #>  pkgconfig     2.0.3      2019-09-22 [1]
 #>  pkgload       1.0.2      2018-10-29 [1]
 #>  plyr          1.8.5      2019-12-10 [1]
-#>  pracma        2.2.9      2019-12-15 [1]
-#>  prettyunits   1.0.2      2015-07-13 [1]
+#>  pracma      * 2.2.9      2019-12-15 [1]
+#>  prettyunits   1.1.1      2020-01-24 [1]
 #>  processx      3.4.1      2019-07-18 [1]
 #>  ps            1.3.0      2018-12-21 [1]
 #>  purrr       * 0.3.3      2019-10-18 [1]
@@ -1974,135 +1975,133 @@ R> devtools::session_info()
 #>  remotes       2.1.0      2019-06-24 [1]
 #>  reprex        0.3.0      2019-05-16 [1]
 #>  reshape2      1.4.3      2017-12-11 [1]
-#>  rlang         0.4.2      2019-11-23 [1]
-#>  rmarkdown     1.18       2019-11-27 [1]
+#>  rlang         0.4.3      2020-01-24 [1]
+#>  rmarkdown     2.1        2020-01-20 [1]
 #>  rprojroot     1.3-2      2018-01-03 [1]
 #>  rstudioapi    0.10       2019-03-19 [1]
-#>  rticles       0.12       2019-11-12 [1]
+#>  rticles       0.13       2019-12-19 [1]
 #>  rvest         0.3.5      2019-11-08 [1]
 #>  scales        1.1.0      2019-11-18 [1]
 #>  sessioninfo   1.1.1      2018-11-05 [1]
 #>  shape         1.4.4      2018-02-07 [1]
-#>  stringi       1.4.4      2020-01-09 [1]
+#>  stringi       1.4.5      2020-01-11 [1]
 #>  stringr     * 1.4.0      2019-02-10 [1]
 #>  survival    * 3.1-8      2019-12-03 [4]
 #>  testthat      2.3.1      2019-12-01 [1]
 #>  tibble      * 2.1.3      2019-06-06 [1]
-#>  tidyr       * 1.0.0      2019-09-11 [1]
+#>  tidyr       * 1.0.2      2020-01-24 [1]
 #>  tidyselect    0.2.5      2018-10-11 [1]
 #>  tidyverse   * 1.3.0      2019-11-21 [1]
 #>  timereg     * 1.9.4      2019-07-30 [1]
 #>  usethis       1.5.1      2019-07-04 [1]
-#>  vctrs         0.2.1      2019-12-17 [1]
+#>  vctrs         0.2.2      2020-01-24 [1]
 #>  VGAM          1.1-2      2019-11-21 [1]
 #>  viridisLite   0.3.0      2018-02-01 [1]
 #>  webshot       0.5.2      2019-11-22 [1]
 #>  withr         2.1.2      2018-03-15 [1]
-#>  xfun          0.11       2019-11-12 [1]
+#>  xfun          0.12       2020-01-13 [1]
 #>  xml2          1.2.2      2019-08-09 [1]
 #>  yaml          2.2.0      2018-07-25 [1]
-#>  zeallot       0.1.0      2018-01-28 [1]
 #>  source                                  
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  Github (sahirbhatnagar/casebase@ae42a9f)
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.5.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.5.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
+#>  Github (sahirbhatnagar/casebase@24359be)
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.0)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.0)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
 #>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
 #>  CRAN (R 3.6.2)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
-#>  CRAN (R 3.6.1)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
+#>  CRAN (R 3.6.2)                          
 #> 
-#> [1] /home/turgeonm/R/x86_64-pc-linux-gnu-library/3.6
+#> [1] /home/sahir/R/x86_64-pc-linux-gnu-library/3.6
 #> [2] /usr/local/lib/R/site-library
 #> [3] /usr/lib/R/site-library
 #> [4] /usr/lib/R/library
@@ -2119,8 +2118,8 @@ R> git2r::repository(here::here())
 \end{CodeInput}
 
 \begin{CodeOutput}
-#> Local:    review /home/turgeonm/Documents/git_repos/cbpaper
-#> Head:     [db3b3b1] 2019-12-12: review of cs 3 with new version of package
+#> Local:    write-popTime /home/sahir/git_repositories/cbpaper
+#> Head:     [c926a9e] 2020-01-21: Merge pull request #15 from sahirbhatnagar/fix-casebase-dependency
 \end{CodeOutput}
 \end{CodeChunk}
 

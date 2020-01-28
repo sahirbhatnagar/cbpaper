@@ -38,10 +38,10 @@ author:
     email: \email{olli.saarela@utoronto.ca}
     url: http://individual.utoronto.ca/osaarela/
 title:
-  formatted: "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
   # If you use tex in the formatted title, also supply version without
-  plain:     "casebase: An Alternative Framework For Survival Analysis"
   # For running headers, if needed
+  formatted: "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+  plain:     "casebase: An Alternative Framework For Survival Analysis"
   short:     "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
 abstract: >
   The abstract of the article. * joint co-authors
@@ -67,6 +67,8 @@ bibliography: references.bib  #Also not included in template by default.
 fig_width: 7
 fig_height: 6
 fig_caption: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- # Code formatting -->
@@ -82,7 +84,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE,
   message = FALSE,
-  echo = TRUE,
+  echo = FALSE,
   comment = "#>",
   fig.path = "../figures/"
 )
@@ -336,13 +338,45 @@ plot(survfit(cox_model, newdata = new_data),
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
+                    exp(confint(cox_model))[2]), 
+     yscale = 100)
 legend("topleft", 
        legend = c("Control group", "Screening group"), 
        col = c("red","blue"),
        lty = c(1, 1), 
        bg = "gray90")
+
+casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
+                                                  data = ERSPC, 
+                                                  ratio = 100)
+smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
+                                          time = seq(0,15,0.1), 
+                                          newdata = new_data)
+lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
+lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
+
+casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
+                                 data = ERSPC, 
+                                 ratio = 100)
+smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
+                                          time = seq(0,15,0.1), 
+                                          newdata = new_data)
+lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
+lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
+
+casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
+                                    data = ERSPC, 
+                                    ratio = 100)
+lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
+lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
+
+legend("topleft", 
+       legend = c("Control group (Cox)","Control group (Casebase)",
+                  "Screening group (Cox)", "Screening group (Casebase)"), 
+       col = c("red","red", "blue","blue"),
+       lty = c(1, 2, 1, 2), 
+       bg = "gray90")
+
 ```
 
 Next, we show how case-base sampling can be used to carry out a similar analysis. We fit several models that differ in how we choose to model time. 
@@ -351,16 +385,6 @@ Next, we show how case-base sampling can be used to carry out a similar analysis
 
 First, we will fit an exponential model. Recall that this corresponds to excluding time from the linear predictor.
 
-```{r erspc-casebase-exponential, eval = eval_cs1}
-casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
-                                                  data = ERSPC, 
-                                                  ratio = 100)
-
-summary(casebase_exponential)
-exp(coef(casebase_exponential)[2])
-exp(confint(casebase_exponential)[2,])
-```
-
 <!-- The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation: -->
 
 <!-- $$ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$ -->
@@ -368,9 +392,7 @@ exp(confint(casebase_exponential)[2,])
 We can then use the \code{absoluteRisk} function to get an estimate of the cumulative incidence curve for a specific covariate profile. In the plot below, we overlay the estimated CIF from the exponential model on the Cox model CIF:
 
 ```{r erspc-casebase-cif, eval = eval_cs1}
-smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
-                                          time = seq(0,15,0.1), 
-                                          newdata = new_data)
+
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
@@ -382,17 +404,11 @@ plot(survfit(cox_model, newdata = new_data),
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
                     exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
-lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
+     yscale = 100)
 
 
-legend("topleft", 
-       legend = c("Control group (Cox)","Control group (Casebase)",
-                  "Screening group (Cox)", "Screening group (Casebase)"), 
-       col = c("red","red", "blue","blue"),
-       lty = c(1, 2, 1, 2), 
-       bg = "gray90")
+
+
 ```
 
 As we can see, the exponential model gives us an estimate of the hazard ratio that is similar to the one obtained using Cox regression. However, the CIF estimates are quite different. Based on what we observed in the population time plot, where more events are observed later on in time, we do not expect a constant hazard would be a good description for this data. In other words, this poor fit for the exponential hazard is expected. A constant hazard model would overestimate the cumulative incidence earlier on in time, and underestimate it later on; this is what we see on the cumulative incidence plot. This example demonstrates the benefits of population time plots as an exploratory analysis tool. 
@@ -400,9 +416,7 @@ As we can see, the exponential model gives us an estimate of the hazard ratio th
 For the next model, we include time as a linear term. Recall that this corresponds to a Weibull model.
 
 ```{r erspc-casebase-weibull, eval = eval_cs1}
-casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
-                                 data = ERSPC, 
-                                 ratio = 100)
+
 
 summary(casebase_time)
 exp(coef(casebase_time))
@@ -412,9 +426,7 @@ exp(confint(casebase_time))
 Again, the estimate of the hazard ratio is similar to that obtained from Cox regression. We then look at the estimate of the CIF:
 
 ```{r erspc-casebase-weibull-cif, eval = eval_cs1}
-smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
-                                          time = seq(0,15,0.1), 
-                                          newdata = new_data)
+
 
 plot(survfit(cox_model, newdata = new_data),
      xlab = "Years since Randomization", 
@@ -426,9 +438,8 @@ plot(survfit(cox_model, newdata = new_data),
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
                     exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
-lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
+     yscale = 100)
+
 
 legend("topleft", 
        legend = c("Control group (Cox)","Control group (Casebase)",
@@ -443,9 +454,7 @@ We see that the Weibull model leads to a better fit of the CIF than the Exponent
 Finally, we can model the hazard as a smooth function of time using the \code{splines} package:
 
 ```{r erspc-casebase-splines, eval = eval_cs1}
-casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
-                                    data = ERSPC, 
-                                    ratio = 100)
+
 
 summary(casebase_splines)
 exp(coef(casebase_splines))
@@ -469,9 +478,8 @@ plot(survfit(cox_model, newdata = new_data),
                     exp(coef(cox_model)), 
                     exp(confint(cox_model))[1], 
                     exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
-lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
+     yscale = 100)
+
 
 legend("topleft", 
        legend = c("Control group (Cox)","Control group (Casebase)",
