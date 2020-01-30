@@ -20,13 +20,23 @@ Title <- "Title of your paper goes here"
 [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/sahirbhatnagar/cbpaper/master?urlpath=rstudio)  
 [![Travis-CI Build Status](https://travis-ci.org/sahirbhatnagar/cbpaper.svg?branch=master)](https://travis-ci.org/sahirbhatnagar/cbpaper)
 
-Source code for Casebase paper
-
-for template, use 
+Source code for casebase paper. Install the following packages from GitHub
 
 ```R 
-devtools::install_github("rstudio/rticles")
+# install.packages("devtools")
+
+devtools::install_github("rstudio/rticles") # for template
+devtools::install_github("benmarwick/rrtools") # for building the research compendium/docker container
 ```
+
+# To contribute
+
+1. Modify the `analysis/paper/paper.Rmd` file.
+2. Run `rrtools::add_dependencies_to_description()`. This command will ensure all used packages are added to the DESCRIPTION file.
+3. Compile the `paper.Rmd` file
+4. Commit and push your changes to GitHub
+
+
 
 # Outline
 
