@@ -232,8 +232,8 @@ Of the methods mentioned so far, only \pkg{CFC}, \pkg{flexsurv},
 \pkg{mets}, \pkg{cmprsk} and \pkg{survival} contain implementations for
 competing risks. The differentiating factor between these packages and
 \pkg{casebase} is that \pkg{casebase} handles competing risks through
-multiple logistic regression.
-\textcolor{red}{The discussion for \pkg{CFC} discusses aspects that I'm not certain are important for our argument. Mixture models, Vertical modelling,Psuedo-observations, machine learning models. Should i include these?}
+multiple logistic regression. Note that \pkg{CFC} has extra features
+outside the scope of the metthods discussed in this paper.
 
 Finally, several packages include functions to estimate the cumulative
 incidence function. The corresponding methods generally fall into two
@@ -914,15 +914,15 @@ individuals who are considered seriously ill within a hospital.
 Imputation was conducted using the \pkg{mice} package in \proglang{R}
 with default settings \citep{mice}. Before imputation, there were a
 total of 1000 individuals and 35 variables. After imputation, we have
-690 individuals.
-\textcolor{red}{we lose individuals due to coliniarity. If a pair of covariates are deemed colinear to a certain degree, they are excluded from any imputations. here, only edu  income  avtisst*  race  ph*  glucose*  adlp* were imputed.}
-Of these, 66.09\% experienced the event of interest. A description of
-each variable can be found in Table \ref{tab:support1} and a breakdown
-of each categorical variable in Table \ref{tab:support2}. The original
-data was obtained from the Department of Biostatistics at Vanderbilt
-University
-\textcolor{red}{do we need to reference the dataset itself? Or is the paper enough? In my code for generating the data in casebase, i link to the original data online and pull from there}.
-The imputed dataset is available as part of the \pkg{casebase} package.
+690 individuals. We lose individuals due to coliniarity. If a pair of
+covariates are deemed colinear to a certain degree, they are excluded
+from any imputations. Here, only edu income avtisst* race ph* glucose*
+adlp* were imputed. Of these, 66.09\% experienced the event of interest.
+A description of each variable can be found in Table \ref{tab:support1}
+and a breakdown of each categorical variable in Table
+\ref{tab:support2}. The original data was obtained from the Department
+of Biostatistics at Vanderbilt University. The imputed dataset is
+available as part of the \pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -1029,7 +1029,7 @@ R> plot(support_popTime)
 
 }
 
-\caption{\label{fig:support-poptime} Population-time plot for tje SUPPORT data.}\label{fig:support-poptime}
+\caption{\label{fig:support-poptime} Population-time plot for the SUPPORT data.}\label{fig:support-poptime}
 \end{figure}
 \end{CodeChunk}
 
@@ -1052,10 +1052,11 @@ variables. Here, we used lasso penalization by setting alpha to 1.
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> #Using casebase's glmnet implementation, using splines and a case to base ratio of 100,
-R> #to determine the hazard function
-R> cb.Model=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="death",
-R+                                        formula_time = ~d.time,alpha=1,ratio=100)
+R> xInteractions=x*y[,2]
+R> colnames(xInteractions) <- paste("d.time*", colnames(xInteractions), sep = "")
+R> xFull=cbind(x,xInteractions)
+R> cb.ModelInter=casebase::fitSmoothHazard.fit(xFull,y,family="glmnet",time="d.time",event="death",
+R+                                        formula_time = ~d.time,alpha=1,ratio=rat)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1066,8 +1067,9 @@ and retrieve our absolute risk function.
 
 \begin{CodeInput}
 R> #Estimating the absolute risk curve using the newData parameter.
-R> casebaseAbsolute=casebase::absoluteRisk(cb.Model,time = seq(1,max(completeData$d.time), 50),newdata = newData , s="lambda.1se",method=c("numerical"))
-R> cab=data.frame(casebaseAbsolute[,1],rowMeans(casebaseAbsolute[,-c(1)]))
+R> casebaseAbsoluteInter=casebase::absoluteRisk(cb.ModelInter,time = seq(1,max(completeData$d.time), 400),newdata = xFull , s="lambda.1se",method=c("numerical"))
+R> 
+R> cabI=data.frame(casebaseAbsoluteInter[,1],rowMeans(casebaseAbsoluteInter[,-c(1)]))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1092,40 +1094,53 @@ curve itself and not the standard error.
 \begin{CodeInput}
 R> #Create u and xCox, which will be used when fitting Cox with glmnet.
 R> u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
-R> xCox=as.matrix(sparse.model.matrix(death~ .-d.time,data=completeData))
+R> 
+R> xCoxI=as.matrix(cbind(data.frame("(Intercept)"=rep(1,each=690)),xFull))
+R> colnames(xCoxI)[1]="(Intercept)"
+R> 
 R> #hazard for cox using glmnet
-R> coxglmFit=glmnet::cv.glmnet(x=xCox,y=u, family="cox",alpha=1)
+R> coxNetI=glmnet::cv.glmnet(x=xCoxI,y=u, family="cox",alpha=1)
 R> #convergence demonstrated in plot
-R> plot(coxglmFit)
-\end{CodeInput}
-
-
-\begin{center}\includegraphics{../figures/coxHazAbsolute-1} \end{center}
-
-
-\begin{CodeInput}
+R> #plot(coxNet)
 R> #taking the coefficient estimates for later use
-R> nonzero_covariate_cox <- predict(coxglmFit, type = "nonzero", s = "lambda.1se")
-R> nonzero_coef_cox <- coef(coxglmFit, s = "lambda.1se")
+R> nonzero_covariate_cox <- predict(coxNetI, type = "nonzero", s = "lambda.1se")
+R> nonzero_coef_cox <- coef(coxNetI, s = "lambda.1se")
 R> #creating a new dataset that only contains the covariates chosen through glmnet.
 R> #cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
-R> cleanCoxData<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCox[,nonzero_covariate_cox$X1]))
+R> cleanCoxDataI<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,nonzero_covariate_cox$X1]))
 R> #newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
 R> #fitting a cox model using regular estimation, however we will not keep it.
 R> #this is used more as an object place holder.
-R> coxFit <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxData)
-R> #The coefficients of this object will be replaced with the estimates from coxglmFit.
+R> coxNetFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxDataI)
+R> #The coefficients of this object will be replaced with the estimates from coxNet.
 R> #Doing so makes it so that everything is invalid aside from the coefficients.
 R> #In this case, all we need to estimate the absolute risk is the coefficients.
 R> #Std. error would be incorrect here, if we were to draw error bars.
-R> coxFit$coefficients<-nonzero_coef_cox@x
+R> coxNetFitI$coefficients<-nonzero_coef_cox@x
 R> #Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
-R> newDataCox=newData[,nonzero_covariate_cox$X1-1]
+R> #posCox=nonzero_covariate_cox$X1
+R> #newDataCoxI=cleanCoxDataI[,posCox]
 R> 
-R> abCoxFit<-survival::survfit(coxFit,newdata=as.data.frame(newDataCox),time = seq(0,max(completeData$d.time), 1),type="breslow")
+R> abcoxNetI<-survival::survfit(coxNetFitI,type="breslow",newdata=cleanCoxDataI)
 R> 
-R> abCF<-abCoxFit
-R> abCF$surv<-rowMeans(abCF$surv)
+R> abCNI<-abcoxNetI
+R> abCNI$surv=rowMeans(abCNI$surv)
+\end{CodeInput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> fullDataCox<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,-c(1)]))
+R> coxFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = fullDataCox)
+R> abcoxFitI<-survival::survfit(coxFitI,newdata=fullDataCox)
+R> abCFI<-abcoxFitI
+R> abCFI$surv<-rowMeans(abCFI$surv)
+R> #cb.ModelNorm=casebase::fitSmoothHazard(V2~.,time="V1",event="V2",
+R>        #                                ratio=rat,data=fullDataCox)
+R> #summary(cb.ModelNorm)#need to figure out how to deal with NAs
+R> #casebaseAbsoluteNorm=casebase::absoluteRisk(cb.ModelNorm,time = seq(1,max(completeData$d.time), 200),newdata = newData , s="lambda.1se",method=c("numerical"))
+R> #cabn=data.frame(casebaseAbsoluteNorm[,1],rowMeans(casebaseAbsoluteNorm[,-c(1)]))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1151,12 +1166,13 @@ kaplan-meier.
 
 \begin{CodeInput}
 R> # A plot to compare all three Absolute risk (Commulative Incidence)
-R> plot(cab[,1],cab[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
-R> lines(abCF,col="red",fun="event",lwd=3,conf.int = FALSE)
+R> plot(cabI[,1],cabI[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
+R> lines(abCFI,col="red",fun="event",lwd=3,conf.int = FALSE)
 R> lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
+R> lines(abCNI,col="purple",fun="event",lwd=3,conf.int = FALSE)
 R> legend("bottomright", 
-R+        legend = c( "Casebase (Lasso+linear)","semi-parametric (Cox)+glmnet","KM curve"), 
-R+        col = c("black","red","Blue"),
+R+        legend = c( "Casebase (Lasso+linear)","semi-parametric Coxnet","KM curve","cox"), 
+R+        col = c("black","red","Blue","purple"),
 R+        lty = c(1, 1, 1), 
 R+        bg = "gray90")
 \end{CodeInput}
@@ -1168,6 +1184,51 @@ R+        bg = "gray90")
 
 \caption{\label{fig:abSC} Compares regularized casebase in black, regularized cox in red and Kaplan meier in blue.}\label{fig:abSupportComparison}
 \end{figure}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> 
+R> #get covariates excluding d.time
+R> estimatescb=setDT(as.data.frame(coef(cb.Model)[-c(1,2),1]), keep.rownames = TRUE)[]
+R> estimatescb$Model="casebase"
+R> colnames(estimatescb)<-c("Coefs","Estimate","Model")
+R> estimatescox=setDT(as.data.frame(coef(coxNet)[-c(1),1]), keep.rownames = TRUE)[]
+R> estimatescox$Model="Cox"
+R> colnames(estimatescox)<-c("Coefs","Estimate","Model")
+R> estimates=rbind(estimatescb, estimatescox)
+R> estimates$Estimate[estimates$Estimate==0]=NA# make it so unchosen covariates appear empty
+R> library(ggstance)# for vertical dodge
+R>   ggplot(estimates, aes(x = Estimate, y = Coefs, color = Model)) +
+R>         geom_segment(aes(x = 0, y = Coefs, xend = Estimate, yend = Coefs),size=0.5 ) +
+R>         geom_point(position=ggstance::position_dodgev(height=0.2))
+R> 
+\end{CodeInput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> #get covariates excluding d.time
+R> library(data.table)
+R> estimatescb=setDT(as.data.frame(coef(cb.ModelInter)[-c(1,2),1]), keep.rownames = TRUE)[]
+R> estimatescb$Model="casebase"
+R> colnames(estimatescb)<-c("Coefs","Estimate","Model")
+R> estimatescox=setDT(as.data.frame(coef(coxNetI)[-c(1),1]), keep.rownames = TRUE)[]
+R> estimatescox$Model="Cox"
+R> colnames(estimatescox)<-c("Coefs","Estimate","Model")
+R> estimatesI=rbind(estimatescb, estimatescox)
+R> estimatesI$Estimate[estimatesI$Estimate==0]=NA# make it so unchosen covariates appear empty
+R> library(ggstance)# for vertical dodge
+R>   ggplot(estimatesI, aes(x = Coefs, y = Estimate , color = Model)) +
+R+         geom_segment(aes(y = 0, x = Coefs, yend = Estimate, xend = Coefs),size=0.5, position = position_dodge(width = 0.5)) +
+R+         geom_point(position = position_dodge(width = 0.5))
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/covariatesLolliInteractions-1} \end{center}
+
 \end{CodeChunk}
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
@@ -1193,7 +1254,7 @@ The purpose of the next case study is to show how \pkg{casebase} can
 also be used for survival analysis problems that do not share the
 properties above. To this end, we will use the Stanford Heart Transplant
 Data \citep[\citet{crowley1977covariance}]{clark1971cardiac}; we will
-use the version available in the \pkg{surivival} package.
+use the version available in the \pkg{survival} package.
 
 Recall the setting of this study: patients were admitted to the Stanford
 program after meeting with their physician and determining that they
@@ -1414,7 +1475,7 @@ to \pkg{casebase}.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-01-16 13:51:03 using the following
+This report was generated on 2020-01-30 20:17:21 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1435,106 +1496,106 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Montreal            
-#>  date     2020-01-16                  
+#>  date     2020-01-30                  
 #> 
 #> - Packages -------------------------------------------------------------------
-#>  ! package     * version    date       lib
-#>    assertthat    0.2.1      2019-03-21 [1]
-#>    backports     1.1.5      2019-10-02 [1]
-#>    broom         0.5.2      2019-04-07 [1]
-#>    callr         3.4.0      2019-12-09 [1]
-#>  P casebase    * 0.2.1.9001 2019-12-11 [?]
-#>    cellranger    1.1.0      2016-07-27 [1]
-#>    cli           2.0.1      2020-01-08 [1]
-#>    codetools     0.2-16     2018-12-24 [1]
-#>    colorspace    1.4-1      2019-03-18 [1]
-#>    crayon        1.3.4      2017-09-16 [1]
-#>    data.table    1.12.8     2019-12-09 [1]
-#>    DBI           1.0.0      2018-05-02 [1]
-#>    dbplyr        1.4.2      2019-06-17 [1]
-#>    desc          1.2.0      2018-05-01 [1]
-#>    devtools      2.2.1      2019-09-24 [1]
-#>    digest        0.6.23     2019-11-23 [1]
-#>    dplyr       * 0.8.3      2019-07-04 [1]
-#>    ellipsis      0.3.0      2019-09-20 [1]
-#>    evaluate      0.14       2019-05-28 [1]
-#>    fansi         0.4.1      2020-01-08 [1]
-#>    farver        2.0.1      2019-11-13 [1]
-#>    forcats     * 0.4.0      2019-02-17 [1]
-#>    foreach       1.4.7      2019-07-27 [1]
-#>    fs            1.3.1      2019-05-06 [1]
-#>    generics      0.0.2      2018-11-29 [1]
-#>    ggplot2     * 3.2.1      2019-08-10 [1]
-#>    glmnet      * 3.0-1      2019-11-15 [1]
-#>    glue          1.3.1      2019-03-12 [1]
-#>    gtable        0.3.0      2019-03-25 [1]
-#>    haven         2.2.0      2019-11-08 [1]
-#>    hms           0.5.2      2019-10-30 [1]
-#>    htmltools     0.4.0      2019-10-04 [1]
-#>    httr          1.4.1      2019-08-05 [1]
-#>    iterators     1.0.12     2019-07-26 [1]
-#>    jsonlite      1.6        2018-12-07 [1]
-#>    kableExtra  * 1.1.0      2019-03-16 [1]
-#>    knitr         1.26       2019-11-12 [1]
-#>    labeling      0.3        2014-08-23 [1]
-#>    lattice       0.20-38    2018-11-04 [1]
-#>    lazyeval      0.2.2      2019-03-15 [1]
-#>    lifecycle     0.1.0      2019-08-01 [1]
-#>    lubridate     1.7.4      2018-04-11 [1]
-#>    magrittr    * 1.5        2014-11-22 [1]
-#>    Matrix      * 1.2-17     2019-03-22 [1]
-#>    memoise       1.1.0      2017-04-21 [1]
-#>    mgcv          1.8-31     2019-11-09 [1]
-#>    modelr        0.1.5      2019-08-08 [1]
-#>    munsell       0.5.0      2018-06-12 [1]
-#>    nlme          3.1-142    2019-11-07 [1]
-#>    pillar        1.4.3      2019-12-20 [1]
-#>    pkgbuild      1.0.6      2019-10-09 [1]
-#>    pkgconfig     2.0.3      2019-09-22 [1]
-#>    pkgload       1.0.2      2018-10-29 [1]
-#>    prettyunits   1.0.2      2015-07-13 [1]
-#>    processx      3.4.1      2019-07-18 [1]
-#>    ps            1.3.0      2018-12-21 [1]
-#>    purrr       * 0.3.3      2019-10-18 [1]
-#>    R6            2.4.1      2019-11-12 [1]
-#>    Rcpp          1.0.3      2019-11-08 [1]
-#>    readr       * 1.3.1      2018-12-21 [1]
-#>    readxl        1.3.1      2019-03-13 [1]
-#>    remotes       2.1.0      2019-06-24 [1]
-#>    reprex        0.3.0      2019-05-16 [1]
-#>    rlang         0.4.2      2019-11-23 [1]
-#>    rmarkdown     1.18       2019-11-27 [1]
-#>    rprojroot     1.3-2      2018-01-03 [1]
-#>    rstudioapi    0.10       2019-03-19 [1]
-#>    rticles       0.12       2019-11-12 [1]
-#>    rvest         0.3.5      2019-11-08 [1]
-#>    scales        1.1.0      2019-11-18 [1]
-#>    sessioninfo   1.1.1      2018-11-05 [1]
-#>    shape         1.4.4      2018-02-07 [1]
-#>    stringi       1.4.5      2020-01-11 [1]
-#>    stringr     * 1.4.0      2019-02-10 [1]
-#>    survival    * 3.1-7      2019-11-09 [1]
-#>    testthat    * 2.3.1      2019-12-01 [1]
-#>    tibble      * 2.1.3      2019-06-06 [1]
-#>    tidyr       * 1.0.0      2019-09-11 [1]
-#>    tidyselect    0.2.5      2018-10-11 [1]
-#>    tidyverse   * 1.3.0      2019-11-21 [1]
-#>    usethis       1.5.1      2019-07-04 [1]
-#>    vctrs         0.2.1      2019-12-17 [1]
-#>    VGAM          1.1-2      2019-11-21 [1]
-#>    viridisLite   0.3.0      2018-02-01 [1]
-#>    webshot       0.5.2      2019-11-22 [1]
-#>    withr         2.1.2      2018-03-15 [1]
-#>    xfun          0.11       2019-11-12 [1]
-#>    xml2          1.2.2      2019-08-09 [1]
-#>    yaml          2.2.0      2018-07-25 [1]
-#>    zeallot       0.1.0      2018-01-28 [1]
+#>  package     * version    date       lib
+#>  assertthat    0.2.1      2019-03-21 [1]
+#>  backports     1.1.5      2019-10-02 [1]
+#>  broom         0.5.2      2019-04-07 [1]
+#>  callr         3.4.1      2020-01-24 [1]
+#>  casebase    * 0.2.1.9001 2020-01-30 [1]
+#>  cellranger    1.1.0      2016-07-27 [1]
+#>  cli           2.0.1      2020-01-08 [1]
+#>  codetools     0.2-16     2018-12-24 [1]
+#>  colorspace    1.4-1      2019-03-18 [1]
+#>  crayon        1.3.4      2017-09-16 [1]
+#>  data.table  * 1.12.8     2019-12-09 [1]
+#>  DBI           1.0.0      2018-05-02 [1]
+#>  dbplyr        1.4.2      2019-06-17 [1]
+#>  desc          1.2.0      2018-05-01 [1]
+#>  devtools      2.2.1      2019-09-24 [1]
+#>  digest        0.6.23     2019-11-23 [1]
+#>  dplyr       * 0.8.3      2019-07-04 [1]
+#>  ellipsis      0.3.0      2019-09-20 [1]
+#>  evaluate      0.14       2019-05-28 [1]
+#>  fansi         0.4.1      2020-01-08 [1]
+#>  farver        2.0.3      2020-01-16 [1]
+#>  forcats     * 0.4.0      2019-02-17 [1]
+#>  foreach       1.4.7      2019-07-27 [1]
+#>  fs            1.3.1      2019-05-06 [1]
+#>  generics      0.0.2      2018-11-29 [1]
+#>  ggplot2     * 3.2.1      2019-08-10 [1]
+#>  ggstance    * 0.3.3      2019-08-19 [1]
+#>  glmnet      * 3.0-2      2019-12-11 [1]
+#>  glue          1.3.1      2019-03-12 [1]
+#>  gtable        0.3.0      2019-03-25 [1]
+#>  haven         2.2.0      2019-11-08 [1]
+#>  hms           0.5.2      2019-10-30 [1]
+#>  htmltools     0.4.0      2019-10-04 [1]
+#>  httr          1.4.1      2019-08-05 [1]
+#>  iterators     1.0.12     2019-07-26 [1]
+#>  jsonlite      1.6        2018-12-07 [1]
+#>  kableExtra  * 1.1.0      2019-03-16 [1]
+#>  knitr         1.27       2020-01-16 [1]
+#>  labeling      0.3        2014-08-23 [1]
+#>  lattice       0.20-38    2018-11-04 [1]
+#>  lazyeval      0.2.2      2019-03-15 [1]
+#>  lifecycle     0.1.0      2019-08-01 [1]
+#>  lubridate     1.7.4      2018-04-11 [1]
+#>  magrittr    * 1.5        2014-11-22 [1]
+#>  Matrix      * 1.2-17     2019-03-22 [1]
+#>  memoise       1.1.0      2017-04-21 [1]
+#>  mgcv          1.8-31     2019-11-09 [1]
+#>  modelr        0.1.5      2019-08-08 [1]
+#>  munsell       0.5.0      2018-06-12 [1]
+#>  nlme          3.1-142    2019-11-07 [1]
+#>  pillar        1.4.3      2019-12-20 [1]
+#>  pkgbuild      1.0.6      2019-10-09 [1]
+#>  pkgconfig     2.0.3      2019-09-22 [1]
+#>  pkgload       1.0.2      2018-10-29 [1]
+#>  prettyunits   1.1.1      2020-01-24 [1]
+#>  processx      3.4.1      2019-07-18 [1]
+#>  ps            1.3.0      2018-12-21 [1]
+#>  purrr       * 0.3.3      2019-10-18 [1]
+#>  R6            2.4.1      2019-11-12 [1]
+#>  Rcpp          1.0.3      2019-11-08 [1]
+#>  readr       * 1.3.1      2018-12-21 [1]
+#>  readxl        1.3.1      2019-03-13 [1]
+#>  remotes       2.1.0      2019-06-24 [1]
+#>  reprex        0.3.0      2019-05-16 [1]
+#>  rlang         0.4.4      2020-01-28 [1]
+#>  rmarkdown     2.1        2020-01-20 [1]
+#>  rprojroot     1.3-2      2018-01-03 [1]
+#>  rstudioapi    0.10       2019-03-19 [1]
+#>  rticles       0.12       2019-11-12 [1]
+#>  rvest         0.3.5      2019-11-08 [1]
+#>  scales        1.1.0      2019-11-18 [1]
+#>  sessioninfo   1.1.1      2018-11-05 [1]
+#>  shape         1.4.4      2018-02-07 [1]
+#>  stringi       1.4.5      2020-01-11 [1]
+#>  stringr     * 1.4.0      2019-02-10 [1]
+#>  survival    * 3.1-7      2019-11-09 [1]
+#>  testthat      2.3.1      2019-12-01 [1]
+#>  tibble      * 2.1.3      2019-06-06 [1]
+#>  tidyr       * 1.0.0      2019-09-11 [1]
+#>  tidyselect    0.2.5      2018-10-11 [1]
+#>  tidyverse   * 1.3.0      2019-11-21 [1]
+#>  usethis       1.5.1      2019-07-04 [1]
+#>  vctrs         0.2.2      2020-01-24 [1]
+#>  VGAM          1.1-2      2019-11-21 [1]
+#>  viridisLite   0.3.0      2018-02-01 [1]
+#>  webshot       0.5.2      2019-11-22 [1]
+#>  withr         2.1.2      2018-03-15 [1]
+#>  xfun          0.12       2020-01-13 [1]
+#>  xml2          1.2.2      2019-08-09 [1]
+#>  yaml          2.2.0      2018-07-25 [1]
 #>  source                                  
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
-#>  Github (sahirbhatnagar/casebase@e2e73fe)
+#>  Github (sahirbhatnagar/casebase@24359be)
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
@@ -1622,8 +1683,6 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.0)                          
 #> 
 #> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
-#> 
-#>  P -- Loaded and on-disk path mismatch.
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1639,7 +1698,7 @@ R> git2r::repository(here::here())
 \begin{CodeOutput}
 #> Local:    master /Users/jislam/Desktop/Gits/cbpaper
 #> Remote:   master @ origin (https://github.com/Jesse-Islam/cbpaper.git)
-#> Head:     [a528002] 2019-12-12: Merge pull request #12 from sahirbhatnagar/review
+#> Head:     [b0db01f] 2020-01-16: mostly Done
 \end{CodeOutput}
 \end{CodeChunk}
 
