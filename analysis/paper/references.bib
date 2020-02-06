@@ -397,3 +397,18 @@
   year={1972}
 }
 
+@article{mahani2015bayesian,
+   author = {Alireza Mahani and Mansour Sharabiani},
+   title = {Bayesian, and Non-Bayesian, Cause-Specific Competing-Risk Analysis for Parametric and Nonparametric Survival Functions: The R Package CFC},
+   journal = {Journal of Statistical Software, Articles},
+   volume = {89},
+   number = {9},
+   year = {2019},
+   keywords = {Newton-Cotes; adaptive quadrature; Markov chain Monto Carlo},
+   abstract = {The R package CFC performs cause-specific, competing-risk survival analysis by computing cumulative incidence functions from unadjusted, cause-specific survival functions. A high-level API in CFC enables end-to-end survival and competing-risk analysis, using a single-line function call, based on the parametric survival regression models in the survival package. A low-level API allows users to achieve more flexibility by supplying their custom survival functions, perhaps in a Bayesian setting. Utility methods for summarizing and plotting the output allow population-average cumulative incidence functions to be calculated, visualized and compared to unadjusted survival curves. Numerical and computational optimization strategies are employed for efficient and reliable computation of the coupled integrals involved. To address potential integrable singularities caused by infinite cause-specific hazards, particularly near time-from-index of zero, integrals are transformed to remove their dependency on hazard functions, making them solely functions of causespecific, unadjusted survival functions. This implicit variable transformation also provides for easier extensibility of CFC to handle custom survival models since it only requires the users to implement a maximum of one function per cause. The transformed integrals are numerically calculated using a generalization of Simpson's rule to handle the implicit change of variable from time to survival, while a generalized trapezoidal rule is used as reference for error calculation. An OpenMP-parallelized, efficient C++ implementation  -  using packages Rcpp and RcppArmadillo  -  makes the application of CFC in Bayesian settings practical, where a potentially large number of samples represent the posterior distribution of cause-specific survival functions.},
+   issn = {1548-7660},
+   pages = {1--29},
+   doi = {10.18637/jss.v089.i09},
+   url = {https://www.jstatsoft.org/v089/i09}
+}
+
