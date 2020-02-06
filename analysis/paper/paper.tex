@@ -1882,7 +1882,13 @@ like to include functions to compute calibration and discrimination
 statistics (e.g.~Brier score, AUC) for our models. Saarela and Arjas
 \citeyearpar{saarela2015non} also describe how to obtain a posterior
 distribution for the AUC from their model. Their approach could also be
-included in \pkg{casebase}.
+included in \pkg{casebase}. Finally, we want to provide more flexibility
+in how the case-base sampling is performed. This could be achieved by
+adding a \code{hazard} argument to the function \code{sampleCaseBase}.
+In this way, users could specify their own sampling mechanism. For
+example, they could provide a hazard that gives sampling probabilities
+that are proportional to the cardiovascular disease event rate given by
+the Framingham score \citep{saarela2015non}.
 
 In conclusion, we presented the \proglang{R} package \pkg{casebase}
 which implements case-base sampling for fitting parametric survival
@@ -1894,7 +1900,7 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-02-05 17:43:41 using the following
+This report was generated on 2020-02-06 13:51:22 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1973,7 +1979,7 @@ R> git2r::repository(here::here())
 
 \begin{CodeOutput}
 #> Local:    intro /home/turgeonm/Documents/git_repos/cbpaper
-#> Head:     [c926a9e] 2020-01-21: Merge pull request #15 from sahirbhatnagar/fix-casebase-dependency
+#> Head:     [92cad64] 2020-02-05: add intro and edit some of the sections
 \end{CodeOutput}
 \end{CodeChunk}
 
