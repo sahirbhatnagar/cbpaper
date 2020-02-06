@@ -20,7 +20,39 @@ devtools::install_github("benmarwick/rrtools") # for building the research compe
 # To contribute
 
 1.  Modify the `analysis/paper/paper.Rmd` file.
-2.  Run `rrtools::add_dependencies_to_description()`
+2.  Run `rrtools::add_dependencies_to_description()`. This command will
+    ensure all used packages are added to the DESCRIPTION file.
+3.  Compile the `paper.Rmd` file
+4.  Commit and push your changes to GitHub
+
+# Docker Image
+
+``` bash
+# https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04
+# https://docs.docker.com/engine/reference/run/ which explains the run tags
+docker pull sahirbhatnagar/cbpaper:latest # pulls the image locally
+docker images # see list of images
+docker ps -a # also see list of images
+docker run -d -p 8787:8787 -e PASSWORD=<YOUR_PASS> --name cbpaper sahirbhatnagar/cbpaper
+# then go to http://localhost:8787
+# username is rstudio, password is what you specified
+# in R do: setwd('/cbpaper/') and then you should see the folder with all the materials in the folder RStudio pane
+docker stop cbpaper # this can be what you supplied to --name in the above command or the container ID
+```
+
+# File structure of repo
+
+    analysis/
+    |
+    ├── paper/
+    │   ├── paper.Rmd       # this is the main document to edit. just testing code for now
+    │   └── references.bib  # this contains the reference list information
+    ├── figures/            # location of the figures produced by the Rmd
+    |
+    ├── data/
+        ├── raw_data/       # data obtained from elsewhere
+        └── derived_data/   # data generated during the analysis
 
 # Outline
 
@@ -72,7 +104,7 @@ This repository contains the data and code for our paper:
 Our pre-print is online here:
 
 > Authors, (YYYY). *Title of your paper goes here*. Name of
-> journal/book, Accessed 29 Jan 2020. Online at
+> journal/book, Accessed 04 Feb 2020. Online at
 > <https://doi.org/xxx/xxx>
 
 ### How to cite
@@ -80,7 +112,7 @@ Our pre-print is online here:
 Please cite this compendium as:
 
 > Authors, (2020). *Compendium of R code and data for Title of your
-> paper goes here*. Accessed 29 Jan 2020. Online at
+> paper goes here*. Accessed 04 Feb 2020. Online at
 > <https://doi.org/xxx/xxx>
 
 ### How to download or install

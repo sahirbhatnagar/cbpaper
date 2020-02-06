@@ -5,45 +5,45 @@ The style file: jss.bst
 Database file #1: references.bib
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Warning--there's a number but no volume in l1penal
-You've used 32 entries,
+You've used 23 entries,
             3215 wiz_defined-function locations,
-            955 strings with 12861 characters,
-and the built_in function-call counts, 33368 in all, are:
-= -- 3318
-> -- 887
-< -- 19
-+ -- 342
-- -- 301
-* -- 2503
-:= -- 4001
-add.period$ -- 133
-call.type$ -- 32
-change.case$ -- 230
-chr.to.int$ -- 33
-cite$ -- 33
-duplicate$ -- 3471
-empty$ -- 2566
-format.name$ -- 406
-if$ -- 6700
+            893 strings with 11231 characters,
+and the built_in function-call counts, 22825 in all, are:
+= -- 2277
+> -- 614
+< -- 13
++ -- 234
+- -- 208
+* -- 1697
+:= -- 2780
+add.period$ -- 95
+call.type$ -- 23
+change.case$ -- 163
+chr.to.int$ -- 24
+cite$ -- 24
+duplicate$ -- 2365
+empty$ -- 1737
+format.name$ -- 278
+if$ -- 4572
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 334
-newline$ -- 178
-num.names$ -- 128
-pop$ -- 1670
+missing$ -- 222
+newline$ -- 131
+num.names$ -- 92
+pop$ -- 1146
 preamble$ -- 1
-purify$ -- 228
+purify$ -- 161
 quote$ -- 0
-skip$ -- 571
+skip$ -- 399
 stack$ -- 0
-substring$ -- 3495
-swap$ -- 836
+substring$ -- 2345
+swap$ -- 548
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 288
+type$ -- 207
 warning$ -- 1
-while$ -- 230
+while$ -- 156
 width$ -- 0
-write$ -- 431
+write$ -- 310
 (There was 1 warning)

@@ -57,6 +57,7 @@ preamble: >
   \usepackage{float}
   \usepackage{booktabs}
   \usepackage{makecell}
+  \usepackage{tabu}
   \DeclareUnicodeCharacter{2500}{-}
 output: 
   rticles::jss_article:
@@ -98,6 +99,7 @@ library(tibble)
 library(glmnet)
 library(kableExtra)
 library(pracma)
+library(flexsurv) # for fitting gompertz AFT
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
@@ -345,45 +347,16 @@ risks <- lapply(fits, function(i) {
   casebase::absoluteRisk(object = i, time = seq(0,15,0.1), newdata = new_data)
 })
 
-# casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
-#                                                   data = ERSPC, 
-#                                                   ratio = 100)
-# smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
-#                                           time = seq(0,15,0.1), 
-#                                           newdata = new_data)
-# 
-# casebase_weibull <- casebase::fitSmoothHazard(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm, 
-#                                            data = ERSPC, 
-#                                            ratio = 100)
-# smooth_risk_weibull <- casebase::absoluteRisk(object = casebase_weibull, 
-#                                            time = seq(0,15,0.1), 
-#                                            newdata = new_data)
-# casebase_splines <- casebase::fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
-#                                               data = ERSPC, 
-#                                               ratio = 100)
-# smooth_risk_splines <- casebase::absoluteRisk(object = casebase_splines, 
-#                                               time = seq(0,15,0.1), 
-#                                               newdata = new_data)
-# 
-# casebase_interaction <- casebase::fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time*ScrArm, 
-#                                                   data = ERSPC, 
-#                                                   ratio = 100)
-# smooth_risk_interaction <- casebase::absoluteRisk(object = casebase_interaction, 
-#                                                   time = seq(0,15,0.1), 
-#                                                   newdata = new_data)
 
-# par(mfrow = c(2, 2))
-# casebase::hazardPlot(casebase_interaction, newdata = new_data[2,], ci = FALSE)
-# casebase::hazardPlot(casebase_interaction, newdata = new_data[1,], ci = FALSE, add = TRUE, lty = 2)
-# 
-# casebase::hazardPlot(casebase_splines, newdata = new_data[2,], ci = FALSE)
-# casebase::hazardPlot(casebase_splines, newdata = new_data[1,], ci = FALSE, add = TRUE, lty = 2)
-# 
-# casebase::hazardPlot(casebase_time, newdata = new_data[2,], ci = FALSE)
-# casebase::hazardPlot(casebase_time, newdata = new_data[1,], add = TRUE, lty = 2)
-# 
-# casebase::hazardPlot(casebase_exponential, newdata = new_data[2,], ci = FALSE)
-# casebase::hazardPlot(casebase_exponential, newdata = new_data[1,], add = TRUE, lty = 2)
+aft_fits <- lapply(list("exp","gompertz","weibull"), function(i) 
+  flexsurv::flexsurvreg(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
+                           data = ERSPC, dist = i)
+  )
+
+names(aft_fits) <- list("exponential","gompertz","weibull")
+
+
+
 
 # dev.off()
 layout(matrix(1:4, ncol = 2, byrow = FALSE), respect = FALSE)
@@ -452,9 +425,18 @@ mtext("Years since randomization", side = 1, line = -1.5, outer = TRUE)
 ```
 
 
+```{r, results='hide'}
+par(mfrow = c(2, 2))
+lapply(fits, function(i) {
+  casebase::hazardPlot(i, newdata = new_data[2,], ci = FALSE)
+  casebase::hazardPlot(i, newdata = new_data[1,], ci = FALSE, add = TRUE, lty = 2)  
+})
+```
+
+
 ## Equivalence between casebase and AFT
 
-```{r}
+```{r, eval = FALSE}
 # exponential -------------------------------------------------------------
 
 casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
@@ -475,6 +457,10 @@ aft_weibull <- survreg(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
                        data = ERSPC, dist = "weibull")
 
 -coef(aft_weibull)/aft_weibull$scale
+
+
+
+
 coef(casebase_weibull)
 ```
 
@@ -515,26 +501,119 @@ Once again, we can see that the estimate of the hazard ratio is similar to that 
 Qualitatively, the combination of splines and case-base sampling produces the parametric model that most closely resembles the Cox model. In the following table, we see that the confidence intervals are also similar across all four models. In other words, this reinforces the idea that, under proportional hazards, we do not need to model the full hazard to obtain reliable estimates of the hazard ratio. Of course, different parametric models for the hazards give rise to qualitatively different estimates for the CIF.
 
 ```{r erspc-95ci, echo = FALSE, eval = eval_cs1}
-CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
-CI_exp <- c(exp(coef(fits$exponential))["ScrArmScreening group"], exp(confint(fits$exponential))["ScrArmScreening group",])
-CI_gompertz <- c(exp(coef(fits$gompertz))["ScrArmScreening group"], exp(confint(fits$gompertz))["ScrArmScreening group",])
-CI_weibull <- c(exp(coef(fits$weibull))["ScrArmScreening group"], exp(confint(fits$weibull))["ScrArmScreening group",])
-CI_splines <- c(exp(coef(fits$splines))["ScrArmScreening group"], exp(confint(fits$splines))["ScrArmScreening group",])
+# CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
+# CI_exp <- c(exp(coef(fits$exponential))["ScrArmScreening group"], exp(confint(fits$exponential))["ScrArmScreening group",])
+# CI_gompertz <- c(exp(coef(fits$gompertz))["ScrArmScreening group"], exp(confint(fits$gompertz))["ScrArmScreening group",])
+# CI_weibull <- c(exp(coef(fits$weibull))["ScrArmScreening group"], exp(confint(fits$weibull))["ScrArmScreening group",])
+# CI_splines <- c(exp(coef(fits$splines))["ScrArmScreening group"], exp(confint(fits$splines))["ScrArmScreening group",])
 
-table_ci <- rbind(CI_cox, CI_exp, CI_gompertz, CI_weibull, CI_splines)
-colnames(table_ci) <- c("HR", "LB", "UB")
+# function to exponentiate HR and CI and return a HR (lower, Upper) character
+exp_est_ci <- function(model = c("exponential","gompertz","weibull","splines"),
+                       fit, 
+                       covariate = "ScrArmScreening group", 
+                       type = c("casebase", "survreg")) {
+  
+  type <- match.arg(type)
+  covariate <- match.arg(covariate)
+  
+  if (type == "casebase"){
+    
+    cis <- confint(fit[[model]])
+    
+    sprintf("%0.2f (%0.2f, %0.2f)",
+            exp(coef(fit[[model]]))[[covariate]],
+            exp(cis)[covariate,1],
+            exp(cis)[covariate,2])
+  } else {
+    
+    if (model == "weibull") {
 
-data.frame(Model = c("Cox", "Exponential", "Gompertz", "Weibull", "Splines")) %>% 
-  bind_cols(as.data.frame(table_ci)) %>% 
-  mutate(CI = paste0("(", round(LB, 2), ", ",
-                     round(UB, 2), ")"),
-         Width = UB - LB) %>% 
-  dplyr::select(-LB, -UB) %>% 
-  knitr::kable(format = "latex", booktabs = TRUE)  %>%
-  kable_styling()
+      # The maximised log-likelihoods are the same between survreg and flexsurvreg, 
+      # however the parameterisation is different: the first coefficient (Intercept) 
+      # reported by survreg is log(mu), and survreg's "scale" is
+      # dweibull’s (thus flexsurvreg)'s 1 / shape
+      res <- -fit[[model]]$res[covariate,] / (1 / fit[[model]]$res["shape",])
+      
+      sprintf("%0.2f (%0.2f, %0.2f)",
+              exp(res[["est"]]),
+              exp(res[["U95%"]]),
+              exp(res[["L95%"]]))
+      
+    } else if (model == "splines") {
+      
+      c("--")
+      
+    } else {
+      
+      res <- fit[[model]]$res[covariate,]
+      
+      sprintf("%0.2f (%0.2f, %0.2f)",
+              exp(res[["est"]]),
+              exp(res[["L95%"]]),
+              exp(res[["U95%"]]))
+    }
+  }
+}
+
+casebase_HR_CI <- lapply(list("exponential","gompertz","weibull","splines"), 
+                         exp_est_ci, 
+                         fit = fits,
+                         covariate = "ScrArmScreening group", 
+                         type = "casebase")
+
+survreg_HR_CI <- lapply(list("exponential","gompertz","weibull","splines"), 
+                         exp_est_ci, 
+                         fit = aft_fits,
+                         covariate = "ScrArmScreening group", 
+                         type = "survreg")
+
+pt <- cbind(list("Exponential","Gompertz","Weibull","Splines"),
+            do.call(rbind, casebase_HR_CI), do.call(rbind, survreg_HR_CI))
+
+# table_ci <- rbind(CI_cox, CI_exp, CI_gompertz, CI_weibull, CI_splines)
+# colnames(table_ci) <- c("HR", "LB", "UB")
+# 
+# data.frame(Model = c("Cox", "Exponential", "Gompertz", "Weibull", "Splines")) %>% 
+#   bind_cols(as.data.frame(table_ci)) %>% 
+#   mutate(CI = paste0("(", round(LB, 2), ", ",
+#                      round(UB, 2), ")"),
+#          Width = UB - LB) %>% 
+#   dplyr::select(-LB, -UB) %>% 
+#   knitr::kable(format = "latex", booktabs = TRUE)  %>%
+#   kable_styling()
+```
+
+
+
+```{r, eval = TRUE}
+## ---- print-sim-table ----
+
+kable(pt, "latex", booktabs = T, align = c("l","c","c"),
+      caption = c("Mean "),
+      col.names = c("Model","casebase","survreg")) %>%
+  kable_styling() %>%
+  # add_header_above(c(" "," ","No overlap" = 2, "All causal SNPs\nin kinship" = 2, "No overlap" = 2, "All causal SNPs\nin kinship" = 2)) %>%
+  # add_header_above(c(" "," ","Null model" = 4, "1% Causal SNPs" = 4)) %>%
+  column_spec(1, bold=T) %>%
+  collapse_rows(columns = 1, latex_hline = "major", valign = "middle") %>%
+  footnote(general = "Median (Inter-quartile range) is given for Model Size.",
+           general_title = "Note:") #%>%
+  # footnote(general = "Model Size is the number of selected variables using the high-dimensional BIC for \texttt{ggmix} and 10-fold cross validation for \texttt{lasso} and \texttt{twostep}.")
+  #          # number = c("", "Footnote 2; "),
+  #          # alphabet = c("Footnote A; ", "Footnote B; "),
+  #          # symbol = c("Footnote Symbol 1; ", "Footnote Symbol 2"),
+  #          general_title = "Note: ", number_title = "Type I: ",
+  #          alphabet_title = "Type II: ", symbol_title = "Type III: ",
+  #          footnote_as_chunk = T, title_format = c("italic", "underline")
+  # )
 ```
 
 As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) splines model.
+
+```{r}
+knitr::knit_exit()
+```
+
 
 ```{r erscp-compare, eval = eval_cs1}
 anova(fits$exponential, fits$splines, test = "LRT")
