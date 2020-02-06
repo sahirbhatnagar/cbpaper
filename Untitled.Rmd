@@ -1,0 +1,113 @@
+---
+title: "ipareport"
+author: "Jesse"
+date: "30/01/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r run}
+library(casebase)
+library(survival)
+library(riskRegression)
+data(veteran)
+
+new_data <- data.frame(trt = "test",
+                       celltype = "adeno",
+                       karno = median(veteran$karno),
+                       diagtime = median(veteran$diagtime),
+                       age = median(veteran$age),
+                       prior = "no")
+
+modelKM <- coxph(Surv(time, status) ~ 1,
+                  data = veteran, y=TRUE, x = TRUE)
+abKM<- survfit(modelKM)
+
+modelCox <- coxph(Surv(time, status) ~ karno + diagtime + age + prior + celltype + trt,
+                data = veteran, y=TRUE, x = TRUE)
+abCox<- survfit(modelCox)
+
+
+modelCB <- fitSmoothHazard(status ~ time + karno + diagtime + age + prior +
+                              celltype + trt, data = veteran, ratio = 100)
+abCB <- absoluteRisk(object = modelCB, time = seq(0,11, sep=99)) ##takes long to run
+
+
+
+plot(abCB[,1],rowMeans(abCB[,-c(1)]),type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
+lines(abCox,col="red",fun="event",lwd=3,conf.int = FALSE)
+lines(abKM ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
+legend("bottomright",
+       legend = c( "Casebase (Lasso+linear)","semi-parametric (Cox)+glmnet","KM curve"),
+       col = c("black","red","Blue"),
+       lty = c(1, 1, 1),
+       bg = "gray90")
+
+s=Score(list("KM"=modelKM,"Cox"=modelCox),
+        formula=Surv(time,status)~1,data=veteran,conf.int=FALSE,times=c(5,8))
+
+BrierNoCensoring=sum((1-rowMeans(abCB[,-c(1)]))^2)/length(abCB[,1])
+
+fit=modelCox
+brierErrorCox <- function(fit, Time,data) {
+    cfit <- survfit(Surv(time, status==0)~1, data) #KM curve
+    sfit <- survfit(fit, newdata = data)  # model curve for fit2
+    S <- summary(sfit, Time)$surv
+    cProb <- summary(cfit, Time)$surv
+    Score <- matrix(NA, nrow(S), ncol(S))
+    for (i in 1:length(Time)) {
+        CensBefore <- fit$y[,2]==0 & fit$y[,1] < Time[i]
+        y <- fit$y[,1] > Time[i]
+            Score[i,] <- (y - S[i,])^2
+
+        Score[i, CensBefore] <- 0
+    }
+    Err <- sweep(Score, 1, cProb, '/')
+    apply(Err, 1, mean)
+}
+fit=modelCB
+data=veteran
+brierErrorCB <- function(fit, Time,data) {
+    cfit <- survfit(Surv(time, status==0)~1, data) #KM curve
+    sfit <- absoluteRisk(object = modelCB, time=Time)  # model curve for fit2
+    S <- 1-sfit[,-c(1)]
+    cProb <- summary(cfit, Time)$surv
+    Score <- matrix(NA, nrow(S), ncol(S))
+    for (i in 1:length(Time)) {
+        CensBefore <- data$status==0 & fit$originalData$time < Time[i]
+        y <- fit$originalData$time > Time[i]
+        Score[i,] <- (y - S[i,])^2
+        Score[i, CensBefore] <- 0
+    }
+
+    Err <- sweep(Score, 1, cProb, '/')
+    Err=rowMeans(Err)
+
+
+}
+
+
+Time <- seq(0, 300, len=200)
+errCox <- cbind(brierErrorCox(modelCox, Time,veteran))
+errCB<- cbind(brierErrorCB(modelCB,Time,veteran))
+errors<-data.frame(coxPredictionError=errCox,cbPredictionError=errCB)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+errors=na.omit(errors)  %>%
+    gather(key,value, coxPredictionError, cbPredictionError)
+errors$time=Time
+
+
+
+errors%>%
+    ggplot(aes(x=time,y=value,col=key,group=key))+geom_line(lwd=1)+
+
+    labs(x = "time",y="Brier prediction error")
+
+
+
+```

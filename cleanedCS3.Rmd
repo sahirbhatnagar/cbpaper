@@ -1,0 +1,324 @@
+---
+documentclass: jss
+author:
+  - name: Sahir Bhatnagar *
+    affiliation: McGill University
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{sahir.bhatnagar@mail.mcgill.ca}
+    url: http://sahirbhatnagar.com/
+  - name: Maxime Turgeon *
+    affiliation: 'University of Manitoba \AND'
+    address: >
+      186 Dysart Road
+      Winnipeg, MB, Canada R3T 2N2
+    email: \email{max.turgeon@umanitoba.ca}
+    url: https://maxturgeon.ca/
+  - name: Jesse Islam 
+    affiliation: McGill University
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{jesse.islam@mail.mcgill.ca}
+  - name: James Hanley
+    affiliation: McGill University
+    address: >
+      1020 Pine Avenue West
+      Montreal, QC, Canada H3A 1A2
+    email: \email{james.hanley@mcgill.ca}
+    url: http://www.medicine.mcgill.ca/epidemiology/hanley/
+  - name: Olli Saarela
+    affiliation: University of Toronto
+    address: >
+      Dalla Lana School of Public Health, 
+      155 College Street, 6th floor, 
+      Toronto, Ontario 
+      M5T 3M7, Canada
+    email: \email{olli.saarela@utoronto.ca}
+    url: http://individual.utoronto.ca/osaarela/
+title:
+  formatted: "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+  # If you use tex in the formatted title, also supply version without
+  plain:     "casebase: An Alternative Framework For Survival Analysis"
+  # For running headers, if needed
+  short:     "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+abstract: >
+  The abstract of the article. * joint co-authors
+keywords:
+  # at least one keyword must be supplied
+  formatted: [keywords, not capitalized, "\\proglang{Java}"]
+  plain:     [keywords, not capitalized, Java]
+preamble: >
+  \usepackage{amsmath}
+  \usepackage{longtable}
+  \usepackage{graphicx}
+  \usepackage{tabularx}
+  \usepackage{float}
+  \usepackage{booktabs}
+  \usepackage{makecell}
+  \DeclareUnicodeCharacter{2500}{-}
+output: 
+  rticles::jss_article:
+    number_sections: TRUE     #added argument option 
+    citation_package: "natbib"  #All my citations use biblatex, not natbib. 
+biblio-style: jss      #Listed to use in JSS Instructions for Authors, but not in template by default. 
+bibliography: references.bib  #Also not included in template by default. 
+fig_width: 7
+fig_height: 6
+fig_caption: true
+---
+
+<!-- # Code formatting -->
+
+<!-- Don't use markdown, instead use the more precise latex commands: -->
+
+<!-- * \proglang{Java} -->
+<!-- * \pkg{plyr} -->
+<!-- * \code{print("abc")} -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  comment = "#>",
+  fig.path = "../figures/"
+)
+options(kableExtra.latex.load_packages = FALSE)
+library(tidyverse)
+library(magrittr)
+library(survival)
+library(casebase)
+#devtools::load_all('../../../casebase')#testing
+library(splines)
+library(tibble)
+library(glmnet)
+library(kableExtra)
+library(data.table)
+options(digits = 2, scipen = 999)
+# set the seed for reproducible output
+set.seed(1234)
+
+eval_introduction <- FALSE
+eval_theory <- TRUE
+eval_implementation <- FALSE
+eval_cs1 <- FALSE
+eval_cs2 <- FALSE
+eval_cs3 <- TRUE
+eval_cs4 <- FALSE
+```
+
+
+
+# Case study 3--SUPPORT Data
+
+In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore more advanced features.
+
+For the third case study, we will introduce regularization into the estimation of the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 1000 individuals and 35 variables. charges, Totcst, totmcst and sfdm2 were removed as they are response variables we are not interested in for the sake of this analysis. After imputation, we have 690 individuals. We lose individuals due to coliniarity between variables, preventing imputation. If a pair of covariates are deemed colinear to a certain degree, they are excluded from any imputations. Here, only edu  income  avtisst*  race  ph*  glucose*  adlp* were imputed. Of these 690 individuals, 66.09% experienced the event of interest. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of each variable can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University. The imputed dataset is available as part of the \pkg{casebase} package.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{ccccc}
+\hline
+\textbf{Name} & \textbf{Labels}                          & \textbf{Levels} & \textbf{Storage} & \textbf{NAs} \\
+\hline
+age           & Age                                      &                 & double           & 0            \\
+death         & Death at any time up to NDI date:31DEC94 &                 & double           & 0            \\
+sex           &                                          & 2               & integer          & 0            \\
+hospdead      & Death in Hospital                        &                 & double           & 0            \\
+slos          & Days from Study Entry to Discharge       &                 & double           & 0            \\
+d.time        & Days of Follow-Up                        &                 & double           & 0            \\
+dzgroup       &                                          & 8               & integer          & 0            \\
+dzclass       &                                          & 4               & integer          & 0            \\
+num.co        & number of comorbidities                  &                 & double           & 0            \\
+edu           & Years of Education                       &                 & double           & 202          \\
+income        &                                          & 4               & integer          & 349          \\
+scoma         & SUPPORT Coma Score based on Glasgow D3   &                 & double           & 0            \\
+charges       & Hospital Charges                         &                 & double           & 25           \\
+totcst        & Total RCC cost                           &                 & double           & 105          \\
+totmcst       & Total micro-cost                         &                 & double           & 372          \\
+avtisst       & Average TISS, Days 3-25                  &                 & double           & 6            \\
+race          &                                          & 5               & integer          & 5            \\
+meanbp        & Mean Arterial Blood Pressure Day 3       &                 & double           & 0            \\
+wblc          & White Blood Cell Count Day 3             &                 & double           & 24           \\
+hrt           & Heart Rate Day 3                         &                 & double           & 0            \\
+resp          & Respiration Rate Day 3                   &                 & double           & 0            \\
+temp          & Temperature (Celsius) Day 3              &                 & double           & 0            \\
+pafi          & PaO2/(.01*FiO2) Day 3                    &                 & double           & 253          \\
+alb           & Serum Albumin Day 3                      &                 & double           & 378          \\
+bili          & Bilirubin Day 3                          &                 & double           & 297          \\
+crea          & Serum creatinine Day 3                   &                 & double           & 3            \\
+sod           & Serum sodium Day 3                       &                 & double           & 0            \\
+ph            & Serum pH (arterial) Day 3                &                 & double           & 250          \\
+glucose       & Glucose Day 3                            &                 & double           & 470          \\
+bun           & BUN Day 3                                &                 & double           & 455          \\
+urine         & Urine Output Day 3                       &                 & double           & 517          \\
+adlp          & ADL Patient Day 3                        &                 & double           & 634          \\
+adls          & ADL Surrogate Day 3                      &                 & double           & 310          \\
+sfdm2         &                                          & 5               & integer          & 159          \\
+adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
+\end{tabular}
+\caption{A description of each variable in the SUPPORT dataset.}
+\label{tab:support1}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{cc}
+\hline
+\textbf{Variable} & \textbf{Levels}                      \\
+\hline
+sex      & female                                        \\
+         & male                                          \\
+dzgroup  & ARF/MOSF w/Sepsis                             \\
+         & COPD                                          \\
+         & CHF                                           \\
+         & Cirrhosis                                     \\
+         & Coma                                          \\
+         & Colon Cancer                                  \\
+         & Lung Cancer                                   \\
+         & MOSF w/Malig                                  \\
+dzclass  & ARF/MOSF                                      \\
+         & COPD/CHF/Cirrhosis                            \\
+         & Coma                                          \\
+         & Cancer                                        \\
+income   & under \$11k                                   \\
+         & $11-$25k                                      \\
+         & $25-$50k                                      \\
+         & \textgreater{}\$50k                           \\
+race     & white                                         \\
+         & black                                         \\
+         & asian                                         \\
+         & other                                         \\
+         & hispanic                                      \\
+sfdm2    & no(M2 and SIP pres)                           \\
+         & adl\textgreater{}=4 (\textgreater{}=5 if sur) \\
+         & SIP\textgreater{}=30                          \\
+         & Coma or Intub                                 \\
+         & \textless{}2 mo. follow-up                   
+\end{tabular}
+\caption{A description of each level within each categorical variable in the dataset.}
+\label{tab:support2}
+\end{table}
+
+<!--Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase.--> As before, the first step is to visualize the incidence density. The population-time plot for the SUPPORT data appears in Figure \ref{fig:support-poptime}.
+
+```{r support-poptime, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:support-poptime} Population-time plot for the SUPPORT data. Red points represent the case series. The gray space demonstrates the base series."}
+data(support)
+support_popTime <- popTime(support,
+                           time = "d.time", event = "death",percentile_number = 0.31)
+plot(support_popTime)
+```
+
+Before we proceed with the analysis, we first remove hospital death as a covariate, as this is directly informative of death. All covariates will be used to estimate the hazard function. The hazard function will be used to estimate the cumulative incidence of each individual in the study. Then, the average cumulative incidience curve for all observations will be used for our comparison.
+
+
+```{r supportSetUp, echo = FALSE, eval = eval_cs3}
+completeData=casebase::support
+#remove hospital dead
+completeData<-completeData[,-c(4)]
+ratio=100  #universal ratio for eval_cs3
+#keep one individual out, at random, for which we will develop an 
+#absolute risk curve.
+#sam=sample(1:nrow(completeData), 1)
+#Set workingData to the remaining individuals in the data
+#workingData=completeData[-c(sam),]
+workingCompleteData=model.matrix(death~ .-d.time,data=completeData)[,-c(1)]#remove intercept
+#Create u and xCox, which will be used when fitting Cox with glmnet.
+newData=workingCompleteData
+x=workingCompleteData
+#x and y will be used to fit the casebase model under glmnet.
+#x=as.matrix(sparse.model.matrix(death~ .-d.time+0,data=workingData))
+y=data.matrix(completeData[,c(2,5)])
+```
+
+Our main objective is to compute the absolute risk of death for a given set of covariates, using regularization when fitting our model. First, we fit a smooth hazard to the data using a weibull distribution. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into indicator variables. Here, we used lasso penalization by setting alpha to 1.
+
+```{r cbHazardInteractions}, echo = TRUE, eval = eval_cs3}
+
+cb.ModelInter=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="death",
+                                       formula_time = ~log(d.time),alpha=1,ratio=ratio)
+```
+Then, we take our model and use the `absoluteRisk` function to integrate and retrieve our cumulative incidence curves.
+
+
+```{r CBabsolute, echo = FALSE, eval = eval_cs3}
+#Estimating the absolute risk curve using the newData parameter.
+casebaseCIAll=casebase::absoluteRisk(cb.ModelInter,time = seq(1,max(completeData$d.time), 400),newdata = x , s="lambda.1se",method=c("numerical"))
+
+cbCIAve=data.frame(casebaseCIAll[,1],rowMeans(casebaseCIAll[,-c(1)]))
+```
+We will compare this curve to a regularized version of cox regression, and a kaplan-meier survival curve. The cox regression absolute risk curve with lasso penalization required two extra steps to retrieve. Coxnet from the glmnet package has tools to fit a regularized cox model, but requires a survival object skeleton of the selected variables, so that the survival package tools can be used to retrive the absolute risk. We handle this by fitting a regularized cox model with the glmnet package, and a cox model from the survival package with the selected variables from the regularized fit. This second model serves as a skeleton that permits the use of survival package functions. The coefficients from the regularized model will replace the coefficients in our skeleton. the resulting model will have the correct coefficients when integrating, but will have an incorrect standard error. For the purposes of this case study, we are only interested in the absolute risk curve itself and not the standard error.
+
+
+```{r coxHazAbsolute, echo = FALSE, eval = eval_cs3}
+#Create u and xCox, which will be used when fitting Cox with glmnet.
+u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
+xCox=as.matrix(sparse.model.matrix(death~ .-d.time,data=completeData))
+#hazard for cox using glmnet
+coxglmFit=glmnet::cv.glmnet(x=xCox,y=u, family="cox",alpha=1)
+#convergence demonstrated in plot
+#plot(coxglmFit)
+#taking the coefficient estimates for later use
+nonzero_covariate_cox <- predict(coxglmFit, type = "nonzero", s = "lambda.1se")
+nonzero_coef_cox <- coef(coxglmFit, s = "lambda.1se")
+#creating a new dataset that only contains the covariates chosen through glmnet.
+#cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
+cleanCoxData<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCox[,nonzero_covariate_cox$X1]))
+#newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
+#fitting a cox model using regular estimation, however we will not keep it.
+#this is used more as an object place holder.
+coxFit <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxData)
+#The coefficients of this object will be replaced with the estimates from coxglmFit.
+#Doing so makes it so that everything is invalid aside from the coefficients.
+#In this case, all we need to estimate the absolute risk is the coefficients.
+#Std. error would be incorrect here, if we were to draw error bars.
+coxFit$coefficients<-nonzero_coef_cox@x
+#Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
+newDataCox=newData[,nonzero_covariate_cox$X1-1]
+abCoxFit<-survival::survfit(coxFit,newdata=as.data.frame(newDataCox),time = seq(0,max(completeData$d.time), 1),type="breslow")
+abCF<-abCoxFit
+abCF$surv<-rowMeans(abCF$surv)
+```
+We used the survival package to calculate the kaplan-meier absolute risk function.
+
+```{r fitKM+abRisk, echo = TRUE, eval = eval_cs3}
+#creating a surv object to be used to fit an unadjusted absolute risk curve.
+# (Kaplan-Meier risk curve)
+km <- survival::Surv(time = completeData$d.time, event = completeData$death)
+abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
+```
+
+Now that our three absolute risk functions have been calculated, we compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase decrease the absolute risk by the end of the study, in comparison to kaplan-meier.
+```{r abSupportComparison, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:abSC} Compares regularized casebase in black, regularized cox in red and Kaplan meier in blue."}
+# A plot to compare all three Absolute risk (Commulative Incidence)
+plot(cbCIAve[,1],cbCIAve[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
+lines(abCF,col="red",fun="event",lwd=3,conf.int = FALSE)
+lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
+legend("bottomright", 
+       legend = c( "Casebase (Lasso+linear)","semi-parametric (Cox)+glmnet","KM curve"), 
+       col = c("black","red","Blue"),
+       lty = c(1, 1, 1), 
+       bg = "gray90")
+```
+
+
+```{r covariatesRegularizedLollipopPlot,eval=FALSE}
+
+#get covariates excluding d.time
+estimatescb=setDT(as.data.frame(coef(cb.Model)[-c(1,2),1]), keep.rownames = TRUE)[]
+estimatescb$Model="casebase"
+colnames(estimatescb)<-c("Coefs","Estimate","Model")
+estimatescox=setDT(as.data.frame(coef(coxNet)[-c(1),1]), keep.rownames = TRUE)[]
+estimatescox$Model="Cox"
+colnames(estimatescox)<-c("Coefs","Estimate","Model")
+estimates=rbind(estimatescb, estimatescox)
+estimates$Estimate[estimates$Estimate==0]=NA# make it so unchosen covariates appear empty
+library(ggstance)# for vertical dodge
+  ggplot(estimates, aes(x = Estimate, y = Coefs, color = Model)) +
+        geom_segment(aes(x = 0, y = Coefs, xend = Estimate, yend = Coefs),size=0.5 ) +
+        geom_point(position=ggstance::position_dodgev(height=0.2))
+
+```

@@ -904,25 +904,28 @@ parametric models for hazard functions, and estimating the corresponding
 cumulative incidence curves. In the next two case studies, we explore
 more advanced features.
 
-For the third case study, we will look at regularized estimation for the
-hazard function. This can be performed using a combination of case-base
-sampling and regularized logistic regression. To demonstrate this
-capability, we examine the Study to Understand Prognoses Preferences
-Outcomes and Risks of Treatment (SUPPORT) dataset
+For the third case study, we will introduce regularization into the
+estimation of the hazard function. This can be performed using a
+combination of case-base sampling and regularized logistic regression.
+To demonstrate this capability, we examine the Study to Understand
+Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset
 \citep{knaus1995support}. The SUPPORT dataset tracks death for
 individuals who are considered seriously ill within a hospital.
 Imputation was conducted using the \pkg{mice} package in \proglang{R}
 with default settings \citep{mice}. Before imputation, there were a
-total of 1000 individuals and 35 variables. After imputation, we have
-690 individuals. We lose individuals due to coliniarity. If a pair of
-covariates are deemed colinear to a certain degree, they are excluded
-from any imputations. Here, only edu income avtisst* race ph* glucose*
-adlp* were imputed. Of these, 66.09\% experienced the event of interest.
-A description of each variable can be found in Table \ref{tab:support1}
-and a breakdown of each categorical variable in Table
-\ref{tab:support2}. The original data was obtained from the Department
-of Biostatistics at Vanderbilt University. The imputed dataset is
-available as part of the \pkg{casebase} package.
+total of 1000 individuals and 35 variables. charges, Totcst, totmcst and
+sfdm2 were removed as they are response variables we are not interested
+in for the sake of this analysis. After imputation, we have 690
+individuals. We lose individuals due to coliniarity between variables,
+preventing imputation. If a pair of covariates are deemed colinear to a
+certain degree, they are excluded from any imputations. Here, only edu
+income avtisst* race ph* glucose* adlp* were imputed. Of these 690
+individuals, 66.09\% experienced the event of interest. A description of
+each variable can be found in Table \ref{tab:support1} and a breakdown
+of each categorical variable in Table \ref{tab:support2}. The original
+data was obtained from the Department of Biostatistics at Vanderbilt
+University. The imputed dataset is available as part of the
+\pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -1011,145 +1014,75 @@ sfdm2    & no(M2 and SIP pres)                           \\
 
 As before, the first step is to visualize the incidence density. The
 population-time plot for the SUPPORT data appears in Figure
-\ref{fig:support-poptime}. \textbackslash{}textcolor\{red\}\{red dots
-now go all over. percentile\_number introduced as a parameter in
-popTime\}
+\ref{fig:support-poptime}.
 
 \begin{CodeChunk}
-
-\begin{CodeInput}
-R> data(support)
-R> support_popTime <- popTime(support,
-R+                            time = "d.time", event = "death",percentile_number = 0.31)
-R> plot(support_popTime)
-\end{CodeInput}
 \begin{figure}
 
 {\centering \includegraphics{../figures/support-poptime-1} 
 
 }
 
-\caption{\label{fig:support-poptime} Population-time plot for the SUPPORT data.}\label{fig:support-poptime}
+\caption{\label{fig:support-poptime} Population-time plot for the SUPPORT data. Red points represent the case series. The gray space demonstrates the base series.}\label{fig:support-poptime}
 \end{figure}
 \end{CodeChunk}
 
 Before we proceed with the analysis, we first remove hospital death as a
-covariate, as this is directly informative of death and cannot be used
-as a predictor. Then we select one observation at random. We will
-estimate the cumulative incidence curve for this individual. The other
-observations will be used to fit the hazard function.
+covariate, as this is directly informative of death. All covariates will
+be used to estimate the hazard function. The hazard function will be
+used to estimate the cumulative incidence of each individual in the
+study. Then, the average cumulative incidience curve for all
+observations will be used for our comparison.
 
 Our main objective is to compute the absolute risk of death for a given
 set of covariates, using regularization when fitting our model. First,
-we fit a smooth hazard to the data; for the sake of this example, we
-opted for a linear term for time. As casebase makes use of the glmnet
-package, we interact with the fitsmoothhazard.fit function using a
-matrix interface, where y contains the time and event variables and x
-contains all other variables we would like to include in the model. For
-the SUPPORT dataset, all factor variables were converted into dummy
-variables. Here, we used lasso penalization by setting alpha to 1.
+we fit a smooth hazard to the data using a weibull distribution. As
+casebase makes use of the glmnet package, we interact with the
+fitsmoothhazard.fit function using a matrix interface, where y contains
+the time and event variables and x contains all other variables we would
+like to include in the model. For the SUPPORT dataset, all factor
+variables were converted into indicator variables. Here, we used lasso
+penalization by setting alpha to 1.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> xInteractions=x*y[,2]
-R> colnames(xInteractions) <- paste("d.time*", colnames(xInteractions), sep = "")
-R> xFull=cbind(x,xInteractions)
-R> cb.ModelInter=casebase::fitSmoothHazard.fit(xFull,y,family="glmnet",time="d.time",event="death",
-R+                                        formula_time = ~d.time,alpha=1,ratio=rat)
-\end{CodeInput}
-\end{CodeChunk}
-
-Then, we take our model and use the absoluteRisk function to integrate
-and retrieve our absolute risk function.
-
-\begin{CodeChunk}
-
-\begin{CodeInput}
-R> #Estimating the absolute risk curve using the newData parameter.
-R> casebaseAbsoluteInter=casebase::absoluteRisk(cb.ModelInter,time = seq(1,max(completeData$d.time), 400),newdata = xFull , s="lambda.1se",method=c("numerical"))
 R> 
-R> cabI=data.frame(casebaseAbsoluteInter[,1],rowMeans(casebaseAbsoluteInter[,-c(1)]))
+R> cb.Model=casebase::fitSmoothHazard.fit(x,y,family="glmnet",time="d.time",event="death",
+R+                                        formula_time = ~log(d.time),alpha=1,ratio=ratio)
 \end{CodeInput}
 \end{CodeChunk}
+
+Then, we take our model and use the \texttt{absoluteRisk} function to
+integrate and retrieve our cumulative incidence curves.
 
 We will compare this curve to a regularized version of cox regression,
 and a kaplan-meier survival curve. The cox regression absolute risk
 curve with lasso penalization required two extra steps to retrieve.
 Coxnet from the glmnet package has tools to fit a regularized cox model,
-but requires that a survival object skeleton of the selected variables,
-so that the survival package tools can be used to retrive the absolute
+but requires a survival object skeleton of the selected variables, so
+that the survival package tools can be used to retrive the absolute
 risk. We handle this by fitting a regularized cox model with the glmnet
 package, and a cox model from the survival package with the selected
 variables from the regularized fit. This second model serves as a
 skeleton that permits the use of survival package functions. The
-coefficients from the regularized model will replace the coeficients in
+coefficients from the regularized model will replace the coefficients in
 our skeleton. the resulting model will have the correct coefficients
 when integrating, but will have an incorrect standard error. For the
 purposes of this case study, we are only interested in the absolute risk
 curve itself and not the standard error.
 
-\begin{CodeChunk}
-
-\begin{CodeInput}
-R> #Create u and xCox, which will be used when fitting Cox with glmnet.
-R> u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
-R> 
-R> xCoxI=as.matrix(cbind(data.frame("(Intercept)"=rep(1,each=690)),xFull))
-R> colnames(xCoxI)[1]="(Intercept)"
-R> 
-R> #hazard for cox using glmnet
-R> coxNetI=glmnet::cv.glmnet(x=xCoxI,y=u, family="cox",alpha=1)
-R> #convergence demonstrated in plot
-R> #plot(coxNet)
-R> #taking the coefficient estimates for later use
-R> nonzero_covariate_cox <- predict(coxNetI, type = "nonzero", s = "lambda.1se")
-R> nonzero_coef_cox <- coef(coxNetI, s = "lambda.1se")
-R> #creating a new dataset that only contains the covariates chosen through glmnet.
-R> #cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
-R> cleanCoxDataI<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,nonzero_covariate_cox$X1]))
-R> #newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
-R> #fitting a cox model using regular estimation, however we will not keep it.
-R> #this is used more as an object place holder.
-R> coxNetFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxDataI)
-R> #The coefficients of this object will be replaced with the estimates from coxNet.
-R> #Doing so makes it so that everything is invalid aside from the coefficients.
-R> #In this case, all we need to estimate the absolute risk is the coefficients.
-R> #Std. error would be incorrect here, if we were to draw error bars.
-R> coxNetFitI$coefficients<-nonzero_coef_cox@x
-R> #Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
-R> #posCox=nonzero_covariate_cox$X1
-R> #newDataCoxI=cleanCoxDataI[,posCox]
-R> 
-R> abcoxNetI<-survival::survfit(coxNetFitI,type="breslow",newdata=cleanCoxDataI)
-R> 
-R> abCNI<-abcoxNetI
-R> abCNI$surv=rowMeans(abCNI$surv)
-\end{CodeInput}
-\end{CodeChunk}
+We used the survival package to calculate cox regression's cumulative
+incidience without penalization and the kaplan-meier curve for
+incidience.
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> fullDataCox<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,-c(1)]))
-R> coxFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = fullDataCox)
-R> abcoxFitI<-survival::survfit(coxFitI,newdata=fullDataCox)
-R> abCFI<-abcoxFitI
-R> abCFI$surv<-rowMeans(abCFI$surv)
-R> #cb.ModelNorm=casebase::fitSmoothHazard(V2~.,time="V1",event="V2",
-R>        #                                ratio=rat,data=fullDataCox)
-R> #summary(cb.ModelNorm)#need to figure out how to deal with NAs
-R> #casebaseAbsoluteNorm=casebase::absoluteRisk(cb.ModelNorm,time = seq(1,max(completeData$d.time), 200),newdata = newData , s="lambda.1se",method=c("numerical"))
-R> #cabn=data.frame(casebaseAbsoluteNorm[,1],rowMeans(casebaseAbsoluteNorm[,-c(1)]))
-\end{CodeInput}
-\end{CodeChunk}
-
-We used the survival package to calculate the kaplan-meier absolute risk
-function.
-
-\begin{CodeChunk}
-
-\begin{CodeInput}
+R> 
+R> coxFitup <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = Cox)
+R> abcoxFitup<-survival::survfit(coxFitup,newdata=Cox)
+R> 
 R> #creating a surv object to be used to fit an unadjusted absolute risk curve.
 R> # (Kaplan-Meier risk curve)
 R> km <- survival::Surv(time = completeData$d.time, event = completeData$death)
@@ -1157,25 +1090,12 @@ R> abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
 \end{CodeInput}
 \end{CodeChunk}
 
-Now that our three absolute risk functions have been calculated, we
-compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase
+Now that our four cumulative incidence estimations have been calculated,
+we compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase
 decrease the absolute risk by the end of the study, in comparison to
 kaplan-meier.
 
 \begin{CodeChunk}
-
-\begin{CodeInput}
-R> # A plot to compare all three Absolute risk (Commulative Incidence)
-R> plot(cabI[,1],cabI[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
-R> lines(abCFI,col="red",fun="event",lwd=3,conf.int = FALSE)
-R> lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
-R> lines(abCNI,col="purple",fun="event",lwd=3,conf.int = FALSE)
-R> legend("bottomright", 
-R+        legend = c( "Casebase (Lasso+linear)","semi-parametric Coxnet","KM curve","cox"), 
-R+        col = c("black","red","Blue","purple"),
-R+        lty = c(1, 1, 1), 
-R+        bg = "gray90")
-\end{CodeInput}
 \begin{figure}
 
 {\centering \includegraphics{../figures/abSupportComparison-1} 
@@ -1194,7 +1114,7 @@ R> #get covariates excluding d.time
 R> estimatescb=setDT(as.data.frame(coef(cb.Model)[-c(1,2),1]), keep.rownames = TRUE)[]
 R> estimatescb$Model="casebase"
 R> colnames(estimatescb)<-c("Coefs","Estimate","Model")
-R> estimatescox=setDT(as.data.frame(coef(coxNet)[-c(1),1]), keep.rownames = TRUE)[]
+R> estimatescox=setDT(as.data.frame(coef(coxglmFit)[-c(1),1]), keep.rownames = TRUE)[]
 R> estimatescox$Model="Cox"
 R> colnames(estimatescox)<-c("Coefs","Estimate","Model")
 R> estimates=rbind(estimatescb, estimatescox)
@@ -1205,30 +1125,6 @@ R>         geom_segment(aes(x = 0, y = Coefs, xend = Estimate, yend = Coefs),siz
 R>         geom_point(position=ggstance::position_dodgev(height=0.2))
 R> 
 \end{CodeInput}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-
-\begin{CodeInput}
-R> #get covariates excluding d.time
-R> library(data.table)
-R> estimatescb=setDT(as.data.frame(coef(cb.ModelInter)[-c(1,2),1]), keep.rownames = TRUE)[]
-R> estimatescb$Model="casebase"
-R> colnames(estimatescb)<-c("Coefs","Estimate","Model")
-R> estimatescox=setDT(as.data.frame(coef(coxNetI)[-c(1),1]), keep.rownames = TRUE)[]
-R> estimatescox$Model="Cox"
-R> colnames(estimatescox)<-c("Coefs","Estimate","Model")
-R> estimatesI=rbind(estimatescb, estimatescox)
-R> estimatesI$Estimate[estimatesI$Estimate==0]=NA# make it so unchosen covariates appear empty
-R> library(ggstance)# for vertical dodge
-R>   ggplot(estimatesI, aes(x = Coefs, y = Estimate , color = Model)) +
-R+         geom_segment(aes(y = 0, x = Coefs, yend = Estimate, xend = Coefs),size=0.5, position = position_dodge(width = 0.5)) +
-R+         geom_point(position = position_dodge(width = 0.5))
-\end{CodeInput}
-
-
-\begin{center}\includegraphics{../figures/covariatesLolliInteractions-1} \end{center}
-
 \end{CodeChunk}
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
@@ -1475,7 +1371,7 @@ to \pkg{casebase}.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-01-30 20:17:21 using the following
+This report was generated on 2020-02-06 17:40:56 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1496,7 +1392,7 @@ R> devtools::session_info()
 #>  collate  en_CA.UTF-8                 
 #>  ctype    en_CA.UTF-8                 
 #>  tz       America/Montreal            
-#>  date     2020-01-30                  
+#>  date     2020-02-06                  
 #> 
 #> - Packages -------------------------------------------------------------------
 #>  package     * version    date       lib
@@ -1526,7 +1422,6 @@ R> devtools::session_info()
 #>  fs            1.3.1      2019-05-06 [1]
 #>  generics      0.0.2      2018-11-29 [1]
 #>  ggplot2     * 3.2.1      2019-08-10 [1]
-#>  ggstance    * 0.3.3      2019-08-19 [1]
 #>  glmnet      * 3.0-2      2019-12-11 [1]
 #>  glue          1.3.1      2019-03-12 [1]
 #>  gtable        0.3.0      2019-03-25 [1]
@@ -1680,7 +1575,6 @@ R> devtools::session_info()
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
 #>  CRAN (R 3.6.0)                          
-#>  CRAN (R 3.6.0)                          
 #> 
 #> [1] /Library/Frameworks/R.framework/Versions/3.6/Resources/library
 \end{CodeOutput}
@@ -1698,7 +1592,7 @@ R> git2r::repository(here::here())
 \begin{CodeOutput}
 #> Local:    master /Users/jislam/Desktop/Gits/cbpaper
 #> Remote:   master @ origin (https://github.com/Jesse-Islam/cbpaper.git)
-#> Head:     [b0db01f] 2020-01-16: mostly Done
+#> Head:     [a04834a] 2020-01-31: cbPaper draft for covars and interactions
 \end{CodeOutput}
 \end{CodeChunk}
 
