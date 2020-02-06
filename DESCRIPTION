@@ -39,4 +39,5 @@ Imports: bookdown,
     ggplot2 (>= 3.2.1),
     glmnet (>= 3.0-2),
     pacman (>= 0.5.1),
-    timereg (>= 1.9.4)
+    timereg (>= 1.9.4),
+    flexsurv (>= 1.1.1)
