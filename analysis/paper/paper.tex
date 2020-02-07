@@ -93,8 +93,8 @@ can be fit via logistic regression. From the fitted hazard function,
 cumulative incidence and, thus, risk functions of time, treatment and
 profile can be easily derived.
 
-\hypertarget{theoretical-details}{%
-\section{Theoretical details}\label{theoretical-details}}
+\hypertarget{theory}{%
+\section{Theoretical details}\label{theory}}
 
 As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
 key idea behind case-base sampling is to discretize the study base into
@@ -290,14 +290,62 @@ motivations for introducting case-base sampling in survival analysis.
 \section{Implementation details}\label{implementation-details}}
 
 The functions in the casebase package can be divided into two
-categories: 1) data visualization, in the form of population-time plots;
-and 2) parametric modeling. We explicitly aimed at being compatible with
-both \code{data.frame}s and \code{data.table}s. This is evident in some
-of the coding choices we made, and it is also reflected in our unit
-tests.
+categories: 1) data visualization, in the form of population-time plots
+and hazard curves; and 2) parametric modeling. We explicitly aimed at
+being compatible with both \code{data.frame}s and \code{data.table}s.
+This is evident in some of the coding choices we made, and it is also
+reflected in our unit tests.
 
 \hypertarget{population-time-plots}{%
 \subsection{Population-time plots}\label{population-time-plots}}
+
+As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
+key idea behind case-base sampling is to discretize the study base into
+an infinite amount of \emph{person moments}. These person moments are
+indexed by both an individual in the study and a time point, and
+therefore each person moment has a covariate profile, an exposure status
+and an outcome status attached to it. We note that there is only a
+finite number of person moments associated with the event of interest
+(what Hanley \& Miettinen call the \emph{case series}). The case-base
+sampling refers to the sampling from the base of a representative finite
+sample called the \emph{base series}.
+
+The case-base sampling approach described in Section \ref{theory} can be
+visualized in the form of a population time plot. They are extremely
+informative graphical displays of survival data and should be one of the
+first steps in an exploratory data analysis. We facilitate this task in
+the \pkg{casebase} package using the \code{popTime} function. This is
+done in two steps:
+
+\begin{enumerate}
+\item Pass your dataset to the casebase::popTime function and specify the column names corresponding to
+
+the time of event
+the event status
+exposure (optional)
+
+This will create an object of class popTime (or popTimeExposure if you specify a value for the exposure argument)
+
+Pass the object of class popTime (or popTimeExposure) to the plot function
+\end{enumerate}
+
+We first create the necessary dataset for producing the population time
+plots, and we can generate the plot by using the corresponding
+\code{plot} method:
+
+We can also create exposure stratified plots by specifying the
+\code{exposure} argument in the \code{popTime} function:
+
+We can also plot them side-by-side using the \code{ncol} argument:
+
+\begin{CodeChunk}
+
+
+\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-side-1} \end{center}
+
+\end{CodeChunk}
+
+ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
 
 \hypertarget{parametric-modeling}{%
 \subsection{Parametric modeling}\label{parametric-modeling}}
@@ -426,27 +474,6 @@ of Prostate Cancer Screening data. This dataset is available through the
 The results of this study were published by
 \citep{schroder2009screening}, and the dataset itself was obtained using
 the approach described in \citep{liu2014recovering}.
-
-Population time plots can be extremely informative graphical displays of
-survival data. They should be the first step in an exploratory data
-analysis. We facilitate this task in the \pkg{casebase} package using
-the \code{popTime} function. We first create the necessary dataset for
-producing the population time plots, and we can generate the plot by
-using the corresponding \code{plot} method:
-
-We can also create exposure stratified plots by specifying the
-\code{exposure} argument in the \code{popTime} function:
-
-We can also plot them side-by-side using the \code{ncol} argument:
-
-\begin{CodeChunk}
-
-
-\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-side-1} \end{center}
-
-\end{CodeChunk}
-
-ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
 
 Next, we investigate the differences between the control and the
 screening arms. A common choice for this type of analysis is to use a
