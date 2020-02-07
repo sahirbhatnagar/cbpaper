@@ -831,7 +831,7 @@ Before we proceed with the analysis, we first remove hospital death as a covaria
 completeData=casebase::support
 #remove hospital dead
 completeData<-completeData[,-c(4)]
-rat=1  #universal ratio for eval_cs3
+ratio=10  #universal ratio for eval_cs3
 #keep one individual out, at random, for which we will develop an 
 #absolute risk curve.
 #sam=sample(1:nrow(completeData), 1)
