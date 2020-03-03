@@ -102,13 +102,13 @@ options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
 
-eval_introduction <- FALSE
+eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
-eval_cs1 <- FALSE
-eval_cs2 <- FALSE
+eval_cs1 <- TRUE
+eval_cs2 <- TRUE
 eval_cs3 <- FALSE
-eval_cs4 <- FALSE
+eval_cs4 <- TRUE
 ```
 
 # Introduction
@@ -246,11 +246,11 @@ The parametric modeling step was separated into three parts:
   
 By separating the sampling and estimation functions, we allowed the possibility of users implementing more complex sampling scheme, as described in Saarela [-@saarela2016case].
 
-The sampling scheme selected for \code{sampleCaseBase} was described in Hanley and Miettinen [-@hanley2009fitting]: we first sample along the ``person'' axis, proportional to each individual's total follow-up time, and then we sample a moment uniformly over their follow-up time. This sampling scheme is equivalent to the following picture: imagine representing the total follow-up time of all individuals in the study along a single dimension, where the follow-up time of the next individual would start exactly when the follow-up time of the previous individual ends. Then the base series could be sampled uniformly from this one-dimensional representation of the overall follow-up time. In any case, the output is a dataset of the same class as the input, where each row corresponds to a person-moment. The covariate profile for each such person-moment is retained, and an offset term is added to the dataset. This output could then be used to fit a smooth hazard function, or for visualization of the base series.
+The sampling scheme selected for \code{sampleCaseBase} was described in Hanley & Miettinen [-@hanley2009fitting]: we first sample along the ``person'' axis, proportional to each individual's total follow-up time, and then we sample a moment uniformly over their follow-up time. This sampling scheme is equivalent to the following picture: imagine representing the total follow-up time of all individuals in the study along a single dimension, where the follow-up time of the next individual would start exactly when the follow-up time of the previous individual ends. Then the base series could be sampled uniformly from this one-dimensional representation of the overall follow-up time. In any case, the output is a dataset of the same class as the input, where each row corresponds to a person-moment. The covariate profile for each such person-moment is retained, and an offset term is added to the dataset. This output could then be used to fit a smooth hazard function, or for visualization of the base series.
 
-The fitting function \code{fitSmoothHazard} starts by looking at the class of the dataset: if it was generated from \code{sampleCaseBase}, it automatically inherited the class \code{cbData}. If the dataset supplied to \code{fitSmoothHazard} does not inherit from \code{cbData}, then the fitting function starts by calling \code{sampleCaseBase} to generate the base series. In other words, the occasional user can bypass \code{sampleCaseBase} altogether and only worry about the fitting function \code{fitSmoothHazard}. 
+The fitting function \code{fitSmoothHazard} starts by looking at the class of the dataset: if it was generated from \code{sampleCaseBase}, it automatically inherited the class \code{cbData}. If the dataset supplied to \code{fitSmoothHazard} does not inherit from \code{cbData}, then the fitting function starts by calling \code{sampleCaseBase} to generate the base series. In other words, users can bypass \code{sampleCaseBase} altogether and only worry about the fitting function \code{fitSmoothHazard}. 
 
-The fitting function retains the familiar formula interface of \code{glm}. The left-hand side of the formula should be the name of the column corresponding to the event type. The right-hand side can be any combination of the covariates, along with an explicit functional form for the time variable. Note that non-proportional hazard models can be achieved at this stage by adding an interaction term involving time. The offset term does not need to be specified by the user, as it is automatically added to the formula.
+The fitting function retains the familiar formula interface of \code{glm}. The left-hand side of the formula should be the name of the column corresponding to the event type. The right-hand side can be any combination of the covariates, along with an explicit functional form for the time variable. Note that non-proportional hazard models can be achieved at this stage by adding an interaction term involving time (cf. Case Study 4 below). The offset term does not need to be specified by the user, as it is automatically added to the formula before calling \code{glm}.
 
 To fit the hazard function, we provide several approaches that are available via the \code{family} parameter. These approaches are:
 
@@ -259,11 +259,11 @@ To fit the hazard function, we provide several approaches that are available via
   - \code{gam}: This option provides support for *Generalized Additive Models* via the \code{gam} package [@hastie1987generalized].
   - \code{gbm}: This option provides support for *Gradient Boosted Trees* via the \code{gbm} package. This feature is still experimental.
   
-In the case of multiple events, the hazard is fitted via multinomial regression as performed by the \pkg{VGAM} package. This package was selected for its ability to fit multinomial regression models with an offset.
+In the case of multiple events, the hazard is fitted via multinomial regression as performed by the \pkg{VGAM} package. We selected this package for its ability to fit multinomial regression models with an offset.
 
 Once a model-fit object has been returned by \code{fitSmoothHazard}, all the familiar summary and diagnostic functions are available: \code{print}, \code{summary}, \code{predict}, \code{plot}, etc. Our package provides one more functionality: it computes risk functions from the model fit. For the case of a single event, it uses the familiar identity
 \begin{equation}\label{eqn:surv}
-S(t) = \exp\left(-\int_0^t h(u;X) du\right).
+S(t) = \exp\left(-\int_0^t \lambda(u;X) du\right).
 \end{equation}
 The integral is computed using either the \code{stats::integrate} function or Monte-Carlo integration. The risk function (or cumulative incidence function) is then defined as
 \begin{equation}\label{eqn:CI}
@@ -272,18 +272,19 @@ CI(t) = 1 - S(t).
 
 For the case of a competing-event analysis, the event-specific risk is computed using the following procedure: first, we compute the overall survival function (i.e. for all event types):
 
-$$ S(t) = \exp\left(-\int_0^t H(u;X) du\right),\qquad H(t;X) = \sum_{j=1}^J h_j(t;X).$$
+$$ S(t) = \exp\left(-\int_0^t \Lambda(u;X) du\right),\qquad \Lambda(t;X) = \sum_{j=1}^J \lambda_j(t;X).$$
 From this, we can derive the event-specific subdensities:
 
-$$ f_j(t) = h_j(t)S(t).$$
+$$ f_j(t) = \lambda_j(t)S(t).$$
 
 Finally, by integrating these subdensities, we obtain the event-specific cumulative incidence functions:
 
 $$ CI_j(t) = \int_0^t f_j(u)du.$$
+The integrals are computed using either numerical integration (via the trapezoidal rule) or Monte Carlo integration. This option is controlled by the argument \code{method} of the \code{absoluteRisk} function.
 
-We created \code{absoluteRisk} as an \code{S3} generic, with methods for the different types of outputs of \code{fitSmoothHazard}. The method dispatch system of \proglang{R} then takes care of matching the correct output to the correct methodology for calculating the cumulative incidence function, without the user's intervention.
+We created \code{absoluteRisk} as an \code{S3} generic, with methods that match the different types of outputs of \code{fitSmoothHazard}. The method dispatch system of \proglang{R} then takes care of matching the correct output to the correct methodology for calculating the cumulative incidence function, without requiring any intervention from the user.
 
-In the following sections, we illustrate these functionalities in the context of three case studies.
+In the following sections, we illustrate these functionalities in the context of four case studies.
 
 # Case study 1--European Randomized Study of Prostate Cancer Screening
 
@@ -1170,7 +1171,7 @@ Competing risks & Difficult & Cause-specific CIFs\\
 \end{table}
 
 Our choice of modeling the log-hazard as a linear function of covariates allows us to develop a simple computational scheme for estimation. However, as a downside, it does not allow us to model location and scale parameters separately like the package \pkg{flexsurv}. For example, if we look at the Weibull distribution as parametrised in \code{stats::pweibull}, the log-hazard function is given by
-$$ \log h(t; \alpha, \beta) = \left[\log(\alpha/\beta) - (\alpha - 1)\log(\beta)\right] + (\alpha - 1)\log t,$$
+$$ \log \lambda(t; \alpha, \beta) = \left[\log(\alpha/\beta) - (\alpha - 1)\log(\beta)\right] + (\alpha - 1)\log t,$$
 where $\alpha,\beta$ are shape and scale parameters, respectively. Unlike \pkg{casebase}, the approach taken by \pkg{flexsurv} allows the user to model the scale parameter as a function of covariates. Of course, this added flexibility comes at the cost of interpretability: by modeling the log-hazard directly, the parameter estimates from \pkg{casebase} can be interpreted as estimates of log-hazard ratios. To improve the flexibility of \pkg{casebase} at capturing the scale of a parametric family, we could replace the logistic regression with its quasi-likelihood counterpart and therefore model over- and under-dispersion with respect to the logistic likelihood. We defer the study of the properties and performance of such a model to a future article.
 
 Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we want to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools would then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
