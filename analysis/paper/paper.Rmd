@@ -734,7 +734,9 @@ Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base s
 
 In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore more advanced features.
 
-For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 1000 individuals and 35 variables. After imputation, we have 690 individuals. We lose individuals due to coliniarity. If a pair of covariates are deemed colinear to a certain degree, they are excluded from any imputations. Here, only edu  income  avtisst*  race  ph*  glucose*  adlp* were imputed. Of these, 66.09% experienced the event of interest. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of each variable can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University. The imputed dataset is available as part of the \pkg{casebase} package.
+For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 9105 individuals and 47 variables. Of those variables, a few were removed before imputation. We removed three response variables: hospital charges, patient ratio of costs to charges and patient micro-costs. We also removed functional disability and income as they are ordinal covariates, because ordinal variables are treated as factors in our current model. Finally, we removed 8 covariates relating to the results of previous findings: we removed SUPPORT day 3 physiology score (sps), 	APACHE III day 3 physiology score (aps),	SUPPORT model 2-month survival estimate, SUPPORT model 6-month survival estimate, Physician's 2-month survival estimate for pt., Physician's 6-month survival estimate for pt., Patient had Do Not Resuscitate (DNR) order and Day of DNR order (<0 if before study). Of these, sps and aps were added on after imputation, as they were missing only 1 observation and permitted us to compare findings between our model and their's.
+
+First we impute manually using recommended normal values for physiological measures [@harrell_2020]. Next, we impute a single dataset using \pkg{mice} with default settings. After imputation, we noted that the covariate for surrogate activities of daily living was not imputed. This is due to colinearity between the other two covariates for activities of daily living. As such, surrogate activites of daily living was removed from our model. After these imputations, we have a total of 9104 observations and 30 variables, two of which are sps and aps, which will work as a baseline for our comparison to previous findings. This dataset is available  Its worth noting that these scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of used variables can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. The imputed dataset is available as part of the \pkg{casebase} package.
 
 \begin{table}[ht]
 \centering
@@ -759,6 +761,12 @@ totcst        & Total RCC cost                           &                 & dou
 totmcst       & Total micro-cost                         &                 & double           & 372          \\
 avtisst       & Average TISS, Days 3-25                  &                 & double           & 6            \\
 race          &                                          & 5               & integer          & 5            \\
+sps 	        & support physiology score day 3           &	               & double           &	1            \\
+aps           & APS III no coma, imp bun,uout for ph1,D3 &	               & double	          & 1            \\
+hday	        & Day in Hospital at Study Admit	         &                 & double           & 0            \\	
+diabetes      &	Diabetes (Com 27-28, Dx 73)	             &                 & double	          & 0            \\
+dementia      & Dementia (Comorbidity 6)                 &	               & double	          & 0            \\
+ca		        & Cancer State                             & 3               & integer	        & 0            \\
 meanbp        & Mean Arterial Blood Pressure Day 3       &                 & double           & 0            \\
 wblc          & White Blood Cell Count Day 3             &                 & double           & 24           \\
 hrt           & Heart Rate Day 3                         &                 & double           & 0            \\
@@ -773,7 +781,7 @@ ph            & Serum pH (arterial) Day 3                &                 & dou
 glucose       & Glucose Day 3                            &                 & double           & 470          \\
 bun           & BUN Day 3                                &                 & double           & 455          \\
 urine         & Urine Output Day 3                       &                 & double           & 517          \\
-adlp          & ADL Patient Day 3                        &                 & double           & 634          \\
+adlp          & Activiites of Daily Living (ADL) Patient Day 3                        &                 & double           & 634          \\
 adls          & ADL Surrogate Day 3                      &                 & double           & 310          \\
 sfdm2         &                                          & 5               & integer          & 159          \\
 adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
@@ -811,6 +819,9 @@ race     & white                                         \\
          & asian                                         \\
          & other                                         \\
          & hispanic                                      \\
+ca       & Yes                                           \\
+         & No                                            \\
+         & Metastatic                                    \\
 sfdm2    & no(M2 and SIP pres)                           \\
          & adl\textgreater{}=4 (\textgreater{}=5 if sur) \\
          & SIP\textgreater{}=30                          \\
