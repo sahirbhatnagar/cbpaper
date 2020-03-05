@@ -734,7 +734,7 @@ Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base s
 
 In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore more advanced features.
 
-For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 9105 individuals and 47 variables. Of those variables, a few were removed before imputation. We removed three response variables: hospital charges, patient ratio of costs to charges and patient micro-costs. We also removed functional disability and income as they are ordinal covariates, because ordinal variables are treated as factors in our current model. Finally, we removed 8 covariates relating to the results of previous findings: we removed SUPPORT day 3 physiology score (sps), 	APACHE III day 3 physiology score (aps),	SUPPORT model 2-month survival estimate, SUPPORT model 6-month survival estimate, Physician's 2-month survival estimate for pt., Physician's 6-month survival estimate for pt., Patient had Do Not Resuscitate (DNR) order and Day of DNR order (<0 if before study). Of these, sps and aps were added on after imputation, as they were missing only 1 observation and permitted us to compare findings between our model and their's.
+For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 9105 individuals and 47 variables. Of those variables, a few were removed before imputation. We removed three response variables: hospital charges, patient ratio of costs to charges and patient micro-costs. Next, we removed hospital death as it was directly informative of our event of interest, death. We also removed functional disability and income as they are ordinal covariates, because ordinal variables are treated as factors in our current model. Finally, we removed 8 covariates relating to the results of previous findings: we removed SUPPORT day 3 physiology score (sps), 	APACHE III day 3 physiology score (aps),	SUPPORT model 2-month survival estimate, SUPPORT model 6-month survival estimate, Physician's 2-month survival estimate for pt., Physician's 6-month survival estimate for pt., Patient had Do Not Resuscitate (DNR) order and Day of DNR order (<0 if before study). Of these, sps and aps were added on after imputation, as they were missing only 1 observation and permitted us to compare findings between our model and their's.
 
 First we impute manually using recommended normal values for physiological measures [@harrell_2020]. Next, we impute a single dataset using \pkg{mice} with default settings. After imputation, we noted that the covariate for surrogate activities of daily living was not imputed. This is due to colinearity between the other two covariates for activities of daily living. As such, surrogate activites of daily living was removed from our model. After these imputations, we have a total of 9104 observations and 30 variables, two of which are sps and aps, which will work as a baseline for our comparison to previous findings. This dataset is available  Its worth noting that these scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of used variables can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. The imputed dataset is available as part of the \pkg{casebase} package.
 
@@ -747,7 +747,6 @@ First we impute manually using recommended normal values for physiological measu
 age           & Age                                      &                 & double           & 0            \\
 death         & Death at any time up to NDI date:31DEC94 &                 & double           & 0            \\
 sex           &                                          & 2               & integer          & 0            \\
-hospdead      & Death in Hospital                        &                 & double           & 0            \\
 slos          & Days from Study Entry to Discharge       &                 & double           & 0            \\
 d.time        & Days of Follow-Up                        &                 & double           & 0            \\
 dzgroup       &                                          & 8               & integer          & 0            \\
@@ -756,9 +755,6 @@ num.co        & number of comorbidities                  &                 & dou
 edu           & Years of Education                       &                 & double           & 202          \\
 income        &                                          & 4               & integer          & 349          \\
 scoma         & SUPPORT Coma Score based on Glasgow D3   &                 & double           & 0            \\
-charges       & Hospital Charges                         &                 & double           & 25           \\
-totcst        & Total RCC cost                           &                 & double           & 105          \\
-totmcst       & Total micro-cost                         &                 & double           & 372          \\
 avtisst       & Average TISS, Days 3-25                  &                 & double           & 6            \\
 race          &                                          & 5               & integer          & 5            \\
 sps 	        & support physiology score day 3           &	               & double           &	1            \\
@@ -781,9 +777,7 @@ ph            & Serum pH (arterial) Day 3                &                 & dou
 glucose       & Glucose Day 3                            &                 & double           & 470          \\
 bun           & BUN Day 3                                &                 & double           & 455          \\
 urine         & Urine Output Day 3                       &                 & double           & 517          \\
-adlp          & Activiites of Daily Living (ADL) Patient Day 3                        &                 & double           & 634          \\
-adls          & ADL Surrogate Day 3                      &                 & double           & 310          \\
-sfdm2         &                                          & 5               & integer          & 159          \\
+adlp          & Activiites of Daily Living (ADL) Patient Day 3 &           & double           & 634          \\
 adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
 \end{tabular}
 \caption{A description of each variable in the SUPPORT dataset.}
@@ -810,9 +804,6 @@ dzclass  & ARF/MOSF                                      \\
          & COPD/CHF/Cirrhosis                            \\
          & Coma                                          \\
          & Cancer                                        \\
-income   & under \$11k                                   \\
-         & $11-$25k                                      \\
-         & $25-$50k                                      \\
          & \textgreater{}\$50k                           \\
 race     & white                                         \\
          & black                                         \\
@@ -822,40 +813,20 @@ race     & white                                         \\
 ca       & Yes                                           \\
          & No                                            \\
          & Metastatic                                    \\
-sfdm2    & no(M2 and SIP pres)                           \\
-         & adl\textgreater{}=4 (\textgreater{}=5 if sur) \\
-         & SIP\textgreater{}=30                          \\
-         & Coma or Intub                                 \\
-         & \textless{}2 mo. follow-up                   
 \end{tabular}
 \caption{A description of each level within each categorical variable in the dataset.}
 \label{tab:support2}
 \end{table}
 
-<!--Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase.--> As before, the first step is to visualize the incidence density. The population-time plot for the SUPPORT data appears in Figure \ref{fig:support-poptime}.
+<!--Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase.--> As before, the first step is to visualize the incidence density. The population-time plot for the SUPPORT data appears in Figure \ref{fig:support-poptime}. As we can see, the incidence density is not constant.
 
 
 
 ```{r support-poptime, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:support-poptime} Population-time plot for the SUPPORT data."}
-data(support)
-support_popTime <- popTime(support,
-                           time = "d.time", event = "death",percentile_number = 0.31)
-plot(support_popTime)
-```
-
-Before we proceed with the analysis, we first remove hospital death as a covariate, as this is directly informative of death. All covariates will be used to estimate the hazard function. The hazard function will be used to estimate the cumulative incidence of each individual in the study. Then, the average cumulative incidience curve for all observations will be used for our comparison.
 
 
-```{r supportSetUp, echo = FALSE, eval = eval_cs3}
-completeData=casebase::support
-#remove hospital dead
-completeData<-completeData[,-c(4)]
-ratio=10  #universal ratio for eval_cs3
-#keep one individual out, at random, for which we will develop an 
-#absolute risk curve.
-#sam=sample(1:nrow(completeData), 1)
-#Set workingData to the remaining individuals in the data
-#workingData=completeData[-c(sam),]
+
+completeData<-casebase::support
 workingCompleteData=model.matrix(death~ .-d.time,data=completeData)[,-c(1)]#remove intercept
 #Create u and xCox, which will be used when fitting Cox with glmnet.
 newData=workingCompleteData
@@ -863,145 +834,17 @@ x=workingCompleteData
 #x and y will be used to fit the casebase model under glmnet.
 #x=as.matrix(sparse.model.matrix(death~ .-d.time+0,data=workingData))
 y=data.matrix(completeData[,c(2,5)])
+
+support_popTime <- popTime(support,
+                           time = "d.time", event = "death",percentile_number = 0.31)
+plot(support_popTime)
 ```
+
+Our next step is to get the hazard function. All covariates will be used to estimate the hazard function. The hazard function will be used to estimate the cumulative incidence of each individual in the study. Then, the average cumulative incidience curve for all observations will be used for our comparison.
+
 
 Our main objective is to compute the absolute risk of death for a given set of covariates, using regularization when fitting our model. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1.
 
-```{r cbHazardInteractions}, echo = TRUE, eval = eval_cs3}
-xInteractions=x*y[,2]
-colnames(xInteractions) <- paste("d.time*", colnames(xInteractions), sep = "")
-xFull=cbind(x,xInteractions)
-cb.ModelInter=casebase::fitSmoothHazard.fit(xFull,y,family="glmnet",time="d.time",event="death",
-                                       formula_time = ~d.time,alpha=1,ratio=rat)
-```
-Then, we take our model and use the absoluteRisk function to integrate and retrieve our absolute risk function.
-
-
-```{r CBabsoluteInteracts, echo = TRUE, eval = eval_cs3}
-#Estimating the absolute risk curve using the newData parameter.
-casebaseAbsoluteInter=casebase::absoluteRisk(cb.ModelInter,time = seq(1,max(completeData$d.time), 400),newdata = xFull , s="lambda.1se",method=c("numerical"))
-
-cabI=data.frame(casebaseAbsoluteInter[,1],rowMeans(casebaseAbsoluteInter[,-c(1)]))
-```
-We will compare this curve to a regularized version of cox regression, and a kaplan-meier survival curve. The cox regression absolute risk curve with lasso penalization required two extra steps to retrieve. Coxnet from the glmnet package has tools to fit a regularized cox model, but requires a survival object skeleton of the selected variables, so that the survival package tools can be used to retrive the absolute risk. We handle this by fitting a regularized cox model with the glmnet package, and a cox model from the survival package with the selected variables from the regularized fit. This second model serves as a skeleton that permits the use of survival package functions. The coefficients from the regularized model will replace the coefficients in our skeleton. the resulting model will have the correct coefficients when integrating, but will have an incorrect standard error. For the purposes of this case study, we are only interested in the absolute risk curve itself and not the standard error.
-
-
-```{r coxHazAbsoluteInteracts, echo = TRUE, eval = eval_cs3}
-#Create u and xCox, which will be used when fitting Cox with glmnet.
-u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
-
-xCoxI=as.matrix(cbind(data.frame("(Intercept)"=rep(1,each=690)),xFull))
-colnames(xCoxI)[1]="(Intercept)"
-
-#hazard for cox using glmnet
-coxNetI=glmnet::cv.glmnet(x=xCoxI,y=u, family="cox",alpha=1)
-#convergence demonstrated in plot
-#plot(coxNet)
-#taking the coefficient estimates for later use
-nonzero_covariate_cox <- predict(coxNetI, type = "nonzero", s = "lambda.1se")
-nonzero_coef_cox <- coef(coxNetI, s = "lambda.1se")
-#creating a new dataset that only contains the covariates chosen through glmnet.
-#cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
-cleanCoxDataI<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,nonzero_covariate_cox$X1]))
-#newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
-#fitting a cox model using regular estimation, however we will not keep it.
-#this is used more as an object place holder.
-coxNetFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxDataI)
-#The coefficients of this object will be replaced with the estimates from coxNet.
-#Doing so makes it so that everything is invalid aside from the coefficients.
-#In this case, all we need to estimate the absolute risk is the coefficients.
-#Std. error would be incorrect here, if we were to draw error bars.
-coxNetFitI$coefficients<-nonzero_coef_cox@x
-#Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
-#posCox=nonzero_covariate_cox$X1
-#newDataCoxI=cleanCoxDataI[,posCox]
-
-abcoxNetI<-survival::survfit(coxNetFitI,type="breslow",newdata=cleanCoxDataI)
-
-abCNI<-abcoxNetI
-abCNI$surv=rowMeans(abCNI$surv)
-```
-
-
-```{r unpenalizedCox, echo = TRUE, eval = eval_cs3}
-fullDataCox<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,-c(1)]))
-coxFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = fullDataCox)
-abcoxFitI<-survival::survfit(coxFitI,newdata=fullDataCox)
-abCFI<-abcoxFitI
-abCFI$surv<-rowMeans(abCFI$surv)
-#cb.ModelNorm=casebase::fitSmoothHazard(V2~.,time="V1",event="V2",
-       #                                ratio=rat,data=fullDataCox)
-#summary(cb.ModelNorm)#need to figure out how to deal with NAs
-#casebaseAbsoluteNorm=casebase::absoluteRisk(cb.ModelNorm,time = seq(1,max(completeData$d.time), 200),newdata = newData , s="lambda.1se",method=c("numerical"))
-#cabn=data.frame(casebaseAbsoluteNorm[,1],rowMeans(casebaseAbsoluteNorm[,-c(1)]))
-
-```
-We used the survival package to calculate the kaplan-meier absolute risk function.
-
-```{r fitKM+abRisk, echo = TRUE, eval = eval_cs3}
-
-coxFitup <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = Cox)
-abcoxFitup<-survival::survfit(coxFitup,newdata=Cox)
-
-#creating a surv object to be used to fit an unadjusted absolute risk curve.
-# (Kaplan-Meier risk curve)
-km <- survival::Surv(time = completeData$d.time, event = completeData$death)
-abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
-```
-
-Now that our four cumulative incidence estimations have been calculated, we compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase decrease the absolute risk by the end of the study, in comparison to kaplan-meier.
-```{r abSupportComparison, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:abSC} Compares regularized casebase in black, regularized cox in red and Kaplan meier in blue."}
-abCFup<-abcoxFitup
-abCFup$surv<-rowMeans(abCFup$surv)
-# A plot to compare all three Absolute risk (Commulative Incidence)
-plot(cabI[,1],cabI[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
-lines(abCFI,col="red",fun="event",lwd=3,conf.int = FALSE)
-lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
-lines(abCNI,col="purple",fun="event",lwd=3,conf.int = FALSE)
-legend("bottomright", 
-       legend = c( "Casebase (Lasso+linear)","semi-parametric Coxnet","KM curve","cox"), 
-       col = c("black","red","Blue","purple"),
-       lty = c(1, 1, 1), 
-       bg = "gray90")
-```
-
-
-```{r covariatesRegularizedLollipopPlot,eval=FALSE}
-
-#get covariates excluding d.time
-estimatescb=setDT(as.data.frame(coef(cb.Model)[-c(1,2),1]), keep.rownames = TRUE)[]
-estimatescb$Model="casebase"
-colnames(estimatescb)<-c("Coefs","Estimate","Model")
-estimatescox=setDT(as.data.frame(coef(coxNet)[-c(1),1]), keep.rownames = TRUE)[]
-estimatescox$Model="Cox"
-colnames(estimatescox)<-c("Coefs","Estimate","Model")
-estimates=rbind(estimatescb, estimatescox)
-estimates$Estimate[estimates$Estimate==0]=NA# make it so unchosen covariates appear empty
-library(ggstance)# for vertical dodge
-  ggplot(estimates, aes(x = Estimate, y = Coefs, color = Model)) +
-        geom_segment(aes(x = 0, y = Coefs, xend = Estimate, yend = Coefs),size=0.5 ) +
-        geom_point(position=ggstance::position_dodgev(height=0.2))
-
-```
-
-```{r covariatesLolliInteractions,eval=eval_cs3}
-#get covariates excluding d.time
-library(data.table)
-estimatescb=setDT(as.data.frame(coef(cb.ModelInter)[-c(1,2),1]), keep.rownames = TRUE)[]
-estimatescb$Model="casebase"
-colnames(estimatescb)<-c("Coefs","Estimate","Model")
-estimatescox=setDT(as.data.frame(coef(coxNetI)[-c(1),1]), keep.rownames = TRUE)[]
-estimatescox$Model="Cox"
-colnames(estimatescox)<-c("Coefs","Estimate","Model")
-estimatesI=rbind(estimatescb, estimatescox)
-estimatesI$Estimate[estimatesI$Estimate==0]=NA# make it so unchosen covariates appear empty
-library(ggstance)# for vertical dodge
-  ggplot(estimatesI, aes(x = Coefs, y = Estimate , color = Model)) +
-        geom_segment(aes(y = 0, x = Coefs, yend = Estimate, xend = Coefs),size=0.5, position = position_dodge(width = 0.5)) +
-        geom_point(position = position_dodge(width = 0.5))
-  
-    
-```
   
   
 # Case study 4--Stanford Heart Transplant Data
