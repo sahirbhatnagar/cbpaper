@@ -237,6 +237,7 @@ The functions in the casebase package can be divided into two categories: 1) dat
 
 The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. They are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function and \code{plot} method as follows:
 
+The splitting of these tasks gives the user the flexibility to create population-time plots with the graphics system of their choice using the object created in Step 1, while the object created in Step 2 allows one to leverage the \pkg{ggplot2} family of functions for further customization. 
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime} (or \code{popTimeExposure} if you specify a value for the exposure argument).  
 2. The corresponding \code{plot} methods for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
@@ -244,6 +245,7 @@ To illustrate these functions we will use the European Randomized Study of Prost
 
 We first create the necessary dataset for producing the population time plots using the \code{casebase::popTime} function. In this example we stratify by the treatment group. Note that the resulting object stores the exposure variable as an attribute:
 
+We first pass this dataset to the \code{popTime} function. If you do not specify the time and event arguments, this function will try to guess them using regular expressions. We then generate the plot by using the corresponding \code{plot} method:
 ```{r plot-erspc-data, eval = eval_cs1}
 data("ERSPC")
 ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
@@ -266,13 +268,24 @@ The unique _step shape_ of the population time plot is due to the randomization 
 It is important to note that the red points are random distributed across the grey area for each time of event. That is, imagine we draw a vertical line at a specific event time. We then plot the red point at a randomly sampled y-coordinate along this vertical line. This is done to avoid having all red points along the upper edge of the plot (because the subjects with the least amount of observation time are plotted at the top of the y-axis). By randomly distributing them, we can get a better sense of the inicidence density.
 
 
+The randomization of the Finnish cohorts were carried out on January 1 of each of the 4 years 1996 to 1999. This, coupled with the uniform December 31 2006 censoring date, lead to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e. from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and in particular the Jan 1 entries in successive years. Tracked forwards in time (i.e. from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to close their recruitment - in December 2003 - the minimum potential follow-up is three years. Tracked further forwards in time (i.e. after year 3) the attrition is
 We can also create exposure stratified plots by specifying the \code{exposure} argument in the \code{popTime} function:
 
 ```{r plot-stratified-erspc-data, eval = eval_cs1}
 pt_object_strat <- casebase::popTime(ERSPC, 
                                      event = "DeadOfPrCa", 
                                      exposure = "ScrArm")
-# plot(pt_object_strat)
+# class(pt_object_strat)
+# pt_object
+plot(pt_object_strat)
+# dev.off()
+# library(magrittr)
+# pt <- plot(pt_object_strat)
+# pt %>% class
+
+# library(ggplot2)
+# pt + theme_minimal()
+
 ```
 
 We can also plot them side-by-side using the \code{ncol} argument:
@@ -487,7 +500,7 @@ coef(casebase_weibull)
 ```
 
 
-```{r, eval = F}
+```{r, eval = T}
 knitr::knit_exit()
 ```
 
