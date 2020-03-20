@@ -235,21 +235,36 @@ The functions in the casebase package can be divided into two categories: 1) dat
 
 ## Population-time plots
 
-As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to discretize the study base into an infinite amount of *person moments*. These person moments are indexed by both an individual in the study and a time point, and therefore each person moment has a covariate profile, an exposure status and an outcome status attached to it. We note that there is only a finite number of person moments associated with the event of interest (what Hanley & Miettinen call the *case series*). The case-base sampling refers to the sampling from the base of a representative finite sample called the *base series*. 
+The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. They are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function and \code{plot} method as follows:
 
-The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. They are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. We facilitate this task in the \pkg{casebase} package using the \code{popTime} function. This is done in two steps:
-\begin{enumerate}
-\item Pass your dataset to the \code{casebase::popTime} function and specify the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime} (or \code{popTimeExposure} if you specify a value for the exposure argument)
+1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime} (or \code{popTimeExposure} if you specify a value for the exposure argument).  
+2. The corresponding \code{plot} methods for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
-Pass the object of class popTime (or popTimeExposure) to the plot function
-\end{enumerate}
+To illustrate these functions we will use the European Randomized Study of Prostate Cancer Screening data which is available through the \pkg{casebase} package. The results of this study were published by [@schroder2009screening], and the dataset itself was obtained using the approach described in [@liu2014recovering].
 
-We first create the necessary dataset for producing the population time plots, and we can generate the plot by using the corresponding \code{plot} method:
+We first create the necessary dataset for producing the population time plots using the \code{casebase::popTime} function. In this example we stratify by the treatment group. Note that the resulting object stores the exposure variable as an attribute:
 
 ```{r plot-erspc-data, eval = eval_cs1}
-# pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
-# plot(pt_object)
+data("ERSPC")
+ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+                       levels = c(0,1), 
+                       labels = c("Control group", "Screening group"))
+pt_object <- casebase::popTime(ERSPC, 
+                               time = "Follow.Up.Time",
+                               event = "DeadOfPrCa",
+                               exposure = "ScrArm")
+attr(pt_object, "exposure")
 ```
+
+<!--The \code{pt_object} is a \code{data.table} containing the original dataset augmented with-->
+We then pass this object to the \code{plot} function which leverages the \pkg{ggplot2} package [@ggplot2] to build population time plots. It builds the plot by sequentially adding layers, starting with a layer for the area representing the population time followed by points to show the casebase sampling mechanism. This function gives user the flexibility to add any combination of the case.series, base.series and competing events. The case series and competing events are sampled at random vertically on the plot in order to visualise the incidence density using the popTime function. That is, imagine we draw a vertical line at a specific event time. We then plot the point at a randomly sampled y-coordinate along this vertical line. This is done to avoid having all points along the upper edge of the plot (because the subjects with the least amount of observation time are plotted at the top of the y-axis). By randomly distributing them, we can get a better sense of the inicidence density. The base series is sampled horizontally on the plot using the sampleCaseBase function.
+
+One benefit from these plots is that it allows you to see the incidence density. This can be seen from the distribution of the red dots in the above plot. We can see that more events are observed later on in time. Therefore a constant hazard model would not be appropriate in this instance as it would overestimate the cumulative incidence earlier on in time, and underestimate it later on.
+
+The unique _step shape_ of the population time plot is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of the 4 years 1996 to 1999. This, coupled with the uniform December 31 2006 censoring date, lead to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up.
+
+It is important to note that the red points are random distributed across the grey area for each time of event. That is, imagine we draw a vertical line at a specific event time. We then plot the red point at a randomly sampled y-coordinate along this vertical line. This is done to avoid having all red points along the upper edge of the plot (because the subjects with the least amount of observation time are plotted at the top of the y-axis). By randomly distributing them, we can get a better sense of the inicidence density.
+
 
 We can also create exposure stratified plots by specifying the \code{exposure} argument in the \code{popTime} function:
 
@@ -267,6 +282,9 @@ plot(pt_object_strat, ncol = 2)
 ```
 
 ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
+
+
+For a more detailed description of how to modify the aesthetics of a population time plot, please refer to the [Customizing Population Time Plots](http://sahirbhatnagar.com/casebase/articles/customizingpopTime.html) vignette.
 
 ## Parametric modeling
 
@@ -319,16 +337,7 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1--European Randomized Study of Prostate Cancer Screening
 
-For the first case study, we will use of the European Randomized Study of Prostate Cancer Screening data. This dataset is available through the \pkg{casebase} package:
 
-```{r erspc-data, eval = eval_cs1}
-data(ERSPC)
-ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
-                       levels = c(0, 1), 
-                       labels = c("Control group", "Screening group"))
-```
-
-The results of this study were published by [@schroder2009screening], and the dataset itself was obtained using the approach described in [@liu2014recovering].
 
 
 
