@@ -1167,16 +1167,18 @@ beyond a simple Kaplan-meier curve. For all the following analyses in
 this case study, we will use 80\% of the observations to train our
 models, while 20\% will be used to generate absolute risk curves, all of
 which will be averaged to demonstrate each model's predictive ability.
-We will then compare each modeling using the IPA score (???NEED
-REFERENCE HERE???) We will examine three cox regression scenarios: sps
-only, aps only and all covariates excluding sps and aps. The original
-study compared these scores over a span of 180 days, which may not be
-comparable over the full 5.56 years. Over 5.56 years,
-\ref{fig:baselines} demonstrates that ???BEST MODEL BASED ON IPA??? has
-the best calibration and discrimination with an IPA score of ???INSERT
-ACTUAL BEST SCORE??? . ??BEST MODEL?? will be used in the following
-comparison to regularized cox, regularized logistic regression and the
-unadjusted Kaplan-Meier curve.
+We will then compare each modeling using the brier score
+\citep{graf1999ass} We will examine three cox regression scenarios: sps
+only, aps only and all covariates excluding sps and aps.
+
+The original study compared these scores over a span of 180 days, which
+may not be comparable over the full 5.56 years. Over 5.56 years,
+\ref{fig:baselines} demonstrates that all the cox models have similar,
+if not identical average predictions. Figure \ref{fig:brier1} examines
+the brier scores as they change over time. As the full model has the
+lowest brier score over all, it will be used in the following comparison
+to regularized cox, regularized logistic regression and the unadjusted
+Kaplan-Meier curve.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1186,6 +1188,17 @@ unadjusted Kaplan-Meier curve.
 }
 
 \caption{\label{fig:baselines} AbsoluteRisk curves from hazard models. Pink: All covariates without SPS nor APS. Green: APS only model. Blue: SPS only model. Purple: unadjusted curve. All three models underestimate the risk in comparison to the unadjusted curve.}\label{fig:baselines}
+\end{figure}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics{../figures/brierpt1-1} 
+
+}
+
+\caption{\label{fig:brier1} Brier scores over time. Full model performs best.}\label{fig:brierpt1}
 \end{figure}
 \end{CodeChunk}
 
@@ -1207,19 +1220,20 @@ the time and event variables and x contains all other variables we would
 like to include in the model. For the SUPPORT dataset, all factor
 variables were converted into dummy variables. Here, we used lasso
 penalization by setting alpha to 1, leading to our smooth hazard
-function, depicted in the ??? curve in \ref{fig:cs3Final}. ??? I AM
-STILL PENALIZING TIME ???
+function. We then take our hazard and use it to predict the absolute
+risk of each individual in our test set, over time. These individuals
+are then average resulting in the smooth absolute risk curve in Figure
+\ref{fig:cs3Final}.
 
-We then take our hazard and use it to predict the absolute risk of each
-individual in our test set, over time. These individuals are then
-average resulting in the ???curve in \ref{fig:cs3Final}. ???SAME BUG IS
-BACK???
+\textbf{note that I am still penalizing time, there's a bug I did not
+want to deal with when I try to use \texttt{penalty.factor} in
+fitsmoothhazard . If this is still here, i have not fixed it.}
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> 
-R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = ratio, standardize = TRUE)
+R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 100, standardize = TRUE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1227,26 +1241,18 @@ R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.ti
 
 \begin{CodeInput}
 R> # Estimating the absolute risk curve using the newData parameter.
-R> abCbFull <- casebase::absoluteRisk(cbFull, time = seq(1, max(abKMcompare[, 1]), 25), newdata = newData, s = "lambda.1se", method = c("numerical"))
+R> abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s = "lambda.1se", method = c("numerical"))
 \end{CodeInput}
 \end{CodeChunk}
 
 \begin{CodeChunk}
-
-\begin{CodeInput}
-R> ggplot(as.data.frame(ab), aes(Time)) +
-R+   geom_line(data = as.data.frame(baseCoxComparisonData), mapping = aes(y = Full, colour = "Cox"), lwd = 2) +
-R+   geom_line(aes(y = `Absolute risk`, colour = Model), lwd = 2) +
-R+   geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 2) +
-R+   labs(y = "Probability of Death", x = "Survival time (Days)")
-\end{CodeInput}
 \begin{figure}
 
 {\centering \includegraphics{../figures/unnamed-chunk-2-1} 
 
 }
 
-\caption{\label{fig:baselines} HERES SOME TEXT ABT IT}\label{fig:unnamed-chunk-2}
+\caption{\label{fig:cs3Final} HERES SOME TEXT ABT IT}\label{fig:unnamed-chunk-2}
 \end{figure}
 \end{CodeChunk}
 
@@ -1256,30 +1262,12 @@ in a following figure???
 
 \begin{CodeChunk}
 
-\begin{CodeInput}
-R> 
-R> library(dotwhisker)
-R> library(broom)
-R> library(dplyr)
-R> 
-R> estimatescb <- setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), keep.rownames = TRUE)[]
-R> # estimatescb$std.error<-0
-R> estimatescb$Model <- "casebase"
-R> colnames(estimatescb) <- c("term", "estimate", "model")
-R> 
-R> estimatescoxFull <- setDT(as.data.frame(coef(coxFull)), keep.rownames = TRUE)[]
-R> # estimatescoxFull$std.error<-0
-R> estimatescoxFull$Model <- "CoxFull"
-R> colnames(estimatescoxFull) <- c("term", "estimate", "model")
-R> 
-R> lolliplotDots <- rbind(estimatescb, estimatescoxNet, estimatescoxFull)
-R> lolliplotDots$conf.low <- lolliplotDots$estimate
-R> lolliplotDots$conf.high <- lolliplotDots$estimate
-R> lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
-R> lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
-R> 
-R> dwplot(lolliplotDots)
-\end{CodeInput}
+
+\begin{center}\includegraphics{../figures/finalBrierplot-1} \end{center}
+
+\end{CodeChunk}
+
+\begin{CodeChunk}
 
 
 \begin{center}\includegraphics{../figures/coefplots-1} \end{center}
@@ -1678,7 +1666,7 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-03-06 08:01:48 using the following
+This report was generated on 2020-03-26 16:26:24 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1708,31 +1696,50 @@ R> sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] broom_0.5.5         dotwhisker_0.5.0    pracma_2.2.9       
-#>  [4] kableExtra_1.1.0    data.table_1.12.8   glmnet_3.0-2       
-#>  [7] Matrix_1.2-17       casebase_0.2.1.9001 survival_3.1-8     
-#> [10] magrittr_1.5        forcats_0.5.0       stringr_1.4.0      
-#> [13] dplyr_0.8.3         purrr_0.3.3         readr_1.3.1        
-#> [16] tidyr_1.0.2         tibble_2.1.3        ggplot2_3.3.0      
-#> [19] tidyverse_1.3.0    
+#>  [1] broom_0.5.5               dotwhisker_0.5.0         
+#>  [3] prodlim_2019.11.13        riskRegression_2020.02.05
+#>  [5] pracma_2.2.9              kableExtra_1.1.0         
+#>  [7] data.table_1.12.8         glmnet_3.0-2             
+#>  [9] Matrix_1.2-17             casebase_0.2.1.9001      
+#> [11] survival_3.1-8            magrittr_1.5             
+#> [13] forcats_0.5.0             stringr_1.4.0            
+#> [15] dplyr_0.8.3               purrr_0.3.3              
+#> [17] readr_1.3.1               tidyr_1.0.2              
+#> [19] tibble_2.1.3              ggplot2_3.3.0            
+#> [21] tidyverse_1.3.0          
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] httr_1.4.1        VGAM_1.1-2        jsonlite_1.6.1    viridisLite_0.3.0
-#>  [5] foreach_1.4.8     modelr_0.1.6      assertthat_0.2.1  stats4_3.6.1     
-#>  [9] ggstance_0.3.3    cellranger_1.1.0  yaml_2.2.1        pillar_1.4.3     
-#> [13] backports_1.1.5   lattice_0.20-38   glue_1.3.1        digest_0.6.25    
-#> [17] rvest_0.3.5       colorspace_1.4-1  plyr_1.8.6        htmltools_0.4.0  
-#> [21] pkgconfig_2.0.3   haven_2.2.0       scales_1.1.0      webshot_0.5.2    
-#> [25] mgcv_1.8-28       rticles_0.14      generics_0.0.2    farver_2.0.3     
-#> [29] withr_2.1.2       cli_2.0.2         crayon_1.3.4      readxl_1.3.1     
-#> [33] evaluate_0.14     fs_1.3.2          fansi_0.4.1       nlme_3.1-140     
-#> [37] xml2_1.2.2        tools_3.6.1       hms_0.5.3         lifecycle_0.1.0  
-#> [41] munsell_0.5.0     reprex_0.3.0      compiler_3.6.1    rlang_0.4.5      
-#> [45] grid_3.6.1        iterators_1.0.12  rstudioapi_0.11   labeling_0.3     
-#> [49] rmarkdown_2.1     gtable_0.3.0      codetools_0.2-16  DBI_1.1.0        
-#> [53] R6_2.4.1          lubridate_1.7.4   knitr_1.28        shape_1.4.4      
-#> [57] stringi_1.4.6     Rcpp_1.0.3        vctrs_0.2.3       dbplyr_1.4.2     
-#> [61] tidyselect_1.0.0  xfun_0.12
+#>  [1] nlme_3.1-140        fs_1.3.2            cmprsk_2.2-9       
+#>  [4] lubridate_1.7.4     rms_5.1-4           webshot_0.5.2      
+#>  [7] RColorBrewer_1.1-2  httr_1.4.1          numDeriv_2016.8-1.1
+#> [10] tools_3.6.1         backports_1.1.5     R6_2.4.1           
+#> [13] rpart_4.1-15        Hmisc_4.3-1         DBI_1.1.0          
+#> [16] mgcv_1.8-28         colorspace_1.4-1    nnet_7.3-12        
+#> [19] withr_2.1.2         gridExtra_2.3       tidyselect_1.0.0   
+#> [22] compiler_3.6.1      quantreg_5.54       cli_2.0.2          
+#> [25] rvest_0.3.5         htmlTable_1.13.3    SparseM_1.78       
+#> [28] xml2_1.2.5          sandwich_2.5-1      labeling_0.3       
+#> [31] checkmate_2.0.0     scales_1.1.0        mvtnorm_1.1-0      
+#> [34] polspline_1.1.17    digest_0.6.25       foreign_0.8-71     
+#> [37] rmarkdown_2.1       base64enc_0.1-3     rticles_0.14       
+#> [40] jpeg_0.1-8.1        pkgconfig_2.0.3     htmltools_0.4.0    
+#> [43] dbplyr_1.4.2        htmlwidgets_1.5.1   rlang_0.4.5        
+#> [46] readxl_1.3.1        rstudioapi_0.11     VGAM_1.1-2         
+#> [49] farver_2.0.3        shape_1.4.4         generics_0.0.2     
+#> [52] zoo_1.8-7           jsonlite_1.6.1      acepack_1.4.1      
+#> [55] Formula_1.2-3       Rcpp_1.0.3          munsell_0.5.0      
+#> [58] fansi_0.4.1         lifecycle_0.2.0     multcomp_1.4-12    
+#> [61] stringi_1.4.6       yaml_2.2.1          MASS_7.3-51.4      
+#> [64] plyr_1.8.6          ggstance_0.3.3      grid_3.6.1         
+#> [67] crayon_1.3.4        lattice_0.20-38     haven_2.2.0        
+#> [70] hms_0.5.3           timereg_1.9.4       knitr_1.28         
+#> [73] pillar_1.4.3        codetools_0.2-16    stats4_3.6.1       
+#> [76] reprex_0.3.0        glue_1.3.1          evaluate_0.14      
+#> [79] latticeExtra_0.6-29 modelr_0.1.6        vctrs_0.2.4        
+#> [82] png_0.1-7           foreach_1.4.8       MatrixModels_0.4-1 
+#> [85] cellranger_1.1.0    gtable_0.3.0        assertthat_0.2.1   
+#> [88] xfun_0.12           viridisLite_0.3.0   iterators_1.0.12   
+#> [91] cluster_2.1.0       lava_1.6.7          TH.data_1.0-10
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1748,7 +1755,7 @@ R> git2r::repository(here::here())
 \begin{CodeOutput}
 #> Local:    master C:/Users/jesse/Documents/gits/cbpaper
 #> Remote:   master @ origin (https://github.com/Jesse-Islam/cbpaper.git)
-#> Head:     [6682dfb] 2020-03-06: NOT COMPLETE
+#> Head:     [a01a2a8] 2020-03-06: Fixed lollipop plot
 \end{CodeOutput}
 \end{CodeChunk}
 

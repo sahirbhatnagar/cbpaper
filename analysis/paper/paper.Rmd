@@ -98,6 +98,8 @@ library(glmnet)
 library(data.table)
 library(kableExtra)
 library(pracma)
+library(riskRegression)
+library(prodlim)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
@@ -903,7 +905,9 @@ support_popTime <- popTime(support,
 plot(support_popTime)
 ```
 
-Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison, beyond a simple Kaplan-meier curve. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. We will then compare each modeling using the IPA score (???NEED REFERENCE HERE???) We will examine three cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years.  Over 5.56 years, \ref{fig:baselines} demonstrates that ???BEST MODEL BASED ON IPA??? has the best calibration and discrimination with an IPA score of ???INSERT ACTUAL BEST SCORE??? . ??BEST MODEL?? will be used in the following comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve.
+Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison, beyond a simple Kaplan-meier curve. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. We will then compare each modeling using the brier score [@graf1999ass] We will examine three cox regression scenarios: sps only, aps only and all covariates excluding sps and aps.
+
+The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years.  Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score over all, it will be used in the following comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve.
 
 
 ```{r baselinePlotsPrep, eval=eval_cs3,echo=FALSE}
@@ -917,30 +921,43 @@ x <- workingCompleteData
 y <- data.matrix(completeData[, c(2, 5)])
 
 fullDataCox <- as.data.frame(cbind(as.numeric(y[, 2]), as.numeric(y[, 1]), x))
+names(fullDataCox)[names(fullDataCox) == 'V1'] <- 'time'
+names(fullDataCox)[names(fullDataCox) == 'V2'] <- 'event'
 train_index <- sample(1:nrow(fullDataCox), 0.8 * nrow(fullDataCox))
 test_index <- setdiff(1:nrow(fullDataCox), train_index)
 
+
+
 train <- fullDataCox[train_index, ]
 test <- fullDataCox[test_index, ]
-coxSPS <- survival::coxph(Surv(time = V1, event = V2) ~ sps, data = train)
+coxSPS <- survival::coxph(Surv(time =time , event = event) ~ sps, data = train, x = TRUE)
 abcoxSPS <- survival::survfit(coxSPS, newdata = test)
 
-coxAPS <- survival::coxph(Surv(time = V1, event = V2) ~ aps, data = train)
+coxAPS <- survival::coxph(Surv(time =time , event = event) ~ aps, data = train, x = TRUE)
 abcoxAPS <- survival::survfit(coxAPS, newdata = test)
-
-coxFull <- survival::coxph(Surv(time = V1, event = V2) ~ . - sps - aps, data = train)
-abcoxFull <- survival::survfit(coxAPS, newdata = test)
+coxfullForumla<-as.formula(paste("Surv(time = time, event = event) ~ age + sexmale + slos + dzgroupCHF + 
+    dzgroupCirrhosis + `dzgroupColon Cancer` + dzgroupComa + 
+    dzgroupCOPD + `dzgroupLung Cancer` + `dzgroupMOSF w/Malig` + 
+    dzclassCancer + dzclassComa + `dzclassCOPD/CHF/Cirrhosis` + 
+    num.co + edu + scoma + avtisst + raceasian + raceblack + 
+    racehispanic + raceother + racewhite + hday + diabetes + 
+    dementia + cano + cayes + meanbp + wblc + hrt + resp + temp + 
+    pafi + alb + bili + crea + sod + ph + glucose + bun + urine + 
+    adlp + adlsc "))
+coxFull <- survival::coxph(coxfullForumla, data = train, x = TRUE)
+abcoxFull <- survival::survfit(coxFull, newdata = test)
 # library(prodlim)
 
 
-KM <- survival::coxph(Surv(time = V1, event = V2) ~ 1, data = test)
+KM <- survival::coxph(Surv(time = time, event = event) ~ 1, data = test)
 abKM <- survival::survfit(KM)
-# abKM <- prodlim(Hist(V1,V2)~1,data=test) minimal difference
+# abKM <- prodlim(Hist(,event)~1,data=test) minimal difference
 abKMcompare <- cbind(abKM$time[abKM$time <= 1631], 1 - abKM$surv[abKM$time <= 1631])
 colnames(abKMcompare) <- c("Time", "KM")
 
-baseCoxComparisonData <- cbind(abcoxSPS$time[abcoxSPS$time <= 1631], 1 - rowMeans(abcoxSPS$surv[abcoxSPS$time <= 1631, ]), 1 - rowMeans(abcoxAPS$surv[abcoxSPS$time <= 1631, ]), 1 - abKM$surv, 1 - rowMeans(abcoxFull$surv[abcoxSPS$time <= 1631, ]))
-colnames(baseCoxComparisonData) <- c("Time", "SPS", "APS", "Unadjusted", "Full")
+baseCoxComparisonData <- cbind(abcoxSPS$time[abcoxSPS$time <= 1631], 1 - rowMeans(abcoxSPS$surv[abcoxSPS$time <= 1631, ]), 1 - rowMeans(abcoxAPS$surv[abcoxAPS$time <= 1631, ]), 1 - rowMeans(abcoxFull$surv[abcoxFull$time <= 1631, ]))
+
+colnames(baseCoxComparisonData) <- c("Time", "SPS", "APS","Full")
 ```
 
 ```{r baselines, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:baselines} AbsoluteRisk curves from hazard models. Pink: All covariates without SPS nor APS. Green: APS only model. Blue: SPS only model. Purple: unadjusted curve. All three models underestimate the risk in comparison to the unadjusted curve.",echo=FALSE}
@@ -952,15 +969,44 @@ ggplot(as.data.frame(baseCoxComparisonData), aes(Time)) +
   labs(y = "Probability of Death", x = "Survival time (Days)")
 ```
 
+```{r brierpt1, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:brier1} Brier scores over time. Full model performs best.",echo=FALSE}
+
+
+
+times <- sort(unique(test$time))
+brierAPS <- Score(list("PredictionModel" = coxAPS), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+brierSPS <- Score(list("PredictionModel" = coxSPS), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+
+
+
+
+coxFull$coefficients[which(is.na(coxFull$coefficients))]=0
+brierFull <- Score(list("PredictionModel" = coxFull), data = test, formula = Surv(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+brierPlotter<-rbind(
+      data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"],times=times,model="cox Full"),
+      data.frame(brierScore = brierAPS$Brier$score$Brier[brierAPS$Brier$score$model == "PredictionModel"],times=times,model="cox APS only"),
+            data.frame(brierScore = brierSPS$Brier$score$Brier[brierSPS$Brier$score$model == "PredictionModel"],times=times,model="cox SPS only")
+      )
+
+
+ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore, col = model)) +
+  geom_line() +
+  xlab("Times") +
+  ylab("Brier-Score")+
+  ggtitle("Brier scores over time")
+```
+
 To get the absolute risk following regularized cox regression, this required that we work around limitations in existing packages. To make use of the \pkg{survival} package, we first get our hazard coefficients using \pkg{glmnet}'s coxnet implementation for lasso penalization [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our previous fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package.
 
 
 
 
-For our penalized logistic regression model, we opted for a logistic function of time, resulting in a Weibull distribution assumption. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1, leading to our smooth hazard function, depicted in the ??? curve in \ref{fig:cs3Final}.
-??? I AM STILL PENALIZING TIME ???
+For our penalized logistic regression model, we opted for a logistic function of time, resulting in a Weibull distribution assumption. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1, leading to our smooth hazard function.
+ We then take our hazard and use it to predict the absolute risk of each individual in our test set, over time. These individuals are then average resulting in the smooth absolute risk curve in Figure \ref{fig:cs3Final}.
 
-We then take our hazard and use it to predict the absolute risk of each individual in our test set, over time. These individuals are then average resulting in the ???curve in \ref{fig:cs3Final}. ???SAME BUG IS BACK???
+**note that I am still penalizing time, there's a bug I did not want to deal with when I try to use `penalty.factor` in fitsmoothhazard . If this is still here, i have not fixed it.**
 
 ```{r supportSetUp, echo = FALSE, eval = eval_cs3}
 
@@ -993,12 +1039,12 @@ cleanCoxData <- as.data.frame(cbind(d.time = as.numeric(y[, 2]), death = as.nume
 
 # fitting a cox model using regular estimation, however we will not keep it.
 # this is used more as an object place holder.
-coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., data = cleanCoxData)
+coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., data = cleanCoxData,x=TRUE)
 
 # extract coefficients for lollipop plot later
 estimatescoxNet <- setDT(as.data.frame(coef(coxNet)), keep.rownames = TRUE)[]
 
-estimatescoxNet$Model <- "CoxNet"
+estimatescoxNet$Model <- "Penalized Cox"
 colnames(estimatescoxNet) <- c("term", "estimate", "model")
 
 
@@ -1014,6 +1060,10 @@ coxNet$coefficients <- nonzero_coef_cox@x
 abcoxNet <- survival::survfit(coxNet, type = "breslow", newdata = as.data.frame(newData[, nonzero_covariate_cox$X1]))
 
 
+
+brierCoxNet <- Score(list("PredictionModel" = coxNet), data = as.data.frame(cbind(test[,c(1,2)],newData[, nonzero_covariate_cox$X1])), formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+
 abCN <- as.data.frame(cbind(abcoxNet$time, 1 - rowMeans(abcoxNet$surv)))
 colnames(abCN) <- c("Time", "Absolute risk")
 abCN$Model <- "Coxnet"
@@ -1023,13 +1073,13 @@ abCN <- abCN[abCN$Time <= max(abKMcompare[, 1]), ]
 
 ```{r cbHazard}, echo = TRUE, eval = eval_cs3}
 
-cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE)
+cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 100, standardize = TRUE)
 ```
 
 
 ```{r CBabsolute, echo = TRUE, eval = eval_cs3}
 # Estimating the absolute risk curve using the newData parameter.
-abCbFull <- casebase::absoluteRisk(cbFull, time = seq(1, max(abKMcompare[, 1]), 25), newdata = newData, s = "lambda.1se", method = c("numerical"))
+abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s = "lambda.1se", method = c("numerical"))
 ```
 
 ```{r cbAbProcessing,echo=FALSE,eval=eval_cs3}
@@ -1041,7 +1091,7 @@ abCB$Model <- "Penalized logistic"
 ab <- rbind(abCB, abCN)
 ```
 
-```{r include=TRUE,eval=eval_cs3,fig.cap="\\label{fig:baselines} HERES SOME TEXT ABT IT"}
+```{r include=TRUE,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3Final} HERES SOME TEXT ABT IT"}
 ggplot(as.data.frame(ab), aes(Time)) +
   geom_line(data = as.data.frame(baseCoxComparisonData), mapping = aes(y = Full, colour = "Cox"), lwd = 2) +
   geom_line(aes(y = `Absolute risk`, colour = Model), lwd = 2) +
@@ -1051,8 +1101,72 @@ ggplot(as.data.frame(ab), aes(Time)) +
   
 ???SHORT SPIEL ABOUT IPA BETWEEN SEMI_PARAMETRIC AND PARAMETRIC which leads to conclusion of best overall model. This refers to the COEFPLOT in a following figure??? 
 
+```{r finalBrierplot, echo=FALSE, eval=eval_cs3}
+brierScoreKMCens <- function(predSurvs, times, newData) {
+  # inverse probability censoring weights
+  # Note that we take probabilities right before the drops.
+  
+  #DIFFERENCES START HERE
+  fitCens <- prodlim::prodlim(Hist(time, event != 0) ~ 1, newData, reverse = TRUE)
+  IPCW.subject.times <- prodlim::predictSurvIndividual(fitCens, lag = 1) # G(t-|X)
+  #DIFFERENCES END HERE
+  
+  # Empty matrix that will be filled in with the following loop
+  Score <- matrix(NA, nrow(predSurvs), ncol(predSurvs))
+  IPCWMatrix <- matrix(NA, nrow(predSurvs), ncol(predSurvs))
+  # for each point in time we have predicted
+  for (i in 1:length(times)) {
+    # get number of censored individuals so long as their survival time is less than times[i]
+    # these individuals do not have an effect on right-censored brier score.
+    CensBefore <- newData$event == 0 & newData$time < times[i]
+    # y encompasses all survival times larger than t[i] with a 1, 0 otherwise
+    y <- drop(t(newData$time > times[i]))
+    # above permits the two parts of right-censored brier score to be calculated, without IPCW, in one line
+    Score[i, ] <- (y - predSurvs[i, ])^2
+    
+    # Generate IPCWMatrix
+    IPCWMatrix[i, y == 0] <- IPCW.subject.times[y == 0] # G(t-|X) filled in corresponding positions
+    #DIFFERENCES START HERE
+    IPCW.time <- predict(fitCens, newdata = newData, times = times[i], level.chaos = 1, mode = "matrix", type = "surv", lag = 1)
+    #DIFFERENCES END HERE
+    IPCWMatrix[i, y == 1] <- IPCW.time # G(t) filled, same value, for remaining positions.
+    # above calculated individuals who don't have an effect on brier score at specfied time. they're scores are set to 0.
+    Score[i, CensBefore] <- 0
+  }
+  
+  # apply IPCW to all scores
+  Err <- Score / IPCWMatrix
+  
+  # Average curve demonstrating right-censored brier averaged over test-set, for each time of interest.
+  Err <- apply(Err, 1, mean)
+  return(Err)
+}
+absRiskcb <-abCbFull
+absRiskcb[, -c(1)] <- 1 - absRiskcb[, -c(1)] # make it survival probabilities
+absRiskcb <- absRiskcb[-c(1), -c(1)] # remove extra time at 0. Also remove the first column (times) as it matches perfectly now
 
-```{r coefplots, eval=eval_cs3}
+kmCensoredBrierScores <- brierScoreKMCens(predSurvs = absRiskcb, times = times, newData = data.frame(time=test$time,event=test$event))
+
+
+finalBrierDataToPlot<-rbind(
+  data.frame(brierScore = brierCoxNet$Brier$score$Brier[brierCoxNet$Brier$score$model == "PredictionModel"],times=times,model="Penalized Cox"),
+   data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"],times=times,model="cox"),
+      rbind(data.frame(brierScore=kmCensoredBrierScores,times=times,model="Penalized logistic"))
+      
+  )
+
+
+ggplot(data = finalBrierDataToPlot, mapping = aes(x = times, y = brierScore, col = model)) +
+  geom_line() +
+  xlab("Times") +
+  ylab("Brier-Score")+
+  ggtitle("Brier scores over time")
+      
+```
+
+
+
+```{r coefplots,echo=FALSE, eval=eval_cs3}
 
 library(dotwhisker)
 library(broom)
@@ -1060,12 +1174,12 @@ library(dplyr)
 
 estimatescb <- setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), keep.rownames = TRUE)[]
 # estimatescb$std.error<-0
-estimatescb$Model <- "casebase"
+estimatescb$Model <- "Penalized logistic"
 colnames(estimatescb) <- c("term", "estimate", "model")
 
 estimatescoxFull <- setDT(as.data.frame(coef(coxFull)), keep.rownames = TRUE)[]
 # estimatescoxFull$std.error<-0
-estimatescoxFull$Model <- "CoxFull"
+estimatescoxFull$Model <- "Cox"
 colnames(estimatescoxFull) <- c("term", "estimate", "model")
 
 lolliplotDots <- rbind(estimatescb, estimatescoxNet, estimatescoxFull)
@@ -1073,8 +1187,13 @@ lolliplotDots$conf.low <- lolliplotDots$estimate
 lolliplotDots$conf.high <- lolliplotDots$estimate
 lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
 lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
-
-dwplot(lolliplotDots)
+lolliplotDots$term=gsub( '\`', "", as.character(lolliplotDots$term))
+dwplot(lolliplotDots)+
+  theme(axis.text.y = element_text(size = 7.5, angle = 0, hjust = 1, vjust = 0),
+        strip.text.x = element_blank(),
+      strip.background = element_rect(colour="white", fill="white"),
+      legend.position=c(.855,0.15),legend.text=element_text(size=7.5)
+      )
 ```
 
 
