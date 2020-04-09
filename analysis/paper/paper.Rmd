@@ -1096,50 +1096,8 @@ ggplot(as.data.frame(ab), aes(Time)) +
 
 ```{r riskregressionBrier,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between a null model (Kaplan-Meier, black), Cox regression (yellow), penalized Cox regression (blue) and penalized logistic regression (green)."}
 
-
-
-predictRisk.singleRisk <- function(object, newdata, times, cause, ...) {
-  if (object$call[[1]]!="glm"){
-    #get all covariates excluding intercept and time
-    coVars=colnames(object$originalData$x)
-    #coVars is used in lines 44 and 50
-    newdata=data.matrix(drop(subset(newdata, select=coVars)))
-  }
-
-  # if (missing(cause)) stop("Argument cause should be the event type for which we predict the absolute risk.")
-  # the output of absoluteRisk is an array with dimension dependening on the length of the requested times:
-  # case 1: the number of time points is 1
-  #         dim(array) =  (length(time), NROW(newdata), number of causes in the data)
-  if (length(times) == 1) {
-    a <- absoluteRisk(object, newdata = newdata, time = times)
-    p <- matrix(a, ncol = 1)
-  } else {
-    # case 2 a) zero is included in the number of time points
-    if (0 %in% times) {
-      # dim(array) =  (length(time)+1, NROW(newdata)+1, number of causes in the data)
-      a <- absoluteRisk(object, newdata = newdata, time = times)
-      p <- t(a)
-    } else {
-      # case 2 b) zero is not included in the number of time points (but the absoluteRisk function adds it)
-      a <- absoluteRisk(object, newdata = newdata, time = times)
-      ### we need to invert the plot because, by default, we get cumulative incidence
-      #a[, -c(1)] <- 1 - a[, -c(1)]
-      ### we remove time 0 for everyone, and remove the time column
-      a <- a[-c(1), -c(1)] ### a[-c(1), ] to keep times column, but remove time 0 probabilities
-      # now we transpose the matrix because in riskRegression we work with number of
-      # observations in rows and time points in columns
-      p <- t(a)
-    }
-  }
-  if (NROW(p) != NROW(newdata) || NCOL(p) != length(times)) {
-    stop(paste("\nPrediction matrix has wrong dimensions:\nRequested newdata x times: ", NROW(newdata), " x ", length(times), "\nProvided prediction matrix: ", NROW(p), " x ", NCOL(p), "\n\n", sep = ""))
-  }
-  p
-}
-
-class(cbFull) <- c("singleRisk",class(cbFull))
-brierFinalResults <- Score(list("Cox" = coxFull,"Penalized Cox"=coxNet,"Penalized Logistic"=cbFull), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times =times)
-
+class(cbFull) <- c("singleEventCB",class(cbFull))
+brierFinalResults <- Score(list("Cox" = coxFull,"Penalized Cox"=coxNet,"Penalized Logistic"=cbFull), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ibs", se.fit = 0L, metrics = "brier", contrasts = FALSE, times =times)
 
 
 levels(brierFinalResults$Brier$score$model)[levels(brierFinalResults$Brier$score$model)=="Null model"] <- "Kaplan-Meier"
@@ -1152,7 +1110,7 @@ ggplot(data = brierFinalResults$Brier$score, mapping = aes(x = times, y = Brier,
 
 ```
 
-```{r coefplots,echo=FALSE, eval=eval_cs3}
+```{r coefplots,echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (blue), penalized Cox (Green), penalized logisitic (red). If a coefficient is estimated to be 0, it is removed from the plot"}
 
 library(dotwhisker)
 library(broom)
@@ -1174,6 +1132,10 @@ lolliplotDots$conf.high <- lolliplotDots$estimate
 lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
 lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
 lolliplotDots$term=gsub( '\`', "", as.character(lolliplotDots$term))
+
+lolliplotDots[which(lolliplotDots$estimate==0),c(2,4,5)]<-NA
+
+
 dwplot(lolliplotDots)+
   theme(axis.text.y = element_text(size = 7.5, angle = 0, hjust = 1, vjust = 0),
         strip.text.x = element_blank(),
