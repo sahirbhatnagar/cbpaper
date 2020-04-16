@@ -100,17 +100,18 @@ library(kableExtra)
 library(pracma)
 library(riskRegression)
 library(prodlim)
+library(colorspace)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
 
-eval_introduction <- FALSE
-eval_theory <- FALSE
-eval_implementation <- FALSE
-eval_cs1 <- FALSE
-eval_cs2 <- FALSE
+eval_introduction <- TRUE
+eval_theory <- TRUE
+eval_implementation <- TRUE
+eval_cs1 <- TRUE
+eval_cs2 <- TRUE
 eval_cs3 <- TRUE
-eval_cs4 <- FALSE
+eval_cs4 <- TRUE
 ```
 
 # Introduction
@@ -172,7 +173,7 @@ Survival analysis is an important branch of applied statistics and epidemiology.
 
 At the time of writing, a cursory examination of CRAN's task view on survival analysis reveals that there are over 250 packages related to survival analysis [-@survTaskView]. For the purposes of this article, we restricted our description to packages that implement at least one of the following features: parametric modeling, non-proportional hazard models, competing risk analysis, penalized estimation, and cumulative incidence curve estimation. By searching for appropriate keywords in the \code{DESCRIPTION} file of these packages, we found 60 relevant packages. These 60 packages were then manually examined to determine which ones are comparable to \pkg{casebase}. In particular, we excluded packages that were focused on a different set of problems, such as frailty and multi-state models. The remaining 14 packages appear in Table \ref{tab:surv-pkgs}, along with some of the functionalities they offer. 
 
-Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation for ridge. \pkg{casebase} provides penalized estimation in the context of parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality. \textcolor{red}{I can dive deeper to determine if this is a fair statement}
+Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation for ridge. \pkg{casebase} provides penalized estimation in the context of parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality.
 
 Parametric survival models are implemented in a handful of packages: \pkg{CFC} [-@mahani2015bayesian], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu], \pkg{mets} [-@scheike2014estimating], and \pkg{survival}. The types of models they allow vary for each package. For example, \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas both \pkg{flexsurv} and \pkg{survival} allow users to supply any distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of time using splines, which allows flexible modeling of the hazard function. Moreover, \pkg{flexsurv} has the ability to estimate both scale and shape parameters for a variety of parametric families (see Table \ref{tab:dists}). As discussed above, \pkg{casebase} can model any parametric family whose log-hazard can be expressed as a linear model of covariates (including time). Therefore, our package allows the user to model the effect of time using splines, and through interaction terms involving covariates and time, it also allows user to fit time-varying coefficient models. However, we do not explicitly model any shape parameter, unlike \pkg{flexsurv}.
 
@@ -806,11 +807,11 @@ Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base s
 
 # Case study 3--SUPPORT Data
 
-In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore more advanced features.
+In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore advanced features.
 
-For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 9105 individuals and 47 variables. Of those variables, a few were removed before imputation. We removed three response variables: hospital charges, patient ratio of costs to charges and patient micro-costs. Next, we removed hospital death as it was directly informative of our event of interest, death. We also removed functional disability and income as they are ordinal covariates, because ordinal variables are treated as factors in our current model. Finally, we removed 8 covariates relating to the results of previous findings: we removed SUPPORT day 3 physiology score (sps), 	APACHE III day 3 physiology score (aps),	SUPPORT model 2-month survival estimate, SUPPORT model 6-month survival estimate, Physician's 2-month survival estimate for pt., Physician's 6-month survival estimate for pt., Patient had Do Not Resuscitate (DNR) order and Day of DNR order (<0 if before study). Of these, sps and aps were added on after imputation, as they were missing only 1 observation and permitted us to compare findings between our model and their's.
+For the third case study, we will demonstrate regularization during hazard estimation. Since we are using logistic regression, existing packages, like \pkg{glmnet} can be leveraged. To demonstrate this feature, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. The imputed dataset is available as part of the \pkg{casebase} package. For more information please see the SUPPORT data documentation in the package. 
 
-First we impute manually using recommended normal values for physiological measures [@harrell_2020]. Next, we impute a single dataset using \pkg{mice} with default settings. After imputation, we noted that the covariate for surrogate activities of daily living was not imputed. This is due to colinearity between the other two covariates for activities of daily living. As such, surrogate activites of daily living was removed from our model. After these imputations, we have a total of 9104 observations and 30 variables, two of which are sps and aps, which will work as a baseline for our comparison to previous findings. This dataset is available  Its worth noting that these scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of used variables can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. The imputed dataset is available as part of the \pkg{casebase} package.
+we have a total of 9104 observations and 30 variables, two of which are SUPPORT day 3 physiology score (sps) and 	APACHE III day 3 physiology score (aps). These scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Therefore, we will assess these two models before using either as our baseline, by comparing them to a full model using all variables. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of used variables can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University [@harrell_2020].
 
 \begin{table}[ht]
 \centering
@@ -892,21 +893,10 @@ ca       & Yes                                           \\
 \label{tab:support2}
 \end{table}
 
-<!--Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase.--> As before, the first step is to visualize the incidence density. The population-time plot for the SUPPORT data appears in Figure \ref{fig:support-poptime}. As we can see, the incidence density is not constant.
-
-```{r support-poptime, echo=FALSE, eval = eval_cs3, fig.cap="\\label{fig:support-poptime} Population-time plot for the SUPPORT data."}
-support <- casebase::support
-
-support_popTime <- popTime(support,
-  time = "d.time", event = "death", percentile_number = 0.31
-)
-plot(support_popTime)
-```
-
-Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison, beyond a Kaplan-meier curve. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years. Therefore, We will examine three cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. Next, we will compare each modeling using the Brier score [@graf1999ass]. The Brier score is able to demonstrate both discrimination and calibration in a single model [@graf1999ass] and provide a comparable metric between semi-parametric and parametric methods in the survival context. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score on overall, it will be used in the following comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve.
-
+Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison, beyond a Kaplan-meier curve. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years. Therefore, We will examine three cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. Next, we will compare each modeling using the Brier score [@graf1999ass]. The Brier score is able to demonstrate both discrimination and calibration in a single model [@graf1999ass] and provide a comparable metric between semi-parametric and parametric methods in the survival context. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score on overall, it will be used in the following absolute risk comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve.
 
 ```{r baselinePlotsPrep, eval=eval_cs3,echo=FALSE}
+q4 <- qualitative_hcl(4, palette = "Dark 3")
 completeData <- casebase::support
 
 completeData$d.time<-completeData$d.time/365
@@ -962,16 +952,17 @@ baseCoxComparisonData <- cbind(abcoxSPS$time[abcoxSPS$time <= 1631], 1 - rowMean
 colnames(baseCoxComparisonData) <- c("Time", "SPS", "APS","Full")
 ```
 
-```{r baselines, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:baselines} AbsoluteRisk curves from hazard models. Pink: All covariates without SPS nor APS. Green: APS only model. Blue: SPS only model. Purple: unadjusted curve. All three models underestimate the risk in comparison to the unadjusted curve.",echo=FALSE}
+```{r baselines, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:baselines} Absolute risk curves estimated from hazard models. Red: APS only hazard was used to generate the absolute risk. Green: All covariates aside from APS and SPS. Blue: SPS only. Purple: unadjusted Kaplan-Meier curve.",echo=FALSE}
 ggplot(as.data.frame(baseCoxComparisonData), aes(Time)) +
-  geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
   geom_line(aes(y = APS, colour = "APS"), lwd = 1) +
+  geom_line(aes(y = Full, col = "Full"), lwd = 1) +
+  geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
   geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 1) +
-  geom_line(aes(y = Full, col = "All Covariates without SPS APS"), lwd = 1) +
-  labs(y = "Probability of Death", x = "Survival time (Years)")
+  labs(y = "Probability of Death", x = "Survival time (Years)",color = "Models")+
+   scale_color_manual(values=q4)
 ```
 
-```{r brierpt1, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:brier1} Brier scores over time. Full model (Cox Full) performs best, while the other two (APS only and SPS only) are comparable.",echo=FALSE}
+```{r brierpt1, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:brier1} Brier scores over survival time. Full model (Full) performs best, while the other two (APS only and SPS only) are comparable. Red: APS only model was used to generate the brier scores. Green: all covariates excluding APS and SPS. Blue: SPS only model.",echo=FALSE}
 
 times <- sort(unique(test$time))
 brierAPS <- Score(list("PredictionModel" = coxAPS), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
@@ -981,30 +972,61 @@ coxFull$coefficients[which(is.na(coxFull$coefficients))]=0
 brierFull <- Score(list("PredictionModel" = coxFull), data = test, formula = Surv(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
 
 brierPlotter<-rbind(
-      data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"],times=times,model="cox Full"),
-      data.frame(brierScore = brierAPS$Brier$score$Brier[brierAPS$Brier$score$model == "PredictionModel"],times=times,model="cox APS only"),
-            data.frame(brierScore = brierSPS$Brier$score$Brier[brierSPS$Brier$score$model == "PredictionModel"],times=times,model="cox SPS only")
+      data.frame(brierScore = brierAPS$Brier$score$Brier[brierAPS$Brier$score$model == "PredictionModel"],times=times,model="APS"),
+      data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"],times=times,model="Full"),
+            data.frame(brierScore = brierSPS$Brier$score$Brier[brierSPS$Brier$score$model == "PredictionModel"],times=times,model="SPS")
       )
 
 
 ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore, col = model)) +
   geom_line() +
-  xlab("Times") +
+  xlab("Survival time (Years)") +
   ylab("Brier-Score")+
-  ggtitle("Brier scores over time")
+   labs(color = "Models")+
+  ggtitle("Brier scores over time")+
+   scale_color_manual(values=q4[1:3])
 ```
 
-To get the absolute risk following regularized cox regression, this required that we work around limitations in existing packages. To make use of the \pkg{survival} package, we first get our hazard coefficients using \pkg{glmnet}'s coxnet implementation for lasso penalization [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our previous fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package.
+To get the absolute risk following regularized cox regression, we had to work around limitations in existing packages. To make use of the \pkg{survival} package, we first get our hazard coefficients using \pkg{glmnet}'s coxnet implementation for lasso penalization [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our previous fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package.
 
-For our penalized logistic regression model, we opted for a logistic function of time, resulting in a Weibull distribution assumption. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1, leading to our smooth hazard function.
- We then take our hazard and use it to predict the absolute risk of each individual in our test set, over time. The probabilites over time for each individual are averaged, resulting in the smooth absolute risk curve in figure \ref{fig:cs3Final}. On average, the Brier score is lower in our penalized logistic regression model, compared to the other models (fig. \ref{fig:cs3FinalBrier}).
+```{r coxNetCode,eval=FALSE,echo=TRUE}
+# hazard for cox using glmnet
+coxNet <- glmnet::cv.glmnet(x = x, y = y, family = "cox", alpha = 1, standardize = TRUE)
+#getting all non-zero covariates
+nonzero_covariate_cox <- predict(coxNet, type = "nonzero", s = "lambda.1se")
+#keeping coefficients for later
+nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
+# cutting dataset to only include nonzero covariates
+cleanCoxData <- as.data.frame(cbind(y, x[, nonzero_covariate_cox]))
+#create a skeleton object
+coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., data = cleanCoxData,x=TRUE)
+#replace coefficients with regularized ones
+coxNet$coefficients <- nonzero_coef_cox@x
+```
+
+For our penalized logistic regression model, we opted for the natural log of time, which assumes a Weibull distribution for our event. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1, leading to our smooth hazard function.
+
+
  
-This case study serves to demonstrate how regularization can be used in a survival context, using logistic regression. Our approach performs comparably to Cox regression, demonstrating its validity in an applied setting.
+```{r casebaseDisplayCode, eval=FALSE,echo=TRUE}
+#regularized logistic regression to estimate hazard
+cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet",
+                      time = "d.time", event = "death",
+                      formula_time = ~ log(d.time), alpha = 1,
+                      ratio = 100, standardize = TRUE, penalty.factor=c(0,rep(1,ncol(x))))
+
+# Estimating the absolute risk curve using the newData parameter.
+abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s = "lambda.1se", method = c("numerical"))
+
+```
+ 
+
 
 ```{r supportSetUp, echo = FALSE, eval = eval_cs3}
 
-#ratio <- 100 # universal ratio for TRUE
-
+#remove apsSPS
+train<-train[,-c(46,47)]
+test<-test[,-c(46,47)]
 # x and y will be used to fit the casebase model under glmnet.
 y <- data.matrix(train[, c(2, 1)])
 colnames(y) <- c("death", "d.time")
@@ -1066,7 +1088,7 @@ abCN <- abCN[abCN$Time <= max(abKMcompare[, 1]), ]
 
 ```{r cbHazard}, echo = TRUE, eval = eval_cs3}
 
-cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE,penalty.facto=c(0,rep(1,ncol(x))))
+cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE,penalty.factor=c(0,rep(1,ncol(x))))
 ```
 
 
@@ -1084,33 +1106,7 @@ abCB$Model <- "Penalized logistic"
 ab <- rbind(abCB, abCN)
 ```
 
-```{r include=TRUE,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3Final} Four absolute risk curves, integrated from the following hazard models: Cox (pink), penalized Cox (green), penalized logistic (blue) and Kaplan-Meier (purple)."}
-ggplot(as.data.frame(ab), aes(Time)) +
-  geom_line(data = as.data.frame(baseCoxComparisonData), mapping = aes(y = Full, colour = "Cox"), lwd = 1) +
-  geom_line(aes(y = `Absolute risk`, colour = Model), lwd = 1) +
-  geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 1) +
-  labs(y = "Probability of Death", x = "Survival time (Years)")
-```
-  
-
-
-```{r riskregressionBrier,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between a null model (Kaplan-Meier, black), Cox regression (yellow), penalized Cox regression (blue) and penalized logistic regression (green)."}
-
-class(cbFull) <- c("singleEventCB",class(cbFull))
-brierFinalResults <- Score(list("Cox" = coxFull,"Penalized Cox"=coxNet,"Penalized Logistic"=cbFull), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ibs", se.fit = 0L, metrics = "brier", contrasts = FALSE, times =times)
-
-
-levels(brierFinalResults$Brier$score$model)[levels(brierFinalResults$Brier$score$model)=="Null model"] <- "Kaplan-Meier"
-ggplot(data = brierFinalResults$Brier$score, mapping = aes(x = times, y = Brier, col = model)) +
-  geom_line() +
-  xlab("Times") +
-  ylab("Brier-Score")+
-  ggtitle("Brier scores over time")
-
-
-```
-
-```{r coefplots,echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (blue), penalized Cox (Green), penalized logisitic (red). If a coefficient is estimated to be 0, it is removed from the plot"}
+```{r coefplots,echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (green), penalized Cox (red), penalized logisitic (blue). If a coefficient is estimated to be 0, it is removed from the plot"}
 
 library(dotwhisker)
 library(broom)
@@ -1126,7 +1122,7 @@ estimatescoxFull <- setDT(as.data.frame(coef(coxFull)), keep.rownames = TRUE)[]
 estimatescoxFull$Model <- "Cox"
 colnames(estimatescoxFull) <- c("term", "estimate", "model")
 
-lolliplotDots <- rbind(estimatescb, estimatescoxNet, estimatescoxFull)
+lolliplotDots <- rbind(estimatescoxFull, estimatescoxNet,estimatescb)
 lolliplotDots$conf.low <- lolliplotDots$estimate
 lolliplotDots$conf.high <- lolliplotDots$estimate
 lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
@@ -1134,17 +1130,57 @@ lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
 lolliplotDots$term=gsub( '\`', "", as.character(lolliplotDots$term))
 
 lolliplotDots[which(lolliplotDots$estimate==0),c(2,4,5)]<-NA
+unChosen<- unique(lolliplotDots[which(is.na(lolliplotDots$estimate)),1])
 
+lolliplotDots[which(lolliplotDots$term %in% unChosen$term),c(2,4,5)]<-NA
 
+lolliplotDots<-lolliplotDots[-which(is.na(lolliplotDots$estimate)),]
 dwplot(lolliplotDots)+
-  theme(axis.text.y = element_text(size = 7.5, angle = 0, hjust = 1, vjust = 0),
+  theme(axis.text.y = element_text(size = 11, angle = 0, hjust = 1, vjust = 0),
         strip.text.x = element_blank(),
       strip.background = element_rect(colour="white", fill="white"),
-      legend.position=c(.855,0.15),legend.text=element_text(size=7.5)
-      )
+      legend.position=c(.855,0.15),legend.text=element_text(size=11)
+      )+
+  ggtitle("Coefficient plot")+
+   labs(color = "Models")+
+   scale_color_manual(values=q4[c(2,1,3)])
+```
+
+```{r include=TRUE,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3Final} Four absolute risk curves, integrated from the following hazard models: Cox (green), penalized Cox (red), penalized logistic (blue) and unadjusted (Kaplan-Meier, purple)."}
+ggplot(as.data.frame(ab), aes(Time)) +
+  geom_line(data = as.data.frame(baseCoxComparisonData), mapping = aes(y = Full, colour = "Cox"), lwd = 1) +
+  geom_line(aes(y = `Absolute risk`, colour = Model), lwd = 1) +
+  geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 1) +
+  labs(y = "Probability of Death", x = "Survival time (Years)",color = "Models")+
+  ggtitle("Absolute risk curves")+
+   scale_color_manual(values=q4[c(2,1,3,4)])
+```
+  
+
+
+```{r riskregressionBrier,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between Cox regression (green), penalized Cox regression (red) and penalized logistic regression (blue) and a unadjusted curve (Kaplan-Meier, purple). Penalized logistic regression produced the lowest curve."}
+
+class(cbFull) <- c("singleEventCB",class(cbFull))
+brierFinalResults <- Score(list("Cox" = coxFull,"Penalized Cox"=coxNet,"Penalized Logistic"=cbFull), data = test, formula = Hist(time, event != 0) ~ 1, summary = NULL, se.fit = 0L, metrics = "brier", contrasts = FALSE, times =times)
+
+
+levels(brierFinalResults$Brier$score$model)[levels(brierFinalResults$Brier$score$model)=="Null model"] <- "Unadjusted"
+b=brierFinalResults
+
+brierFinalResults$Brier$score$model<- factor(brierFinalResults$Brier$score$model, levels = c("Cox","Penalized Cox","Penalized Logistic", "Unadjusted"))
+
+ggplot(data = brierFinalResults$Brier$score, mapping = aes(x = times, y = Brier, col = model)) +
+  geom_line() +
+  xlab("Survival time (Years)") +
+  ylab("Brier-Score")+
+  ggtitle("Brier scores over time")+
+  labs(color = "Models")+
+  scale_color_manual(values=q4[c(2,1,3,4)])
+
 ```
 
 
+Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of cofficients with values greater than 0 for all models are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). These values do not inform us of model performance. To do so, we take our hazard functions and use them to predict the absolute risk of each individual in our test set, over time. The probabilites over time for each individual are averaged, resulting in the absolute risk curves in figure \ref{fig:cs3Final}. There is separation between the curves, but it is minimal.  To better demonstrate the differences between the models, we compare brier scores over time. \ref{fig:cs3FinalBrier} the Brier score is lower in our penalized logistic regression model, compared to the other models. This difference, however, is minimal. We can say with relative certainty that any of the hazard models outperform an unadjusted curve, while penalized logistic regression performs the best on this testing dataset.
 
 # Case study 4--Stanford Heart Transplant Data
 

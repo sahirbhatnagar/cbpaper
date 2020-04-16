@@ -263,7 +263,6 @@ with time-varying coefficients: elastic-net penalization with
 \pkg{casebase} provides penalized estimation in the context of
 parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2}
 are the only packages to offer this functionality.
-\textcolor{red}{I can dive deeper to determine if this is a fair statement}
 
 Parametric survival models are implemented in a handful of packages:
 \pkg{CFC} \citeyearpar{mahani2015bayesian}, \pkg{flexsurv}
@@ -518,9 +517,9 @@ of Prostate Cancer Screening data. This dataset is available through the
 \begin{CodeInput}
 R> data(ERSPC)
 R> ERSPC$ScrArm <- factor(ERSPC$ScrArm,
-R>   levels = c(0, 1),
-R>   labels = c("Control group", "Screening group")
-R> )
+R+   levels = c(0, 1),
+R+   labels = c("Control group", "Screening group")
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -541,6 +540,10 @@ using the corresponding \code{plot} method:
 R> pt_object <- casebase::popTime(ERSPC, event = "DeadOfPrCa")
 R> plot(pt_object)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-erspc-data-1} \end{center}
+
 \end{CodeChunk}
 
 We can also create exposure stratified plots by specifying the
@@ -550,11 +553,15 @@ We can also create exposure stratified plots by specifying the
 
 \begin{CodeInput}
 R> pt_object_strat <- casebase::popTime(ERSPC,
-R>   event = "DeadOfPrCa",
-R>   exposure = "ScrArm"
-R> )
+R+   event = "DeadOfPrCa",
+R+   exposure = "ScrArm"
+R+ )
 R> plot(pt_object_strat)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-1} \end{center}
+
 \end{CodeChunk}
 
 We can also plot them side-by-side using the \code{ncol} argument:
@@ -564,6 +571,10 @@ We can also plot them side-by-side using the \code{ncol} argument:
 \begin{CodeInput}
 R> plot(pt_object_strat, ncol = 2)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/plot-stratified-erspc-data-side-1} \end{center}
+
 \end{CodeChunk}
 
 ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
@@ -578,10 +589,31 @@ as follows:
 
 \begin{CodeInput}
 R> cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
-R>   data = ERSPC
-R> )
+R+   data = ERSPC
+R+ )
 R> summary(cox_model)
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> Call:
+#> survival::coxph(formula = Surv(Follow.Up.Time, DeadOfPrCa) ~ 
+#>     ScrArm, data = ERSPC)
+#> 
+#>   n= 159893, number of events= 540 
+#> 
+#>                         coef exp(coef) se(coef)     z Pr(>|z|)  
+#> ScrArmScreening group -0.222     0.801    0.088 -2.52    0.012 *
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#>                       exp(coef) exp(-coef) lower .95 upper .95
+#> ScrArmScreening group     0.801       1.25     0.674     0.952
+#> 
+#> Concordance= 0.519  (se = 0.011 )
+#> Likelihood ratio test= 6.45  on 1 df,   p=0.01
+#> Wald test            = 6.37  on 1 df,   p=0.01
+#> Score (logrank) test = 6.39  on 1 df,   p=0.01
+\end{CodeOutput}
 \end{CodeChunk}
 
 We can also plot the cumulative incidence function (CIF) for each group.
@@ -592,31 +624,35 @@ regression treated as a nuisance parameter.
 
 \begin{CodeInput}
 R> new_data <- data.frame(
-R>   ScrArm = c("Control group", "Screening group"),
-R>   ignore = 99
-R> )
+R+   ScrArm = c("Control group", "Screening group"),
+R+   ignore = 99
+R+ )
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>   xlab = "Years since Randomization",
-R>   ylab = "Cumulative Incidence (%)",
-R>   fun = "event",
-R>   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-R>   main = sprintf(
-R>     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>     exp(coef(cox_model)),
-R>     exp(confint(cox_model))[1],
-R>     exp(confint(cox_model))[2]
-R>   ),
-R>   ylim = c(0, 2), yscale = 100
-R> )
+R+   xlab = "Years since Randomization",
+R+   ylab = "Cumulative Incidence (%)",
+R+   fun = "event",
+R+   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+R+   main = sprintf(
+R+     "Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+     exp(coef(cox_model)),
+R+     exp(confint(cox_model))[1],
+R+     exp(confint(cox_model))[2]
+R+   ),
+R+   ylim = c(0, 2), yscale = 100
+R+ )
 R> legend("topleft",
-R>   legend = c("Control group", "Screening group"),
-R>   col = c("red", "blue"),
-R>   lty = c(1, 1),
-R>   bg = "gray90"
-R> )
+R+   legend = c("Control group", "Screening group"),
+R+   col = c("red", "blue"),
+R+   lty = c(1, 1),
+R+   bg = "gray90"
+R+ )
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-cox-cif-1} \end{center}
+
 \end{CodeChunk}
 
 Next, we show how case-base sampling can be used to carry out a similar
@@ -630,14 +666,55 @@ excluding time from the linear predictor.
 
 \begin{CodeInput}
 R> casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm,
-R>   data = ERSPC,
-R>   ratio = 100
-R> )
+R+   data = ERSPC,
+R+   ratio = 100
+R+ )
 R> 
 R> summary(casebase_exponential)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.148  -0.148  -0.148  -0.133   3.078  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value            Pr(>|z|)    
+#> (Intercept)            -7.7659     0.0557 -139.46 <0.0000000000000002 ***
+#> ScrArmScreening group  -0.2147     0.0884   -2.43               0.015 *  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059  on 54539  degrees of freedom
+#> Residual deviance: 6053  on 54538  degrees of freedom
+#> AIC: 6057
+#> 
+#> Number of Fisher Scoring iterations: 7
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_exponential)[2])
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> ScrArmScreening group 
+#>                  0.81
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_exponential)[2, ])
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>  2.5 % 97.5 % 
+#>   0.68   0.96
+\end{CodeOutput}
 \end{CodeChunk}
 
 We can then use the \code{absoluteRisk} function to get an estimate of
@@ -649,39 +726,43 @@ the Cox model CIF:
 
 \begin{CodeInput}
 R> smooth_risk_exp <- casebase::absoluteRisk(
-R>   object = casebase_exponential,
-R>   time = seq(0, 15, 0.1),
-R>   newdata = new_data
-R> )
+R+   object = casebase_exponential,
+R+   time = seq(0, 15, 0.1),
+R+   newdata = new_data
+R+ )
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>   xlab = "Years since Randomization",
-R>   ylab = "Cumulative Incidence (%)",
-R>   fun = "event",
-R>   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-R>   main = sprintf(
-R>     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>     exp(coef(cox_model)),
-R>     exp(confint(cox_model))[1],
-R>     exp(confint(cox_model))[2]
-R>   ),
-R>   ylim = c(0, 2), yscale = 100
-R> )
+R+   xlab = "Years since Randomization",
+R+   ylab = "Cumulative Incidence (%)",
+R+   fun = "event",
+R+   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+R+   main = sprintf(
+R+     "Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+     exp(coef(cox_model)),
+R+     exp(confint(cox_model))[1],
+R+     exp(confint(cox_model))[2]
+R+   ),
+R+   ylim = c(0, 2), yscale = 100
+R+ )
 R> lines(smooth_risk_exp[, 1], smooth_risk_exp[, 2], col = "red", lty = 2)
 R> lines(smooth_risk_exp[, 1], smooth_risk_exp[, 3], col = "blue", lty = 2)
 R> 
 R> 
 R> legend("topleft",
-R>   legend = c(
-R>     "Control group (Cox)", "Control group (Casebase)",
-R>     "Screening group (Cox)", "Screening group (Casebase)"
-R>   ),
-R>   col = c("red", "red", "blue", "blue"),
-R>   lty = c(1, 2, 1, 2),
-R>   bg = "gray90"
-R> )
+R+   legend = c(
+R+     "Control group (Cox)", "Control group (Casebase)",
+R+     "Screening group (Cox)", "Screening group (Casebase)"
+R+   ),
+R+   col = c("red", "red", "blue", "blue"),
+R+   lty = c(1, 2, 1, 2),
+R+   bg = "gray90"
+R+ )
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-cif-1} \end{center}
+
 \end{CodeChunk}
 
 As we can see, the exponential model gives us an estimate of the hazard
@@ -702,14 +783,58 @@ corresponds to a Weibull model.
 
 \begin{CodeInput}
 R> casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm,
-R>   data = ERSPC,
-R>   ratio = 100
-R> )
+R+   data = ERSPC,
+R+   ratio = 100
+R+ )
 R> 
 R> summary(casebase_time)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.401  -0.162  -0.122  -0.094   3.466  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value            Pr(>|z|)    
+#> (Intercept)            -9.0314     0.1121  -80.53 <0.0000000000000002 ***
+#> Follow.Up.Time          0.2222     0.0145   15.29 <0.0000000000000002 ***
+#> ScrArmScreening group  -0.2320     0.0886   -2.62              0.0089 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059  on 54539  degrees of freedom
+#> Residual deviance: 5811  on 54537  degrees of freedom
+#> AIC: 5817
+#> 
+#> Number of Fisher Scoring iterations: 8
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_time))
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>           (Intercept)        Follow.Up.Time ScrArmScreening group 
+#>               0.00012               1.24882               0.79297
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_time))
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>                          2.5 %  97.5 %
+#> (Intercept)           0.000096 0.00015
+#> Follow.Up.Time        1.213876 1.28507
+#> ScrArmScreening group 0.665769 0.94256
+\end{CodeOutput}
 \end{CodeChunk}
 
 Again, the estimate of the hazard ratio is similar to that obtained from
@@ -719,38 +844,42 @@ Cox regression. We then look at the estimate of the CIF:
 
 \begin{CodeInput}
 R> smooth_risk_time <- casebase::absoluteRisk(
-R>   object = casebase_time,
-R>   time = seq(0, 15, 0.1),
-R>   newdata = new_data
-R> )
+R+   object = casebase_time,
+R+   time = seq(0, 15, 0.1),
+R+   newdata = new_data
+R+ )
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>   xlab = "Years since Randomization",
-R>   ylab = "Cumulative Incidence (%)",
-R>   fun = "event",
-R>   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-R>   main = sprintf(
-R>     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>     exp(coef(cox_model)),
-R>     exp(confint(cox_model))[1],
-R>     exp(confint(cox_model))[2]
-R>   ),
-R>   ylim = c(0, 2), yscale = 100
-R> )
+R+   xlab = "Years since Randomization",
+R+   ylab = "Cumulative Incidence (%)",
+R+   fun = "event",
+R+   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+R+   main = sprintf(
+R+     "Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+     exp(coef(cox_model)),
+R+     exp(confint(cox_model))[1],
+R+     exp(confint(cox_model))[2]
+R+   ),
+R+   ylim = c(0, 2), yscale = 100
+R+ )
 R> lines(smooth_risk_time[, 1], smooth_risk_time[, 2], col = "red", lty = 2)
 R> lines(smooth_risk_time[, 1], smooth_risk_time[, 3], col = "blue", lty = 2)
 R> 
 R> legend("topleft",
-R>   legend = c(
-R>     "Control group (Cox)", "Control group (Casebase)",
-R>     "Screening group (Cox)", "Screening group (Casebase)"
-R>   ),
-R>   col = c("red", "red", "blue", "blue"),
-R>   lty = c(1, 2, 1, 2),
-R>   bg = "gray90"
-R> )
+R+   legend = c(
+R+     "Control group (Cox)", "Control group (Casebase)",
+R+     "Screening group (Cox)", "Screening group (Casebase)"
+R+   ),
+R+   col = c("red", "red", "blue", "blue"),
+R+   lty = c(1, 2, 1, 2),
+R+   bg = "gray90"
+R+ )
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-weibull-cif-1} \end{center}
+
 \end{CodeChunk}
 
 We see that the Weibull model leads to a better fit of the CIF than the
@@ -763,14 +892,64 @@ Finally, we can model the hazard as a smooth function of time using the
 
 \begin{CodeInput}
 R> casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
-R>   data = ERSPC,
-R>   ratio = 100
-R> )
+R+   data = ERSPC,
+R+   ratio = 100
+R+ )
 R> 
 R> summary(casebase_splines)
+\end{CodeInput}
+
+\begin{CodeOutput}
+#> 
+#> Call:
+#> glm(formula = formula, family = binomial, data = sampleData)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.405  -0.173  -0.136  -0.085   3.796  
+#> 
+#> Coefficients:
+#>                       Estimate Std. Error z value             Pr(>|z|)    
+#> (Intercept)           -10.2643     0.3159  -32.49 < 0.0000000000000002 ***
+#> bs(Follow.Up.Time)1     4.2983     0.8005    5.37        0.00000007893 ***
+#> bs(Follow.Up.Time)2     2.0945     0.4824    4.34        0.00001412028 ***
+#> bs(Follow.Up.Time)3     4.5544     0.7067    6.44        0.00000000012 ***
+#> ScrArmScreening group  -0.2169     0.0886   -2.45                0.014 *  
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for binomial family taken to be 1)
+#> 
+#>     Null deviance: 6059.0  on 54539  degrees of freedom
+#> Residual deviance: 5790.5  on 54535  degrees of freedom
+#> AIC: 5800
+#> 
+#> Number of Fisher Scoring iterations: 8
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(coef(casebase_splines))
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>           (Intercept)   bs(Follow.Up.Time)1   bs(Follow.Up.Time)2 
+#>              0.000035             73.578176              8.121029 
+#>   bs(Follow.Up.Time)3 ScrArmScreening group 
+#>             95.053534              0.805017
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> exp(confint(casebase_splines))
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>                           2.5 %     97.5 %
+#> (Intercept)            0.000018   0.000063
+#> bs(Follow.Up.Time)1   15.835008 367.061126
+#> bs(Follow.Up.Time)2    3.252368  21.652009
+#> bs(Follow.Up.Time)3   22.537699 364.141700
+#> ScrArmScreening group  0.675920   0.956823
+\end{CodeOutput}
 \end{CodeChunk}
 
 Once again, we can see that the estimate of the hazard ratio is similar
@@ -781,38 +960,42 @@ CIF:
 
 \begin{CodeInput}
 R> smooth_risk_splines <- absoluteRisk(
-R>   object = casebase_splines,
-R>   time = seq(0, 15, 0.1),
-R>   newdata = new_data
-R> )
+R+   object = casebase_splines,
+R+   time = seq(0, 15, 0.1),
+R+   newdata = new_data
+R+ )
 R> 
 R> plot(survfit(cox_model, newdata = new_data),
-R>   xlab = "Years since Randomization",
-R>   ylab = "Cumulative Incidence (%)",
-R>   fun = "event",
-R>   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-R>   main = sprintf(
-R>     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-R>                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-R>     exp(coef(cox_model)),
-R>     exp(confint(cox_model))[1],
-R>     exp(confint(cox_model))[2]
-R>   ),
-R>   ylim = c(0, 2), yscale = 100
-R> )
+R+   xlab = "Years since Randomization",
+R+   ylab = "Cumulative Incidence (%)",
+R+   fun = "event",
+R+   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+R+   main = sprintf(
+R+     "Estimated Cumulative Incidence (risk) of Death from Prostate 
+R+                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
+R+     exp(coef(cox_model)),
+R+     exp(confint(cox_model))[1],
+R+     exp(confint(cox_model))[2]
+R+   ),
+R+   ylim = c(0, 2), yscale = 100
+R+ )
 R> lines(smooth_risk_splines[, 1], smooth_risk_splines[, 2], col = "red", lty = 2)
 R> lines(smooth_risk_splines[, 1], smooth_risk_splines[, 3], col = "blue", lty = 2)
 R> 
 R> legend("topleft",
-R>   legend = c(
-R>     "Control group (Cox)", "Control group (Casebase)",
-R>     "Screening group (Cox)", "Screening group (Casebase)"
-R>   ),
-R>   col = c("red", "red", "blue", "blue"),
-R>   lty = c(1, 2, 1, 2),
-R>   bg = "gray90"
-R> )
+R+   legend = c(
+R+     "Control group (Cox)", "Control group (Casebase)",
+R+     "Screening group (Cox)", "Screening group (Casebase)"
+R+   ),
+R+   col = c("red", "red", "blue", "blue"),
+R+   lty = c(1, 2, 1, 2),
+R+   bg = "gray90"
+R+ )
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/erspc-casebase-splines-cif-1} \end{center}
+
 \end{CodeChunk}
 
 Qualitatively, the combination of splines and case-base sampling
@@ -824,6 +1007,23 @@ hazard to obtain reliable estimates of the hazard ratio. Of course,
 different parametric models for the hazards give rise to qualitatively
 different estimates for the CIF.
 
+\begin{CodeChunk}
+\begin{table}[H]
+\centering
+\begin{tabular}{lrlr}
+\toprule
+Model & HR & CI & Width\\
+\midrule
+Cox & 0.80 & (0.67, 0.95) & 0.28\\
+Exponential & 0.81 & (0.68, 0.96) & 0.28\\
+Weibull & 0.79 & (0.67, 0.94) & 0.28\\
+Splines & 0.81 & (0.68, 0.96) & 0.28\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{CodeChunk}
+
 As noted above, the usual asymptotic results hold for likelihood ratio
 tests built using case-base sampling models. Therefore, we can easily
 test the null hypothesis that the exponential model is just as good as
@@ -834,6 +1034,18 @@ the larger (in terms of number of parameters) splines model.
 \begin{CodeInput}
 R> anova(casebase_exponential, casebase_splines, test = "LRT")
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> Analysis of Deviance Table
+#> 
+#> Model 1: DeadOfPrCa ~ ScrArm + offset(offset)
+#> Model 2: DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm + offset(offset)
+#>   Resid. Df Resid. Dev Df Deviance            Pr(>Chi)    
+#> 1     54538       6053                                    
+#> 2     54535       5790  3      262 <0.0000000000000002 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{CodeOutput}
 \end{CodeChunk}
 
 As expected, we see that splines model provides a better fit. Similarly,
@@ -843,11 +1055,16 @@ we can compare the AIC for all three case-base models:
 
 \begin{CodeInput}
 R> c(
-R>   "Exp." = AIC(casebase_exponential),
-R>   "Weib." = AIC(casebase_time),
-R>   "Splines" = AIC(casebase_splines)
-R> )
+R+   "Exp." = AIC(casebase_exponential),
+R+   "Weib." = AIC(casebase_time),
+R+   "Splines" = AIC(casebase_splines)
+R+ )
 \end{CodeInput}
+
+\begin{CodeOutput}
+#>    Exp.   Weib. Splines 
+#>    6057    5817    5800
+\end{CodeOutput}
 \end{CodeChunk}
 
 Once again, we have evidence that the splines model provides the best
@@ -893,6 +1110,41 @@ different variable types: for continuous variables, we gave the range,
 followed by the mean and standard deviation; for categorical variables,
 we gave the counts for each category.
 
+\begin{CodeChunk}
+\begin{table}
+
+\caption{\label{tab:table1bmtcrr}Baseline characteristics of patients in the stem-cell transplant study.}
+\centering
+\begin{tabular}[t]{lll}
+\toprule
+Variable & Description & Statistical summary\\
+\midrule
+\code{Sex} & Sex & M=Male (100)\\
+ &  & F=Female (77)\\
+\code{D} & Disease & ALL (73)\\
+ &  & AML (104)\\
+\code{Phase} & Phase & CR1 (47)\\
+\addlinespace
+ &  & CR2 (45)\\
+ &  & CR3 (12)\\
+ &  & Relapse (73)\\
+\code{Source} & Type of transplant & BM+PB (21)\\
+ &  & PB (156)\\
+\addlinespace
+\code{Age} & Age of patient (years) & 4--62\\
+ &  & 30.47 (13.04)\\
+\code{ftime} & Failure time (months) & 0.13--131.77\\
+ &  & 20.28 (30.78)\\
+\code{Status} & Status indicator & 0=censored (46)\\
+\addlinespace
+ &  & 1=relapse (56)\\
+ &  & 2=competing event (75)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{CodeChunk}
+
 First, we can look at a population-time plot to visualize the incidence
 density of both relapse and the competing events. In Figure
 \ref{fig:compPop}, failure times are highlighted on the plot using red
@@ -900,6 +1152,17 @@ dots for the event of interest (panel A) and blue dots for competing
 events (panel B). In both panels, we see evidence of a non-constant
 hazard function: the density of points is larger at the beginning of
 follow-up than at the end.
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics{../figures/compPop-1} 
+
+}
+
+\caption[Population-time plot for the stem-cell transplant study]{Population-time plot for the stem-cell transplant study. A) The red points represent relapse events. B) The blue points represent the competing events.}\label{fig:compPop}
+\end{figure}
+\end{CodeChunk}
 
 Our main objective is to compute the absolute risk of relapse for a
 given set of covariates. We start by fitting a smooth hazard to the data
@@ -909,11 +1172,11 @@ using a linear term for time:
 
 \begin{CodeInput}
 R> model_cb <- fitSmoothHazard(
-R>   Status ~ ftime + Sex + D + Phase + Source + Age,
-R>   data = bmtcrr,
-R>   ratio = 100,
-R>   time = "ftime"
-R> )
+R+   Status ~ ftime + Sex + D + Phase + Source + Age,
+R+   data = bmtcrr,
+R+   ratio = 100,
+R+   time = "ftime"
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -926,9 +1189,34 @@ regression. To do so, we need to treat the competing event as censoring.
 R> library(survival)
 R> # Treat competing event as censoring
 R> model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-R>   data = bmtcrr
-R> )
+R+   data = bmtcrr
+R+ )
 \end{CodeInput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{table}
+
+\caption{\label{tab:bmtcrr-cis}Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.}
+\centering
+\begin{tabular}[t]{lrlrl}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Case-Base} & \multicolumn{2}{c}{Cox} \\
+\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
+Covariates & HR & 95\% CI & HR & 95\% CI\\
+\midrule
+Sex & 0.71 & (0.41, 1.24) & 0.68 & (0.39, 1.19)\\
+Disease & 0.55 & (0.31, 1) & 0.52 & (0.29, 0.93)\\
+Phase (CR2 vs. CR1) & 1.18 & (0.47, 2.93) & 1.21 & (0.48, 3.02)\\
+Phase (CR3 vs. CR1) & 1.47 & (0.38, 5.63) & 1.67 & (0.43, 6.5)\\
+Phase (Relapse vs. CR1) & 4.30 & (2, 9.27) & 4.55 & (2.09, 9.9)\\
+\addlinespace
+Source & 1.56 & (0.52, 4.7) & 1.46 & (0.47, 4.54)\\
+Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \end{CodeChunk}
 
 From the fit object, we can extract both the hazard ratios and their
@@ -955,24 +1243,24 @@ R> time_points <- seq(0, 60, length.out = 50)
 R> 
 R> # Data.frame containing risk profile
 R> newdata <- data.frame(
-R>   "Sex" = factor(c("F", "F"),
-R>     levels = levels(bmtcrr[, "Sex"])
-R>   ),
-R>   "D" = c("ALL", "AML"), # Both diseases
-R>   "Phase" = factor(c("Relapse", "Relapse"),
-R>     levels = levels(bmtcrr[, "Phase"])
-R>   ),
-R>   "Age" = c(35, 35),
-R>   "Source" = factor(c("PB", "PB"),
-R>     levels = levels(bmtcrr[, "Source"])
-R>   )
-R> )
+R+   "Sex" = factor(c("F", "F"),
+R+     levels = levels(bmtcrr[, "Sex"])
+R+   ),
+R+   "D" = c("ALL", "AML"), # Both diseases
+R+   "Phase" = factor(c("Relapse", "Relapse"),
+R+     levels = levels(bmtcrr[, "Phase"])
+R+   ),
+R+   "Age" = c(35, 35),
+R+   "Source" = factor(c("PB", "PB"),
+R+     levels = levels(bmtcrr[, "Source"])
+R+   )
+R+ )
 R> 
 R> # Estimate absolute risk curve
 R> risk_cb <- absoluteRisk(
-R>   object = model_cb, time = time_points,
-R>   method = "numerical", newdata = newdata
-R> )
+R+   object = model_cb, time = time_points,
+R+   method = "numerical", newdata = newdata
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -991,13 +1279,24 @@ use the \pkg{timereg} package \citep{timereg}:
 \begin{CodeInput}
 R> library(timereg)
 R> model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
-R>   const(Phase) + const(Source) + const(Age),
-R> data = bmtcrr, cause = 1, model = "fg"
-R> )
+R+   const(Phase) + const(Source) + const(Age),
+R+ data = bmtcrr, cause = 1, model = "fg"
+R+ )
 R> 
 R> # Estimate absolute risk curve
 R> risk_fg <- predict(model_fg, newdata, times = time_points)
 \end{CodeInput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics{../figures/bmtcrr-risk-1} 
+
+}
+
+\caption{\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
+\end{figure}
 \end{CodeChunk}
 
 Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both
@@ -1016,54 +1315,34 @@ In the first two case studies, we described the basic functionalities of
 the \pkg{casebase} package: creating population-time plots, fitting
 parametric models for hazard functions, and estimating the corresponding
 cumulative incidence curves. In the next two case studies, we explore
-more advanced features.
+advanced features.
 
-For the third case study, we will look at regularized estimation for the
-hazard function. This can be performed using a combination of case-base
-sampling and regularized logistic regression. To demonstrate this
-capability, we examine the Study to Understand Prognoses Preferences
+For the third case study, we will demonstrate regularization during
+hazard estimation. Since we are using logistic regression, existing
+packages, like \pkg{glmnet} can be leveraged. To demonstrate this
+feature, we examine the Study to Understand Prognoses Preferences
 Outcomes and Risks of Treatment (SUPPORT) dataset
 \citep{knaus1995support}. The SUPPORT dataset tracks death for
 individuals who are considered seriously ill within 5 hospitals in the
 United States of America. Imputation was conducted using the \pkg{mice}
-package in \proglang{R} with default settings \citep{mice}. Before
-imputation, there were a total of 9105 individuals and 47 variables. Of
-those variables, a few were removed before imputation. We removed three
-response variables: hospital charges, patient ratio of costs to charges
-and patient micro-costs. Next, we removed hospital death as it was
-directly informative of our event of interest, death. We also removed
-functional disability and income as they are ordinal covariates, because
-ordinal variables are treated as factors in our current model. Finally,
-we removed 8 covariates relating to the results of previous findings: we
-removed SUPPORT day 3 physiology score (sps), APACHE III day 3
-physiology score (aps), SUPPORT model 2-month survival estimate, SUPPORT
-model 6-month survival estimate, Physician's 2-month survival estimate
-for pt., Physician's 6-month survival estimate for pt., Patient had Do
-Not Resuscitate (DNR) order and Day of DNR order (\textless{}0 if before
-study). Of these, sps and aps were added on after imputation, as they
-were missing only 1 observation and permitted us to compare findings
-between our model and their's.
+package in \proglang{R} with default settings \citep{mice}. The imputed
+dataset is available as part of the \pkg{casebase} package. For more
+information please see the SUPPORT data documentation in the package.
 
-First we impute manually using recommended normal values for
-physiological measures \citep{harrell_2020}. Next, we impute a single
-dataset using \pkg{mice} with default settings. After imputation, we
-noted that the covariate for surrogate activities of daily living was
-not imputed. This is due to colinearity between the other two covariates
-for activities of daily living. As such, surrogate activites of daily
-living was removed from our model. After these imputations, we have a
-total of 9104 observations and 30 variables, two of which are sps and
-aps, which will work as a baseline for our comparison to previous
-findings. This dataset is available Its worth noting that these scores
-were developed for a period of 180 days, which makes our comparison over
-5.56 years exploratory. Also, our single imputation introduces bias in
-the data. As the goal here is purely demonstrative, this bias will be
-consistent with any of the following models. As such, their comparison
-is still valid, though any interpretation requires an awareness of said
-bias. A description of used variables can be found in Table
-\ref{tab:support1} and a breakdown of each categorical variable in Table
-\ref{tab:support2}. The original data was obtained from the Department
-of Biostatistics at Vanderbilt University \citep{harrell_2020}. The
-imputed dataset is available as part of the \pkg{casebase} package.
+we have a total of 9104 observations and 30 variables, two of which are
+SUPPORT day 3 physiology score (sps) and APACHE III day 3 physiology
+score (aps). These scores were developed for a period of 180 days, which
+makes our comparison over 5.56 years exploratory. Therefore, we will
+assess these two models before using either as our baseline, by
+comparing them to a full model using all variables. Also, our single
+imputation introduces bias in the data. As the goal here is purely
+demonstrative, this bias will be consistent with any of the following
+models. As such, their comparison is still valid, though any
+interpretation requires an awareness of said bias. A description of used
+variables can be found in Table \ref{tab:support1} and a breakdown of
+each categorical variable in Table \ref{tab:support2}. The original data
+was obtained from the Department of Biostatistics at Vanderbilt
+University \citep{harrell_2020}.
 
 \begin{table}[ht]
 \centering
@@ -1145,22 +1424,6 @@ ca       & Yes                                           \\
 \label{tab:support2}
 \end{table}
 
-As before, the first step is to visualize the incidence density. The
-population-time plot for the SUPPORT data appears in Figure
-\ref{fig:support-poptime}. As we can see, the incidence density is not
-constant.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{../figures/support-poptime-1} 
-
-}
-
-\caption{\label{fig:support-poptime} Population-time plot for the SUPPORT data.}\label{fig:support-poptime}
-\end{figure}
-\end{CodeChunk}
-
 Before generating an absolute risk curve using regularized logistic
 regression, we will explore three options as a baseline comparison,
 beyond a Kaplan-meier curve. The original study compared these scores
@@ -1178,9 +1441,9 @@ demonstrate each model's predictive ability. Over 5.56 years,
 \ref{fig:baselines} demonstrates that all the cox models have similar,
 if not identical average predictions. Figure \ref{fig:brier1} examines
 the brier scores as they change over time. As the full model has the
-lowest brier score on overall, it will be used in the following
-comparison to regularized cox, regularized logistic regression and the
-unadjusted Kaplan-Meier curve.
+lowest brier score on overall, it will be used in the following absolute
+risk comparison to regularized cox, regularized logistic regression and
+the unadjusted Kaplan-Meier curve.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1189,7 +1452,7 @@ unadjusted Kaplan-Meier curve.
 
 }
 
-\caption{\label{fig:baselines} AbsoluteRisk curves from hazard models. Pink: All covariates without SPS nor APS. Green: APS only model. Blue: SPS only model. Purple: unadjusted curve. All three models underestimate the risk in comparison to the unadjusted curve.}\label{fig:baselines}
+\caption{\label{fig:baselines} Absolute risk curves estimated from hazard models. Red: APS only hazard was used to generate the absolute risk. Green: All covariates aside from APS and SPS. Blue: SPS only. Purple: unadjusted Kaplan-Meier curve.}\label{fig:baselines}
 \end{figure}
 \end{CodeChunk}
 
@@ -1200,45 +1463,68 @@ unadjusted Kaplan-Meier curve.
 
 }
 
-\caption{\label{fig:brier1} Brier scores over time. Full model (Cox Full) performs best, while the other two (APS only and SPS only) are comparable.}\label{fig:brierpt1}
+\caption{\label{fig:brier1} Brier scores over survival time. Full model (Full) performs best, while the other two (APS only and SPS only) are comparable. Red: APS only model was used to generate the brier scores. Green: all covariates excluding APS and SPS. Blue: SPS only model.}\label{fig:brierpt1}
 \end{figure}
 \end{CodeChunk}
 
-To get the absolute risk following regularized cox regression, this
-required that we work around limitations in existing packages. To make
-use of the \pkg{survival} package, we first get our hazard coefficients
-using \pkg{glmnet}'s coxnet implementation for lasso penalization
+To get the absolute risk following regularized cox regression, we had to
+work around limitations in existing packages. To make use of the
+\pkg{survival} package, we first get our hazard coefficients using
+\pkg{glmnet}'s coxnet implementation for lasso penalization
 \citep{regpathcox}. Next, we fit a cox model using the survival package
 with the selected variables only, from our previous fit. Finally, we
 replaced the coefficients in the survival object with those from our
 glmnet fit, allowing us to make use of the absolute risk tools available
 in the \pkg{survival} package.
 
-For our penalized logistic regression model, we opted for a logistic
-function of time, resulting in a Weibull distribution assumption. As
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # hazard for cox using glmnet
+R> coxNet <- glmnet::cv.glmnet(x = x, y = y, family = "cox", alpha = 1, standardize = TRUE)
+R> #getting all non-zero covariates
+R> nonzero_covariate_cox <- predict(coxNet, type = "nonzero", s = "lambda.1se")
+R> #keeping coefficients for later
+R> nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
+R> # cutting dataset to only include nonzero covariates
+R> cleanCoxData <- as.data.frame(cbind(y, x[, nonzero_covariate_cox]))
+R> #create a skeleton object
+R> coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., data = cleanCoxData,x=TRUE)
+R> #replace coefficients with regularized ones
+R> coxNet$coefficients <- nonzero_coef_cox@x
+\end{CodeInput}
+\end{CodeChunk}
+
+For our penalized logistic regression model, we opted for the natural
+log of time, which assumes a Weibull distribution for our event. As
 casebase makes use of the glmnet package, we interact with the
 fitsmoothhazard.fit function using a matrix interface, where y contains
 the time and event variables and x contains all other variables we would
 like to include in the model. For the SUPPORT dataset, all factor
 variables were converted into dummy variables. Here, we used lasso
 penalization by setting alpha to 1, leading to our smooth hazard
-function. We then take our hazard and use it to predict the absolute
-risk of each individual in our test set, over time. The probabilites
-over time for each individual are averaged, resulting in the smooth
-absolute risk curve in figure \ref{fig:cs3Final}. On average, the Brier
-score is lower in our penalized logistic regression model, compared to
-the other models (fig.~\ref{fig:cs3FinalBrier}).
+function.
 
-This case study serves to demonstrate how regularization can be used in
-a survival context, using logistic regression. Our approach performs
-comparably to Cox regression, demonstrating its validity in an applied
-setting.
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> #regularized logistic regression to estimate hazard
+R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet",
+R>                       time = "d.time", event = "death",
+R>                       formula_time = ~ log(d.time), alpha = 1,
+R>                       ratio = 100, standardize = TRUE, penalty.factor=c(0,rep(1,ncol(x))))
+R> 
+R> # Estimating the absolute risk curve using the newData parameter.
+R> abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s = "lambda.1se", method = c("numerical"))
+R> 
+\end{CodeInput}
+\end{CodeChunk}
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> 
-R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE,penalty.facto=c(0,rep(1,ncol(x))))
+R> cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE,penalty.factor=c(0,rep(1,ncol(x))))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1253,11 +1539,22 @@ R> abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s
 \begin{CodeChunk}
 \begin{figure}
 
+{\centering \includegraphics{../figures/coefplots-1} 
+
+}
+
+\caption{\label{fig:cs3lolliPlot} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (green), penalized Cox (red), penalized logisitic (blue). If a coefficient is estimated to be 0, it is removed from the plot}\label{fig:coefplots}
+\end{figure}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{figure}
+
 {\centering \includegraphics{../figures/unnamed-chunk-2-1} 
 
 }
 
-\caption{\label{fig:cs3Final} Four absolute risk curves, integrated from the following hazard models: Cox (pink), penalized Cox (green), penalized logistic (blue) and Kaplan-Meier (purple).}\label{fig:unnamed-chunk-2}
+\caption{\label{fig:cs3Final} Four absolute risk curves, integrated from the following hazard models: Cox (green), penalized Cox (red), penalized logistic (blue) and unadjusted (Kaplan-Meier, purple).}\label{fig:unnamed-chunk-2}
 \end{figure}
 \end{CodeChunk}
 
@@ -1268,20 +1565,30 @@ R> abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s
 
 }
 
-\caption{\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between a null model (Kaplan-Meier, black), Cox regression (yellow), penalized Cox regression (blue) and penalized logistic regression (green).}\label{fig:riskregressionBrier}
+\caption{\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between Cox regression (green), penalized Cox regression (red) and penalized logistic regression (blue) and a unadjusted curve (Kaplan-Meier, purple). Penalized logistic regression produced the lowest curve.}\label{fig:riskregressionBrier}
 \end{figure}
 \end{CodeChunk}
 
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{../figures/coefplots-1} 
-
-}
-
-\caption{\label{fig:cs3FinalBrier} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (blue), penalized Cox (Green), penalized logisitic (red). If a coefficient is estimated to be 0, it is removed from the plot}\label{fig:coefplots}
-\end{figure}
-\end{CodeChunk}
+Our first comparison plot examines the covariates that were selected
+between all three hazard functions. Note that Cox regression without
+penalization selected more covariates than the other two, but only the
+intersection of cofficients with values greater than 0 for all models
+are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox
+regression to have larger estimated coefficients. This is expected, as
+there are no restrictions on the size of coefficients. The smallest
+coefficient estimates are found in penalized logistic model, aside from
+cancer state (cano). These values do not inform us of model performance.
+To do so, we take our hazard functions and use them to predict the
+absolute risk of each individual in our test set, over time. The
+probabilites over time for each individual are averaged, resulting in
+the absolute risk curves in figure \ref{fig:cs3Final}. There is
+separation between the curves, but it is minimal. To better demonstrate
+the differences between the models, we compare brier scores over time.
+\ref{fig:cs3FinalBrier} the Brier score is lower in our penalized
+logistic regression model, compared to the other models. This
+difference, however, is minimal. We can say with relative certainty that
+any of the hazard models outperform an unadjusted curve, while penalized
+logistic regression performs the best on this testing dataset.
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
 \section{Case study 4--Stanford Heart Transplant
@@ -1321,11 +1628,15 @@ R> library(survival)
 R> library(casebase)
 R> 
 R> stanford_popTime <- popTime(jasa,
-R>   time = "futime",
-R>   event = "fustat"
-R> )
+R+   time = "futime",
+R+   event = "fustat"
+R+ )
 R> plot(stanford_popTime)
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-poptime-1} \end{center}
+
 \end{CodeChunk}
 
 Since the exposure is time-dependent, we need to manually define the
@@ -1340,9 +1651,9 @@ R> library(tidyverse)
 R> library(lubridate)
 R> 
 R> cb_data <- sampleCaseBase(jasa,
-R>   time = "futime",
-R>   event = "fustat", ratio = 10
-R> )
+R+   time = "futime",
+R+   event = "fustat", ratio = 10
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1355,15 +1666,15 @@ each population-moment is exposed or not.
 \begin{CodeInput}
 R> # Define exposure variable
 R> cb_data <- mutate(cb_data,
-R>   txtime = time_length(accept.dt %--% tx.date,
-R>     unit = "days"
-R>   ),
-R>   exposure = case_when(
-R>     is.na(txtime) ~ 0L,
-R>     txtime > futime ~ 0L,
-R>     txtime <= futime ~ 1L
-R>   )
-R> )
+R+   txtime = time_length(accept.dt %--% tx.date,
+R+     unit = "days"
+R+   ),
+R+   exposure = case_when(
+R+     is.na(txtime) ~ 0L,
+R+     txtime > futime ~ 0L,
+R+     txtime <= futime ~ 1L
+R+   )
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1375,17 +1686,17 @@ Finally, we can fit the hazard using various linear predictors.
 R> library(splines)
 R> # Fit several models
 R> fit1 <- fitSmoothHazard(fustat ~ exposure,
-R>   data = cb_data, time = "futime"
-R> )
+R+   data = cb_data, time = "futime"
+R+ )
 R> fit2 <- fitSmoothHazard(fustat ~ exposure + futime,
-R>   data = cb_data, time = "futime"
-R> )
+R+   data = cb_data, time = "futime"
+R+ )
 R> fit3 <- fitSmoothHazard(fustat ~ exposure + bs(futime),
-R>   data = cb_data, time = "futime"
-R> )
+R+   data = cb_data, time = "futime"
+R+ )
 R> fit4 <- fitSmoothHazard(fustat ~ exposure * bs(futime),
-R>   data = cb_data, time = "futime"
-R> )
+R+   data = cb_data, time = "futime"
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1403,12 +1714,17 @@ Akaike Information Criterion (AIC).
 \begin{CodeInput}
 R> # Compute AIC
 R> c(
-R>   "Model1" = AIC(fit1),
-R>   "Model2" = AIC(fit2),
-R>   "Model3" = AIC(fit3),
-R>   "Model4" = AIC(fit4)
-R> )
+R+   "Model1" = AIC(fit1),
+R+   "Model2" = AIC(fit2),
+R+   "Model3" = AIC(fit3),
+R+   "Model4" = AIC(fit4)
+R+ )
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> Model1 Model2 Model3 Model4 
+#>    790    752    737    721
+\end{CodeOutput}
 \end{CodeChunk}
 
 As we can, the best fit is the fourth model. By visualizing the hazard
@@ -1421,31 +1737,35 @@ clearly see how the hazards are no longer proportional.
 R> # Compute hazards---
 R> # First, create a list of time points for both exposure status
 R> hazard_data <- expand.grid(
-R>   exposure = c(0, 1),
-R>   futime = seq(0, 1000,
-R>     length.out = 100
-R>   )
-R> )
+R+   exposure = c(0, 1),
+R+   futime = seq(0, 1000,
+R+     length.out = 100
+R+   )
+R+ )
 R> # Set the offset to zero
 R> hazard_data$offset <- 0
 R> # Use predict to get the fitted values, and exponentiate to
 R> # transform to the right scale
 R> hazard_data$hazard <- exp(predict(fit4,
-R>   newdata = hazard_data,
-R>   type = "link"
-R> ))
+R+   newdata = hazard_data,
+R+   type = "link"
+R+ ))
 R> # Add labels for plots
 R> hazard_data$Status <- factor(hazard_data$exposure,
-R>   labels = c("NoTrans", "Trans")
-R> )
+R+   labels = c("NoTrans", "Trans")
+R+ )
 R> 
 R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
-R>   geom_line() +
-R>   theme_minimal() +
-R>   theme(legend.position = "top") +
-R>   ylab("Hazard") +
-R>   xlab("Follow-up time")
+R+   geom_line() +
+R+   theme_minimal() +
+R+   theme(legend.position = "top") +
+R+   ylab("Hazard") +
+R+   xlab("Follow-up time")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-hazard-1} \end{center}
+
 \end{CodeChunk}
 
 The non-proportionality seems to be more pronounced at the beginning of
@@ -1458,26 +1778,30 @@ hazard function into estimates of the cumulative incidence functions.
 R> # Compute absolute risk curves
 R> newdata <- data.frame(exposure = c(0, 1))
 R> absrisk <- absoluteRisk(fit4,
-R>   newdata = newdata,
-R>   time = seq(0, 1000, length.out = 100)
-R> )
+R+   newdata = newdata,
+R+   time = seq(0, 1000, length.out = 100)
+R+ )
 R> 
 R> colnames(absrisk) <- c("Time", "NoTrans", "Trans")
 R> 
 R> # Rearrange the data
 R> absrisk <- gather(
-R>   as.data.frame(absrisk),
-R>   "Status", "Risk", -Time
-R> )
+R+   as.data.frame(absrisk),
+R+   "Status", "Risk", -Time
+R+ )
 R> 
 R> ggplot(absrisk, aes(Time, Risk, colour = Status)) +
-R>   geom_line() +
-R>   theme_minimal() +
-R>   theme(legend.position = "top") +
-R>   expand_limits(y = 0.5) +
-R>   xlab("Follow-up time") +
-R>   ylab("Cum. Incidence")
+R+   geom_line() +
+R+   theme_minimal() +
+R+   theme(legend.position = "top") +
+R+   expand_limits(y = 0.5) +
+R+   xlab("Follow-up time") +
+R+   ylab("Cum. Incidence")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-risk-1} \end{center}
+
 \end{CodeChunk}
 
 Note that we can easily adapt the code above to the situation where a
@@ -1490,24 +1814,28 @@ example after 30 days.
 R> # Compute hazards---
 R> # First, create a list of time points for both exposure status
 R> one_yr_haz <- data.frame(futime = seq(0, 365,
-R>   length.out = 100
-R> ))
+R+   length.out = 100
+R+ ))
 R> one_yr_haz <- mutate(one_yr_haz,
-R>   offset = 0,
-R>   exposure = if_else(futime < 30, 0, 1)
-R> )
+R+   offset = 0,
+R+   exposure = if_else(futime < 30, 0, 1)
+R+ )
 R> one_yr_haz$hazard <- exp(predict(fit4,
-R>   newdata = one_yr_haz,
-R>   type = "link"
-R> ))
+R+   newdata = one_yr_haz,
+R+   type = "link"
+R+ ))
 R> ggplot(one_yr_haz, aes(futime, hazard)) +
-R>   geom_line() +
-R>   theme_minimal() +
-R>   theme(legend.position = "top") +
-R>   ylab("Hazard") +
-R>   xlab("Follow-up time") +
-R>   geom_vline(xintercept = 30, linetype = "dashed")
+R+   geom_line() +
+R+   theme_minimal() +
+R+   theme(legend.position = "top") +
+R+   ylab("Hazard") +
+R+   xlab("Follow-up time") +
+R+   geom_vline(xintercept = 30, linetype = "dashed")
 \end{CodeInput}
+
+
+\begin{center}\includegraphics{../figures/stanford-1y-haz-1} \end{center}
+
 \end{CodeChunk}
 
 We can then compare the 1-year mortality risk without transplant and
@@ -1517,14 +1845,26 @@ with transplant at 30 days.
 
 \begin{CodeInput}
 R> absoluteRisk(fit4,
-R>   newdata = data.frame(exposure = 0),
-R>   time = 365
-R> )
+R+   newdata = data.frame(exposure = 0),
+R+   time = 365
+R+ )
+\end{CodeInput}
+
+\begin{CodeOutput}
+#>         
+#> 365 0.31
+\end{CodeOutput}
+
+\begin{CodeInput}
 R> 
 R> # Use the trapezoidal rule to estimate the cumulative hazard
 R> cumhaz_est <- pracma::trapz(one_yr_haz$futime, one_yr_haz$hazard)
 R> 1 - exp(-cumhaz_est)
 \end{CodeInput}
+
+\begin{CodeOutput}
+#> [1] 0.2
+\end{CodeOutput}
 \end{CodeChunk}
 
 As we can see, the risk estimate at 1-year is about 30\% lower if the
@@ -1675,7 +2015,7 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-04-09 13:28:46 using the following
+This report was generated on 2020-04-16 12:08:46 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1705,51 +2045,52 @@ R> sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] broom_0.5.5               dotwhisker_0.5.0         
-#>  [3] prodlim_2019.11.13        riskRegression_2020.03.27
-#>  [5] pracma_2.2.9              kableExtra_1.1.0         
-#>  [7] data.table_1.12.8         glmnet_3.0-2             
-#>  [9] Matrix_1.2-18             casebase_0.2.1.9001      
-#> [11] survival_3.1-11           magrittr_1.5             
-#> [13] forcats_0.5.0             stringr_1.4.0            
-#> [15] dplyr_0.8.5               purrr_0.3.3              
-#> [17] readr_1.3.1               tidyr_1.0.2              
-#> [19] tibble_3.0.0              ggplot2_3.3.0            
-#> [21] tidyverse_1.3.0          
+#>  [1] lubridate_1.7.8           broom_0.5.5              
+#>  [3] dotwhisker_0.5.0          timereg_1.9.4            
+#>  [5] glue_1.4.0                cowplot_1.0.0            
+#>  [7] colorspace_1.4-1          prodlim_2019.11.13       
+#>  [9] riskRegression_2020.03.27 pracma_2.2.9             
+#> [11] kableExtra_1.1.0          data.table_1.12.8        
+#> [13] glmnet_3.0-2              Matrix_1.2-18            
+#> [15] casebase_0.2.1.9001       survival_3.1-12          
+#> [17] magrittr_1.5              forcats_0.5.0            
+#> [19] stringr_1.4.0             dplyr_0.8.5              
+#> [21] purrr_0.3.3               readr_1.3.1              
+#> [23] tidyr_1.0.2               tibble_3.0.0             
+#> [25] ggplot2_3.3.0             tidyverse_1.3.0          
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] TH.data_1.0-10      VGAM_1.1-2          colorspace_1.4-1   
-#>  [4] ellipsis_0.3.0      ggstance_0.3.4      htmlTable_1.13.3   
-#>  [7] base64enc_0.1-3     fs_1.4.1            rstudioapi_0.11    
-#> [10] farver_2.0.3        MatrixModels_0.4-1  fansi_0.4.1        
-#> [13] mvtnorm_1.1-0       lubridate_1.7.8     xml2_1.3.1         
-#> [16] codetools_0.2-16    knitr_1.28          Formula_1.2-3      
-#> [19] jsonlite_1.6.1      cluster_2.1.0       dbplyr_1.4.2       
-#> [22] png_0.1-7           compiler_3.6.3      httr_1.4.1         
-#> [25] backports_1.1.6     assertthat_0.2.1    cli_2.0.2          
-#> [28] acepack_1.4.1       htmltools_0.4.0     quantreg_5.55      
-#> [31] tools_3.6.3         gtable_0.3.0        glue_1.4.0         
-#> [34] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.2.4        
-#> [37] nlme_3.1-145        iterators_1.0.12    xfun_0.12          
-#> [40] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
-#> [43] MASS_7.3-51.5       zoo_1.8-7           scales_1.1.0       
-#> [46] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
-#> [49] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
-#> [52] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
-#> [55] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [58] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
-#> [61] mets_1.2.7.1        rlang_0.4.5         pkgconfig_2.0.3    
-#> [64] evaluate_0.14       lattice_0.20-41     htmlwidgets_1.5.1  
-#> [67] labeling_0.3        cmprsk_2.2-9        tidyselect_1.0.0   
-#> [70] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [73] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
-#> [76] pillar_1.4.3        haven_2.2.0         foreign_0.8-76     
-#> [79] withr_2.1.2         mgcv_1.8-31         nnet_7.3-13        
-#> [82] modelr_0.1.6        crayon_1.3.4        rmarkdown_2.1      
-#> [85] timereg_1.9.4       jpeg_0.1-8.1        grid_3.6.3         
-#> [88] readxl_1.3.1        reprex_0.3.0        digest_0.6.25      
-#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_3.6.3       
-#> [94] munsell_0.5.0       viridisLite_0.3.0
+#>  [1] TH.data_1.0-10      VGAM_1.1-2          ellipsis_0.3.0     
+#>  [4] ggstance_0.3.4      htmlTable_1.13.3    base64enc_0.1-3    
+#>  [7] fs_1.4.1            rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-0      
+#> [13] xml2_1.3.1          codetools_0.2-16    knitr_1.28         
+#> [16] Formula_1.2-3       jsonlite_1.6.1      cluster_2.1.0      
+#> [19] dbplyr_1.4.2        png_0.1-7           compiler_3.6.3     
+#> [22] httr_1.4.1          backports_1.1.6     assertthat_0.2.1   
+#> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.4.0    
+#> [28] quantreg_5.55       tools_3.6.3         gtable_0.3.0       
+#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.2.4        
+#> [34] nlme_3.1-145        iterators_1.0.12    xfun_0.13          
+#> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
+#> [40] MASS_7.3-51.5       zoo_1.8-7           scales_1.1.0       
+#> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
+#> [46] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
+#> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
+#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
+#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
+#> [58] mets_1.2.7.1        rlang_0.4.5         pkgconfig_2.0.3    
+#> [61] evaluate_0.14       lattice_0.20-41     htmlwidgets_1.5.1  
+#> [64] labeling_0.3        cmprsk_2.2-9        tidyselect_1.0.0   
+#> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
+#> [70] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
+#> [73] pillar_1.4.3        haven_2.2.0         foreign_0.8-76     
+#> [76] withr_2.1.2         mgcv_1.8-31         nnet_7.3-13        
+#> [79] modelr_0.1.6        crayon_1.3.4        rmarkdown_2.1      
+#> [82] jpeg_0.1-8.1        grid_3.6.3          readxl_1.3.1       
+#> [85] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
+#> [88] numDeriv_2016.8-1.1 stats4_3.6.3        munsell_0.5.0      
+#> [91] viridisLite_0.3.0
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1765,7 +2106,7 @@ R> git2r::repository(here::here())
 \begin{CodeOutput}
 #> Local:    master C:/Users/jesse/Documents/gits/cbpaper
 #> Remote:   master @ origin (https://github.com/Jesse-Islam/cbpaper.git)
-#> Head:     [b31e195] 2020-03-31: Fixed penal. on time and Brier
+#> Head:     [7755d8f] 2020-04-09: Uses development version of Jesse-Islam/riskRegression
 \end{CodeOutput}
 \end{CodeChunk}
 
