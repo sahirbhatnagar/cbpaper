@@ -64,8 +64,8 @@ output:
     citation_package: "natbib"  #All my citations use biblatex, not natbib. 
 biblio-style: jss      #Listed to use in JSS Instructions for Authors, but not in template by default. 
 bibliography: references.bib  #Also not included in template by default. 
-fig_width: 7
-fig_height: 6
+fig_width: 12
+fig_height: 9
 fig_caption: true
 ---
 
@@ -91,13 +91,16 @@ library(tidyverse)
 library(magrittr)
 library(survival)
 library(casebase)
-#devtools::load_all('../../../casebase')#testing
+# devtools::load_all('../../../casebase')#testing
 library(splines)
 library(tibble)
 library(glmnet)
 library(data.table)
 library(kableExtra)
 library(pracma)
+library(riskRegression)
+library(prodlim)
+library(colorspace)
 options(digits = 2, scipen = 999)
 # set the seed for reproducible output
 set.seed(1234)
@@ -107,7 +110,7 @@ eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
 eval_cs2 <- TRUE
-eval_cs3 <- FALSE
+eval_cs3 <- TRUE
 eval_cs4 <- TRUE
 ```
 
@@ -170,7 +173,7 @@ Survival analysis is an important branch of applied statistics and epidemiology.
 
 At the time of writing, a cursory examination of CRAN's task view on survival analysis reveals that there are over 250 packages related to survival analysis [-@survTaskView]. For the purposes of this article, we restricted our description to packages that implement at least one of the following features: parametric modeling, non-proportional hazard models, competing risk analysis, penalized estimation, and cumulative incidence curve estimation. By searching for appropriate keywords in the \code{DESCRIPTION} file of these packages, we found 60 relevant packages. These 60 packages were then manually examined to determine which ones are comparable to \pkg{casebase}. In particular, we excluded packages that were focused on a different set of problems, such as frailty and multi-state models. The remaining 14 packages appear in Table \ref{tab:surv-pkgs}, along with some of the functionalities they offer. 
 
-Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation for ridge. \pkg{casebase} provides penalized estimation in the context of parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality. \textcolor{red}{I can dive deeper to determine if this is a fair statement}
+Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation for ridge. \pkg{casebase} provides penalized estimation in the context of parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality.
 
 Parametric survival models are implemented in a handful of packages: \pkg{CFC} [-@mahani2015bayesian], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu], \pkg{mets} [-@scheike2014estimating], and \pkg{survival}. The types of models they allow vary for each package. For example, \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas both \pkg{flexsurv} and \pkg{survival} allow users to supply any distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of time using splines, which allows flexible modeling of the hazard function. Moreover, \pkg{flexsurv} has the ability to estimate both scale and shape parameters for a variety of parametric families (see Table \ref{tab:dists}). As discussed above, \pkg{casebase} can model any parametric family whose log-hazard can be expressed as a linear model of covariates (including time). Therefore, our package allows the user to model the effect of time using splines, and through interaction terms involving covariates and time, it also allows user to fit time-varying coefficient models. However, we do not explicitly model any shape parameter, unlike \pkg{flexsurv}.
 
@@ -292,9 +295,10 @@ For the first case study, we will use of the European Randomized Study of Prosta
 
 ```{r erspc-data, eval = eval_cs1}
 data(ERSPC)
-ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
-                       levels = c(0, 1), 
-                       labels = c("Control group", "Screening group"))
+ERSPC$ScrArm <- factor(ERSPC$ScrArm,
+  levels = c(0, 1),
+  labels = c("Control group", "Screening group")
+)
 ```
 
 The results of this study were published by [@schroder2009screening], and the dataset itself was obtained using the approach described in [@liu2014recovering].
@@ -309,9 +313,10 @@ plot(pt_object)
 We can also create exposure stratified plots by specifying the \code{exposure} argument in the \code{popTime} function:
 
 ```{r plot-stratified-erspc-data, eval = eval_cs1}
-pt_object_strat <- casebase::popTime(ERSPC, 
-                                     event = "DeadOfPrCa", 
-                                     exposure = "ScrArm")
+pt_object_strat <- casebase::popTime(ERSPC,
+  event = "DeadOfPrCa",
+  exposure = "ScrArm"
+)
 plot(pt_object_strat)
 ```
 
@@ -326,33 +331,40 @@ ADD PARAGRAPH ABOUT WHAT WE CAN CONCLUDE FROM THESE GRAPHS.
 Next, we investigate the differences between the control and the screening arms. A common choice for this type of analysis is to use a Cox regression model and estimate the hazard ratio for the screening group (relative to the control group). In \proglang{R}, it can be done as follows:
 
 ```{r erspc-cox, eval = eval_cs1}
-cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, 
-                             data = ERSPC)
+cox_model <- survival::coxph(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
+  data = ERSPC
+)
 summary(cox_model)
 ```
 
 We can also plot the cumulative incidence function (CIF) for each group. However, this involves estimating the baseline hazard, which Cox regression treated as a nuisance parameter.
 
 ```{r erspc-cox-cif, eval = eval_cs1}
-new_data <- data.frame(ScrArm = c("Control group", "Screening group"),
-                       ignore = 99)
+new_data <- data.frame(
+  ScrArm = c("Control group", "Screening group"),
+  ignore = 99
+)
 
 plot(survfit(cox_model, newdata = new_data),
-     xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence (%)", 
-     fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-     main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+  xlab = "Years since Randomization",
+  ylab = "Cumulative Incidence (%)",
+  fun = "event",
+  xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+  main = sprintf(
+    "Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-                    exp(coef(cox_model)), 
-                    exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-legend("topleft", 
-       legend = c("Control group", "Screening group"), 
-       col = c("red","blue"),
-       lty = c(1, 1), 
-       bg = "gray90")
+    exp(coef(cox_model)),
+    exp(confint(cox_model))[1],
+    exp(confint(cox_model))[2]
+  ),
+  ylim = c(0, 2), yscale = 100
+)
+legend("topleft",
+  legend = c("Control group", "Screening group"),
+  col = c("red", "blue"),
+  lty = c(1, 1),
+  bg = "gray90"
+)
 ```
 
 Next, we show how case-base sampling can be used to carry out a similar analysis. We fit several models that differ in how we choose to model time. 
@@ -362,13 +374,14 @@ Next, we show how case-base sampling can be used to carry out a similar analysis
 First, we will fit an exponential model. Recall that this corresponds to excluding time from the linear predictor.
 
 ```{r erspc-casebase-exponential, eval = eval_cs1}
-casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm, 
-                                                  data = ERSPC, 
-                                                  ratio = 100)
+casebase_exponential <- casebase::fitSmoothHazard(DeadOfPrCa ~ ScrArm,
+  data = ERSPC,
+  ratio = 100
+)
 
 summary(casebase_exponential)
 exp(coef(casebase_exponential)[2])
-exp(confint(casebase_exponential)[2,])
+exp(confint(casebase_exponential)[2, ])
 ```
 
 <!-- The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation: -->
@@ -378,31 +391,39 @@ exp(confint(casebase_exponential)[2,])
 We can then use the \code{absoluteRisk} function to get an estimate of the cumulative incidence curve for a specific covariate profile. In the plot below, we overlay the estimated CIF from the exponential model on the Cox model CIF:
 
 ```{r erspc-casebase-cif, eval = eval_cs1}
-smooth_risk_exp <- casebase::absoluteRisk(object = casebase_exponential, 
-                                          time = seq(0,15,0.1), 
-                                          newdata = new_data)
+smooth_risk_exp <- casebase::absoluteRisk(
+  object = casebase_exponential,
+  time = seq(0, 15, 0.1),
+  newdata = new_data
+)
 
 plot(survfit(cox_model, newdata = new_data),
-     xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence (%)", 
-     fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-     main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+  xlab = "Years since Randomization",
+  ylab = "Cumulative Incidence (%)",
+  fun = "event",
+  xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+  main = sprintf(
+    "Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-                    exp(coef(cox_model)), 
-                    exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_exp[,1], smooth_risk_exp[,2], col = "red", lty = 2)
-lines(smooth_risk_exp[,1], smooth_risk_exp[,3], col = "blue", lty = 2)
+    exp(coef(cox_model)),
+    exp(confint(cox_model))[1],
+    exp(confint(cox_model))[2]
+  ),
+  ylim = c(0, 2), yscale = 100
+)
+lines(smooth_risk_exp[, 1], smooth_risk_exp[, 2], col = "red", lty = 2)
+lines(smooth_risk_exp[, 1], smooth_risk_exp[, 3], col = "blue", lty = 2)
 
 
-legend("topleft", 
-       legend = c("Control group (Cox)","Control group (Casebase)",
-                  "Screening group (Cox)", "Screening group (Casebase)"), 
-       col = c("red","red", "blue","blue"),
-       lty = c(1, 2, 1, 2), 
-       bg = "gray90")
+legend("topleft",
+  legend = c(
+    "Control group (Cox)", "Control group (Casebase)",
+    "Screening group (Cox)", "Screening group (Casebase)"
+  ),
+  col = c("red", "red", "blue", "blue"),
+  lty = c(1, 2, 1, 2),
+  bg = "gray90"
+)
 ```
 
 As we can see, the exponential model gives us an estimate of the hazard ratio that is similar to the one obtained using Cox regression. However, the CIF estimates are quite different. Based on what we observed in the population time plot, where more events are observed later on in time, we do not expect a constant hazard would be a good description for this data. In other words, this poor fit for the exponential hazard is expected. A constant hazard model would overestimate the cumulative incidence earlier on in time, and underestimate it later on; this is what we see on the cumulative incidence plot. This example demonstrates the benefits of population time plots as an exploratory analysis tool. 
@@ -410,9 +431,10 @@ As we can see, the exponential model gives us an estimate of the hazard ratio th
 For the next model, we include time as a linear term. Recall that this corresponds to a Weibull model.
 
 ```{r erspc-casebase-weibull, eval = eval_cs1}
-casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm, 
-                                 data = ERSPC, 
-                                 ratio = 100)
+casebase_time <- fitSmoothHazard(DeadOfPrCa ~ Follow.Up.Time + ScrArm,
+  data = ERSPC,
+  ratio = 100
+)
 
 summary(casebase_time)
 exp(coef(casebase_time))
@@ -422,30 +444,38 @@ exp(confint(casebase_time))
 Again, the estimate of the hazard ratio is similar to that obtained from Cox regression. We then look at the estimate of the CIF:
 
 ```{r erspc-casebase-weibull-cif, eval = eval_cs1}
-smooth_risk_time <- casebase::absoluteRisk(object = casebase_time, 
-                                          time = seq(0,15,0.1), 
-                                          newdata = new_data)
+smooth_risk_time <- casebase::absoluteRisk(
+  object = casebase_time,
+  time = seq(0, 15, 0.1),
+  newdata = new_data
+)
 
 plot(survfit(cox_model, newdata = new_data),
-     xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence (%)", 
-     fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-     main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+  xlab = "Years since Randomization",
+  ylab = "Cumulative Incidence (%)",
+  fun = "event",
+  xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+  main = sprintf(
+    "Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-                    exp(coef(cox_model)), 
-                    exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_time[,1], smooth_risk_time[,2], col = "red", lty = 2)
-lines(smooth_risk_time[,1], smooth_risk_time[,3], col = "blue", lty = 2)
+    exp(coef(cox_model)),
+    exp(confint(cox_model))[1],
+    exp(confint(cox_model))[2]
+  ),
+  ylim = c(0, 2), yscale = 100
+)
+lines(smooth_risk_time[, 1], smooth_risk_time[, 2], col = "red", lty = 2)
+lines(smooth_risk_time[, 1], smooth_risk_time[, 3], col = "blue", lty = 2)
 
-legend("topleft", 
-       legend = c("Control group (Cox)","Control group (Casebase)",
-                  "Screening group (Cox)", "Screening group (Casebase)"), 
-       col = c("red","red", "blue","blue"),
-       lty = c(1, 2, 1, 2), 
-       bg = "gray90")
+legend("topleft",
+  legend = c(
+    "Control group (Cox)", "Control group (Casebase)",
+    "Screening group (Cox)", "Screening group (Casebase)"
+  ),
+  col = c("red", "red", "blue", "blue"),
+  lty = c(1, 2, 1, 2),
+  bg = "gray90"
+)
 ```
 
 We see that the Weibull model leads to a better fit of the CIF than the Exponential model, when compared with the semi-parametric approach.
@@ -453,9 +483,10 @@ We see that the Weibull model leads to a better fit of the CIF than the Exponent
 Finally, we can model the hazard as a smooth function of time using the \code{splines} package:
 
 ```{r erspc-casebase-splines, eval = eval_cs1}
-casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
-                                    data = ERSPC, 
-                                    ratio = 100)
+casebase_splines <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
+  data = ERSPC,
+  ratio = 100
+)
 
 summary(casebase_splines)
 exp(coef(casebase_splines))
@@ -465,50 +496,62 @@ exp(confint(casebase_splines))
 Once again, we can see that the estimate of the hazard ratio is similar to that from the Cox regression. We then look at the estimate of the CIF:
 
 ```{r erspc-casebase-splines-cif, eval = eval_cs1}
-smooth_risk_splines <- absoluteRisk(object = casebase_splines, 
-                                    time = seq(0,15,0.1), 
-                                    newdata = new_data)
+smooth_risk_splines <- absoluteRisk(
+  object = casebase_splines,
+  time = seq(0, 15, 0.1),
+  newdata = new_data
+)
 
 plot(survfit(cox_model, newdata = new_data),
-     xlab = "Years since Randomization", 
-     ylab = "Cumulative Incidence (%)", 
-     fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = c("red","blue"), 
-     main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
+  xlab = "Years since Randomization",
+  ylab = "Cumulative Incidence (%)",
+  fun = "event",
+  xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
+  main = sprintf(
+    "Estimated Cumulative Incidence (risk) of Death from Prostate 
                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-                    exp(coef(cox_model)), 
-                    exp(confint(cox_model))[1], 
-                    exp(confint(cox_model))[2]),
-     ylim = c(0, 2), yscale = 100)
-lines(smooth_risk_splines[,1], smooth_risk_splines[,2], col = "red", lty = 2)
-lines(smooth_risk_splines[,1], smooth_risk_splines[,3], col = "blue", lty = 2)
+    exp(coef(cox_model)),
+    exp(confint(cox_model))[1],
+    exp(confint(cox_model))[2]
+  ),
+  ylim = c(0, 2), yscale = 100
+)
+lines(smooth_risk_splines[, 1], smooth_risk_splines[, 2], col = "red", lty = 2)
+lines(smooth_risk_splines[, 1], smooth_risk_splines[, 3], col = "blue", lty = 2)
 
-legend("topleft", 
-       legend = c("Control group (Cox)","Control group (Casebase)",
-                  "Screening group (Cox)", "Screening group (Casebase)"), 
-       col = c("red","red", "blue","blue"),
-       lty = c(1, 2, 1, 2), 
-       bg = "gray90")
+legend("topleft",
+  legend = c(
+    "Control group (Cox)", "Control group (Casebase)",
+    "Screening group (Cox)", "Screening group (Casebase)"
+  ),
+  col = c("red", "red", "blue", "blue"),
+  lty = c(1, 2, 1, 2),
+  bg = "gray90"
+)
 ```
 
 Qualitatively, the combination of splines and case-base sampling produces the parametric model that most closely resembles the Cox model. In the following table, we see that the confidence intervals are also similar across all four models. In other words, this reinforces the idea that, under proportional hazards, we do not need to model the full hazard to obtain reliable estimates of the hazard ratio. Of course, different parametric models for the hazards give rise to qualitatively different estimates for the CIF.
 
 ```{r erspc-95ci, echo = FALSE, eval = eval_cs1}
 CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
-CI_exp <- c(exp(coef(casebase_exponential))["ScrArmScreening group"], exp(confint(casebase_exponential))["ScrArmScreening group",])
-CI_time <- c(exp(coef(casebase_time))["ScrArmScreening group"], exp(confint(casebase_time))["ScrArmScreening group",])
-CI_splines <- c(exp(coef(casebase_splines))["ScrArmScreening group"], exp(confint(casebase_splines))["ScrArmScreening group",])
+CI_exp <- c(exp(coef(casebase_exponential))["ScrArmScreening group"], exp(confint(casebase_exponential))["ScrArmScreening group", ])
+CI_time <- c(exp(coef(casebase_time))["ScrArmScreening group"], exp(confint(casebase_time))["ScrArmScreening group", ])
+CI_splines <- c(exp(coef(casebase_splines))["ScrArmScreening group"], exp(confint(casebase_splines))["ScrArmScreening group", ])
 
 table_ci <- rbind(CI_cox, CI_exp, CI_time, CI_splines)
 colnames(table_ci) <- c("HR", "LB", "UB")
 
-data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>% 
-  bind_cols(as.data.frame(table_ci)) %>% 
-  mutate(CI = paste0("(", round(LB, 2), ", ",
-                     round(UB, 2), ")"),
-         Width = UB - LB) %>% 
-  dplyr::select(-LB, -UB) %>% 
-  knitr::kable(format = "latex", booktabs = TRUE)  %>%
+data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>%
+  bind_cols(as.data.frame(table_ci)) %>%
+  mutate(
+    CI = paste0(
+      "(", round(LB, 2), ", ",
+      round(UB, 2), ")"
+    ),
+    Width = UB - LB
+  ) %>%
+  dplyr::select(-LB, -UB) %>%
+  knitr::kable(format = "latex", booktabs = TRUE) %>%
   kable_styling()
 ```
 
@@ -521,9 +564,11 @@ anova(casebase_exponential, casebase_splines, test = "LRT")
 As expected, we see that splines model provides a better fit. Similarly, we can compare the AIC for all three case-base models:
 
 ```{r erscp-aic, eval = eval_cs1}
-c("Exp." = AIC(casebase_exponential),
+c(
+  "Exp." = AIC(casebase_exponential),
   "Weib." = AIC(casebase_time),
-  "Splines" = AIC(casebase_splines))
+  "Splines" = AIC(casebase_splines)
+)
 ```
 
 Once again, we have evidence that the splines model provides the best fit.
@@ -543,29 +588,31 @@ The data contains information on 177 patients who received a stem-cell transplan
 
 ```{r echo = FALSE, eval = eval_cs2}
 tibble::tribble(
-    ~Variable, ~Description, ~`Statistical summary`,
-    "\\code{Sex}", "Sex", "M=Male (100)",
-    "", "", "F=Female (77)",
-    "\\code{D}", "Disease", "ALL (73)",
-    "", "", "AML (104)",
-    "\\code{Phase}", "Phase", "CR1 (47)", 
-    "", "", "CR2 (45)", 
-    "", "", "CR3 (12)", 
-    "", "", "Relapse (73)",
-    "\\code{Source}", "Type of transplant", "BM+PB (21)", 
-    "", "", "PB (156)",
-    "\\code{Age}", "Age of patient (years)", "4--62", 
-    "", "", "30.47 (13.04)",
-    "\\code{ftime}", "Failure time (months)", "0.13--131.77",
-    "", "", "20.28 (30.78)",
-    "\\code{Status}", "Status indicator", "0=censored (46)", 
-    "", "", "1=relapse (56)", 
-    "", "", "2=competing event (75)"
-) %>% 
-  knitr::kable(format = "latex", booktabs = TRUE,
-               caption = "Baseline characteristics of patients in the stem-cell transplant study.", 
-               label = "table1bmtcrr",
-               escape = FALSE) %>%
+  ~Variable, ~Description, ~`Statistical summary`,
+  "\\code{Sex}", "Sex", "M=Male (100)",
+  "", "", "F=Female (77)",
+  "\\code{D}", "Disease", "ALL (73)",
+  "", "", "AML (104)",
+  "\\code{Phase}", "Phase", "CR1 (47)",
+  "", "", "CR2 (45)",
+  "", "", "CR3 (12)",
+  "", "", "Relapse (73)",
+  "\\code{Source}", "Type of transplant", "BM+PB (21)",
+  "", "", "PB (156)",
+  "\\code{Age}", "Age of patient (years)", "4--62",
+  "", "", "30.47 (13.04)",
+  "\\code{ftime}", "Failure time (months)", "0.13--131.77",
+  "", "", "20.28 (30.78)",
+  "\\code{Status}", "Status indicator", "0=censored (46)",
+  "", "", "1=relapse (56)",
+  "", "", "2=competing event (75)"
+) %>%
+  knitr::kable(
+    format = "latex", booktabs = TRUE,
+    caption = "Baseline characteristics of patients in the stem-cell transplant study.",
+    label = "table1bmtcrr",
+    escape = FALSE
+  ) %>%
   kable_styling()
 ```
 
@@ -575,26 +622,30 @@ First, we can look at a population-time plot to visualize the incidence density 
 library(cowplot)
 pt_object <- casebase::popTime(bmtcrr, event = "Status", time = "ftime")
 
-pt_object_comp <- bmtcrr %>% 
-    mutate(Status = case_when(Status == 1 ~ 2L, 
-                              Status == 2 ~ 1L, 
-                              TRUE ~ Status)) %>% 
-    casebase::popTime(event = "Status", time = "ftime")
+pt_object_comp <- bmtcrr %>%
+  mutate(Status = case_when(
+    Status == 1 ~ 2L,
+    Status == 2 ~ 1L,
+    TRUE ~ Status
+  )) %>%
+  casebase::popTime(event = "Status", time = "ftime")
 
-plot_grid(plot(pt_object) + ggtitle("Relapse"), 
-          plot(pt_object_comp, point.colour = "blue") +
-            ggtitle("Competing events"), 
-          labels = c('A', 'B'))
+plot_grid(plot(pt_object) + ggtitle("Relapse"),
+  plot(pt_object_comp, point.colour = "blue") +
+    ggtitle("Competing events"),
+  labels = c("A", "B")
+)
 ```
 
 Our main objective is to compute the absolute risk of relapse for a given set of covariates. We start by fitting a smooth hazard to the data using a linear term for time:
 
 ```{r bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2}
 model_cb <- fitSmoothHazard(
-    Status ~ ftime + Sex + D + Phase + Source + Age, 
-    data = bmtcrr, 
-    ratio = 100, 
-    time = "ftime")
+  Status ~ ftime + Sex + D + Phase + Source + Age,
+  data = bmtcrr,
+  ratio = 100,
+  time = "ftime"
+)
 ```
 
 We will compare our hazard ratio estimates to that obtained from a Cox regression. To do so, we need to treat the competing event as censoring.
@@ -603,7 +654,8 @@ We will compare our hazard ratio estimates to that obtained from a Cox regressio
 library(survival)
 # Treat competing event as censoring
 model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-                   data = bmtcrr)
+  data = bmtcrr
+)
 ```
 
 ```{r bmtcrr-cis, echo=FALSE, eval = eval_cs2}
@@ -611,32 +663,36 @@ model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
 library(glue)
 z_value <- qnorm(0.975)
 foo <- summary(model_cb)@coef3
-table_cb <- foo[!grepl("Intercept", rownames(foo)) & 
-                    !grepl("ftime", rownames(foo)) &
-                    grepl(":1", rownames(foo)), 
-                1:2]
-table_cb <- cbind(table_cb[,1], 
-                  table_cb[,1] - z_value * table_cb[,2],
-                  table_cb[,1] + z_value * table_cb[,2])
+table_cb <- foo[
+  !grepl("Intercept", rownames(foo)) &
+    !grepl("ftime", rownames(foo)) &
+    grepl(":1", rownames(foo)),
+  1:2
+]
+table_cb <- cbind(
+  table_cb[, 1],
+  table_cb[, 1] - z_value * table_cb[, 2],
+  table_cb[, 1] + z_value * table_cb[, 2]
+)
 table_cb <- round(exp(table_cb), 2)
 
-table_cox <- round(summary(model_cox)$conf.int[,-2], 2)
+table_cox <- round(summary(model_cox)$conf.int[, -2], 2)
 rownames(table_cb) <- rownames(table_cox)
 colnames(table_cb) <- colnames(table_cox)
 
 table_cb <- as.data.frame(table_cb) %>%
-  tibble::rownames_to_column("Covariates") %>% 
-    mutate(CI = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>% 
-    rename(HR = `exp(coef)`) %>% 
-    select(Covariates, HR, CI)
+  tibble::rownames_to_column("Covariates") %>%
+  mutate(CI = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
+  rename(HR = `exp(coef)`) %>%
+  select(Covariates, HR, CI)
 
 table_cox <- as.data.frame(table_cox) %>%
-  tibble::rownames_to_column("Covariates") %>% 
+  tibble::rownames_to_column("Covariates") %>%
   dplyr::mutate(CI_Cox = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
   dplyr::rename(HR_Cox = `exp(coef)`) %>%
   dplyr::select(Covariates, HR_Cox, CI_Cox)
 
-table_cb %>% 
+table_cb %>%
   dplyr::inner_join(table_cox, by = "Covariates") %>%
   dplyr::mutate(Covariates = dplyr::case_when(
     Covariates == "SexM" ~ "Sex",
@@ -646,11 +702,13 @@ table_cb %>%
     Covariates == "PhaseRelapse" ~ "Phase (Relapse vs. CR1)",
     Covariates == "SourcePB" ~ "Source",
     TRUE ~ Covariates
-    )) %>% 
-  knitr::kable(format = "latex", booktabs = TRUE,
-               col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
-               caption = "Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.") %>% 
-  kable_styling() %>% 
+  )) %>%
+  knitr::kable(
+    format = "latex", booktabs = TRUE,
+    col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
+    caption = "Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented."
+  ) %>%
+  kable_styling() %>%
   add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
 ```
 
@@ -663,18 +721,25 @@ Given the estimate of the hazard function obtained using case-base sampling, we 
 time_points <- seq(0, 60, length.out = 50)
 
 # Data.frame containing risk profile
-newdata <- data.frame("Sex" = factor(c("F", "F"), 
-                                     levels = levels(bmtcrr[,"Sex"])),
-                      "D" = c("ALL", "AML"), # Both diseases
-                      "Phase" = factor(c("Relapse", "Relapse"), 
-                                       levels = levels(bmtcrr[,"Phase"])),
-                      "Age" = c(35, 35),
-                      "Source" = factor(c("PB", "PB"), 
-                                        levels = levels(bmtcrr[,"Source"])))
+newdata <- data.frame(
+  "Sex" = factor(c("F", "F"),
+    levels = levels(bmtcrr[, "Sex"])
+  ),
+  "D" = c("ALL", "AML"), # Both diseases
+  "Phase" = factor(c("Relapse", "Relapse"),
+    levels = levels(bmtcrr[, "Phase"])
+  ),
+  "Age" = c(35, 35),
+  "Source" = factor(c("PB", "PB"),
+    levels = levels(bmtcrr[, "Source"])
+  )
+)
 
 # Estimate absolute risk curve
-risk_cb <- absoluteRisk(object = model_cb, time = time_points,
-                        method = "numerical", newdata = newdata)
+risk_cb <- absoluteRisk(
+  object = model_cb, time = time_points,
+  method = "numerical", newdata = newdata
+)
 ```
 
 We will compare our estimates to that obtained from a corresponding Fine-Gray model [-@fine1999proportional]. The Fine-Gray model is a semiparametric model for the cause-specific *subdistribution*, i.e. the function $f_k(t)$ such that
@@ -683,9 +748,10 @@ where $CI_k(t)$ is the cause-specific cumulative indicence. The Fine-Gray model 
 
 ```{r fg_risk, eval = eval_cs2, echo = TRUE}
 library(timereg)
-model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) + 
-                          const(Phase) + const(Source) + const(Age), 
-                      data = bmtcrr, cause = 1, model = "fg")
+model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
+  const(Phase) + const(Source) + const(Age),
+data = bmtcrr, cause = 1, model = "fg"
+)
 
 # Estimate absolute risk curve
 risk_fg <- predict(model_fg, newdata, times = time_points)
@@ -694,47 +760,58 @@ risk_fg <- predict(model_fg, newdata, times = time_points)
 ```{r bmtcrr-risk, echo = FALSE, fig.cap="\\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2}
 library(ggplot2)
 risk_all <- dplyr::bind_rows(
-    data.frame(Time = time_points, 
-               Method = "Case-base", 
-               Risk = risk_cb[,2], 
-               Disease = "ALL",
-               stringsAsFactors = FALSE),
-    data.frame(Time = time_points, 
-               Method = "Case-base", 
-               Risk = risk_cb[,3], 
-               Disease = "AML",
-               stringsAsFactors = FALSE),
-    data.frame(Time = time_points,
-               Method = "Fine-Gray",
-               Risk = risk_fg$P1[1,],
-               Disease = "ALL",
-               stringsAsFactors = FALSE),
-    data.frame(Time = time_points,
-               Method = "Fine-Gray",
-               Risk = risk_fg$P1[2,],
-               Disease = "AML",
-               stringsAsFactors = FALSE)
-    )
+  data.frame(
+    Time = time_points,
+    Method = "Case-base",
+    Risk = risk_cb[, 2],
+    Disease = "ALL",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Case-base",
+    Risk = risk_cb[, 3],
+    Disease = "AML",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Fine-Gray",
+    Risk = risk_fg$P1[1, ],
+    Disease = "ALL",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Fine-Gray",
+    Risk = risk_fg$P1[2, ],
+    Disease = "AML",
+    stringsAsFactors = FALSE
+  )
+)
 
-ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) + 
+ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   # geom_line for smooth curve
-  geom_line(data = dplyr::filter(risk_all, Method == "Case-base")) + 
+  geom_line(data = dplyr::filter(risk_all, Method == "Case-base")) +
   # geom_step for step function
-  geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) + 
+  geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) +
   facet_grid(Disease ~ .) +
-  ylim(c(0,1)) +
+  ylim(c(0, 1)) +
   theme_minimal() +
-  theme(legend.position = 'top') +    
-  xlab("Time (in Months)") + ylab("Relapse risk")
+  theme(legend.position = "top") +
+  xlab("Time (in Months)") +
+  ylab("Relapse risk")
 ```
 
 Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base sampling and the Fine-Gray model. As we can see, the two approaches agree quite well for acute myeloblastic leukemia; however, there seems to be a difference of about 5% between the two curves for acute lymphoblastic leukemia. This difference does not appear to be significant: the curve from case-base sampling is contained within a 95% confidence band around the Fine-Gray absolute risk curve (figure not shown).
 
 # Case study 3--SUPPORT Data
 
-In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next two case studies, we explore more advanced features.
+In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. In the next case study, we explore an advanced feature. 
 
-For the third case study, we will look at regularized estimation for the hazard function. This can be performed using a combination of case-base sampling and regularized logistic regression. To demonstrate this capability, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within a hospital. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. Before imputation, there were a total of 1000 individuals and 35 variables. After imputation, we have 690 individuals. We lose individuals due to coliniarity. If a pair of covariates are deemed colinear to a certain degree, they are excluded from any imputations. Here, only edu  income  avtisst*  race  ph*  glucose*  adlp* were imputed. Of these, 66.09% experienced the event of interest. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of each variable can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University. The imputed dataset is available as part of the \pkg{casebase} package.
+For the third case study, we will demonstrate regularization during hazard estimation. Since we are using logistic regression, existing packages, like \pkg{glmnet} can be leveraged. To demonstrate this feature, we examine the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) dataset [@knaus1995support]. The SUPPORT dataset tracks death for individuals who are considered seriously ill within 5 hospitals in the United States of America. Imputation was conducted using the \pkg{mice} package in \proglang{R} with default settings [@mice]. The imputed dataset is available as part of the \pkg{casebase} package. For more information please see the SUPPORT data documentation in the package.  
+
+we have a total of 9104 observations and 30 variables, two of which are SUPPORT day 3 physiology score (sps) and APACHE III day 3 physiology score (aps). These scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Therefore, we will assess these two models before using either as our baseline, by comparing them to a full model using all variables. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. <!--The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> A description of covariates and response variables can be found in Table \ref{tab:support1} and a breakdown of each categorical variable in Table \ref{tab:support2}. The original data was obtained from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. 
 
 \begin{table}[ht]
 \centering
@@ -745,7 +822,6 @@ For the third case study, we will look at regularized estimation for the hazard 
 age           & Age                                      &                 & double           & 0            \\
 death         & Death at any time up to NDI date:31DEC94 &                 & double           & 0            \\
 sex           &                                          & 2               & integer          & 0            \\
-hospdead      & Death in Hospital                        &                 & double           & 0            \\
 slos          & Days from Study Entry to Discharge       &                 & double           & 0            \\
 d.time        & Days of Follow-Up                        &                 & double           & 0            \\
 dzgroup       &                                          & 8               & integer          & 0            \\
@@ -754,11 +830,14 @@ num.co        & number of comorbidities                  &                 & dou
 edu           & Years of Education                       &                 & double           & 202          \\
 income        &                                          & 4               & integer          & 349          \\
 scoma         & SUPPORT Coma Score based on Glasgow D3   &                 & double           & 0            \\
-charges       & Hospital Charges                         &                 & double           & 25           \\
-totcst        & Total RCC cost                           &                 & double           & 105          \\
-totmcst       & Total micro-cost                         &                 & double           & 372          \\
 avtisst       & Average TISS, Days 3-25                  &                 & double           & 6            \\
 race          &                                          & 5               & integer          & 5            \\
+sps 	        & support physiology score day 3           &	               & double           &	1            \\
+aps           & APS III no coma, imp bun,uout for ph1,D3 &	               & double	          & 1            \\
+hday	        & Day in Hospital at Study Admit	         &                 & double           & 0            \\	
+diabetes      &	Diabetes (Com 27-28, Dx 73)	             &                 & double	          & 0            \\
+dementia      & Dementia (Comorbidity 6)                 &	               & double	          & 0            \\
+ca		        & Cancer State                             & 3               & integer	        & 0            \\
 meanbp        & Mean Arterial Blood Pressure Day 3       &                 & double           & 0            \\
 wblc          & White Blood Cell Count Day 3             &                 & double           & 24           \\
 hrt           & Heart Rate Day 3                         &                 & double           & 0            \\
@@ -773,9 +852,7 @@ ph            & Serum pH (arterial) Day 3                &                 & dou
 glucose       & Glucose Day 3                            &                 & double           & 470          \\
 bun           & BUN Day 3                                &                 & double           & 455          \\
 urine         & Urine Output Day 3                       &                 & double           & 517          \\
-adlp          & ADL Patient Day 3                        &                 & double           & 634          \\
-adls          & ADL Surrogate Day 3                      &                 & double           & 310          \\
-sfdm2         &                                          & 5               & integer          & 159          \\
+adlp          & Activiites of Daily Living (ADL) Patient Day 3 &           & double           & 634          \\
 adlsc         & Imputed ADL Calibrated to Surrogate      &                 & double           & 0           
 \end{tabular}
 \caption{A description of each variable in the SUPPORT dataset.}
@@ -802,197 +879,324 @@ dzclass  & ARF/MOSF                                      \\
          & COPD/CHF/Cirrhosis                            \\
          & Coma                                          \\
          & Cancer                                        \\
-income   & under \$11k                                   \\
-         & $11-$25k                                      \\
-         & $25-$50k                                      \\
          & \textgreater{}\$50k                           \\
 race     & white                                         \\
          & black                                         \\
          & asian                                         \\
          & other                                         \\
          & hispanic                                      \\
-sfdm2    & no(M2 and SIP pres)                           \\
-         & adl\textgreater{}=4 (\textgreater{}=5 if sur) \\
-         & SIP\textgreater{}=30                          \\
-         & Coma or Intub                                 \\
-         & \textless{}2 mo. follow-up                   
+ca       & Yes                                           \\
+         & No                                            \\
+         & Metastatic                                    \\
 \end{tabular}
 \caption{A description of each level within each categorical variable in the dataset.}
 \label{tab:support2}
 \end{table}
 
-<!--Hospital death as a covariate was removed, as this is directly informative of death. The glmnet package on CRAN was used to introduce elastic net, lasso and ridge regressions to casebase.--> As before, the first step is to visualize the incidence density. The population-time plot for the SUPPORT data appears in Figure \ref{fig:support-poptime}.
+Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years. Therefore, We will examine three cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. Next, we will compare each modeling using the Brier score [@graf1999ass]. The Brier score can demonstrate both discrimination and calibration in a single model [@graf1999ass] and provide a comparable metric between semi-parametric and parametric methods in the survival context. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score on overall, it will be used in the following absolute risk comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve. 
+
+```{r baselinePlotsPrep, eval=eval_cs3,echo=FALSE}
+q4 <- qualitative_hcl(4, palette = "Dark 3")
+completeData <- casebase::support
+
+completeData$d.time <- completeData$d.time / 365
+
+workingCompleteData <- model.matrix(death ~ . - d.time, data = completeData)[, -c(1)] # remove intercept
+
+# Create u and xCox, which will be used when fitting Cox with glmnet.
+newData <- workingCompleteData
+x <- workingCompleteData
+# x and y will be used to fit the casebase model under glmnet.
+# x=as.matrix(sparse.model.matrix(death~ .-d.time+0,data=workingData))
+y <- data.matrix(completeData[, c(2, 5)])
+
+fullDataCox <- as.data.frame(cbind(as.numeric(y[, 2]), as.numeric(y[, 1]), x))
+names(fullDataCox)[names(fullDataCox) == "V1"] <- "time"
+names(fullDataCox)[names(fullDataCox) == "V2"] <- "event"
+
+# here we specify train and test size
+train_index <- sample(1:nrow(fullDataCox), 0.8 * nrow(fullDataCox))
+test_index <- setdiff(1:nrow(fullDataCox), train_index)
 
 
 
-```{r support-poptime, echo = TRUE, eval = eval_cs3, fig.cap="\\label{fig:support-poptime} Population-time plot for the SUPPORT data."}
-data(support)
-support_popTime <- popTime(support,
-                           time = "d.time", event = "death",percentile_number = 0.31)
-plot(support_popTime)
+train <- fullDataCox[train_index, ]
+test <- fullDataCox[test_index, ]
+coxSPS <- survival::coxph(Surv(time = time, event = event) ~ sps, data = train, x = TRUE)
+abcoxSPS <- survival::survfit(coxSPS, newdata = test)
+
+coxAPS <- survival::coxph(Surv(time = time, event = event) ~ aps, data = train, x = TRUE)
+abcoxAPS <- survival::survfit(coxAPS, newdata = test)
+coxfullForumla <- as.formula(paste("Surv(time = time, event = event) ~ age + sexmale + slos + dzgroupCHF + 
+    dzgroupCirrhosis + `dzgroupColon Cancer` + dzgroupComa + 
+    dzgroupCOPD + `dzgroupLung Cancer` + `dzgroupMOSF w/Malig` + 
+    dzclassCancer + dzclassComa + `dzclassCOPD/CHF/Cirrhosis` + 
+    num.co + edu + scoma + avtisst + raceasian + raceblack + 
+    racehispanic + raceother + racewhite + hday + diabetes + 
+    dementia + cano + cayes + meanbp + wblc + hrt + resp + temp + 
+    pafi + alb + bili + crea + sod + ph + glucose + bun + urine + 
+    adlp + adlsc "))
+coxFull <- survival::coxph(coxfullForumla, data = train, x = TRUE)
+abcoxFull <- survival::survfit(coxFull, newdata = test)
+# library(prodlim)
+
+
+KM <- survival::coxph(Surv(time = time, event = event) ~ 1, data = test)
+abKM <- survival::survfit(KM)
+# abKM <- prodlim(Hist(,event)~1,data=test) minimal difference
+abKMcompare <- cbind(abKM$time[abKM$time <= 1631], 1 - abKM$surv[abKM$time <= 1631])
+colnames(abKMcompare) <- c("Time", "KM")
+
+baseCoxComparisonData <- cbind(abcoxSPS$time[abcoxSPS$time <= 1631], 1 - rowMeans(abcoxSPS$surv[abcoxSPS$time <= 1631, ]), 1 - rowMeans(abcoxAPS$surv[abcoxAPS$time <= 1631, ]), 1 - rowMeans(abcoxFull$surv[abcoxFull$time <= 1631, ]))
+
+colnames(baseCoxComparisonData) <- c("Time", "SPS", "APS", "Full")
 ```
 
-Before we proceed with the analysis, we first remove hospital death as a covariate, as this is directly informative of death. All covariates will be used to estimate the hazard function. The hazard function will be used to estimate the cumulative incidence of each individual in the study. Then, the average cumulative incidience curve for all observations will be used for our comparison.
+```{r baselines, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:baselines} Absolute risk curves estimated from hazard models. Red: APS only hazard was used to generate the absolute risk. Green: All covariates aside from APS and SPS. Blue: SPS only. Purple: unadjusted Kaplan-Meier curve.",echo=FALSE}
+ggplot(as.data.frame(baseCoxComparisonData), aes(Time)) +
+  geom_line(aes(y = APS, colour = "APS"), lwd = 1) +
+  geom_line(aes(y = Full, col = "Full"), lwd = 1) +
+  geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
+  geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 1) +
+  labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
+  scale_color_manual(values = q4)
+```
+
+```{r brierpt1, echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:brier1} Brier scores over survival time. Full model (Full) performs best, while the other two (APS only and SPS only) are comparable. Red: APS only model was used to generate the brier scores. Green: all covariates excluding APS and SPS. Blue: SPS only model.",echo=FALSE}
+
+times <- sort(unique(test$time))
+brierAPS <- Score(list("PredictionModel" = coxAPS), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+brierSPS <- Score(list("PredictionModel" = coxSPS), data = test, formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+coxFull$coefficients[which(is.na(coxFull$coefficients))] <- 0
+brierFull <- Score(list("PredictionModel" = coxFull), data = test, formula = Surv(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+brierPlotter <- rbind(
+  data.frame(brierScore = brierAPS$Brier$score$Brier[brierAPS$Brier$score$model == "PredictionModel"], times = times, model = "APS"),
+  data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"], times = times, model = "Full"),
+  data.frame(brierScore = brierSPS$Brier$score$Brier[brierSPS$Brier$score$model == "PredictionModel"], times = times, model = "SPS")
+)
+
+
+ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore, col = model)) +
+  geom_line() +
+  xlab("Survival time (Years)") +
+  ylab("Brier-Score") +
+  labs(color = "Models") +
+  ggtitle("Brier scores over time") +
+  scale_color_manual(values = q4[1:3])
+```
+
+To get the absolute risk following regularized cox regression, we had to work around limitations in existing packages. To make use of the \pkg{survival} package, we first estimate the hazard coefficients using thecoxnet implementation for lasso penalization in \pkg{glmnet} [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our regularized fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package. 
+
+```{r coxNetCode,eval=FALSE,echo=TRUE}
+# hazard for cox using glmnet
+coxNet <- glmnet::cv.glmnet(
+  x = x, y = y, family = "cox", alpha = 1,
+  standardize = TRUE
+)
+# getting all non-zero covariates
+nonzero_covariate_cox <- predict(coxNet,
+  type = "nonzero",
+  s = "lambda.1se"
+)
+# keeping coefficients for later
+nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
+# cutting dataset to only include nonzero covariates
+cleanCoxData <- as.data.frame(cbind(y, x[, nonzero_covariate_cox]))
+# create a skeleton object
+coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ .,
+  data = cleanCoxData, x = TRUE
+)
+# replace coefficients with regularized ones
+coxNet$coefficients <- nonzero_coef_cox@x
+```
+
+For our penalized logistic regression model, we opted for the natural log of time, which assumes a Weibull distribution for our event. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where *y* contains the time and event variables and *x* contains all covariates we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1, leading to our smooth hazard function. 
+
+
+ 
+```{r casebaseDisplayCode, eval=FALSE,echo=TRUE}
+# regularized logistic regression to estimate hazard
+cbFull <- casebase::fitSmoothHazard.fit(x, y,
+  family = "glmnet",
+  time = "d.time", event = "death",
+  formula_time = ~ log(d.time), alpha = 1,
+  ratio = 100, standardize = TRUE,
+  penalty.factor = c(0, rep(1, ncol(x)))
+)
+
+# Estimating the absolute risk curve using the newData parameter.
+abCbFull <- casebase::absoluteRisk(cbFull,
+  time = times,
+  newdata = newData,
+  s = "lambda.1se",
+  method = c("numerical")
+)
+```
+ 
 
 
 ```{r supportSetUp, echo = FALSE, eval = eval_cs3}
-completeData=casebase::support
-#remove hospital dead
-completeData<-completeData[,-c(4)]
-ratio=10  #universal ratio for eval_cs3
-#keep one individual out, at random, for which we will develop an 
-#absolute risk curve.
-#sam=sample(1:nrow(completeData), 1)
-#Set workingData to the remaining individuals in the data
-#workingData=completeData[-c(sam),]
-workingCompleteData=model.matrix(death~ .-d.time,data=completeData)[,-c(1)]#remove intercept
-#Create u and xCox, which will be used when fitting Cox with glmnet.
-newData=workingCompleteData
-x=workingCompleteData
-#x and y will be used to fit the casebase model under glmnet.
-#x=as.matrix(sparse.model.matrix(death~ .-d.time+0,data=workingData))
-y=data.matrix(completeData[,c(2,5)])
+
+# remove apsSPS
+train <- train[, -c(46, 47)]
+test <- test[, -c(46, 47)]
+# x and y will be used to fit the casebase model under glmnet.
+y <- data.matrix(train[, c(2, 1)])
+colnames(y) <- c("death", "d.time")
+x <- data.matrix(train[, -c(2, 1)])
+newData <- data.matrix(test[, -c(2, 1)])
 ```
 
-Our main objective is to compute the absolute risk of death for a given set of covariates, using regularization when fitting our model. First, we fit a smooth hazard to the data; for the sake of this example, we opted for a linear term for time. As casebase makes use of the glmnet package, we interact with the fitsmoothhazard.fit function using a matrix interface, where y contains the time and event variables and x contains all other variables we would like to include in the model. For the SUPPORT dataset, all factor variables were converted into dummy variables. Here, we used lasso penalization by setting alpha to 1.
+```{r coxHazAbsolute, echo = FALSE,eval= eval_cs3 }
+# Create u and xCox, which will be used when fitting Cox with glmnet.
 
-```{r cbHazardInteractions}, echo = TRUE, eval = eval_cs3}
-xInteractions=x*y[,2]
-colnames(xInteractions) <- paste("d.time*", colnames(xInteractions), sep = "")
-xFull=cbind(x,xInteractions)
-cb.ModelInter=casebase::fitSmoothHazard.fit(xFull,y,family="glmnet",time="d.time",event="death",
-                                       formula_time = ~d.time,alpha=1,ratio=rat)
+u <- survival::Surv(time = as.numeric(y[, 2]), event = as.factor(y[, 1]))
+
+xCox <- as.matrix(cbind(data.frame("(Intercept)" = rep(1, each = length(x[, 1]))), x))
+colnames(xCox)[2] <- "(Intercept)"
+
+# hazard for cox using glmnet
+coxNet <- glmnet::cv.glmnet(x = x, y = u, family = "cox", alpha = 1, standardize = TRUE)
+# convergence demonstrated in plot
+# plot(coxNet)
+# taking the coefficient estimates for later use
+nonzero_covariate_cox <- predict(coxNet, type = "nonzero", s = "lambda.1se")
+nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
+# creating a new dataset that only contains the covariates chosen through glmnet.
+cleanCoxData <- as.data.frame(cbind(d.time = as.numeric(y[, 2]), death = as.numeric(y[, 1]), x[, nonzero_covariate_cox$X1]))
+
+# fitting a cox model using regular estimation, however we will not keep it.
+# this is used more as an object place holder.
+coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., data = cleanCoxData, x = TRUE)
+
+# extract coefficients for lollipop plot later
+estimatescoxNet <- setDT(as.data.frame(coef(coxNet)), keep.rownames = TRUE)[]
+
+estimatescoxNet$Model <- "Penalized Cox"
+colnames(estimatescoxNet) <- c("term", "estimate", "model")
+
+
+
+# The coefficients of this object will be replaced with the estimates from coxNet.
+# Doing so makes it so that everything is invalid aside from the coefficients.
+# In this case, all we need to estimate the absolute risk is the coefficients.
+# Std. error would be incorrect here, if we were to draw error bars.
+coxNet$coefficients <- nonzero_coef_cox@x
+# Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
+
+
+abcoxNet <- survival::survfit(coxNet, type = "breslow", newdata = as.data.frame(newData[, nonzero_covariate_cox$X1]))
+
+
+
+brierCoxNet <- Score(list("PredictionModel" = coxNet), data = as.data.frame(cbind(test[, c(1, 2)], newData[, nonzero_covariate_cox$X1])), formula = Hist(time, event != 0) ~ 1, summary = "ipa", se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+
+abCN <- as.data.frame(cbind(abcoxNet$time, 1 - rowMeans(abcoxNet$surv)))
+colnames(abCN) <- c("Time", "Absolute risk")
+abCN$Model <- "Penalized Cox"
+abCN <- abCN[abCN$Time <= max(abKMcompare[, 1]), ]
+# plot(abCN[,1],1-abCN[,2])
 ```
-Then, we take our model and use the absoluteRisk function to integrate and retrieve our absolute risk function.
 
+```{r cbHazard}, echo = FALSE, eval = eval_cs3}
 
-```{r CBabsoluteInteracts, echo = TRUE, eval = eval_cs3}
-#Estimating the absolute risk curve using the newData parameter.
-casebaseAbsoluteInter=casebase::absoluteRisk(cb.ModelInter,time = seq(1,max(completeData$d.time), 400),newdata = xFull , s="lambda.1se",method=c("numerical"))
-
-cabI=data.frame(casebaseAbsoluteInter[,1],rowMeans(casebaseAbsoluteInter[,-c(1)]))
-```
-We will compare this curve to a regularized version of cox regression, and a kaplan-meier survival curve. The cox regression absolute risk curve with lasso penalization required two extra steps to retrieve. Coxnet from the glmnet package has tools to fit a regularized cox model, but requires a survival object skeleton of the selected variables, so that the survival package tools can be used to retrive the absolute risk. We handle this by fitting a regularized cox model with the glmnet package, and a cox model from the survival package with the selected variables from the regularized fit. This second model serves as a skeleton that permits the use of survival package functions. The coefficients from the regularized model will replace the coefficients in our skeleton. the resulting model will have the correct coefficients when integrating, but will have an incorrect standard error. For the purposes of this case study, we are only interested in the absolute risk curve itself and not the standard error.
-
-
-```{r coxHazAbsoluteInteracts, echo = TRUE, eval = eval_cs3}
-#Create u and xCox, which will be used when fitting Cox with glmnet.
-u=survival::Surv(time = as.numeric(y[,2]), event = as.factor(y[,1]))
-
-xCoxI=as.matrix(cbind(data.frame("(Intercept)"=rep(1,each=690)),xFull))
-colnames(xCoxI)[1]="(Intercept)"
-
-#hazard for cox using glmnet
-coxNetI=glmnet::cv.glmnet(x=xCoxI,y=u, family="cox",alpha=1)
-#convergence demonstrated in plot
-#plot(coxNet)
-#taking the coefficient estimates for later use
-nonzero_covariate_cox <- predict(coxNetI, type = "nonzero", s = "lambda.1se")
-nonzero_coef_cox <- coef(coxNetI, s = "lambda.1se")
-#creating a new dataset that only contains the covariates chosen through glmnet.
-#cleanCoxData<- as.data.frame(cbind(as.numeric(workingData$d.time),as.factor(workingData$death), xCox[,nonzero_covariate_cox$X1]))
-cleanCoxDataI<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,nonzero_covariate_cox$X1]))
-#newDataCox<-xCox[sam,nonzero_covariate_cox$X1]
-#fitting a cox model using regular estimation, however we will not keep it.
-#this is used more as an object place holder.
-coxNetFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = cleanCoxDataI)
-#The coefficients of this object will be replaced with the estimates from coxNet.
-#Doing so makes it so that everything is invalid aside from the coefficients.
-#In this case, all we need to estimate the absolute risk is the coefficients.
-#Std. error would be incorrect here, if we were to draw error bars.
-coxNetFitI$coefficients<-nonzero_coef_cox@x
-#Fitting absolute risk curve for cox+glmnet. -1 to remove intercept
-#posCox=nonzero_covariate_cox$X1
-#newDataCoxI=cleanCoxDataI[,posCox]
-
-abcoxNetI<-survival::survfit(coxNetFitI,type="breslow",newdata=cleanCoxDataI)
-
-abCNI<-abcoxNetI
-abCNI$surv=rowMeans(abCNI$surv)
+cbFull <- casebase::fitSmoothHazard.fit(x, y, family = "glmnet", time = "d.time", event = "death", formula_time = ~ log(d.time), alpha = 1, ratio = 10, standardize = TRUE, penalty.factor = c(0, rep(1, ncol(x))))
 ```
 
 
-```{r unpenalizedCox, echo = TRUE, eval = eval_cs3}
-fullDataCox<-as.data.frame(cbind(as.numeric(y[,2]),as.numeric(y[,1]),xCoxI[,-c(1)]))
-coxFitI <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = fullDataCox)
-abcoxFitI<-survival::survfit(coxFitI,newdata=fullDataCox)
-abCFI<-abcoxFitI
-abCFI$surv<-rowMeans(abCFI$surv)
-#cb.ModelNorm=casebase::fitSmoothHazard(V2~.,time="V1",event="V2",
-       #                                ratio=rat,data=fullDataCox)
-#summary(cb.ModelNorm)#need to figure out how to deal with NAs
-#casebaseAbsoluteNorm=casebase::absoluteRisk(cb.ModelNorm,time = seq(1,max(completeData$d.time), 200),newdata = newData , s="lambda.1se",method=c("numerical"))
-#cabn=data.frame(casebaseAbsoluteNorm[,1],rowMeans(casebaseAbsoluteNorm[,-c(1)]))
-
-```
-We used the survival package to calculate the kaplan-meier absolute risk function.
-
-```{r fitKM+abRisk, echo = TRUE, eval = eval_cs3}
-
-coxFitup <- survival::coxph(Surv(time=V1,event=V2) ~ ., data = Cox)
-abcoxFitup<-survival::survfit(coxFitup,newdata=Cox)
-
-#creating a surv object to be used to fit an unadjusted absolute risk curve.
-# (Kaplan-Meier risk curve)
-km <- survival::Surv(time = completeData$d.time, event = completeData$death)
-abKm<-survival::survfit(km~1,type='kaplan-meier',conf.type='log')
+```{r CBabsolute, echo = FALSE, eval = eval_cs3}
+# Estimating the absolute risk curve using the newData parameter.
+abCbFull <- casebase::absoluteRisk(cbFull, time = times, newdata = newData, s = "lambda.1se", method = c("numerical"))
 ```
 
-Now that our four cumulative incidence estimations have been calculated, we compare them all in Figure \ref{fig:abSC}. Both coxnet and casebase decrease the absolute risk by the end of the study, in comparison to kaplan-meier.
-```{r abSupportComparison, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:abSC} Compares regularized casebase in black, regularized cox in red and Kaplan meier in blue."}
-abCFup<-abcoxFitup
-abCFup$surv<-rowMeans(abCFup$surv)
-# A plot to compare all three Absolute risk (Commulative Incidence)
-plot(cabI[,1],cabI[,2],type='l',col="black",lwd=3,main="Support- CaseBase vs. Cox+glmnet vs KM Absolute Risk Curves",xlab="Survival-Time",ylab="Cumulative Incidence",ylim=c(0,1),xlim=)
-lines(abCFI,col="red",fun="event",lwd=3,conf.int = FALSE)
-lines(abKm ,col="Blue",fun="event",lwd=3,conf.int = FALSE)
-lines(abCNI,col="purple",fun="event",lwd=3,conf.int = FALSE)
-legend("bottomright", 
-       legend = c( "Casebase (Lasso+linear)","semi-parametric Coxnet","KM curve","cox"), 
-       col = c("black","red","Blue","purple"),
-       lty = c(1, 1, 1), 
-       bg = "gray90")
+```{r cbAbProcessing,echo=FALSE,eval=eval_cs3}
+abCB <- data.frame(abCbFull[, 1], rowMeans(abCbFull[, -c(1)]))
+
+colnames(abCB) <- c("Time", "Absolute risk")
+abCB$Model <- "Penalized logistic"
+
+ab <- rbind(abCB, abCN)
 ```
 
+```{r coefplots,echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} A lollipop plot demonstrating the estimated coefficients between the following three models: Cox (green), penalized Cox (red), penalized logisitic (blue). If a coefficient is estimated to be 0, in any model, it is removed from the plot for simplicity."}
 
-```{r covariatesRegularizedLollipopPlot,eval=FALSE}
+library(dotwhisker)
+library(broom)
+library(dplyr)
 
-#get covariates excluding d.time
-estimatescb=setDT(as.data.frame(coef(cb.Model)[-c(1,2),1]), keep.rownames = TRUE)[]
-estimatescb$Model="casebase"
-colnames(estimatescb)<-c("Coefs","Estimate","Model")
-estimatescox=setDT(as.data.frame(coef(coxNet)[-c(1),1]), keep.rownames = TRUE)[]
-estimatescox$Model="Cox"
-colnames(estimatescox)<-c("Coefs","Estimate","Model")
-estimates=rbind(estimatescb, estimatescox)
-estimates$Estimate[estimates$Estimate==0]=NA# make it so unchosen covariates appear empty
-library(ggstance)# for vertical dodge
-  ggplot(estimates, aes(x = Estimate, y = Coefs, color = Model)) +
-        geom_segment(aes(x = 0, y = Coefs, xend = Estimate, yend = Coefs),size=0.5 ) +
-        geom_point(position=ggstance::position_dodgev(height=0.2))
+estimatescb <- setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), keep.rownames = TRUE)[]
+# estimatescb$std.error<-0
+estimatescb$Model <- "Penalized logistic"
+colnames(estimatescb) <- c("term", "estimate", "model")
 
+estimatescoxFull <- setDT(as.data.frame(coef(coxFull)), keep.rownames = TRUE)[]
+# estimatescoxFull$std.error<-0
+estimatescoxFull$Model <- "Cox"
+colnames(estimatescoxFull) <- c("term", "estimate", "model")
+
+lolliplotDots <- rbind(estimatescoxFull, estimatescoxNet, estimatescb)
+lolliplotDots$conf.low <- lolliplotDots$estimate
+lolliplotDots$conf.high <- lolliplotDots$estimate
+lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
+lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
+lolliplotDots$term <- gsub("\`", "", as.character(lolliplotDots$term))
+
+lolliplotDots[which(lolliplotDots$estimate == 0), c(2, 4, 5)] <- NA
+unChosen <- unique(lolliplotDots[which(is.na(lolliplotDots$estimate)), 1])
+
+lolliplotDots[which(lolliplotDots$term %in% unChosen$term), c(2, 4, 5)] <- NA
+
+lolliplotDots <- lolliplotDots[-which(is.na(lolliplotDots$estimate)), ]
+dwplot(lolliplotDots) +
+  theme(
+    axis.text.y = element_text(size = 11, angle = 0, hjust = 1, vjust = 0),
+    strip.text.x = element_blank(),
+    strip.background = element_rect(colour = "white", fill = "white"),
+    legend.position = c(.855, 0.15), legend.text = element_text(size = 11)
+  ) +
+  ggtitle("Coefficient plot") +
+  labs(color = "Models") +
+  scale_color_manual(values = q4[c(2, 1, 3)])
 ```
 
-```{r covariatesLolliInteractions,eval=eval_cs3}
-#get covariates excluding d.time
-library(data.table)
-estimatescb=setDT(as.data.frame(coef(cb.ModelInter)[-c(1,2),1]), keep.rownames = TRUE)[]
-estimatescb$Model="casebase"
-colnames(estimatescb)<-c("Coefs","Estimate","Model")
-estimatescox=setDT(as.data.frame(coef(coxNetI)[-c(1),1]), keep.rownames = TRUE)[]
-estimatescox$Model="Cox"
-colnames(estimatescox)<-c("Coefs","Estimate","Model")
-estimatesI=rbind(estimatescb, estimatescox)
-estimatesI$Estimate[estimatesI$Estimate==0]=NA# make it so unchosen covariates appear empty
-library(ggstance)# for vertical dodge
-  ggplot(estimatesI, aes(x = Coefs, y = Estimate , color = Model)) +
-        geom_segment(aes(y = 0, x = Coefs, yend = Estimate, xend = Coefs),size=0.5, position = position_dodge(width = 0.5)) +
-        geom_point(position = position_dodge(width = 0.5))
-  
-    
+```{r include=TRUE,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3Final} Four absolute risk curves, integrated from the following hazard models: Cox (green), penalized Cox (red), penalized logistic (blue) and unadjusted (Kaplan-Meier, purple)."}
+ggplot(as.data.frame(ab), aes(Time)) +
+  geom_line(data = as.data.frame(baseCoxComparisonData), mapping = aes(y = Full, colour = "Cox"), lwd = 1) +
+  geom_line(aes(y = `Absolute risk`, colour = Model), lwd = 1) +
+  geom_step(data = as.data.frame(abKMcompare), mapping = aes(x = Time, y = KM, color = "Unadjusted"), lwd = 1) +
+  labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
+  ggtitle("Absolute risk curves") +
+  scale_color_manual(values = q4[c(2, 1, 3, 4)])
 ```
   
-  
+
+
+```{r riskregressionBrier,echo=FALSE,eval=eval_cs3,fig.cap="\\label{fig:cs3FinalBrier} 4 curves comparing the brier scores as they change over time between Cox regression (green), penalized Cox regression (red) and penalized logistic regression (blue) and a unadjusted curve (Kaplan-Meier, purple). Penalized logistic regression produced the lowest curve."}
+
+class(cbFull) <- c("singleEventCB", class(cbFull))
+brierFinalResults <- Score(list("Cox" = coxFull, "Penalized Cox" = coxNet, "Penalized Logistic" = cbFull), data = test, formula = Hist(time, event != 0) ~ 1, summary = NULL, se.fit = 0L, metrics = "brier", contrasts = FALSE, times = times)
+
+
+levels(brierFinalResults$Brier$score$model)[levels(brierFinalResults$Brier$score$model) == "Null model"] <- "Unadjusted"
+b <- brierFinalResults
+
+brierFinalResults$Brier$score$model <- factor(brierFinalResults$Brier$score$model, levels = c("Cox", "Penalized Cox", "Penalized Logistic", "Unadjusted"))
+
+ggplot(data = brierFinalResults$Brier$score, mapping = aes(x = times, y = Brier, col = model)) +
+  geom_line() +
+  xlab("Survival time (Years)") +
+  ylab("Brier-Score") +
+  ggtitle("Brier scores over time") +
+  labs(color = "Models") +
+  scale_color_manual(values = q4[c(2, 1, 3, 4)])
+```
+
+
+Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). These values do not inform us of model performance. To do so, we take our hazard functions and use them to predict the absolute risk of everyone in our test set, over time. The probabilities over time for each individual are averaged, resulting in the absolute risk curves in figure \ref{fig:cs3Final}. There is separation between the curves, but it is minimal. To better demonstrate the differences between the models, we compare brier scores over time. \ref{fig:cs3FinalBrier} The Brier score is lower in our penalized logistic regression model, compared to the other models. This difference, however, is minimal. We can say with relative certainty that any of the hazard models outperform an unadjusted curve, while penalized logistic regression performs the best on this testing dataset. 
+
 # Case study 4--Stanford Heart Transplant Data
 
 In the previous case studies, we only considered covariates that were fixed at baseline. In this next case study, we will use the Stanford Heart Transplant data [@clark1971cardiac,@crowley1977covariance] to show how case-base sampling can also be used in the context of time-varying covariates. As an example that already appeared in the literature, case-base sampling was used to study vaccination safety, where the exposure period was defined as the week following vaccination [@saarela2015case]. Hence, the main covariate of interest, i.e. exposure to the vaccine, was changing over time. In this context, case-base sampling offers an efficient alternative to nested case-control designs or self-matching.
@@ -1005,8 +1209,10 @@ As before, we can look at the population-time plot for a graphical summary of th
 library(survival)
 library(casebase)
 
-stanford_popTime <- popTime(jasa, time = "futime", 
-                            event = "fustat")
+stanford_popTime <- popTime(jasa,
+  time = "futime",
+  event = "fustat"
+)
 plot(stanford_popTime)
 ```
 
@@ -1016,8 +1222,10 @@ Since the exposure is time-dependent, we need to manually define the exposure va
 library(tidyverse)
 library(lubridate)
 
-cb_data <- sampleCaseBase(jasa, time = "futime", 
-                          event = "fustat", ratio = 10)
+cb_data <- sampleCaseBase(jasa,
+  time = "futime",
+  event = "fustat", ratio = 10
+)
 ```
 
 Next, we will compute the number of days from acceptance into the program to transplant, and we use this variable to determine whether each population-moment is exposed or not.
@@ -1025,13 +1233,15 @@ Next, we will compute the number of days from acceptance into the program to tra
 ```{r, eval = eval_cs4}
 # Define exposure variable
 cb_data <- mutate(cb_data,
-                  txtime = time_length(accept.dt %--% tx.date, 
-                                       unit = "days"),
-                  exposure = case_when(
-                    is.na(txtime) ~ 0L,
-                    txtime > futime ~ 0L,
-                    txtime <= futime ~ 1L
-                  ))
+  txtime = time_length(accept.dt %--% tx.date,
+    unit = "days"
+  ),
+  exposure = case_when(
+    is.na(txtime) ~ 0L,
+    txtime > futime ~ 0L,
+    txtime <= futime ~ 1L
+  )
+)
 ```
 
 Finally, we can fit the hazard using various linear predictors.
@@ -1040,13 +1250,17 @@ Finally, we can fit the hazard using various linear predictors.
 library(splines)
 # Fit several models
 fit1 <- fitSmoothHazard(fustat ~ exposure,
-                        data = cb_data, time = "futime")
+  data = cb_data, time = "futime"
+)
 fit2 <- fitSmoothHazard(fustat ~ exposure + futime,
-                        data = cb_data, time = "futime")
+  data = cb_data, time = "futime"
+)
 fit3 <- fitSmoothHazard(fustat ~ exposure + bs(futime),
-                        data = cb_data, time = "futime")
-fit4 <- fitSmoothHazard(fustat ~ exposure*bs(futime),
-                        data = cb_data, time = "futime")
+  data = cb_data, time = "futime"
+)
+fit4 <- fitSmoothHazard(fustat ~ exposure * bs(futime),
+  data = cb_data, time = "futime"
+)
 ```
 
 Note that the fourth model (i.e. `fit4`) includes an interaction term between exposure and follow-up time. In other words, this model no longer exhibit proportional hazards. The evidence of non-proportionality of hazards in the Stanford Heart Transplant data has been widely discussed [@arjas1988graphical].
@@ -1055,10 +1269,12 @@ We can then compare the goodness of fit of these four models using the Akaike In
 
 ```{r, eval = eval_cs4}
 # Compute AIC
-c("Model1" = AIC(fit1),
+c(
+  "Model1" = AIC(fit1),
   "Model2" = AIC(fit2),
   "Model3" = AIC(fit3),
-  "Model4" = AIC(fit4))
+  "Model4" = AIC(fit4)
+)
 ```
 
 As we can, the best fit is the fourth model. By visualizing the hazard functions for both exposed and unexposed individuals, we can more clearly see how the hazards are no longer proportional.
@@ -1066,24 +1282,31 @@ As we can, the best fit is the fourth model. By visualizing the hazard functions
 ```{r stanford-hazard, eval = eval_cs4}
 # Compute hazards---
 # First, create a list of time points for both exposure status
-hazard_data <- expand.grid(exposure = c(0, 1),
-                           futime = seq(0, 1000,
-                                        length.out = 100))
+hazard_data <- expand.grid(
+  exposure = c(0, 1),
+  futime = seq(0, 1000,
+    length.out = 100
+  )
+)
 # Set the offset to zero
-hazard_data$offset <- 0 
-# Use predict to get the fitted values, and exponentiate to 
+hazard_data$offset <- 0
+# Use predict to get the fitted values, and exponentiate to
 # transform to the right scale
-hazard_data$hazard = exp(predict(fit4, newdata = hazard_data,
-                                 type = "link"))
+hazard_data$hazard <- exp(predict(fit4,
+  newdata = hazard_data,
+  type = "link"
+))
 # Add labels for plots
-hazard_data$Status = factor(hazard_data$exposure,
-                            labels = c("NoTrans", "Trans"))
+hazard_data$Status <- factor(hazard_data$exposure,
+  labels = c("NoTrans", "Trans")
+)
 
 ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
-    geom_line() +
-    theme_minimal() +
-    theme(legend.position = 'top') +
-    ylab('Hazard') + xlab('Follow-up time')
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  ylab("Hazard") +
+  xlab("Follow-up time")
 ```
 
 The non-proportionality seems to be more pronounced at the beginning of follow-up than the end. Finally, we can turn these estimates of the hazard function into estimates of the cumulative incidence functions.
@@ -1091,21 +1314,26 @@ The non-proportionality seems to be more pronounced at the beginning of follow-u
 ```{r stanford-risk, eval = eval_cs4}
 # Compute absolute risk curves
 newdata <- data.frame(exposure = c(0, 1))
-absrisk <- absoluteRisk(fit4, newdata = newdata, 
-                        time = seq(0, 1000, length.out = 100))
+absrisk <- absoluteRisk(fit4,
+  newdata = newdata,
+  time = seq(0, 1000, length.out = 100)
+)
 
 colnames(absrisk) <- c("Time", "NoTrans", "Trans")
 
 # Rearrange the data
-absrisk <- gather(as.data.frame(absrisk),
-                  "Status", "Risk", -Time)
- 
+absrisk <- gather(
+  as.data.frame(absrisk),
+  "Status", "Risk", -Time
+)
+
 ggplot(absrisk, aes(Time, Risk, colour = Status)) +
   geom_line() +
   theme_minimal() +
-  theme(legend.position = 'top') +
+  theme(legend.position = "top") +
   expand_limits(y = 0.5) +
-  xlab('Follow-up time') + ylab('Cum. Incidence')
+  xlab("Follow-up time") +
+  ylab("Cum. Incidence")
 ```
 
 Note that we can easily adapt the code above to the situation where a patient receives a heart transplant at a point in time of interest, for example after 30 days.
@@ -1114,25 +1342,32 @@ Note that we can easily adapt the code above to the situation where a patient re
 # Compute hazards---
 # First, create a list of time points for both exposure status
 one_yr_haz <- data.frame(futime = seq(0, 365,
-                                      length.out = 100))
+  length.out = 100
+))
 one_yr_haz <- mutate(one_yr_haz,
-                     offset = 0,
-                     exposure = if_else(futime < 30, 0, 1))
-one_yr_haz$hazard = exp(predict(fit4, newdata = one_yr_haz,
-                                type = "link"))
+  offset = 0,
+  exposure = if_else(futime < 30, 0, 1)
+)
+one_yr_haz$hazard <- exp(predict(fit4,
+  newdata = one_yr_haz,
+  type = "link"
+))
 ggplot(one_yr_haz, aes(futime, hazard)) +
   geom_line() +
   theme_minimal() +
-  theme(legend.position = 'top') +
-  ylab('Hazard') + xlab('Follow-up time') +
-  geom_vline(xintercept = 30, linetype = 'dashed')
+  theme(legend.position = "top") +
+  ylab("Hazard") +
+  xlab("Follow-up time") +
+  geom_vline(xintercept = 30, linetype = "dashed")
 ```
 
 We can then compare the 1-year mortality risk without transplant and with transplant at 30 days.
 
 ```{r stanford-1y-risk, eval = eval_cs4}
-absoluteRisk(fit4, newdata = data.frame(exposure = 0),
-             time = 365)
+absoluteRisk(fit4,
+  newdata = data.frame(exposure = 0),
+  time = 365
+)
 
 # Use the trapezoidal rule to estimate the cumulative hazard
 cumhaz_est <- pracma::trapz(one_yr_haz$futime, one_yr_haz$hazard)
@@ -1181,15 +1416,20 @@ In future versions of the package, we also want to increase the complement of di
 In conclusion, we presented the \proglang{R} package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practioners. 
 
 ```{r, echo=FALSE, eval = FALSE}
-knitr::kable(data.frame(`feature` = c("model type", "time", "cumulative incidence", "non-proportional hazards","model testing","competing risks", "prediction"),
-           `Cox` = c("semi-parametric","left hand side of the equation", "step function", "interaction of covariates with time"," ", "difficult", "Kaplan-Meier-based"),
-           `Case Base Sampling` = c("fully parametric (logistic/multinomial regression)", "right hand side - allows flexible modeling of time",
-           "smooth-in-time curve", "interaction of covariates with time", "make use of GLM framework (LRT, AIC, BIC)",
-           "cause-specific cumulative incidence functions (CIFs) directly obtained via multinomial regression", "ROC, AUC, risk reclassification probabilities")), 
-           col.names = c("Feature", "Cox model", "Case-base sampling"),
-           format = "latex", booktabs = TRUE,
-           caption = "Comparison between the Cox model and case-base sampling", 
-           escape = FALSE)
+knitr::kable(data.frame(
+  `feature` = c("model type", "time", "cumulative incidence", "non-proportional hazards", "model testing", "competing risks", "prediction"),
+  `Cox` = c("semi-parametric", "left hand side of the equation", "step function", "interaction of covariates with time", " ", "difficult", "Kaplan-Meier-based"),
+  `Case Base Sampling` = c(
+    "fully parametric (logistic/multinomial regression)", "right hand side - allows flexible modeling of time",
+    "smooth-in-time curve", "interaction of covariates with time", "make use of GLM framework (LRT, AIC, BIC)",
+    "cause-specific cumulative incidence functions (CIFs) directly obtained via multinomial regression", "ROC, AUC, risk reclassification probabilities"
+  )
+),
+col.names = c("Feature", "Cox model", "Case-base sampling"),
+format = "latex", booktabs = TRUE,
+caption = "Comparison between the Cox model and case-base sampling",
+escape = FALSE
+)
 ```
 
 # Environment Details
@@ -1204,6 +1444,6 @@ sessionInfo()
 
 The current Git commit details are:
 ```{r}
-# what commit is this file at? 
+# what commit is this file at?
 git2r::repository(here::here())
 ```
