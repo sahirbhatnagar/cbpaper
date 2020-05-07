@@ -31,6 +31,7 @@ Imports: bookdown,
     pracma (>= 2.2.0),
     purrr (>= 0.3.2),
     remotes (>= 2.0.2),
+    riskRegression (>= 2020.02.05)
     rticles (>= 0.9.1),
     survival (>= 2.43-3),
     tibble (>= 2.1.3),
