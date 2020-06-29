@@ -396,16 +396,25 @@ the \pkg{casebase} package using the \code{popTime} function and
   for customizing the aesthetics.
 \end{enumerate}
 
-To illustrate these functions we will use the European Randomized Study
-of Prostate Cancer Screening data which is available through the
-\pkg{casebase} package. The results of this study were published by
-\citep{schroder2009screening}, and the dataset itself was obtained using
-the approach described in \citep{liu2014recovering}.
+The splitting of these tasks gives the user the flexibility to create
+population-time plots with the graphics system of their choice using the
+object created in Step 1, while the object created in Step 2 allows one
+to leverage the \pkg{ggplot2} family of functions for further
+customization. To illustrate these functions we will use the European
+Randomized Study of Prostate Cancer Screening data which is available
+through the \pkg{casebase} package. The results of this study were
+published by \citep{schroder2009screening}, and the dataset itself was
+obtained using the approach described in \citep{liu2014recovering}.
 
 We first create the necessary dataset for producing the population time
 plots using the \code{casebase::popTime} function. In this example we
 stratify by the treatment group. Note that the resulting object stores
 the exposure variable as an attribute:
+
+We first pass this dataset to the \code{popTime} function. If you do not
+specify the time and event arguments, this function will try to guess
+them using regular expressions. We then generate the plot by using the
+corresponding \code{plot} method:
 
 \begin{CodeChunk}
 
@@ -453,8 +462,20 @@ the subjects with the least amount of observation time are plotted at
 the top of the y-axis). By randomly distributing them, we can get a
 better sense of the inicidence density.
 
-We can also create exposure stratified plots by specifying the
-\code{exposure} argument in the \code{popTime} function:
+The randomization of the Finnish cohorts were carried out on January 1
+of each of the 4 years 1996 to 1999. This, coupled with the uniform
+December 31 2006 censoring date, lead to large numbers of men with
+exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time
+(i.e.~from right to left), the population-time plot shows the
+recruitment pattern from its beginning in 1991, and in particular the
+Jan 1 entries in successive years. Tracked forwards in time (i.e.~from
+left to right), the plot for the first three years shows attrition due
+entirely to death (mainly from other causes). Since the Swedish and
+Belgian centres were the last to close their recruitment - in December
+2003 - the minimum potential follow-up is three years. Tracked further
+forwards in time (i.e.~after year 3) the attrition is We can also create
+exposure stratified plots by specifying the \code{exposure} argument in
+the \code{popTime} function:
 
 \begin{CodeChunk}
 
@@ -750,7 +771,7 @@ R+ )
 \begin{CodeChunk}
 
 
-\begin{center}\includegraphics{../figures/unnamed-chunk-2-1} \end{center}
+\begin{center}\includegraphics{../figures/unnamed-chunk-1-1} \end{center}
 
 \end{CodeChunk}
 
