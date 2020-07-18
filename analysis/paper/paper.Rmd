@@ -116,9 +116,9 @@ eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
-eval_cs2 <- FALSE
-eval_cs3 <- FALSE
-eval_cs4 <- FALSE
+eval_cs2 <- TRUE
+eval_cs3 <- TRUE
+eval_cs4 <- TRUE
 eval_colophon <- TRUE
 
 echo_plot_code <- TRUE
@@ -191,7 +191,7 @@ Survival analysis is an important branch of applied statistics and epidemiology.
 
 At the time of writing, a cursory examination of CRAN's task view on survival analysis reveals that there are over 250 packages related to survival analysis [-@survTaskView]. For the purposes of this article, we restricted our review to packages that implement at least one of the following features: parametric modeling, non-proportional hazard models, competing risk analysis, penalized estimation, and CIF estimation. By searching for appropriate keywords in the \code{DESCRIPTION} file of these packages, we found 60 relevant packages. These 60 packages were then manually examined to determine which ones are comparable to \pkg{casebase}. In particular, we excluded packages that were focused on a different set of problems, such as frailty and multi-state models. The remaining 14 packages appear in Table \ref{tab:surv-pkgs}, along with some of the functionalities they offer. 
 
-Parametric survival models are implemented in a handful of packages: \pkg{CFC} [-@mahani2015bayesian], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu], \pkg{mets} [-@scheike2014estimating], and \pkg{survival} [-@survival-package]. The types of models they allow vary for each package. For example, \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas both \pkg{flexsurv} and \pkg{survival} allow users to supply any distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of time using splines, which allows flexible modeling of the hazard function. Moreover, \pkg{flexsurv} has the ability to estimate both scale and shape parameters for a variety of parametric families (see Table \ref{tab:dists}). As discussed above, \pkg{casebase} can model any parametric family whose log-hazard can be expressed as a linear combination of covariates (including time). Therefore, our package allows the user to model the effect of time using splines. Also, by including interaction terms between covariates and time, it also allows users to fit time-varying coefficient models. However, we do not explicitly model any shape parameter, unlike \pkg{flexsurv}.
+Parametric survival models are implemented in a handful of packages: \pkg{CFC} [-@mahani2015bayesian], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu], \pkg{mets} [-@scheike2014estimating], and \pkg{survival} [-@survival-package]. The types of models they allow vary for each package. For example, \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas both \pkg{flexsurv} and \pkg{survival} allow users to supply any distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of time using splines, which allows flexible modeling of the hazard function. Moreover, \pkg{flexsurv} has the ability to estimate both scale and shape parameters for a variety of parametric families. As discussed above, \pkg{casebase} can model any parametric family whose log-hazard can be expressed as a linear combination of covariates (including time). Therefore, our package allows the user to model the effect of time using splines. Also, by including interaction terms between covariates and time, it also allows users to fit time-varying coefficient models. However, we do not explicitly model any shape parameter, unlike \pkg{flexsurv}.
 
 Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation of ridge-penalized estimation. On the other hand, our package \pkg{casebase} provides penalized estimation in the context of parametric hazards. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality.
 
@@ -199,33 +199,35 @@ Next, several \proglang{R} packages implement methodologies for competing risk a
 
 Finally, several packages include functions to estimate the CIF. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explictly modeled. Using this estimate, the survival function and the CIF can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below). Packages providing this functionality include \pkg{CFC}, \pkg{Flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing-risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{RiskRegression}, \pkg{rstpm2}, and \pkg{survival}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the cumulative incidence function, whereas the second category often produces estimates in the form of step-wise functions. Providing smooth estimates of the CIF was one of the main motivations for introducting case-base sampling in survival analysis.
 
+
 \begin{table}[ht]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
 \hline
-\textbf{Package}        & \vtop{\hbox{\strut \textbf{Competing}}\hbox{\strut \textbf{risks}}}  & \textbf{Non-proportional} & \textbf{Penalization} & \textbf{Splines} & \textbf{Parametric} & \textbf{Semi-parametric} & \vtop{\hbox{\strut \textbf{Interval/left}}\hbox{\strut \textbf{censoring}}} & \vtop{\hbox{\strut \textbf{Absolute}}\hbox{\strut \textbf{risk}}}           \\
+& \textbf{Competing} & \textbf{Allows} &  \textbf{Penalized}   &    &  & \textbf{Semi} & \textbf{Interval/Left} & \textbf{Absolute}  \\
+\textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Likelihood} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
 \hline
-\textbf{casebase} \cite{hanley2009fitting}       & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
-\textbf{CFC} \cite{mahani2015bayesian}            & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
-textbf{cmprsk} \cite{gray_2019}            & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\
-\textbf{coxRidge} \cite{perperoglou}       &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{crrp} \cite{fu}           & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
-\textbf{fastcox} \cite{yi_zou}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv} \cite{flexrsurv}      &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{Flexsurv} \cite{flexsurv}       & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{glmnet} \cite{regpathcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{glmpath} \cite{park_hastie}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{mets} \cite{scheike2014estimating}           & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
-\textbf{penalized} \cite{goeman_meijer2019}      &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{RiskRegression} \cite{gerds_blanche} &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2} \cite{clements_liu}         &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
-\textbf{SmoothHazard} \cite{smoothHazard}   &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
-\textbf{Survival} \cite{survival-package}       & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\
+\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
+\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
+\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\
+\textbf{coxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{crrp}            & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
+\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{Flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
+\textbf{Flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
+\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{glmpath}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
+\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{RiskRegression}  &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
+\textbf{Rstpm2}          &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
+\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
+\textbf{Survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\
 \hline
 \end{tabular}%
 }
-\caption{Different features of interest in various survival packages.}
+\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features.}
 \label{tab:surv-pkgs}
 \end{table}
 
@@ -290,14 +292,14 @@ We then pass this object to the corresponding \code{plot} method which leverages
 plot(pt_object, add.base.series = TRUE)
 ```
 
-```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE}
+```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for ERSPC data."}
 plot(pt_object, 
      add.base.series = TRUE,
-     ratio = 0.5,
+     ratio = 0.7,
      facet.params = list(ncol = 2),
-     ribbon.params = list(fill = "gray30"),
-     case.params = list(size = 0.5),
-     base.params = list(size = 0.5)) + theme_bw(base_size = 10) + theme(legend.position = "bottom") + 
+     ribbon.params = list(fill = "gray50"),
+     case.params = list(size = 0.8),
+     base.params = list(size = 0.8)) + theme_bw(base_size = 10) + theme(legend.position = "bottom") + 
   scale_y_continuous(labels = scales::label_number_si())
 ```
 
@@ -358,6 +360,18 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1---European Randomized Study of Prostate Cancer Screening
 
+```{r, eval = eval_cs1, echo=FALSE}
+fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
+             gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
+             weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
+             splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
+
+fits <- lapply(fmla, function(i) {
+  casebase::fitSmoothHazard(i, data = ERSPC, ratio = 100)
+})
+```
+
+
 We investigate the differences in survival between the control and screening arms in the ERSPC study presented earlier using casebase sampling to fit a parametric hazard function. We fit four models that differ in the functional form of time; (1) excluded from the linear predictor (Eq.\eqref{eq:exp}), (2) linear function (Eq.\eqref{eq:gomp}), (3) log function (Eq.\eqref{eq:weibull}), and (4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard}. Since the output object from \code{fitSmoothHazard} inherits from the \code{glm} class, we see a familiar result when using the function \code{summary}:
 
 ```{r, eval = FALSE, echo = TRUE}
@@ -372,6 +386,11 @@ fits <- lapply(fmla, function(i) {
 
 summary(fits[[2]])
 ```
+
+```{r, eval = eval_cs1, echo=FALSE}
+summary(fits[[2]])
+```
+
 
 The \code{absoluteRisk} function takes as input the \code{fitSmoothHazard} object and returns a matrix where each column corresponds to the covariate profiles specified in the \code{newdata} argument, and each row corresponds to a specified time point:
 
@@ -389,16 +408,6 @@ In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from casebase o
 
 In Figure \ref{fig:erspc-cox-cif} panels (2)-(4), we notice a better fit with increasing complexities of time. As noted above, the usual asymptotic results hold for likelihood ratio tests built using casebase sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) splines model:
 
-```{r, eval = eval_cs1, echo=FALSE}
-fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-             gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-             weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-             splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
-
-fits <- lapply(fmla, function(i) {
-  casebase::fitSmoothHazard(i, data = ERSPC, ratio = 100)
-})
-```
 
 
 ```{r erscp-compare, eval = eval_cs1, echo = FALSE}
@@ -855,7 +864,7 @@ tibble::tribble(
 
 First, we can look at a population-time plot to visualize the incidence density of both relapse and the competing events. In Figure \ref{fig:compPop}, failure times are highlighted on the plot using red dots for the event of interest (panel A) and blue dots for competing events (panel B). In both panels, we see evidence of a non-constant hazard function: the density of points is larger at the beginning of follow-up than at the end.
 
-```{r compPop, fig.cap="Population-time plot for the stem-cell transplant study. A) The red points represent relapse events. B) The blue points represent the competing events.", echo=FALSE, eval = eval_cs2}
+```{r compPop, fig.cap="Population-time plot for the stem-cell transplant study with both relapse and competing events.", echo=FALSE, eval = eval_cs2}
 
 # fill_cols <- colorspace::sequential_hcl(n = 3, palette = "Viridis")
 # 
@@ -884,11 +893,26 @@ First, we can look at a population-time plot to visualize the incidence density 
 #           labels = c("A", "B"))
 
 popTimeData <- popTime(data = bmtcrr, time = "ftime")
-plot(popTimeData,
-     add.case.series = TRUE,
-     # add.base.series = TRUE,
+
+
+plot(popTimeData, 
      add.competing.event = TRUE,
-     comprisk = TRUE)
+     comprisk = TRUE,
+     # add.base.series = TRUE,
+     # ratio = 0.7,
+     # facet.params = list(ncol = 2),
+     ribbon.params = list(fill = "gray50"),
+     case.params = list(size = 0.8),
+     competing.params = list(size = 0.8)) + 
+  theme_bw(base_size = 10) + 
+  theme(legend.position = "bottom") + 
+  scale_y_continuous(labels = scales::label_number_si())
+
+# plot(popTimeData,
+#      add.case.series = TRUE,
+#      # add.base.series = TRUE,
+#      add.competing.event = TRUE,
+#      comprisk = TRUE)
 
 ```
 
@@ -1050,8 +1074,8 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) +
   facet_grid(Disease ~ .) +
   ylim(c(0, 1)) +
-  theme_minimal() +
-  theme(legend.position = "top") +
+  theme_bw(base_size = 10) + 
+  theme(legend.position = "bottom") +
   xlab("Time (in Months)") +
   ylab("Relapse risk")
 ```
@@ -1205,7 +1229,7 @@ cox_ci <- ggplot(baseCoxComparisonData, aes(Time)) +
   geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M"), lwd = 1) +
   labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
-  scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M"))
+  scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + theme_bw(base_size = 10) + theme(legend.position = "bottom")
 ```
 
 ```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models. (A) Cumulative Incidence curves. (B) Time-dependent Brier scores."}
@@ -1241,7 +1265,7 @@ cox_brier <- ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore
   ylab("Brier score") +
   labs(color = "Models") +
   # ggtitle("Brier scores over time") +
-  scale_color_manual(values = q4[1:3])
+  scale_color_manual(values = q4[1:3]) + theme_bw(base_size = 10)
 
 # Combine both plots using cowplot
 plot_row <- cowplot::plot_grid(cox_ci + theme(legend.position = 'none'),
@@ -1252,7 +1276,7 @@ legend <- cowplot::get_legend(
   cox_ci + theme(legend.box.margin = margin(0, 0, 0, 12))
 )
 
-cowplot::plot_grid(plot_row, legend, rel_widths = c(3, .4))
+cowplot::plot_grid(plot_row, legend, rel_heights = c(3, .4), nrow = 2)
 ```
 
 <!--To get the absolute risk following regularized cox regression, we had to work around limitations in existing packages. To make use of the \pkg{survival} package, we first estimate the hazard coefficients using thecoxnet implementation for lasso penalization in \pkg{glmnet} [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our regularized fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package.-->
@@ -1380,6 +1404,8 @@ dwplot(lolliplotDots) +
     strip.background = element_rect(colour = "white", fill = "white"),
     legend.position = c(.855, 0.15), legend.text = element_text(size = 11)
   ) +
+  theme_bw(base_size = 10) + 
+  theme(legend.position = "bottom") + 
   # ggtitle("Coefficient plot") +
   labs(color = "Models") +
   scale_color_manual(values = q4[1:3])
@@ -1394,7 +1420,9 @@ reg_ci <- ggplot(ab, aes(Time)) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M"), lwd = 1) +
   labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
   # ggtitle("Absolute risk curves") +
-  scale_color_manual(values = q4, breaks = c("Cox", "Penalized Cox", "Penalized logistic", "K-M"))
+  scale_color_manual(values = q4, breaks = c("Cox", "Penalized Cox", "Penalized logistic", "K-M")) + 
+  theme_bw(base_size = 10) + 
+  theme(legend.position = "bottom")
 ```
   
 ```{r eval = eval_cs3, echo = FALSE, warning = FALSE}
@@ -1468,6 +1496,8 @@ reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col =
   ylab("Brier score") +
   # ggtitle("Brier score over time") +
   labs(color = "Models") +
+  theme_bw(base_size = 10) + 
+  theme(legend.position = "bottom")+
   scale_color_manual(values = q4)
 
 # Combine both plots using cowplot
@@ -1479,7 +1509,7 @@ legend_reg <- cowplot::get_legend(
   reg_ci + theme(legend.box.margin = margin(0, 0, 0, 12))
 )
 
-cowplot::plot_grid(plot_row_reg, legend_reg, rel_widths = c(3, .4))
+cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 ```
 
 # Case study 4---Stanford Heart Transplant Data
@@ -1498,7 +1528,8 @@ stanford_popTime <- popTime(jasa,
   time = "futime",
   event = "fustat"
 )
-plot(stanford_popTime)
+plot(stanford_popTime,
+     ribbon.params = list(fill = "grey50")) + theme_bw(base_size = 10) + theme(legend.position = "bottom") 
 ```
 
 Since the exposure is time-dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we will use the `sampleCaseBase` function directly.
@@ -1570,6 +1601,7 @@ hazard_data <- expand.grid(
     length.out = 100
   )
 )
+
 # Set the offset to zero
 hazard_data$offset <- 0
 # Use predict to get the fitted values, and exponentiate to
@@ -1601,21 +1633,26 @@ absrisk <- absoluteRisk(fit4,
   time = seq(0, 1000, length.out = 100)
 )
 
-colnames(absrisk) <- c("Time", "NoTrans", "Trans")
+class(absrisk)
 
-# Rearrange the data
-absrisk <- gather(
-  as.data.frame(absrisk),
-  "Status", "Risk", -Time
-)
+plot(absrisk,
+     id.names = c("NoTrans","Trans")) + theme_bw(base_size = 10) + theme(legend.position = "bottom")
 
-ggplot(absrisk, aes(Time, Risk, colour = Status)) +
-  geom_line() +
-  theme_minimal() +
-  theme(legend.position = "top") +
-  expand_limits(y = 0.5) +
-  xlab("Follow-up time") +
-  ylab("Cum. Incidence")
+# colnames(absrisk) <- c("Time", "NoTrans", "Trans")
+# 
+# # Rearrange the data
+# absrisk <- gather(
+#   as.data.frame(absrisk),
+#   "Status", "Risk", -Time
+# )
+# 
+# ggplot(absrisk, aes(Time, Risk, colour = Status)) +
+#   geom_line() +
+#   theme_minimal() +
+#   theme(legend.position = "top") +
+#   expand_limits(y = 0.5) +
+#   xlab("Follow-up time") +
+#   ylab("Cum. Incidence")
 ```
 
 Note that we can easily adapt the code above to the situation where a patient receives a heart transplant at a point in time of interest, for example after 30 days.
@@ -1657,6 +1694,26 @@ cumhaz_est <- pracma::trapz(one_yr_haz$futime, one_yr_haz$hazard)
 ```
 
 As we can see, the risk estimate at 1-year is about 30% lower if the patient receives a heart transplant at 30 days.
+
+We can also plot the Hazard ratio:
+```{r}
+newtime <- quantile(fit4[["originalData"]][[fit4[["timeVar"]]]],
+                    probs = seq(0.01, 0.99, 0.01))
+
+# reference category
+newdata <- data.frame(exposure = 0,
+                      futime = newtime)
+
+plot(fit4,
+     type = "hr",
+     newdata = newdata,
+     var = "exposure",
+     increment = 1,
+     xvar = "futime",
+     ci = F,
+     rug = T)
+```
+
 
 # Discussion
 
