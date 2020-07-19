@@ -42,4 +42,10 @@ Imports: bookdown,
     glmnet (>= 3.0-2),
     pacman (>= 0.5.1),
     timereg (>= 1.9.4),
-    flexsurv (>= 1.1.1)
+    flexsurv (>= 1.1.1),
+    broom (>= 0.7.0),
+    colorspace (>= 1.4-1),
+    data.table (>= 1.12.8),
+    prodlim (>= 2019.11.13),
+    scales (>= 1.1.1),
+    visreg (>= 2.7.0)
