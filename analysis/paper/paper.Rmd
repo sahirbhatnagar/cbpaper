@@ -94,6 +94,7 @@ options(kableExtra.latex.load_packages = FALSE)
 library(casebase)
 library(colorspace)
 library(cowplot)
+library(scales)
 library(data.table)
 library(glmnet)
 library(kableExtra)
@@ -303,7 +304,7 @@ plot(pt_object,
      case.params = list(size = 0.8),
      base.params = list(size = 0.8)) + 
   paper_gg_theme +  
-  scale_y_continuous(labels = scales::label_number_si())
+  scale_y_continuous(labels = label_number_si())
 ```
 
 
@@ -908,7 +909,7 @@ plot(popTimeData,
      case.params = list(size = 0.8),
      competing.params = list(size = 0.8)) + 
   paper_gg_theme +  
-  scale_y_continuous(labels = scales::label_number_si())
+  scale_y_continuous(labels = label_number_si())
 
 # plot(popTimeData,
 #      add.case.series = TRUE,
