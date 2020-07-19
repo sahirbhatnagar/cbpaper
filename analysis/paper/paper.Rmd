@@ -122,6 +122,8 @@ eval_cs4 <- TRUE
 eval_colophon <- TRUE
 
 echo_plot_code <- TRUE
+
+paper_gg_theme <- theme_bw(base_size = 10) + theme(legend.position = "bottom")
 ```
 
 # Introduction
@@ -299,7 +301,8 @@ plot(pt_object,
      facet.params = list(ncol = 2),
      ribbon.params = list(fill = "gray50"),
      case.params = list(size = 0.8),
-     base.params = list(size = 0.8)) + theme_bw(base_size = 10) + theme(legend.position = "bottom") + 
+     base.params = list(size = 0.8)) + 
+  paper_gg_theme +  
   scale_y_continuous(labels = scales::label_number_si())
 ```
 
@@ -904,8 +907,7 @@ plot(popTimeData,
      ribbon.params = list(fill = "gray50"),
      case.params = list(size = 0.8),
      competing.params = list(size = 0.8)) + 
-  theme_bw(base_size = 10) + 
-  theme(legend.position = "bottom") + 
+  paper_gg_theme +  
   scale_y_continuous(labels = scales::label_number_si())
 
 # plot(popTimeData,
@@ -1074,8 +1076,7 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) +
   facet_grid(Disease ~ .) +
   ylim(c(0, 1)) +
-  theme_bw(base_size = 10) + 
-  theme(legend.position = "bottom") +
+  paper_gg_theme +  
   xlab("Time (in Months)") +
   ylab("Relapse risk")
 ```
@@ -1229,7 +1230,8 @@ cox_ci <- ggplot(baseCoxComparisonData, aes(Time)) +
   geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M"), lwd = 1) +
   labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
-  scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + theme_bw(base_size = 10) + theme(legend.position = "bottom")
+  scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
+  paper_gg_theme
 ```
 
 ```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models. (A) Cumulative Incidence curves. (B) Time-dependent Brier scores."}
@@ -1265,7 +1267,8 @@ cox_brier <- ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore
   ylab("Brier score") +
   labs(color = "Models") +
   # ggtitle("Brier scores over time") +
-  scale_color_manual(values = q4[1:3]) + theme_bw(base_size = 10)
+  scale_color_manual(values = q4[1:3]) + 
+  paper_gg_theme
 
 # Combine both plots using cowplot
 plot_row <- cowplot::plot_grid(cox_ci + theme(legend.position = 'none'),
@@ -1404,8 +1407,7 @@ dwplot(lolliplotDots) +
     strip.background = element_rect(colour = "white", fill = "white"),
     legend.position = c(.855, 0.15), legend.text = element_text(size = 11)
   ) +
-  theme_bw(base_size = 10) + 
-  theme(legend.position = "bottom") + 
+  paper_gg_theme +  
   # ggtitle("Coefficient plot") +
   labs(color = "Models") +
   scale_color_manual(values = q4[1:3])
@@ -1421,8 +1423,7 @@ reg_ci <- ggplot(ab, aes(Time)) +
   labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
   # ggtitle("Absolute risk curves") +
   scale_color_manual(values = q4, breaks = c("Cox", "Penalized Cox", "Penalized logistic", "K-M")) + 
-  theme_bw(base_size = 10) + 
-  theme(legend.position = "bottom")
+  paper_gg_theme
 ```
   
 ```{r eval = eval_cs3, echo = FALSE, warning = FALSE}
@@ -1496,8 +1497,7 @@ reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col =
   ylab("Brier score") +
   # ggtitle("Brier score over time") +
   labs(color = "Models") +
-  theme_bw(base_size = 10) + 
-  theme(legend.position = "bottom")+
+  paper_gg_theme +  
   scale_color_manual(values = q4)
 
 # Combine both plots using cowplot
@@ -1529,7 +1529,8 @@ stanford_popTime <- popTime(jasa,
   event = "fustat"
 )
 plot(stanford_popTime,
-     ribbon.params = list(fill = "grey50")) + theme_bw(base_size = 10) + theme(legend.position = "bottom") 
+     ribbon.params = list(fill = "grey50")) + 
+  paper_gg_theme
 ```
 
 Since the exposure is time-dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we will use the `sampleCaseBase` function directly.
@@ -1617,8 +1618,7 @@ hazard_data$Status <- factor(hazard_data$exposure,
 
 ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
   geom_line() +
-  theme_minimal() +
-  theme(legend.position = "top") +
+  paper_gg_theme +  
   ylab("Hazard") +
   xlab("Follow-up time")
 ```
@@ -1636,7 +1636,8 @@ absrisk <- absoluteRisk(fit4,
 class(absrisk)
 
 plot(absrisk,
-     id.names = c("NoTrans","Trans")) + theme_bw(base_size = 10) + theme(legend.position = "bottom")
+     id.names = c("NoTrans","Trans")) + 
+  paper_gg_theme
 
 # colnames(absrisk) <- c("Time", "NoTrans", "Trans")
 # 
@@ -1673,8 +1674,7 @@ one_yr_haz$hazard <- exp(predict(fit4,
 ))
 ggplot(one_yr_haz, aes(futime, hazard)) +
   geom_line() +
-  theme_minimal() +
-  theme(legend.position = "top") +
+  paper_gg_theme +  
   ylab("Hazard") +
   xlab("Follow-up time") +
   geom_vline(xintercept = 30, linetype = "dashed")

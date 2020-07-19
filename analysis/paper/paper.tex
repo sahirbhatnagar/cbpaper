@@ -1297,8 +1297,7 @@ R> )
 R> 
 R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
 R>   geom_line() +
-R>   theme_minimal() +
-R>   theme(legend.position = "top") +
+R>   paper_gg_theme +  
 R>   ylab("Hazard") +
 R>   xlab("Follow-up time")
 \end{CodeInput}
@@ -1503,7 +1502,7 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-07-18 15:04:50 using the following
+This report was generated on 2020-07-19 18:02:45 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
