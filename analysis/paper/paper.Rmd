@@ -296,6 +296,24 @@ plot(pt_object, add.base.series = TRUE)
 ```
 
 ```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for ERSPC data."}
+
+label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
+    sep <- if (is.null(unit)) 
+        ""
+    else " "
+    scales:::force_all(accuracy, ...)
+    function(x) {
+        breaks <- c(0, 10^c(K = 3, M = 6, B = 9, T = 12))
+        n_suffix <- cut(abs(x), breaks = c(unname(breaks), Inf), 
+            labels = c(names(breaks)), right = FALSE)
+        n_suffix[is.na(n_suffix)] <- ""
+        suffix <- paste0(sep, n_suffix, unit)
+        scale <- 1/breaks[n_suffix]
+        scale[which(scale %in% c(Inf, NA))] <- 1
+        number(x, accuracy = accuracy, scale = unname(scale), 
+            suffix = suffix, ...)
+    }
+}
 plot(pt_object, 
      add.base.series = TRUE,
      ratio = 0.7,
