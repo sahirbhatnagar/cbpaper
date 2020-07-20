@@ -20,13 +20,54 @@ Title <- "Title of your paper goes here"
 [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/sahirbhatnagar/cbpaper/master?urlpath=rstudio)  
 [![Travis-CI Build Status](https://travis-ci.org/sahirbhatnagar/cbpaper.svg?branch=master)](https://travis-ci.org/sahirbhatnagar/cbpaper)
 
-Source code for Casebase paper
-
-for template, use 
+Source code for casebase paper. Install the following packages from GitHub
 
 ```R 
-devtools::install_github("rstudio/rticles")
+# install.packages("devtools")
+
+devtools::install_github("rstudio/rticles") # for template
+devtools::install_github("benmarwick/rrtools") # for building the research compendium/docker container
 ```
+
+# To contribute
+
+1. Modify the `analysis/paper/paper.Rmd` file.
+2. Run `rrtools::add_dependencies_to_description()`. This command will ensure all used packages are added to the DESCRIPTION file.
+3. Compile the `paper.Rmd` file
+4. Commit and push your changes to GitHub
+
+# Docker Image
+
+```{bash, eval = FALSE, echo = TRUE}
+# https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04
+# https://docs.docker.com/engine/reference/run/ which explains the run tags
+docker pull sahirbhatnagar/cbpaper:latest # pulls the image locally
+docker images # see list of images
+docker ps -a # also see list of images
+docker run -d -p 8787:8787 -e PASSWORD=<YOUR_PASS> --name cbpaper sahirbhatnagar/cbpaper
+# then go to http://localhost:8787
+# username is rstudio, password is what you specified
+# in R do: setwd('/cbpaper/') and then you should see the folder with all the materials in the folder RStudio pane
+docker stop cbpaper # this can be what you supplied to --name in the above command or the container ID
+```
+
+# File structure of repo
+
+```
+analysis/
+|
+├── paper/
+│   ├── paper.Rmd       # this is the main document to edit. just testing code for now
+│   └── references.bib  # this contains the reference list information
+├── figures/            # location of the figures produced by the Rmd
+|
+├── data/
+    ├── raw_data/       # data obtained from elsewhere
+    └── derived_data/   # data generated during the analysis
+
+```
+
 
 # Outline
 
