@@ -118,7 +118,7 @@ eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
 eval_cs2 <- TRUE
-eval_cs3 <- FALSE
+eval_cs3 <- TRUE
 eval_cs4 <- TRUE
 eval_colophon <- TRUE
 
@@ -1581,7 +1581,7 @@ As we can, the best fit is the fourth model. By visualizing the hazard functions
 # First, create a list of time points for both exposure status
 hazard_data <- expand.grid(
   exposure = c(0, 1),
-  futime = seq(0, 1000,
+  futime = seq(0, 425,
     length.out = 100
   )
 )
@@ -1613,7 +1613,7 @@ The non-proportionality seems to be more pronounced at the beginning of follow-u
 newdata <- data.frame(exposure = c(0, 1))
 absrisk <- absoluteRisk(fit4,
   newdata = newdata,
-  time = seq(0, 1000, length.out = 100)
+  time = seq(0, 425, length.out = 100)
 )
 
 class(absrisk)
@@ -1680,8 +1680,7 @@ As we can see, the risk estimate at 1-year is about 30% lower if the patient rec
 
 We can also plot the hazard ratio:
 ```{r eval = eval_cs4}
-newtime <- quantile(fit4[["originalData"]][[fit4[["timeVar"]]]],
-                    probs = seq(0.01, 0.99, 0.01))
+newtime <- seq(0, 425, length.out = 100)
 
 # reference category
 newdata <- data.frame(exposure = 0,
@@ -1695,17 +1694,18 @@ plot(fit4,
      xvar = "futime",
      ci = FALSE,
      rug = TRUE)
+abline(h = 1, lty = 2)
 ```
 
 # Discussion
 
-In this article, we presented the \proglang{R} package \pkg{casebase}, which provides functions for fitting smooth parametric hazards and estimating CIFs using case-base sampling. We outlined the theoretical underpinnings of the approach, we provided details about our implementation, and we illustrated the merits of the approach and the package through four case studies. 
+In this article, we presented the \proglang{R} package \pkg{casebase}, which provides functions for fitting smooth parametric hazards and estimating CIFs using case-base sampling. Our package also provide several functions to produce graphical summaries of the data and the results. We outlined the theoretical underpinnings of the approach, we provided details about our implementation, and we illustrated the merits of the approach and the package through four case studies. 
 
-As a methodological framework, case-base sampling is very flexible. This flexibility has been explored before in the literature: for example, Saarela and Hanley [-@saarela2015case] used case-base sampling to model a time-dependent exposure variable in a vaccine safety study. As another example, Saarela and Arjas [-@saarela2015non] combined case-base sampling and a Bayesian non-parametric framework to compute individualized risk assessments for chronic diseases. In the case studies above, we explored this flexibility along two fronts. On the one hand, we showed how splines could be used as part of the linear predictor to model the effect of time on the hazard. This strategy yielded estimates of the survival function that were qualitatively similar to semiparametric estimates derived from Cox regression; however, case-base sampling led to estimates of the survival function that *vary smoothly in time*. On the other hand, we also displayed the flexibility of case-base sampling by showing how it could be combined with penalized logistic regression to perform variable selection. Even though we did not illustrate it in this article, case-base sampling can also be combined with the framework of *generalized additive models*. This functionality has been implemented in our package \pkg{casebase}. Similarly, case-base sampling can also be combined with quasi-likelihood estimation to fit survival models that can account for the presence of over-dispersion. All of these examples illustrate how the case-base sampling framework in general, and the package \pkg{casebase} in particular, allows the user to fit a broad and flexible family of survival functions. 
+As a methodological framework, case-base sampling is very flexible. This flexibility has been explored before in the literature: for example, Saarela and Hanley [-@saarela2015case] used case-base sampling to model a time-dependent exposure variable in a vaccine safety study. As another example, Saarela and Arjas [-@saarela2015non] combined case-base sampling and a Bayesian non-parametric framework to compute individualized risk assessments for chronic diseases. In the case studies above, we further explored this flexibility along two fronts. On the one hand, we showed how splines could be used as part of the linear predictor to model the effect of time on the hazard. This strategy yielded estimates of the survival function that were qualitatively similar to semiparametric estimates derived from Cox regression; however, case-base sampling led to estimates of the survival function that *vary smoothly in time* and are thus easier to interpret. On the other hand, we also displayed the flexibility of case-base sampling by showing how it could be combined with penalized logistic regression to perform variable selection. Even though we did not illustrate it in this article, case-base sampling can also be combined with the framework of *generalized additive models*. This functionality has already been implemented in the package. Similarly, case-base sampling can be combined with quasi-likelihood estimation to fit survival models that can account for the presence of over-dispersion. All of these examples illustrate how the case-base sampling framework in general, and the package \pkg{casebase} in particular, allows the user to fit a broad and flexible family of survival functions. 
 
 As presented in Hanley & Miettinen [-@hanley2009fitting], case-base sampling is comprised of three steps: 1) sampling a case series and a base series from the study; 2) fit the log-hazard as a linear function of predictors (including time); and 3) use the fitted hazard to estimate the CIF. Accordingly, our package provides functions for each step. Moreover, the simple interface of the \code{fittingSmoothHazard} function resembles the \code{glm} interface. This interface should look familiar to new users. Our modular approach also provides a convenient way to extend our package for new sampling or fitting strategies.
 
-In the case studies above, we compared the performance of case-base sampling with that of Cox regression and Fine-Gray models. In terms of function interface, \pkg{casebase} uses a formula interface that is closer to that of \code{glm}, in that the event variable is the only variable appearing on the left-hand side of the formula. By contrast, both \code{survival::coxph} and \code{timereg::comp.risk} use arrays that capture both the event type and time. Both approaches to modeling yield user-friendly code. However, in terms of output, both approaches differ significantly. Case-base sampling produces smooth hazards and smooth cumulative incidence curves, whereas Cox regression and Fine-Gray models produce step-wise cumulative incidence functions and never explicitly model the hazard function. Qualitatively, we showed that by using splines in the linear predictor, all three models yielded similar curves. However, the smooth nature of the output of \pkg{casebase} provides a more intuitive interpretation for consumers of these predictions. In Table \ref{tab:compCBvsCox}, we provide a side-by-side comparison between the Cox model and case-base sampling.
+In the case studies above, we compared the performance of case-base sampling with that of Cox regression and Fine-Gray models. In terms of function interface, \pkg{casebase} uses a formula interface that is closer to that of \code{glm}, in that the event variable is the only variable appearing on the left-hand side of the formula. By contrast, both \code{survival::coxph} and \code{timereg::comp.risk} use arrays that capture both the event type and time. Both approaches to modeling yield user-friendly code. However, in terms of output, both approaches differ significantly. Case-base sampling produces smooth hazards and smooth cumulative incidence curves, whereas Cox regression and Fine-Gray models produce step-wise CIFs and never explicitly model the hazard function. Qualitatively, we showed that by using splines in the linear predictor, all three models yielded similar curves. However, the smooth nature of the output of \pkg{casebase} provides a more intuitive interpretation for consumers of these predictions. In Table \ref{tab:compCBvsCox}, we provide a side-by-side comparison between the Cox model and case-base sampling.
 
 \begin{table}
 \caption{\label{tab:compCBvsCox}Comparison between the Cox model and case-base sampling}
@@ -1730,7 +1730,7 @@ Our choice of modeling the log-hazard as a linear function of covariates allows 
 $$ \log \lambda(t; \alpha, \beta) = \left[\log(\alpha/\beta) - (\alpha - 1)\log(\beta)\right] + (\alpha - 1)\log t,$$
 where $\alpha,\beta$ are shape and scale parameters, respectively. Unlike \pkg{casebase}, the approach taken by \pkg{flexsurv} also allows the user to model the scale parameter as a function of covariates. Of course, this added flexibility comes at the cost of interpretability: by modeling the log-hazard directly, the parameter estimates from \pkg{casebase} can be interpreted as estimates of log-hazard ratios. To improve the flexibility of \pkg{casebase} at capturing the scale of a parametric family, we could replace the logistic regression with its quasi-likelihood counterpart and therefore model over- and under-dispersion with respect to the logistic likelihood. We defer the study of the properties and performance of such a model to a future article.
 
-Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we want to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools would then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
+Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we would like to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools could then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
 
 In future versions of the package, we also want to increase the complement of diagnostic and inferential tools that are currently available. For example, we would like to include the ability to compute confidence intervals for the cumulative incidence curve. The delta method or parametric bootstrap are two different strategies we can use to construct approximate confidence intervals. Furthermore, we would like to include more functions to compute calibration and discrimination statistics (e.g. AUC) for our models. Saarela and Arjas [-@saarela2015non] also describe how to obtain a posterior distribution for the AUC from their model. Their approach could potentially be included in \pkg{casebase}. Finally, we want to provide more flexibility in how the case-base sampling is performed. This could be achieved by adding a \code{hazard} argument to the function \code{sampleCaseBase}. In this way, users could specify their own sampling mechanism. For example, they could provide a hazard that gives sampling probabilities that are proportional to the cardiovascular disease event rate given by the Framingham score [@saarela2015non]. 
 
