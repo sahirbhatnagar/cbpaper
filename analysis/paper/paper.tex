@@ -7,17 +7,13 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
-of Manitoba \AND Jesse Islam\\McGill University \And James
-Hanley\\McGill University \And Olli Saarela\\University of Toronto
+Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University of Manitoba \AND Jesse Islam\\McGill University \And James Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
 \title{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
-\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
-Hanley, Olli Saarela}
+\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James Hanley, Olli Saarela}
 \Plaintitle{casebase: An Alternative Framework For Survival Analysis}
-\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
-Analysis}
+\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
 \Abstract{
 The abstract of the article. *SRB and MT contributed equally to this
@@ -59,7 +55,7 @@ work.
       Olli Saarela\\
   University of Toronto\\
   Dalla Lana School of Public Health, 155 College Street, 6th floor,
-Toronto, Ontario M5T 3M7, Canada\\
+  Toronto, Ontario M5T 3M7, Canada\\
   E-mail: \email{olli.saarela@utoronto.ca}\\
   URL: \url{http://individual.utoronto.ca/osaarela/}\\~\\
   }
@@ -344,28 +340,28 @@ motivations for introducing case-base sampling in survival analysis.
 \begin{tabular}{ccccccccc}
 \hline
 & \textbf{Competing} & \textbf{Allows} &  \textbf{Penalized}   &    &  & \textbf{Semi} & \textbf{Interval/Left} & \textbf{Absolute}  \\
-\textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Likelihood} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
+\textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Regression} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
 \hline
 \textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
 \textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
 \textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\
 \textbf{coxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{crrp}            & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
+\textbf{crrp}            & x                        &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{Flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
 \textbf{Flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
 \textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{glmpath}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
+\textbf{glmpath}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
 \textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
 \textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{RiskRegression}  &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2}          &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
+\textbf{RiskRegression}  & x                         &                           & x                     &                  &                     & x                        &                                  & x                                \\
+\textbf{Rstpm2}          &                          & x                         &                      & x                & x                   & x                        & x                                & x                         \\
 \textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
 \textbf{Survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\
 \hline
 \end{tabular}%
 }
-\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features.}
+\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features. Competing Risks: whether or not an implementation for competing risks is present. Allows Non-PH: permits models that can incorporate variables that change with survival time. Penalized Regression: allows for a penalty term when fitting the model. This is not restricted to lasso nor ridge. Splines: the package permits a flexible fit on time through the use of splines. Parametric: the package has implementations for parametric models. Semi-parametric: the package has implementations for semi-parametric models. Interval/left censoring: the package can interpret interval and left-censoring. If this is not selected, the package only handles right-censoring. Absolute Risk: the package has an implementation for survival curves, cumulative incidence or cumulative hazard rate functions to be plotted.}
 \label{tab:surv-pkgs}
 \end{table}
 
@@ -1054,7 +1050,7 @@ approach from \pkg{casebase}.
 
 }
 
-\caption{\label{fig:brier1} Comparison of three Cox regression models. (A) Cumulative Incidence curves. (B) Time-dependent Brier scores.}\label{fig:brierpt1}
+\caption{\label{fig:brier1} Comparison of three Cox regression models to the unadjusted Kaplan-Meier curve. (A) Cumulative Incidence curves. For a given model, the plotted curve is the average curve of each individual in the study. Each follow-up time seen in the study was used. There are minimal differences between the curves. APS coincides with the SPS curve, as they are considerably overlapped.(B) Time-dependent Brier scores, where a lower score is better. The full model performs best overall.}\label{fig:brierpt1}
 \end{figure}
 \end{CodeChunk}
 
@@ -1127,7 +1123,7 @@ estimates are found in penalized logistic model, aside from cancer state
 
 }
 
-\caption{\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity.}\label{fig:coefplots}
+\caption{\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity. Shrinkage occurs due to penalization.}\label{fig:coefplots}
 \end{figure}
 \end{CodeChunk}
 
@@ -1140,8 +1136,8 @@ curves, but it is minimal. To better demonstrate the differences in
 performance between the models, we compare Brier scores over time. In
 Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our
 penalized logistic regression model compared to both Cox regression
-models. However, this difference is minimal. On the other hand, all
-three models outperform the Kaplan-Meier model.
+models. The differences, however, are minimal. All three outperform the
+Kaplan-Meier model.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1150,7 +1146,7 @@ three models outperform the Kaplan-Meier model.
 
 }
 
-\caption{\label{fig:cs3FinalBrier} Four curves comparing the Cumulative Incidence (A) and the Brier scores (B) as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier.}\label{fig:riskregressionBrier}
+\caption{\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest results over follow-up time.}\label{fig:riskregressionBrier}
 \end{figure}
 \end{CodeChunk}
 
@@ -1216,7 +1212,7 @@ Akaike Information Criterion (AIC).
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 Model4 
-#>    794    760    736    722
+#>    491    459    444    445
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1293,13 +1289,13 @@ with transplant at 30 days.
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#>  time    
-#>     0 0.0
-#>   365 0.3
+#>  time     
+#>     0 0.00
+#>   365 0.72
 \end{CodeOutput}
 
 \begin{CodeOutput}
-#> [1] 0.2
+#> [1] 0.65
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1462,76 +1458,83 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-07-21 20:19:45 using the following
+This report was generated on 2020-07-28 09:55:47 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> R version 4.0.0 (2020-04-24)
-#> Platform: x86_64-apple-darwin17.0 (64-bit)
-#> Running under: macOS Catalina 10.15.5
+#> R version 4.0.2 (2020-06-22)
+#> Platform: x86_64-pc-linux-gnu (64-bit)
+#> Running under: Pop!_OS 20.04 LTS
 #> 
 #> Matrix products: default
-#> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0
 #> 
 #> locale:
-#> [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
+#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 #> 
 #> attached base packages:
 #> [1] splines   stats     graphics  grDevices utils     datasets  methods  
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] broom_0.5.6               dotwhisker_0.5.0         
-#>  [3] timereg_1.9.4             glue_1.4.1               
-#>  [5] scales_1.1.0              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_0.8.5              
+#>  [1] broom_0.7.0               dotwhisker_0.5.0         
+#>  [3] timereg_1.9.6             glue_1.4.1               
+#>  [5] scales_1.1.1              forcats_0.5.0            
+#>  [7] stringr_1.4.0             dplyr_1.0.0              
 #>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.0.2               ggplot2_3.3.0            
-#> [13] tidyverse_1.3.0           lubridate_1.7.8          
-#> [15] visreg_2.6.1              tibble_3.0.1             
-#> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [19] flexsurv_1.1.1            survival_3.1-12          
+#> [11] tidyr_1.1.0               ggplot2_3.3.2            
+#> [13] tidyverse_1.3.0           lubridate_1.7.9          
+#> [15] visreg_2.7.0              tibble_3.0.3             
+#> [17] riskRegression_2020.06.25 prodlim_2019.11.13       
+#> [19] flexsurv_1.1.1            survival_3.2-3           
 #> [21] pracma_2.2.9              magrittr_1.5             
-#> [23] kableExtra_1.1.0          glmnet_3.0-2             
-#> [25] Matrix_1.2-18             data.table_1.12.8        
+#> [23] kableExtra_1.1.0          glmnet_4.0-2             
+#> [25] Matrix_1.2-18             data.table_1.13.0        
 #> [27] cowplot_1.0.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0.9000      
+#> [29] casebase_0.9.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] TH.data_1.0-10      VGAM_1.1-2          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.4      htmlTable_1.13.3    base64enc_0.1-3    
-#>  [7] fs_1.4.1            rstudioapi_0.11     farver_2.0.3       
-#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-0      
+#>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
+#>  [4] ggstance_0.3.4      htmlTable_2.0.1     fs_1.4.2           
+#>  [7] base64enc_0.1-3     rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
 #> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
-#> [16] Formula_1.2-3       jsonlite_1.6.1      cluster_2.1.0      
-#> [19] dbplyr_1.4.3        png_0.1-7           compiler_4.0.0     
-#> [22] httr_1.4.1          backports_1.1.8     assertthat_0.2.1   
+#> [16] Formula_1.2-3       jsonlite_1.7.0      cluster_2.1.0      
+#> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
+#> [22] httr_1.4.2          backports_1.1.8     assertthat_0.2.1   
 #> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.55       tools_4.0.0         gtable_0.3.0       
-#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.3.1        
-#> [34] nlme_3.1-147        iterators_1.0.12    xfun_0.15          
-#> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
-#> [40] muhaz_1.2.6.1       MASS_7.3-51.5       zoo_1.8-7          
-#> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
-#> [46] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
-#> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
-#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
-#> [58] rlang_0.4.6         pkgconfig_2.0.3     evaluate_0.14      
-#> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.28       
-#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
-#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [73] pillar_1.4.4        haven_2.2.0         foreign_0.8-78     
-#> [76] mgcv_1.8-31         nnet_7.3-13         mstate_0.2.12      
-#> [79] modelr_0.1.6        crayon_1.3.4        rmarkdown_2.1      
-#> [82] jpeg_0.1-8.1        grid_4.0.0          readxl_1.3.1       
-#> [85] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
-#> [88] numDeriv_2016.8-1.1 stats4_4.0.0        munsell_0.5.0      
-#> [91] viridisLite_0.3.0   quadprog_1.5-8
+#> [28] quantreg_5.61       tools_4.0.2         gtable_0.3.0       
+#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
+#> [34] nlme_3.1-148        conquer_1.0.1       iterators_1.0.12   
+#> [37] xfun_0.16           rvest_0.3.5         lifecycle_0.2.0    
+#> [40] polspline_1.1.19    muhaz_1.2.6.1       MASS_7.3-51.6      
+#> [43] zoo_1.8-8           hms_0.5.3           sandwich_2.5-1     
+#> [46] SparseM_1.78        RColorBrewer_1.1-2  rticles_0.14       
+#> [49] yaml_2.2.1          gridExtra_2.3       rms_6.0-1          
+#> [52] rpart_4.1-15        latticeExtra_0.6-29 stringi_1.4.6      
+#> [55] foreach_1.5.0       checkmate_2.0.0     lava_1.6.7         
+#> [58] shape_1.4.4         mets_1.2.7.1        rlang_0.4.7        
+#> [61] pkgconfig_2.0.3     matrixStats_0.56.0  evaluate_0.14      
+#> [64] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
+#> [67] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
+#> [70] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
+#> [73] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
+#> [76] withr_2.2.0         pillar_1.4.6        haven_2.3.1        
+#> [79] foreign_0.8-80      mgcv_1.8-31         nnet_7.3-14        
+#> [82] mstate_0.2.12       modelr_0.1.8        crayon_1.3.4       
+#> [85] rmarkdown_2.3       jpeg_0.1-8.1        grid_4.0.2         
+#> [88] readxl_1.3.1        blob_1.2.1          reprex_0.3.0       
+#> [91] digest_0.6.25       webshot_0.5.2       numDeriv_2016.8-1.1
+#> [94] stats4_4.0.2        munsell_0.5.0       viridisLite_0.3.0  
+#> [97] quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1540,8 +1543,9 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    editMax /Users/maxturgeon/Documents/git_repos/cbpaper
-#> Head:     [2d08bac] 2020-07-20: Merge pull request #22 from sahirbhatnagar/write-popTime
+#> Local:    master /home/jesseislam/Documents/gits/cbpaper
+#> Remote:   master @ origin (git@github.com:Jesse-Islam/cbpaper.git)
+#> Head:     [d30ba8c] 2020-07-22: Merge pull request #23 from sahirbhatnagar/editMax
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1549,3 +1553,4 @@ The current Git commit details are:
 
 
 \end{document}
+
