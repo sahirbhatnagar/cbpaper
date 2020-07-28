@@ -88,8 +88,11 @@ knitr::opts_chunk$set(
   echo = FALSE,
   cache = TRUE, 
   comment = "#>",
-  fig.path = "../figures/"
+  fig.path = "../figures/",
+  out.width = "\\textwidth",
+   out.extra = "keepaspectratio=true"
 )
+
 options(kableExtra.latex.load_packages = FALSE)
 library(casebase)
 library(colorspace)
@@ -118,7 +121,7 @@ eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- T
 eval_cs2 <- T
-eval_cs3 <- TRUE
+eval_cs3 <- T
 eval_cs4 <- T
 eval_colophon <- TRUE
 
