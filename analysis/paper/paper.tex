@@ -288,7 +288,7 @@ However, we do not explicitly model any shape parameter, unlike
 Several packages implement penalized estimation for the Cox model:
 \pkg{glmnet} \citeyearpar{regpathcox}, \pkg{glmpath}
 \citeyearpar{park_hastie}, \pkg{penalized} \citeyearpar{l1penal},
-\pkg{RiskRegression} \citeyearpar{gerds_blanche}. Moreover, some
+\pkg{riskRegression} \citeyearpar{gerds_blanche}. Moreover, some
 packages also include penalized estimation in the context of Cox models
 with time-varying coefficients: elastic-net penalization with
 \pkg{CoxRidge} \citeyearpar{perperoglou} and \pkg{rstpm2}
@@ -318,7 +318,7 @@ survival models, where the full hazard is explicitly modeled. Using this
 estimate, the survival function and the CIF can be obtained using their
 functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI}
 below). Packages providing this functionality include \pkg{CFC},
-\pkg{Flexsurv}, \pkg{mets}, and \pkg{survival}. Our package
+\pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package
 \pkg{casebase} also follows this approach for both single-event and
 competing-risk analyses. The second category outlined above broadly
 corresponds to semi-parametric models. These models do not model the
@@ -342,22 +342,22 @@ motivations for introducing case-base sampling in survival analysis.
 & \textbf{Competing} & \textbf{Allows} &  \textbf{Penalized}   &    &  & \textbf{Semi} & \textbf{Interval/Left} & \textbf{Absolute}  \\
 \textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Regression} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
 \hline
-\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
-\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
-\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\
-\textbf{coxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{crrp}            & x                        &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{Flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{glmpath}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
-\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{RiskRegression}  & x                         &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2}          &                          & x                         &                      & x                & x                   & x                        & x                                & x                         \\
-\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
-\textbf{Survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\
+\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\ \bottomrule
+\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\ \bottomrule
+\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\ \bottomrule
+\textbf{CoxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{crrp}            & x                        &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
+\textbf{flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
+\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{glmpath}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\ \bottomrule
+\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{riskRegression}  & x                         &                           & x                     &                  &                     & x                        &                                  & x                                \\ \bottomrule
+\textbf{rstpm2}          &                          & x                         &                      & x                & x                   & x                        & x                                & x                         \\ \bottomrule
+\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\ \bottomrule
+\textbf{survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\ \bottomrule
 \hline
 \end{tabular}%
 }
@@ -1212,7 +1212,7 @@ Akaike Information Criterion (AIC).
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 Model4 
-#>    489    457    439    440
+#>    491    459    444    445
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1291,11 +1291,11 @@ with transplant at 30 days.
 \begin{CodeOutput}
 #>  time     
 #>     0 0.00
-#>   365 0.74
+#>   365 0.72
 \end{CodeOutput}
 
 \begin{CodeOutput}
-#> [1] 0.67
+#> [1] 0.65
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1426,7 +1426,7 @@ resulting diagnostic tools could then be integrated in this package.
 Also, we are interested in extending case-base sampling to account for
 interval censoring. This type of censoring is very common in
 longitudinal studies, and many packages (e.g.~\pkg{SmoothHazard},
-\pkg{survival} and \pkg{Rstpm2}) provide functions to account for it.
+\pkg{survival} and \pkg{rstpm2}) provide functions to account for it.
 Again, we hope to include any resulting methodology as part of this
 package.
 
@@ -1453,12 +1453,12 @@ which implements case-base sampling for fitting parametric survival
 models and for estimating smooth cumulative incidence functions using
 the framework of generalized linear models. We strongly believe that its
 flexibility and its foundation on the familiar logistic regression model
-will make it appealing to new and established practioners.
+will make it appealing to new and established practitioners.
 
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-07-28 10:08:15 using the following
+This report was generated on 2020-08-04 09:28:27 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1525,16 +1525,15 @@ computational environment and dependencies:
 #> [61] pkgconfig_2.0.3     matrixStats_0.56.0  evaluate_0.14      
 #> [64] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
 #> [67] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
-#> [70] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [73] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
-#> [76] withr_2.2.0         pillar_1.4.6        haven_2.3.1        
-#> [79] foreign_0.8-80      mgcv_1.8-31         nnet_7.3-14        
-#> [82] mstate_0.2.12       modelr_0.1.8        crayon_1.3.4       
-#> [85] rmarkdown_2.3       jpeg_0.1-8.1        grid_4.0.2         
-#> [88] readxl_1.3.1        blob_1.2.1          reprex_0.3.0       
-#> [91] digest_0.6.25       webshot_0.5.2       numDeriv_2016.8-1.1
-#> [94] stats4_4.0.2        munsell_0.5.0       viridisLite_0.3.0  
-#> [97] quadprog_1.5-8
+#> [70] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
+#> [73] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
+#> [76] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
+#> [79] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
+#> [82] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
+#> [85] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
+#> [88] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
+#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
+#> [94] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
