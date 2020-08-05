@@ -8,14 +8,16 @@
 
 \author{
 Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
-of Manitoba \AND Jesse Islam\\McGill University \And James
+of Manitoba \AND Jesse Islam\\McGill University \And James A.
 Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
+and Comparison of Event Rates}
 
 \Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
-Hanley, Olli Saarela}
-\Plaintitle{casebase: An Alternative Framework For Survival Analysis}
+A. Hanley, Olli Saarela}
+\Plaintitle{casebase: An Alternative Framework For Survival Analysis and
+Comparison of Event Rates}
 \Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
 Analysis}
 
@@ -51,7 +53,7 @@ work.
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{jesse.islam@mail.mcgill.ca}\\
   
-      James Hanley\\
+      James A. Hanley\\
   McGill University\\
   1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{james.hanley@mcgill.ca}\\
@@ -74,16 +76,17 @@ Toronto, Ontario M5T 3M7, Canada\\
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Survival analysis has been greatly influenced over the last 50 years by
-the partial likelihood approach of the Cox proportional hazard model
-\citep{cox1972regression}. This approach provides a flexible way of
-assessing the influence of covariates on the hazard function, without
-the need to specify a parametric survival model. This flexibility comes
-at the cost of decoupling the baseline hazard from the effect of the
-covariates. To recover the whole survival curve---or the cumulative
-incidence function (CIF)---we then need to separately estimate the
-baseline hazard \citep{breslow1972discussion}. This in turn often leads
-to stepwise estimates of the survival function.
+Survival analysis and the comparison of event rates has been greatly
+influenced over the last 50 years by the partial likelihood approach of
+the Cox proportional hazard model \citep{cox1972regression}. This
+approach provides a flexible way of assessing the influence of
+covariates on the hazard function, without the need to specify a
+parametric survival model. This flexibility comes at the cost of
+decoupling the baseline hazard from the effect of the covariates. To
+recover the whole survival curve---or the cumulative incidence function
+(CIF)---we then need to separately estimate the baseline hazard
+\citep{breslow1972discussion}. This in turn leads to stepwise estimates
+of the survival function.
 
 From the perspective of clinicians and their patients, the most relevant
 quantity is often the 5- or 10-year risk of having a certain event given
@@ -91,9 +94,9 @@ the patient's particular circumstances, and not the hazard ratio between
 a treatment and control group. Therefore, to make sound clinical
 decisions, it is important to accurately estimate the \emph{full} hazard
 function, which can then be used to estimate the cumulative incidence
-function (CIF). Since the parametric hazard is a smooth function of
-time, the CIF and the survival function estimates also vary smoothly
-over time.
+function (CIF). Using a parametric estimator of the hazard function
+leads to a smooth function of time; as a consequence, the CIF and the
+survival function estimates also vary smoothly over time.
 
 With the goal of fitting smooth-in-time hazard functions, Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} proposed a general framework
@@ -102,17 +105,25 @@ Their approach provides users that are familiar with generalized linear
 models with a natural way of fitting parametric survival models.
 Moreover, their framework is very flexible: general functions of time
 can be estimated (e.g.~using splines or general additive models), and
-hence these models retain some of the flexibility of partial likelihood
-approaches.
+hence these models retain some of the flexibility of Cox's partial
+likelihood approach.
+
+Using the framework of logistic regression for analysing time-to-event
+data opens the door to an extensive array of powerful modeling tools.
+Indeed, lasso and elastic-net regression can then be used to select
+variables that are associated with the hazard function. Logistic
+regression can also be replaced by multinomial regression to analyse
+data with multiple competing events.
 
 In this article, we present an \proglang{R} package that combines the
 ideas of Hanley \& Miettinen into a simple interface. The purpose of the
 \pkg{casebase} package is to provide practitioners with an easy-to-use
-software tool to predict the risk (or cumulative incidence) of an event,
-conditional on a particular patient's covariate profile. Our package
-retains the flexibility of case-base sampling and the familiar interface
-of the \code{glm} function. In addition, we provide extensive
-visualization tools.
+software tool to compute a patient's risk (or cumulative incidence) of
+an event, conditional on a particular patient's covariate profile. Our
+package retains the flexibility of case-base sampling and the familiar
+interface of the \code{glm} function. It also provides tools for
+variable selection and competing-risk analysis. In addition, we provide
+extensive visualization tools.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
@@ -130,52 +141,57 @@ and of future directions.
 \section{Theoretical details}\label{theory}}
 
 As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
-key idea behind case-base sampling is to discretize the study base into
-an infinite amount of \emph{person moments}. These person moments are
-indexed by both an individual in the study and a time point, and
-therefore each person moment has a covariate profile, an exposure status
-and an outcome status attached to it. We note that there is only a
-finite number of person moments associated with the event of interest
-(what Hanley \& Miettinen call the \emph{case series}). Case-base
-sampling refers to the sampling from the base of a representative finite
-sample called the \emph{base series}.
+key idea behind case-base sampling is to sample from the study base a
+finite amount of \emph{person moments}. These person moments are indexed
+by both an individual in the study and a time point, and therefore each
+person moment has a covariate profile, an exposure status and an outcome
+status attached to it. We note that there is only a finite number of
+person moments associated with the event of interest (what Hanley \&
+Miettinen call the \emph{case series}). Case-base sampling refers to the
+sampling from the base of a representative finite sample called the
+\emph{base series}.
 
 To describe the theoretical foundations of case-base sampling, we use
 the framework of counting processes. In what follows, we abuse notation
-slightly and omit any mention of \(\sigma\)-algebras; the interested
-reader can refer to Saarela \& Arjas \citeyearpar{saarela2015non} and
-Saarela \citeyearpar{saarela2016case}. First, let
-\(N_{i}(t) \in \{0, 1\}\) be counting processes corresponding to the
-event of interest for individual \(i=1, \ldots,n\). For simplicity, we
-will consider Type I censoring due to the end of follow-up at time
-\(\tau\) (the general case of non-informative censoring is treated in
-Saarela \citeyearpar{saarela2016case}). We assume a continuous time
-model, which implies that the counting process jumps are less than or
-equal to one. We are interested in modeling the hazard functions
-\(\lambda_{i}(t)\) of the processes \(N_i(t)\), and which satisfy
-\[\lambda_{i}(t) dt = E[dN_{i}(t)].\]
+slightly and omit any mention of \(\sigma\)-algebras. Instead, following
+Aalen \emph{et al} \citeyearpar{aalen2008survival}, we use the
+placeholder \(\mathrm{past}\) to denote the past history of the
+corresponding process. The reader interested in more details can refer
+to Saarela \& Arjas \citeyearpar{saarela2015non} and Saarela
+\citeyearpar{saarela2016case}. First, let \(N_{i}(t) \in \{0, 1\}\) be
+counting processes corresponding to the event of interest for individual
+\(i=1, \ldots,n\). For simplicity, we will consider Type I censoring due
+to the end of follow-up at time \(\tau\) (the general case of
+non-informative censoring is treated in Saarela
+\citeyearpar{saarela2016case}). We assume a continuous time model, which
+implies that the counting process jumps are less than or equal to one.
+We are interested in modeling the hazard functions \(\lambda_{i}(t)\) of
+the processes \(N_i(t)\), and which satisfy
+\[\lambda_{i}(t) dt = E[dN_{i}(t)\mid \mathrm{past}].\]
 
 Next, we model the base series sampling mechanism using non-homogeneous
 Poisson processes \(R_i(t) \in \{0, 1, 2, \ldots\}\), with the
 person-moments where \(dR_i(t) = 1\) constituting the base series. The
 process \(Q_{i}(t) = R_i(t) + N_{i}(t)\) then counts both the case and
 base series person-moments contributed by individual \(i\). This process
-is typically defined by the user via its hazard function \(\rho_i(t)\).
-The process \(Q_{i}(t)\) is characterized by
-\(E[dQ_{i}(t)] = \lambda_{i}(t)dt + \rho_i(t)dt\).
+is typically defined by the user via its intensity function
+\(\rho_i(t)\). The process \(Q_{i}(t)\) is characterized by
+\(E[dQ_{i}(t)\mid\mathrm{past}] = \lambda_{i}(t)dt + \rho_i(t)dt\).
 
 If the hazard function \(\lambda_{i}(t; \theta)\) is parametrized in
 terms of \(\theta\), we could define an estimator \(\hat{\theta}\) by
 maximization of the likelihood expression
-\[L_0(\theta) = \prod_{i=1}^n \exp\left\{ -\int_0^\tau \lambda_i(t; \theta) dt \right\} \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \lambda_{i}(t;\theta)^{dN_{i}(t)}\left(1 - \lambda_{i}(t;\theta)\right)^{1 - dN_{i}(t)},\]
+\[L_0(\theta) = \prod_{i=1}^n \exp\left\{ -\int_0^{\min(t_i,\tau)} \lambda_i(t; \theta) dt \right\} \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \lambda_{i}(t;\theta)^{dN_{i}(t)},\]
 where \(\prod_{t\in[0,u)}\) represents a product integral from \(0\) to
-\(u\). However, the integral over time makes the computation and
-maximization of \(L_0(\theta)\) challenging.
+\(u\), and where \(t_i\) is the event time for individual \(i\).
+However, the integral over time makes the computation and maximization
+of \(L_0(\theta)\) challenging.
 
 Case-base sampling allows us to avoid this integral. By conditioning on
-a sampled person-moment, we get individual contributions of the form
-\[P(dN_{i}(t) \mid dQ_{i}(t) = 1) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.\]
-Therefore, we can define an estimating equation for \(\theta\) as
+a sampled person-moment, we get individual likelihood contributions of
+the form
+\[P(dN_{i}(t) \mid dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.\]
+Therefore, we can define an estimating function for \(\theta\) as
 follows:
 \[L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{dQ_i(t)}.\]
 When a logarithmic link function is used for modeling the hazard
@@ -233,14 +249,14 @@ dependence of the hazard on time \citep{kalbfleisch2011statistical}:
 
 Case-base sampling can also be used in the context of competing-risk
 analyses. Assuming there are \(J\) competing events, we can show that
-each person-moment's contribution of the likelihood is of the form
+each person-moment's contribution to the likelihood is of the form
 
 \[\frac{\lambda_j(t)^{dN_j(t)}}{\rho(t) + \sum_{j=1}^J\lambda_j(t)},\]
 
 where \(N_j(t)\) is the counting process associated with the event of
-type \(j\) and \(\lambda_j(t)\) is the corresponding hazard function. As
-may be expected, this functional form is similar to the terms appearing
-in the likelihood function for multinomial
+type \(j\) and \(\lambda_j(t)\) is the corresponding cause-specific
+hazard function. As may be expected, this functional form is similar to
+the terms appearing in the likelihood function for multinomial
 regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1.\end{align*}}
 
 \hypertarget{existing-packages}{%
@@ -285,9 +301,9 @@ above, \pkg{casebase} can model any parametric family whose log-hazard
 can be expressed as a linear combination of covariates (including time).
 Therefore, our package allows the user to model the effect of time using
 splines. Also, by including interaction terms between covariates and
-time, it also allows users to fit time-varying coefficient models.
-However, we do not explicitly model any shape parameter, unlike
-\pkg{flexsurv}.
+time, it also allows users to fit (non-proportional) time-varying
+coefficient models. However, we do not explicitly model any shape
+parameter, unlike \pkg{flexsurv}.
 
 Several packages implement penalized estimation for the Cox model:
 \pkg{glmnet} \citeyearpar{regpathcox}, \pkg{glmpath}
@@ -299,20 +315,21 @@ with time-varying coefficients: elastic-net penalization with
 \citeyearpar{clements_liu}, while \pkg{survival}
 \citeyearpar{survival-package} has an implementation of ridge-penalized
 estimation. On the other hand, our package \pkg{casebase} provides
-penalized estimation in the context of parametric hazards. To our
-knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to
-offer this functionality.
+penalized estimation of the hazard function. To our knowledge,
+\pkg{casebase} and \pkg{rsptm2} are the only packages to offer this
+functionality.
 
 Next, several \proglang{R} packages implement methodologies for
 competing risk analysis; for a different perspective on this topic, see
 Mahani \& Sharabiani \citeyearpar{mahani2015bayesian}. The package
-\pkg{cmprsk} provides methods for cause-specific subdistributions, such
-as in the Fine-Gray model \citeyearpar{fine1999proportional}. On the
-other hand, the package \pkg{CFC} estimates cause-specific CIFs from
-unadjusted, non-parametric survival functions. Our package
-\pkg{casebase} also provides functionalities for competing risk analysis
-by estimating parametrically the cause-specific hazards. From these
-quantities, we can then estimate the cause-specific CIFs.
+\pkg{cmprsk} provides methods for cause-specific subdistribution
+hazards, such as in the Fine-Gray model
+\citeyearpar{fine1999proportional}. On the other hand, the package
+\pkg{CFC} estimates cause-specific CIFs from unadjusted, non-parametric
+survival functions. Our package \pkg{casebase} also provides
+functionalities for competing risk analysis by estimating parametrically
+the cause-specific hazards. From these quantities, we can then estimate
+the cause-specific CIFs.
 
 Finally, several packages include functions to estimate the CIF. The
 corresponding methods generally fall into two categories: transformation
@@ -334,7 +351,7 @@ this approach include \pkg{RiskRegression}, \pkg{rstpm2}, and
 \pkg{survival}. As mentioned in the introduction, a key distinguishing
 factor between these two approaches is that the first category leads to
 smooth estimates of the cumulative incidence function, whereas the
-second category often produces estimates in the form of step-wise
+second category often produces estimates in the form of stepwise
 functions. Providing smooth estimates of the CIF was one of the main
 motivations for introducing case-base sampling in survival analysis.
 
@@ -467,7 +484,7 @@ Figure \ref{fig:plot-stratified-erspc-data} is built sequentially by
 first adding a layer for the area representing the population time in
 gray, with subjects having the least amount of observation time plotted
 at the top of the y-axis. We immediately notice a distinctive
-\emph{step-wise shape} in the population time area. This is due to the
+\emph{stepwise shape} in the population time area. This is due to the
 randomization of the Finnish cohorts which were carried out on January 1
 of each of year from 1996 to 1999. Coupled with the uniform December 31
 2006 censoring date, this led to large numbers of men with exactly 11,
@@ -572,10 +589,10 @@ available via the \code{family} parameter. These approaches are:
   Trees} via the \pkg{gbm} package. This feature is still experimental.
 \end{itemize}
 
-In the case of multiple events, the hazard is fitted via multinomial
-regression as performed by the \pkg{VGAM} package. We selected this
-package for its ability to fit multinomial regression models with an
-offset.
+In the case of multiple competing events, the hazard is fitted via
+multinomial regression as performed by the \pkg{VGAM} package. We
+selected this package for its ability to fit multinomial regression
+models with an offset.
 
 Once a model-fit object has been returned by \code{fitSmoothHazard}, all
 the familiar summary and diagnostic functions are available:
@@ -595,7 +612,7 @@ For the case of a competing-event analysis, the event-specific risk is
 computed using the following procedure: first, we compute the overall
 survival function (i.e.~for all event types):
 
-\[ S(t) = \exp\left(-\int_0^t \Lambda(u;X) du\right),\qquad \Lambda(t;X) = \sum_{j=1}^J \lambda_j(t;X).\]
+\[ S(t) = \exp\left(-\int_0^t \lambda(u;X) du\right),\qquad \lambda(t;X) = \sum_{j=1}^J \lambda_j(t;X).\]
 From this, we can derive the event-specific subdensities:
 
 \[ f_j(t) = \lambda_j(t)S(t).\]
@@ -792,12 +809,13 @@ first author's website, and it is now available as part of the
 
 The data contains information on 177 patients who received a stem-cell
 transplant for acute leukemia. The event of interest is relapse, but
-other competing causes (e.g.~transplant-related death) were also
-recorded. Several covariates were captured at baseline: sex, disease
-type (acute lymphoblastic or myeloblastic leukemia, abbreviated as ALL
-and AML, respectively), disease phase at transplant (Relapse, CR1, CR2,
-CR3), source of stem cells (bone marrow and peripheral blood, coded as
-BM+PB, or only peripheral blood, coded as PB), and age.
+other competing causes (e.g.~death, progression, graft failure,
+graft-versus-host disease) were also recorded. Several covariates were
+captured at baseline: sex, disease type (acute lymphoblastic or
+myeloblastic leukemia, abbreviated as ALL and AML, respectively),
+disease phase at transplant (Relapse, CR1, CR2, CR3), source of stem
+cells (bone marrow and peripheral blood, coded as BM+PB, or only
+peripheral blood, coded as PB), and age.
 
 First, we can look at a population-time plot to visualize the incidence
 density of both relapse and the competing events. In Figure
@@ -818,9 +836,9 @@ follow-up than at the end.
 \end{figure}
 \end{CodeChunk}
 
-Our main objective is to compute the absolute risk of relapse for a
-given set of covariates. We start by fitting a smooth hazard to the data
-using a linear term for time:
+Our main objective is to compute the cumulative incidence of relapse for
+a given set of covariates. We start by fitting a smooth hazard to the
+data using a linear term for time:
 
 We will compare our hazard ratio estimates to that obtained from a Cox
 regression. To do so, we need to treat the competing event as censoring.
@@ -879,13 +897,13 @@ months.
 
 We will compare our estimates to that obtained from a corresponding
 Fine-Gray model \citeyearpar{fine1999proportional}. The Fine-Gray model
-is a semiparametric model for the cause-specific \emph{subdistribution},
-i.e.~the function \(f_k(t)\) such that
+is a semiparametric model for the cause-specific \emph{subdistribution
+hazard}, i.e.~the function \(f_k(t)\) such that
 \[CI_k(t) =1 - \exp\left( - \int_0^t f_k(u) \textrm{d}u \right),\] where
 \(CI_k(t)\) is the cause-specific cumulative incidence. The Fine-Gray
 model allows to directly assess the effect of a covariate on the
-subdistribution, as opposed to the hazard. For the computation, we will
-use the \pkg{timereg} package \citep{timereg}:
+subdistribution hazard, as opposed to the hazard. For the computation,
+we will use the \pkg{timereg} package \citep{timereg}:
 
 \begin{CodeChunk}
 
@@ -1181,9 +1199,10 @@ survival; therefore, the patient is considered exposed only after the
 transplant has occurred.
 
 As before, we can look at the population-time plot for a graphical
-summary of the event incidence. As we can see, most events occur early
-during the follow-up period, and therefore we do not expect the hazard
-to be constant.
+summary of the event incidence. Here, we coloured the exposed
+person-time (i.e.~after transplant) in a darker shade of gray. As we can
+see, most events occur early during the follow-up period, and therefore
+we do not expect the hazard to be constant.
 
 \begin{CodeChunk}
 
@@ -1203,7 +1222,23 @@ each population-moment is exposed or not.
 
 Finally, we can fit the hazard using various linear predictors.
 
-Note that the fourth model includes an interaction term between exposure
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> # Fit several models
+R> fit1 <- fitSmoothHazard(fustat ~ exposure,
+R+   data = cb_data, time = "futime"
+R+ )
+R> fit2 <- fitSmoothHazard(fustat ~ exposure + futime,
+R+   data = cb_data, time = "futime"
+R+ )
+R> fit3 <- fitSmoothHazard(fustat ~ exposure * futime,
+R+   data = cb_data, time = "futime"
+R+ )
+\end{CodeInput}
+\end{CodeChunk}
+
+Note that the third model includes an interaction term between exposure
 and follow-up time. In other words, this model no longer exhibit
 proportional hazards. The evidence of non-proportionality of hazards in
 the Stanford Heart Transplant data has been widely discussed
@@ -1215,13 +1250,13 @@ Akaike Information Criterion (AIC).
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Model1 Model2 Model3 Model4 
-#>    794    760    736    722
+#> Model1 Model2 Model3 
+#>    827    790    788
 \end{CodeOutput}
 \end{CodeChunk}
 
-As we can, the best fit is the fourth model. By visualizing the hazard
-functions for both exposed and unexposed individuals, we can more
+As we can see, the best fit is the third model. By visualizing the
+hazard functions for both exposed and unexposed individuals, we can more
 clearly see how the hazards are no longer proportional.
 
 \begin{CodeChunk}
@@ -1240,20 +1275,20 @@ R> # Set the offset to zero
 R> hazard_data$offset <- 0
 R> # Use predict to get the fitted values, and exponentiate to
 R> # transform to the right scale
-R> hazard_data$hazard <- exp(predict(fit4,
+R> hazard_data$hazard <- exp(predict(fit3,
 R+   newdata = hazard_data,
 R+   type = "link"
 R+ ))
 R> # Add labels for plots
 R> hazard_data$Status <- factor(hazard_data$exposure,
-R+   labels = c("NoTrans", "Trans")
+R+   labels = c("No Tx", "Tx")
 R+ )
 R> 
 R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
 R+   geom_line() +
 R+   paper_gg_theme +  
 R+   ylab("Hazard") +
-R+   xlab("Follow-up time")
+R+   xlab("Follow-up time (in days)")
 \end{CodeInput}
 
 
@@ -1276,44 +1311,18 @@ hazard function into estimates of the cumulative incidence functions.
 
 \end{CodeChunk}
 
-Note that we can easily adapt the code above to the situation where a
-patient receives a heart transplant at a point in time of interest, for
-example after 30 days.
-
-\begin{CodeChunk}
-
-
-\begin{center}\includegraphics{../figures/stanford-1y-haz-1} \end{center}
-
-\end{CodeChunk}
-
-We can then compare the 1-year mortality risk without transplant and
-with transplant at 30 days.
-
-\begin{CodeChunk}
-
-\begin{CodeOutput}
-#>  time    
-#>     0 0.0
-#>   365 0.3
-\end{CodeOutput}
-
-\begin{CodeOutput}
-#> [1] 0.2
-\end{CodeOutput}
-\end{CodeChunk}
-
-As we can see, the risk estimate at 1-year is about 30\% lower if the
-patient receives a heart transplant at 30 days.
-
 We can also plot the hazard ratio:
 
 \begin{CodeChunk}
 
 
-\begin{center}\includegraphics{../figures/unnamed-chunk-12-1} \end{center}
+\begin{center}\includegraphics{../figures/unnamed-chunk-9-1} \end{center}
 
 \end{CodeChunk}
+
+As we can see in the above case-study, the \pkg{casebase} package can
+also be used to model time-varying exposures and non-proportional hazard
+functions.
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -1374,7 +1383,7 @@ that capture both the event type and time. Both approaches to modeling
 yield user-friendly code. However, in terms of output, both approaches
 differ significantly. Case-base sampling produces smooth hazards and
 smooth cumulative incidence curves, whereas Cox regression and Fine-Gray
-models produce step-wise CIFs and never explicitly model the hazard
+models produce stepwise CIFs and never explicitly model the hazard
 function. Qualitatively, we showed that by using splines in the linear
 predictor, all three models yielded similar curves. However, the smooth
 nature of the output of \pkg{casebase} provides a more intuitive
@@ -1462,15 +1471,15 @@ will make it appealing to new and established practioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-07-21 20:19:45 using the following
+This report was generated on 2020-08-05 11:28:49 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> R version 4.0.0 (2020-04-24)
+#> R version 4.0.2 (2020-06-22)
 #> Platform: x86_64-apple-darwin17.0 (64-bit)
-#> Running under: macOS Catalina 10.15.5
+#> Running under: macOS Catalina 10.15.6
 #> 
 #> Matrix products: default
 #> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
@@ -1484,53 +1493,51 @@ computational environment and dependencies:
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] broom_0.5.6               dotwhisker_0.5.0         
-#>  [3] timereg_1.9.4             glue_1.4.1               
-#>  [5] scales_1.1.0              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_0.8.5              
-#>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.0.2               ggplot2_3.3.0            
-#> [13] tidyverse_1.3.0           lubridate_1.7.8          
-#> [15] visreg_2.6.1              tibble_3.0.1             
-#> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [19] flexsurv_1.1.1            survival_3.1-12          
-#> [21] pracma_2.2.9              magrittr_1.5             
-#> [23] kableExtra_1.1.0          glmnet_3.0-2             
-#> [25] Matrix_1.2-18             data.table_1.12.8        
-#> [27] cowplot_1.0.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0.9000      
+#>  [1] scales_1.1.1              forcats_0.5.0            
+#>  [3] stringr_1.4.0             dplyr_1.0.0              
+#>  [5] purrr_0.3.4               readr_1.3.1              
+#>  [7] tidyr_1.0.2               ggplot2_3.3.2            
+#>  [9] tidyverse_1.3.0           lubridate_1.7.8          
+#> [11] visreg_2.6.1              tibble_3.0.3             
+#> [13] riskRegression_2020.02.05 prodlim_2019.11.13       
+#> [15] flexsurv_1.1.1            survival_3.1-12          
+#> [17] pracma_2.2.9              magrittr_1.5             
+#> [19] kableExtra_1.1.0          glmnet_3.0-2             
+#> [21] Matrix_1.2-18             data.table_1.12.8        
+#> [23] cowplot_1.0.0             colorspace_1.4-1         
+#> [25] casebase_0.9.0.9000      
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-2          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.4      htmlTable_1.13.3    base64enc_0.1-3    
-#>  [7] fs_1.4.1            rstudioapi_0.11     farver_2.0.3       
-#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-0      
-#> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
-#> [16] Formula_1.2-3       jsonlite_1.6.1      cluster_2.1.0      
-#> [19] dbplyr_1.4.3        png_0.1-7           compiler_4.0.0     
-#> [22] httr_1.4.1          backports_1.1.8     assertthat_0.2.1   
-#> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.55       tools_4.0.0         gtable_0.3.0       
-#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.3.1        
-#> [34] nlme_3.1-147        iterators_1.0.12    xfun_0.15          
+#>  [4] htmlTable_1.13.3    base64enc_0.1-3     fs_1.4.1           
+#>  [7] rstudioapi_0.11     MatrixModels_0.4-1  fansi_0.4.1        
+#> [10] mvtnorm_1.1-0       xml2_1.3.2          codetools_0.2-16   
+#> [13] knitr_1.29          Formula_1.2-3       jsonlite_1.6.1     
+#> [16] broom_0.5.6         cluster_2.1.0       dbplyr_1.4.3       
+#> [19] png_0.1-7           compiler_4.0.2      httr_1.4.1         
+#> [22] backports_1.1.8     assertthat_0.2.1    cli_2.0.2          
+#> [25] acepack_1.4.1       htmltools_0.5.0     quantreg_5.55      
+#> [28] tools_4.0.2         gtable_0.3.0        glue_1.4.1         
+#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
+#> [34] nlme_3.1-148        iterators_1.0.12    xfun_0.15          
 #> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
-#> [40] muhaz_1.2.6.1       MASS_7.3-51.5       zoo_1.8-7          
+#> [40] muhaz_1.2.6.1       MASS_7.3-51.6       zoo_1.8-8          
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
 #> [46] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
 #> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
 #> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
-#> [58] rlang_0.4.6         pkgconfig_2.0.3     evaluate_0.14      
-#> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.28       
-#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
-#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [73] pillar_1.4.4        haven_2.2.0         foreign_0.8-78     
-#> [76] mgcv_1.8-31         nnet_7.3-13         mstate_0.2.12      
-#> [79] modelr_0.1.6        crayon_1.3.4        rmarkdown_2.1      
-#> [82] jpeg_0.1-8.1        grid_4.0.0          readxl_1.3.1       
+#> [58] rlang_0.4.7         pkgconfig_2.0.3     evaluate_0.14      
+#> [61] lattice_0.20-41     htmlwidgets_1.5.1   cmprsk_2.2-9       
+#> [64] tidyselect_1.1.0    deSolve_1.28        R6_2.4.1           
+#> [67] generics_0.0.2      Hmisc_4.4-0         multcomp_1.4-13    
+#> [70] DBI_1.1.0           withr_2.2.0         pillar_1.4.6       
+#> [73] haven_2.2.0         foreign_0.8-80      mgcv_1.8-31        
+#> [76] nnet_7.3-14         mstate_0.2.12       modelr_0.1.6       
+#> [79] crayon_1.3.4        rmarkdown_2.1       timereg_1.9.4      
+#> [82] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
 #> [85] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
-#> [88] numDeriv_2016.8-1.1 stats4_4.0.0        munsell_0.5.0      
+#> [88] numDeriv_2016.8-1.1 stats4_4.0.2        munsell_0.5.0      
 #> [91] viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
@@ -1541,7 +1548,7 @@ The current Git commit details are:
 
 \begin{CodeOutput}
 #> Local:    editMax /Users/maxturgeon/Documents/git_repos/cbpaper
-#> Head:     [2d08bac] 2020-07-20: Merge pull request #22 from sahirbhatnagar/write-popTime
+#> Head:     [d30ba8c] 2020-07-22: Merge pull request #23 from sahirbhatnagar/editMax
 \end{CodeOutput}
 \end{CodeChunk}
 
