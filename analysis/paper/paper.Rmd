@@ -59,6 +59,7 @@ preamble: >
   \usepackage{makecell}
   \usepackage{tabu}
   \DeclareUnicodeCharacter{2500}{-}
+  
 output: 
   rticles::jss_article:
     number_sections: TRUE     #added argument option 
@@ -88,8 +89,11 @@ knitr::opts_chunk$set(
   echo = FALSE,
   cache = TRUE, 
   comment = "#>",
-  fig.path = "../figures/"
+  fig.path = "../figures/",
+  out.width = "\\textwidth",
+   out.extra = "keepaspectratio=true"
 )
+
 options(kableExtra.latex.load_packages = FALSE)
 library(casebase)
 library(colorspace)
@@ -196,12 +200,11 @@ At the time of writing, a cursory examination of CRAN's task view on survival an
 
 Parametric survival models are implemented in a handful of packages: \pkg{CFC} [-@mahani2015bayesian], \pkg{flexsurv} [-@flexsurv], \pkg{SmoothHazard} [-@smoothHazard], \pkg{rsptm2} [-@clements_liu], \pkg{mets} [-@scheike2014estimating], and \pkg{survival} [-@survival-package]. The types of models they allow vary for each package. For example, \pkg{SmoothHazard} is limited to Weibull distributions [-@smoothHazard], whereas both \pkg{flexsurv} and \pkg{survival} allow users to supply any distribution of their choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and \pkg{rstpm2} also have the ability to model the effect of time using splines, which allows flexible modeling of the hazard function. Moreover, \pkg{flexsurv} has the ability to estimate both scale and shape parameters for a variety of parametric families. As discussed above, \pkg{casebase} can model any parametric family whose log-hazard can be expressed as a linear combination of covariates (including time). Therefore, our package allows the user to model the effect of time using splines. Also, by including interaction terms between covariates and time, it also allows users to fit (non-proportional) time-varying coefficient models. However, we do not explicitly model any shape parameter, unlike \pkg{flexsurv}.
 
-Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{RiskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation of ridge-penalized estimation. On the other hand, our package \pkg{casebase} provides penalized estimation of the hazard function. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality.
+Several packages implement penalized estimation for the Cox model: \pkg{glmnet} [-@regpathcox], \pkg{glmpath} [-@park_hastie], \pkg{penalized} [-@l1penal], \pkg{riskRegression} [-@gerds_blanche]. Moreover, some packages also include penalized estimation in the context of Cox models with time-varying coefficients: elastic-net penalization with \pkg{CoxRidge} [-@perperoglou] and \pkg{rstpm2} [-@clements_liu], while \pkg{survival} [-@survival-package] has an implementation of ridge-penalized estimation. On the other hand, our package \pkg{casebase} provides penalized estimation of the hazard function. To our knowledge, \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this functionality.
 
 Next, several \proglang{R} packages implement methodologies for competing risk analysis; for a different perspective on this topic, see Mahani & Sharabiani [-@mahani2015bayesian]. The package \pkg{cmprsk} provides methods for cause-specific subdistribution hazards, such as in the Fine-Gray model [-@fine1999proportional]. On the other hand, the package \pkg{CFC} estimates cause-specific CIFs from unadjusted, non-parametric survival functions. Our package \pkg{casebase} also provides functionalities for competing risk analysis by estimating parametrically the cause-specific hazards. From these quantities, we can then estimate the cause-specific CIFs. 
 
-Finally, several packages include functions to estimate the CIF. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CIF can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below). Packages providing this functionality include \pkg{CFC}, \pkg{Flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing-risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{RiskRegression}, \pkg{rstpm2}, and \pkg{survival}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the cumulative incidence function, whereas the second category often produces estimates in the form of stepwise functions. Providing smooth estimates of the CIF was one of the main motivations for introducing case-base sampling in survival analysis.
-
+Finally, several packages include functions to estimate the CIF. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CIF can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below). Packages providing this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing-risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{riskRegression}, \pkg{rstpm2}, and \pkg{survival}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the cumulative incidence function, whereas the second category often produces estimates in the form of stepwise functions. Providing smooth estimates of the CIF was one of the main motivations for introducing case-base sampling in survival analysis.
 
 \begin{table}[ht]
 \centering
@@ -209,28 +212,28 @@ Finally, several packages include functions to estimate the CIF. The correspondi
 \begin{tabular}{ccccccccc}
 \hline
 & \textbf{Competing} & \textbf{Allows} &  \textbf{Penalized}   &    &  & \textbf{Semi} & \textbf{Interval/Left} & \textbf{Absolute}  \\
-\textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Likelihood} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
+\textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Regression} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
 \hline
-\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\
-\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\
-\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\
-\textbf{coxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{crrp}            & x                        &                           & x                     &                  &                     &                          &                                  &                                  \\
-\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{Flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{Flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\
-\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{glmpath}        &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\
-\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\
-\textbf{RiskRegression}  &                          &                           & x                     &                  &                     & x                        &                                  & x                                \\
-\textbf{Rstpm2}          &                          & x                         & x                     & x                & x                   & x                        & x                                & x                         \\
-\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\
-\textbf{Survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\
+\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\ \bottomrule
+\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\ \bottomrule
+\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\ \bottomrule
+\textbf{CoxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{crrp}            & x                        &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
+\textbf{flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
+\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{glmpath}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\ \bottomrule
+\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
+\textbf{riskRegression}  & x                         &                           & x                     &                  &                     & x                        &                                  & x                                \\ \bottomrule
+\textbf{rstpm2}          &                          & x                         &                      & x                & x                   & x                        & x                                & x                         \\ \bottomrule
+\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\ \bottomrule
+\textbf{survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\ \bottomrule
 \hline
 \end{tabular}%
 }
-\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features.}
+\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features. Competing Risks: whether or not an implementation for competing risks is present. Allows Non-PH: permits models for non-proportional hazards. Penalized Regression: allows for a penalty term when estimating hazards (e.g. lasso or ridge). Splines: permits a flexible fit on time through the use of splines. Parametric: implementation for parametric models. Semi-parametric: implementation for semi-parametric models. Interval/left censoring: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. Absolute Risk: computation for survival curves, cumulative incidence or cumulative hazard is available.}
 \label{tab:surv-pkgs}
 \end{table}
 
@@ -1161,6 +1164,8 @@ ca       & Yes                                           \\
 In the original study, the authors developed two scores for predicting the outcome. These scores are available as part of the data: SUPPORT day 3 physiology score (\code{sps}) and APACHE III day 3 physiology score (\code{aps}). Using these scores, we will explore three Cox regression scenarios as a baseline comparison for \pkg{casebase}: \code{sps} only, \code{aps} only, and all covariates excluding \code{sps} and \code{aps}. We will compare the three models using a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used to assess both discrimination and calibration in a single model. Moreover, it provides a metric that can be used to compare parametric and semi-parametric survival models. To account for overfitting, we will use 95% of the observations to train our models, while the remaining 5% will be used to compute absolute risk curves and the Brier scores. 
 
 ```{r supportData, eval = eval_cs3}
+scaleFUNy <- function(x) sprintf("%.2f", x)
+scaleFUNx <- function(x) sprintf("%.0f", x)
 data(support)
 # Change time to years
 support$d.time <- support$d.time/365.25
@@ -1194,7 +1199,7 @@ coxFull <- survival::coxph(Surv(time = d.time, event = death) ~ . - aps - sps,
                            data = train, x = TRUE)
 abcoxFull <- survival::survfit(coxFull, newdata = test)
 # 4. Kaplan-Meier
-KM <- survival::coxph(Surv(time = d.time, event = death) ~ 1, data = test)
+KM <- survival::coxph(Surv(time = d.time, event = death) ~ 1, data = test,x=TRUE)
 abKM <- survival::survfit(KM)
 abKMcompare <- data.frame(
   Time = abKM$time,
@@ -1212,16 +1217,16 @@ baseCoxComparisonData <- data.frame(
 
 ```{r baselines, echo=FALSE, eval=eval_cs3}
 cox_ci <- ggplot(baseCoxComparisonData, aes(Time)) +
-  geom_line(aes(y = APS, colour = "APS"), lwd = 1) +
-  geom_line(aes(y = Full, col = "Full"), lwd = 1) +
-  geom_line(aes(y = SPS, colour = "SPS"), lwd = 1) +
-  geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M"), lwd = 1) +
-  labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
+  geom_step(aes(y = APS, colour = "APS")) +
+  geom_step(aes(y = Full, col = "Full")) +
+  geom_step(aes(y = SPS, colour = "SPS")) +
+  geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
+  labs(y = "Probability of Death", x = "Follow-up time (Years)", color = "Models") +
   scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
-  paper_gg_theme
+  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=8)
 ```
 
-```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models. (A) Cumulative Incidence curves. (B) Time-dependent Brier scores."}
+```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models to the unadjusted Kaplan-Meier curve. (A) Cumulative Incidence curves. For a given model, the plotted curve is the average curve of each individual in the study. Each follow-up time seen in the study was used. There are minimal differences between the curves. APS coincides with the SPS curve, as they are considerably overlapped.(B) Time-dependent Brier scores, where a lower score is better. The full model performs best overall."}
 # Extract time points
 times <- sort(unique(test$d.time))
 # Compute Brier scores
@@ -1237,6 +1242,9 @@ coxFull$coefficients[which(is.na(coxFull$coefficients))] <- 0
 brierFull <- Score(list("PredictionModel" = coxFull), data = test, 
                    formula = Surv(d.time, death != 0) ~ 1, summary = "ipa", 
                    se.fit = FALSE, metrics = "brier", contrasts = FALSE, times = times)
+brierNull <- Score(list("PredictionModel" = KM), data = test, 
+                   formula = Surv(d.time, death != 0) ~ 1, summary = "ipa", 
+                   se.fit = FALSE, metrics = "brier", contrasts = FALSE, times = times)
 
 # Combine all results for plotting
 brierPlotter <- rbind(
@@ -1245,17 +1253,19 @@ brierPlotter <- rbind(
   data.frame(brierScore = brierFull$Brier$score$Brier[brierFull$Brier$score$model == "PredictionModel"], 
              times = times, model = "Full"),
   data.frame(brierScore = brierSPS$Brier$score$Brier[brierSPS$Brier$score$model == "PredictionModel"], 
-             times = times, model = "SPS")
+             times = times, model = "SPS"),
+    data.frame(brierScore = brierNull$Brier$score$Brier[brierNull$Brier$score$model == "PredictionModel"], 
+             times = times, model = "K-M")
 )
 
 cox_brier <- ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore, col = model)) +
   geom_line() +
-  xlab("Survival time (Years)") +
+  xlab("Follow-up time (Years)") +
   ylab("Brier score") +
   labs(color = "Models") +
   # ggtitle("Brier scores over time") +
-  scale_color_manual(values = q4[1:3]) + 
-  paper_gg_theme
+  scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
+  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1)))+scale_y_continuous(labels=scaleFUNy,n.breaks=8)
 
 # Combine both plots using cowplot
 plot_row <- cowplot::plot_grid(cox_ci + theme(legend.position = 'none'),
@@ -1349,25 +1359,25 @@ ab <- rbind(abCB, abCN)
 
 Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). 
 
-```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity."}
+```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity. Shrinkage occurs due to penalization."}
 library(dotwhisker)
 library(broom)
 library(dplyr)
 
 # extract coefficients for lollipop plot
-estimatescoxNet <- setDT(as.data.frame(coef(coxNet)), 
+estimatescoxNet <- data.table::setDT(as.data.frame(coef(coxNet)), 
                          keep.rownames = TRUE)
 
 estimatescoxNet$Model <- "Pen. Cox"
 colnames(estimatescoxNet) <- c("term", "estimate", "model")
 
-estimatescb <- setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), 
+estimatescb <- data.table::setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), 
                      keep.rownames = TRUE)
 # estimatescb$std.error<-0
 estimatescb$Model <- "Pen. logistic"
 colnames(estimatescb) <- c("term", "estimate", "model")
 
-estimatescoxFull <- setDT(as.data.frame(coef(coxFull)), 
+estimatescoxFull <- data.table::setDT(as.data.frame(coef(coxFull)), 
                           keep.rownames = TRUE)
 # estimatescoxFull$std.error<-0
 estimatescoxFull$Model <- "Cox"
@@ -1400,17 +1410,17 @@ dwplot(lolliplotDots) +
   scale_color_manual(values = q4[1:3])
 ```
 
-These values do not inform us of model performance. To do so, we take our hazard functions and use them to predict the absolute risk of everyone in our test set, over time. The probabilities over time for each individual are averaged, resulting in the absolute risk curves in Figure \ref{fig:cs3FinalBrier} (A). There is separation between the curves, but it is minimal. To better demonstrate the differences in performance between the models, we compare Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our penalized logistic regression model compared to both Cox regression models. However, this difference is minimal. On the other hand, all three models outperform the Kaplan-Meier model. 
+These values do not inform us of model performance. To do so, we take our hazard functions and use them to predict the absolute risk of everyone in our test set, over time. The probabilities over time for each individual are averaged, resulting in the absolute risk curves in Figure \ref{fig:cs3FinalBrier} (A). There is separation between the curves, but it is minimal. To better demonstrate the differences in performance between the models, we compare Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our penalized logistic regression model compared to both Cox regression models. The differences, however, are minimal. All three outperform the Kaplan-Meier model.
 
 ```{r cs3Final, echo=FALSE, eval=eval_cs3}
 reg_ci <- ggplot(ab, aes(Time)) +
-  geom_line(data = baseCoxComparisonData, mapping = aes(y = Full, colour = "Cox"), lwd = 1) +
-  geom_line(aes(y = absRisk, colour = Model), lwd = 1) +
-  geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M"), lwd = 1) +
-  labs(y = "Probability of Death", x = "Survival time (Years)", color = "Models") +
+  geom_step(data = baseCoxComparisonData, mapping = aes(x = Time,y = Full, colour = "Cox")) +
+  geom_line(aes(y = absRisk, colour = Model)) +
+  geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
+  labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
   # ggtitle("Absolute risk curves") +
-  scale_color_manual(values = q4, breaks = c("Cox", "Penalized Cox", "Penalized logistic", "K-M")) + 
-  paper_gg_theme
+  scale_color_manual(values = q4, breaks = c("K-M","Cox","Penalized Cox","Penalized logistic")) + 
+  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=9)
 ```
   
 ```{r eval = eval_cs3, echo = FALSE, warning = FALSE}
@@ -1457,15 +1467,16 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
 }
 ```
 
-```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} Four curves comparing the Cumulative Incidence (A) and the Brier scores (B) as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier.", warning = FALSE}
+```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest results over follow-up time.", warning = FALSE}
 # Compute Brier score for penalized models
 brierFinalResults <- Score(list("Penalized Cox" = coxNet, "Penalized Logistic" = cbFull),
                            data = cbind(subset(test, select = c(d.time, death)),
                                         as.data.frame(newx)), 
                            formula = Hist(d.time, death != 0) ~ 1, summary = NULL, 
                            se.fit = FALSE, metrics = "brier", contrasts = FALSE, times = times)
-
+#brierFinalResults$models<-as.character(brierFinalResults$models)
 # Combine Brier scores between unpenalized and penalized models before plotting
+
 data_brier <- bind_rows(
   brierFinalResults$Brier$score,
   filter(brierFull$Brier$score, model == "PredictionModel")
@@ -1481,12 +1492,12 @@ data_brier <- bind_rows(
 
 reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col = model)) +
   geom_line() +
-  xlab("Survival time (Years)") +
+  xlab("Follow-up time (years)") +
   ylab("Brier score") +
   # ggtitle("Brier score over time") +
   labs(color = "Models") +
   paper_gg_theme +  
-  scale_color_manual(values = q4)
+  scale_color_manual(values = q4) + scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=8)
 
 # Combine both plots using cowplot
 plot_row_reg <- cowplot::plot_grid(reg_ci + theme(legend.position = 'none'),
@@ -1751,11 +1762,11 @@ Our choice of modeling the log-hazard as a linear function of covariates allows 
 $$ \log \lambda(t; \alpha, \beta) = \left[\log(\alpha/\beta) - (\alpha - 1)\log(\beta)\right] + (\alpha - 1)\log t,$$
 where $\alpha,\beta$ are shape and scale parameters, respectively. Unlike \pkg{casebase}, the approach taken by \pkg{flexsurv} also allows the user to model the scale parameter as a function of covariates. Of course, this added flexibility comes at the cost of interpretability: by modeling the log-hazard directly, the parameter estimates from \pkg{casebase} can be interpreted as estimates of log-hazard ratios. To improve the flexibility of \pkg{casebase} at capturing the scale of a parametric family, we could replace the logistic regression with its quasi-likelihood counterpart and therefore model over- and under-dispersion with respect to the logistic likelihood. We defer the study of the properties and performance of such a model to a future article.
 
-Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we would like to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools could then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{Rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
+Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we would like to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools could then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
 
 In future versions of the package, we also want to increase the complement of diagnostic and inferential tools that are currently available. For example, we would like to include the ability to compute confidence intervals for the cumulative incidence curve. The delta method or parametric bootstrap are two different strategies we can use to construct approximate confidence intervals. Furthermore, we would like to include more functions to compute calibration and discrimination statistics (e.g. AUC) for our models. Saarela and Arjas [-@saarela2015non] also describe how to obtain a posterior distribution for the AUC from their model. Their approach could potentially be included in \pkg{casebase}. Finally, we want to provide more flexibility in how the case-base sampling is performed. This could be achieved by adding a \code{hazard} argument to the function \code{sampleCaseBase}. In this way, users could specify their own sampling mechanism. For example, they could provide a hazard that gives sampling probabilities that are proportional to the cardiovascular disease event rate given by the Framingham score [@saarela2015non]. 
 
-In conclusion, we presented the \proglang{R} package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practioners. 
+In conclusion, we presented the \proglang{R} package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practitioners. 
 
 ```{r, echo=FALSE, eval = FALSE}
 knitr::kable(data.frame(
