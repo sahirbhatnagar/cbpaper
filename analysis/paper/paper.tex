@@ -1076,14 +1076,14 @@ approach from \pkg{casebase}.
 \end{figure}
 \end{CodeChunk}
 
-For our penalized logistic regression model, we opt for the natural log
-of time; recall that this corresponds to a Weibull distribution. For
-fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which
-is a matrix interface to the function \code{fitSmoothHazard}. In order
-to use this interface, we first create a matrix \code{y} containing the
-time and event variables, and a matrix \code{x} containing all remaining
-covariates we would like to include in the model space. We used lasso
-penalization by setting \code{alpha = 1}. Moreover, we use the argument
+For our penalized model, we opt for the natural log of time; recall that
+this corresponds to a Weibull distribution. For fitting the penalized
+hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface
+to the function \code{fitSmoothHazard}. In order to use this interface,
+we first create a matrix \code{y} containing the time and event
+variables, and a matrix \code{x} containing all remaining covariates we
+would like to include in the model space. We used lasso penalization by
+setting \code{alpha = 1}. Moreover, we use the argument
 \code{penalty.factor} to force the time variable into the final model.
 
 \begin{CodeChunk}
@@ -1135,8 +1135,8 @@ intersection of coefficients with values greater than 0 are displayed in
 \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have
 larger estimated coefficients. This is expected, as there are no
 restrictions on the size of coefficients. The smallest coefficient
-estimates are found in penalized logistic model, aside from cancer state
-(cano).
+estimates are found in penalized case-base model, aside from cancer
+state (cano).
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1157,9 +1157,9 @@ Figure \ref{fig:cs3FinalBrier} (A). There is separation between the
 curves, but it is minimal. To better demonstrate the differences in
 performance between the models, we compare Brier scores over time. In
 Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our
-penalized logistic regression model compared to both Cox regression
-models. The differences, however, are minimal. All three outperform the
-Kaplan-Meier model.
+penalized case-base model compared to both Cox regression models. The
+differences, however, are minimal. All three outperform the Kaplan-Meier
+estimator.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1168,7 +1168,7 @@ Kaplan-Meier model.
 
 }
 
-\caption{\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest results over follow-up time.}\label{fig:riskregressionBrier}
+\caption{\label{fig:cs3FinalBrier} Comparison of Cox regression, penalized Cox regression, penalized case-base estimation, and Kaplan-Meier. (A)  Probabilities of death as it changes over follow-up time. (B) Brier scores as they change over time, where a lower score corresponds to better performace. Penalized case-base estimation produced the lowest results over follow-up time.}\label{fig:riskregressionBrier}
 \end{figure}
 \end{CodeChunk}
 
@@ -1471,7 +1471,7 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-06 17:18:33 using the following
+This report was generated on 2020-08-06 17:31:23 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1532,15 +1532,15 @@ computational environment and dependencies:
 #> [58] rlang_0.4.7         pkgconfig_2.0.3     evaluate_0.14      
 #> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
 #> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.28       
-#> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [70] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
-#> [73] withr_2.2.0         pillar_1.4.6        haven_2.2.0        
-#> [76] foreign_0.8-80      mgcv_1.8-31         nnet_7.3-14        
-#> [79] mstate_0.2.12       modelr_0.1.6        crayon_1.3.4       
-#> [82] rmarkdown_2.1       jpeg_0.1-8.1        grid_4.0.2         
-#> [85] readxl_1.3.1        reprex_0.3.0        digest_0.6.25      
-#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
-#> [91] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
+#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
+#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
+#> [73] pillar_1.4.6        haven_2.2.0         foreign_0.8-80     
+#> [76] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
+#> [79] modelr_0.1.6        crayon_1.3.4        rmarkdown_2.1      
+#> [82] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
+#> [85] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
+#> [88] numDeriv_2016.8-1.1 stats4_4.0.2        munsell_0.5.0      
+#> [91] viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
