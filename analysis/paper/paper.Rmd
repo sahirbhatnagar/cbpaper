@@ -113,7 +113,7 @@ library(visreg)
 library(lubridate)
 library(tidyverse)
 library(scales)
-options(digits = 2, scipen = 999)
+options(digits = 2)
 # set the seed for reproducible output
 set.seed(1234)
 
@@ -268,14 +268,14 @@ The functions in the \pkg{casebase} package can be divided into two categories: 
 
 ## Population-time plots
 
-The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
+Population-time plots are a descriptive visualization of incidence density, where aggregate person-time is represented by area and events as points within the area. The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
 
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime}.  
 2. The corresponding \code{plot} method for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
 By splitting these tasks, we give flexibility to the user. While the method call in Step 2 allows further customization by using the \pkg{ggplot2} [@ggplot2] family of functions, users can use for the graphics system of their choice to create population-time plots from the object created in Step 1.
 
-To illustrate these functions, we will use the European Randomized Study of Prostate Cancer Screening (ERSPC) data [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering] This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
+To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering] This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
 
 We first create the necessary dataset for producing the population time plot using the \code{popTime} function. In this example, we stratify the plot by treatment group. The resulting object inherits from class \code{popTime} and stores the exposure variable as an attribute:
 
@@ -285,10 +285,8 @@ ERSPC$ScrArm <- factor(ERSPC$ScrArm,
                        levels = c(0,1), 
                        labels = c("Control group", "Screening group"))
 
-pt_object <- casebase::popTime(ERSPC, 
-                               time = "Follow.Up.Time",
-                               event = "DeadOfPrCa",
-                               exposure = "ScrArm")
+pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
+                               event = "DeadOfPrCa", exposure = "ScrArm")
 inherits(pt_object, "popTime")
 attr(pt_object, "exposure")
 ```
@@ -299,7 +297,7 @@ We then pass this object to the corresponding \code{plot} method:
 plot(pt_object, add.base.series = TRUE)
 ```
 
-```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for ERSPC data."}
+```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The grey area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely small rectangles (person-moments). The points shown in the figure are select person-moments from the case and base series. We see that more events are observed at later follow-up times, motivating the use of a non-constant in time hazard model."}
 label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
     sep <- if (is.null(unit)) 
         ""
@@ -325,12 +323,13 @@ plot(pt_object,
      case.params = list(size = 0.8),
      base.params = list(size = 0.8)) + 
   paper_gg_theme +  
-  scale_y_continuous(labels = label_number_si())
+  scale_y_continuous(labels = label_number_si()) + 
+  ylab("Population Size")
 ```
 
 Figure \ref{fig:plot-stratified-erspc-data} is built sequentially by first adding a layer for the area representing the population time in gray, with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive *stepwise shape* in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e. from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e. from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment--in December 2003--the minimum potential follow-up is three years. Tracked further forwards in time (i.e. after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
 
-Next, layers for the case series and base series are added. The case series is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. By randomly distributing the cases, we can get a better sense of the incidence density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the cumulative incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time. The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
+Next, layers for the case series and base series are added. The y-axis location of each case moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the cumulative incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time. The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
 
 ## Parametric modeling
 
@@ -395,7 +394,7 @@ fits <- lapply(fmla, function(i) {
 })
 ```
 
-For our first case study, we return to the ERSPC study and investigate the differences in survival between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor, 2) linear function, 3) log function, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard}. Since the output object from \code{fitSmoothHazard} inherits from the \code{glm} class, we can directly use the function \code{summary}:
+For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor, 2) linear function, 3) log function, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard}. Since the output object from \code{fitSmoothHazard} inherits from the \code{glm} class, we can directly use the function \code{summary}:
 
 ```{r, eval = FALSE, echo = TRUE}
 fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
@@ -411,7 +410,62 @@ summary(fits[["gompertz"]])
 ```
 
 ```{r, eval = eval_cs1, echo=FALSE}
-summary(fits[["gompertz"]])
+print.summary.glm <- function(x,digits=max(3,getOption("digits")-3),symbolic.cor=x$symbolic.cor,
+                              signif.stars = getOption("show.signif.stars"),show.call=FALSE,show.resids=FALSE,...) {
+  if (show.call) cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
+  if (show.resids) {
+    cat("Deviance Residuals: \n")
+    if (x$df.residual > 5) {
+      x$deviance.resid <- stats::quantile(x$deviance.resid, na.rm = TRUE)
+      names(x$deviance.resid) <- c("Min", "1Q", "Median", "3Q", "Max")
+    }
+    xx <- zapsmall(x$deviance.resid, digits + 1)
+    print.default(xx, digits = digits, na.print = "", print.gap = 2)
+    cat("\n")
+  }
+  if (length(x$aliased) == 0L) cat("No Coefficients\n")
+  else {
+    df <- if ("df" %in% names(x)) x[["df"]]
+    else NULL
+    if (!is.null(df) && (nsingular <- df[3L] - df[1L])) 
+      cat("Coefficients: (", nsingular, " not defined because of singularities)\n", sep = "")
+    else cat("\nCoefficients:\n")
+    coefs <- x$coefficients
+    if (!is.null(aliased <- x$aliased) && any(aliased)) {
+      cn <- names(aliased)
+      coefs <- matrix(NA, length(aliased), 4L, dimnames = list(cn,colnames(coefs)))
+      coefs[!aliased, ] <- x$coefficients
+    }
+    stats::printCoefmat(coefs, digits = digits, signif.stars = signif.stars,na.print = "NA", ...)
+  }
+  cat("\n(Dispersion parameter for ", x$family$family, " family taken to be ", 
+      format(x$dispersion), ")\n\n", apply(cbind(paste(format(c("Null","Residual"), 
+                                                              justify = "right"), "deviance:"),
+                                                 format(unlist(x[c("null.deviance","deviance")]), digits = max(5, digits + 1)), " on", 
+                                                 format(unlist(x[c("df.null", "df.residual")])), " degrees of freedom\n"),1L,
+                                           paste, collapse = " "), sep = "")
+  if (nzchar(mess <- stats::naprint(x$na.action))) cat("  (", mess, ")\n",sep="")
+  cat("AIC: ",format(x$aic,digits=max(4,digits+1)),"\n\n",
+      "Number of Fisher Scoring iterations: ",x$iter,"\n",sep="")
+  correl <- x$correlation
+  if (!is.null(correl)) {
+    p <- NCOL(correl)
+    if (p > 1) {
+      cat("\nCorrelation of Coefficients:\n")
+      if (is.logical(symbolic.cor) && symbolic.cor) print(stats::symnum(correl,abbr.colnames=NULL))
+      else {
+        correl <- format(round(correl, 2),nsmall=2,digits=digits)
+        correl[!lower.tri(correl)] <- ""
+        print(correl[-1,-p,drop=FALSE],quote=FALSE)
+      }
+    }
+  }
+  cat("\n")
+  invisible(x)
+}
+
+
+print(summary(fits[["gompertz"]]), signif.stars = F)
 ```
 
 Next, the \code{absoluteRisk} function takes as input the \code{fitSmoothHazard} object and returns a matrix where each column corresponds to the covariate profiles specified in the \code{newdata} argument, and each row corresponds to a specified time point:
@@ -814,6 +868,29 @@ data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>%
 ```
 
 With this first case study, we explored how \pkg{casebase} allows us to fit different parametric survival models, and how we can compare the fit of each model with tools from GLMs.
+
+
+```{r interaction-ERSPC, eval = eval_cs1}
+fit_inter <- casebase::fitSmoothHazard(DeadOfPrCa ~ poly(Follow.Up.Time, 2)*ScrArm, data = ERSPC)
+summary(fit_inter)
+
+# reference category
+newdata <- data.frame(ScrArm = factor("Control group",
+                                         levels = c("Control group","Screening group")),
+                      Follow.Up.Time = seq(1,12,by =0.1))
+str(newdata)
+
+plot(fit_inter,
+     type = "hr",
+     newdata = newdata,
+     var = "ScrArm",
+     increment = 1,
+     xvar = "Follow.Up.Time",
+     ci = T,
+     rug = T)
+abline(a=1,b=0, lty = 2)
+```
+
 
 # Case study 2---Bone-marrow transplant
 
