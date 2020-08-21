@@ -1227,7 +1227,9 @@ cox_ci <- ggplot(baseCoxComparisonData, aes(Time)) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
   labs(y = "Probability of Death", x = "Follow-up time (Years)", color = "Models") +
   scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
-  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=8)
+  paper_gg_theme + 
+  scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
 ```
 
 ```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models to the unadjusted Kaplan-Meier curve. (A) Cumulative Incidence curves. For a given model, the plotted curve is the average curve of each individual in the study. Each follow-up time seen in the study was used. There are minimal differences between the curves. APS coincides with the SPS curve, as they are considerably overlapped.(B) Time-dependent Brier scores, where a lower score is better. The full model performs best overall."}
@@ -1356,7 +1358,7 @@ abCN$Model <- "Penalized Cox"
 
 abCB <- data.frame(Time = abCbFull[, 1],
                    absRisk = rowMeans(abCbFull[, -c(1)]))
-abCB$Model <- "Penalized estimation"
+abCB$Model <- "Penalized CB"
 
 ab <- rbind(abCB, abCN)
 ```
@@ -1423,8 +1425,10 @@ reg_ci <- ggplot(ab, aes(Time)) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
   labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
   # ggtitle("Absolute risk curves") +
-  scale_color_manual(values = q4, breaks = c("K-M","Cox","Penalized Cox","Penalized CB")) + 
-  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=9)
+  scale_color_manual(values = q4, breaks = c("K-M", "Cox", "Penalized Cox", "Penalized CB")) + 
+  paper_gg_theme + 
+  scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 9)
 ```
   
 ```{r eval = eval_cs3, echo = FALSE, warning = FALSE}
@@ -1438,7 +1442,7 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
   }
   
   # if (missing(cause)) stop("Argument cause should be the event type for which we predict the absolute risk.")
-  # the output of absoluteRisk is an array with dimension dependening on the length of the requested times:
+  # the output of absoluteRisk is an array with dimension depending on the length of the requested times:
   # case 1: the number of time points is 1
   #         dim(array) =  (length(time), NROW(newdata), number of causes in the data)
   if (length(times) == 1) {
@@ -1491,8 +1495,8 @@ data_brier <- bind_rows(
     model == "PredictionModel" ~ "Cox",
     TRUE ~ model
   ),
-  model = factor(model, levels = c("Cox", "Penalized Cox", "Penalized Logistic", "K-M"),
-                 labels = c("Cox", "Pen. Cox", "Pen. Logistic", "K-M")))
+  model = factor(model, levels = c("Cox", "Penalized Cox", "Penalized CB", "K-M"),
+                 labels = c("Cox", "Pen. Cox", "Pen. CB", "K-M")))
 
 reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col = model)) +
   geom_line() +
@@ -1501,7 +1505,10 @@ reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col =
   # ggtitle("Brier score over time") +
   labs(color = "Models") +
   paper_gg_theme +  
-  scale_color_manual(values = q4) + scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1))) +scale_y_continuous(labels=scaleFUNy,n.breaks=8)
+  scale_color_manual(values = q4) + 
+  scale_x_continuous(labels = scaleFUNx, 
+                     breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
 
 # Combine both plots using cowplot
 plot_row_reg <- cowplot::plot_grid(reg_ci + theme(legend.position = 'none'),
