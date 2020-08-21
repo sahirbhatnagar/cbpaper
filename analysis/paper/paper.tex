@@ -7,19 +7,15 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
-of Manitoba \AND Jesse Islam\\McGill University \And James A.
-Hanley\\McGill University \And Olli Saarela\\University of Toronto
+Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University of Manitoba \AND Jesse Islam\\McGill University \And James A. Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
-and Comparison of Event Rates}
-
-\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
-A. Hanley, Olli Saarela}
-\Plaintitle{casebase: An Alternative Framework For Survival Analysis and
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
 Comparison of Event Rates}
-\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
-Analysis}
+
+\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, Olli Saarela}
+\Plaintitle{casebase: An Alternative Framework For Survival Analysis and Comparison
+of Event Rates}
+\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
 \Abstract{
 The abstract of the article. *SRB and MT contributed equally to this
@@ -61,7 +57,7 @@ work.
       Olli Saarela\\
   University of Toronto\\
   Dalla Lana School of Public Health, 155 College Street, 6th floor,
-Toronto, Ontario M5T 3M7, Canada\\
+  Toronto, Ontario M5T 3M7, Canada\\
   E-mail: \email{olli.saarela@utoronto.ca}\\
   URL: \url{http://individual.utoronto.ca/osaarela/}\\~\\
   }
@@ -398,11 +394,14 @@ can be seen in the coding choices we made and the unit tests we wrote.
 \hypertarget{population-time-plots}{%
 \subsection{Population-time plots}\label{population-time-plots}}
 
-The case-base sampling approach described in Section \ref{theory} can be
-visualized in the form of a population time plot. These plots are
-extremely informative graphical displays of survival data and should be
-one of the first steps in an exploratory data analysis. The
-\code{popTime} function and \code{plot} method facilitate this task:
+Population-time plots are a descriptive visualization of incidence
+density, where aggregate person-time is represented by area and events
+as points within the area. The case-base sampling approach described in
+Section \ref{theory} can be visualized in the form of a population time
+plot. These plots are extremely informative graphical displays of
+survival data and should be one of the first steps in an exploratory
+data analysis. The \code{popTime} function and \code{plot} method
+facilitate this task:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -424,13 +423,14 @@ method call in Step 2 allows further customization by using the
 graphics system of their choice to create population-time plots from the
 object created in Step 1.
 
-To illustrate these functions, we will use the European Randomized Study
-of Prostate Cancer Screening (ERSPC) data \citep{schroder2009screening}
-which was extracted using the approach described in Liu \emph{et al.}
-\citeyearpar{liu2014recovering} This dataset is available through the
-\pkg{casebase} package. It contains the individual observations for
-159,893 men from seven European countries, who were between the ages of
-55 and 69 years when recruited for the trial.
+To illustrate these functions, we will use data from the European
+Randomized Study of Prostate Cancer Screening (ERSPC)
+\citep{schroder2009screening} which was extracted using the approach
+described in Liu \emph{et al.} \citeyearpar{liu2014recovering} This
+dataset is available through the \pkg{casebase} package. It contains the
+individual observations for 159,893 men from seven European countries,
+who were between the ages of 55 and 69 years when recruited for the
+trial.
 
 We first create the necessary dataset for producing the population time
 plot using the \code{popTime} function. In this example, we stratify the
@@ -440,10 +440,8 @@ plot by treatment group. The resulting object inherits from class
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> pt_object <- casebase::popTime(ERSPC, 
-R+                                time = "Follow.Up.Time",
-R+                                event = "DeadOfPrCa",
-R+                                exposure = "ScrArm")
+R> pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
+R+                                event = "DeadOfPrCa", exposure = "ScrArm")
 R> inherits(pt_object, "popTime")
 \end{CodeInput}
 
@@ -476,7 +474,7 @@ R> plot(pt_object, add.base.series = TRUE)
 
 }
 
-\caption[Population time plot for ERSPC data]{Population time plot for ERSPC data.}\label{fig:plot-stratified-erspc-data}
+\caption[Population time plots for both treatment arms in the ERSPC dataset]{Population time plots for both treatment arms in the ERSPC dataset. The grey area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely small rectangles (person-moments). The points shown in the figure are select person-moments from the case and base series. We see that more events are observed at later follow-up times, motivating the use of a non-constant in time hazard model.}\label{fig:plot-stratified-erspc-data}
 \end{figure}
 \end{CodeChunk}
 
@@ -500,18 +498,19 @@ attrition is a combination of deaths and staggered entries. As we can
 see, population-time plots summarise a wealth of information about the
 study into a simple graph.
 
-Next, layers for the case series and base series are added. The case
-series is sampled at random vertically on the plot to avoid having all
-points along the upper edge of the gray area. By randomly distributing
-the cases, we can get a better sense of the incidence density. In Figure
-\ref{fig:plot-stratified-erspc-data}, we see that more events are
-observed at later follow-up times. Therefore, a constant hazard model
-would not be appropriate in this instance as it would overestimate the
-cumulative incidence earlier on in time, and underestimate it later on.
-Finally, the base series is sampled horizontally with sampling weight
-proportional to their follow-up time. The reader should refer to the
-package vignettes for more examples and a detailed description of how to
-modify the aesthetics of a population-time plot.
+Next, layers for the case series and base series are added. The y-axis
+location of each case moment is sampled at random vertically on the plot
+to avoid having all points along the upper edge of the gray area. By
+randomly distributing the cases, we can get a sense of the incidence
+density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that
+more events are observed at later follow-up times. Therefore, a constant
+hazard model would not be appropriate in this instance as it would
+overestimate the cumulative incidence earlier on in time, and
+underestimate it later on. Finally, the base series is sampled
+horizontally with sampling weight proportional to their follow-up time.
+The reader should refer to the package vignettes for more examples and a
+detailed description of how to modify the aesthetics of a
+population-time plot.
 
 \hypertarget{parametric-modeling}{%
 \subsection{Parametric modeling}\label{parametric-modeling}}
@@ -633,27 +632,34 @@ context of four case studies.
 Screening}\label{case-study-1european-randomized-study-of-prostate-cancer-screening}}
 
 For our first case study, we return to the ERSPC study and investigate
-the differences in survival between the control and screening arms. We
-fit four models that differ in which functional form of time is used: 1)
+the differences in risk between the control and screening arms. We fit
+four models that differ in which functional form of time is used: 1)
 excluded from the linear predictor, 2) linear function, 3) log function,
 and 4) a smooth function using cubic B-splines. The models are fit using
-\code{fitSmoothHazard}. Since the output object from
-\code{fitSmoothHazard} inherits from the \code{glm} class, we can
-directly use the function \code{summary}:
+\code{fitSmoothHazard} with the familiar formula interface:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
 R> fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-R>              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-R>              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-R>              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
+R+              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
+R+              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
+R+              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
 R> 
 R> fits <- lapply(fmla, function(i) {
-R>   casebase::fitSmoothHazard(i, data = ERSPC, ratio = 100)
-R> })
-R> 
-R> summary(fits[["gompertz"]])
+R+   fitSmoothHazard(i, data = ERSPC, ratio = 100)
+R+ })
+\end{CodeInput}
+\end{CodeChunk}
+
+The output object from \code{fitSmoothHazard} inherits from the
+\code{singleEventCB} and \code{glm} classes. As such, we can directly
+use the \code{summary} generic:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> summary(fits[["splines"]]) 
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -661,28 +667,21 @@ R> summary(fits[["gompertz"]])
 
 \begin{CodeOutput}
 #> 
-#> Call:
-#> glm(formula = formula, family = binomial, data = sampleData)
-#> 
-#> Deviance Residuals: 
-#>    Min      1Q  Median      3Q     Max  
-#> -0.378  -0.162  -0.122  -0.094   3.468  
-#> 
 #> Coefficients:
-#>                       Estimate Std. Error z value            Pr(>|z|)    
-#> (Intercept)            -9.0335     0.1122  -80.54 <0.0000000000000002 ***
-#> Follow.Up.Time          0.2228     0.0145   15.32 <0.0000000000000002 ***
-#> ScrArmScreening group  -0.2340     0.0886   -2.64              0.0083 ** 
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#>                       Estimate Std. Error z value Pr(>|z|)
+#> (Intercept)           -10.2905     0.3185  -32.31  < 2e-16
+#> bs(Follow.Up.Time)1     4.3587     0.8008    5.44  5.2e-08
+#> bs(Follow.Up.Time)2     2.0890     0.4721    4.42  9.7e-06
+#> bs(Follow.Up.Time)3     4.6266     0.6910    6.70  2.1e-11
+#> ScrArmScreening group  -0.2354     0.0886   -2.66   0.0079
 #> 
 #> (Dispersion parameter for binomial family taken to be 1)
 #> 
 #>     Null deviance: 6059.0  on 54539  degrees of freedom
-#> Residual deviance: 5810.1  on 54537  degrees of freedom
-#> AIC: 5816
+#> Residual deviance: 5785.3  on 54535  degrees of freedom
+#> AIC: 5795
 #> 
-#> Number of Fisher Scoring iterations: 8
+#> Number of Fisher Scoring iterations: 9
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -695,12 +694,11 @@ argument, and each row corresponds to a specified time point:
 
 \begin{CodeInput}
 R> new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+R> new_time <- seq(0,14,0.1)
 R> 
 R> risks <- lapply(fits, function(i) {
-R>   casebase::absoluteRisk(object = i, time = seq(0,15,0.1), newdata = new_data)
+R>   absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
 R> })
-R> 
-R> head(risks[["gompertz"]])
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -709,57 +707,48 @@ In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from
 exponential model in panel (1) overestimate the cumulative incidence
 earlier on in time, and underestimate it later on. Based on our earlier
 discussion of the population-time plot, this poor fit for the
-exponential hazard was expected.
-
-In Figure \ref{fig:erspc-cox-cif} (panels 2--4), we notice a better fit
-with increasing complexity of our model for time. As noted above, the
-usual asymptotic results hold for likelihood ratio tests built using
-case-base sampling models. Therefore, we can easily test the null
-hypothesis that the exponential model is just as good as the larger (in
-terms of number of parameters) splines model:
+exponential hazard was expected. We notice a better fit with increasing
+complexity of our model for time in Figure \ref{fig:erspc-cox-cif}
+(panels 2--4). As noted above, the usual asymptotic results hold for
+likelihood ratio tests built using case-base sampling models. Therefore,
+we can easily test the null hypothesis that the Weibull model is just as
+good as the larger (in terms of number of parameters) spline model:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
 #> Analysis of Deviance Table
 #> 
-#> Model 1: DeadOfPrCa ~ ScrArm + offset(offset)
+#> Model 1: DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm + offset(offset)
 #> Model 2: DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm + offset(offset)
-#>   Resid. Df Resid. Dev Df Deviance            Pr(>Chi)    
-#> 1     54538       6053                                    
-#> 2     54535       5787  3      266 <0.0000000000000002 ***
+#>   Resid. Df Resid. Dev Df Deviance Pr(>Chi)    
+#> 1     54537       5801                         
+#> 2     54535       5785  2     15.7    4e-04 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{CodeOutput}
 \end{CodeChunk}
 
-As expected, we see that splines model provides a better fit. Similarly,
-we can compare the AIC for all four case-base models:
+The null hypothesis is rejected in favor of the spline model. Similarly,
+the AIC provides further evidence that the flexible function of time
+provides the best fit:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#>    Exp.   Gomp.   Weib. Splines 
-#>    6057    5816    6057    5797
+#>     Exp. Gompertz  Weibull  Splines 
+#>     6056     5821     5807     5795
 \end{CodeOutput}
 \end{CodeChunk}
 
-Once again, we have evidence that the splines model provides the best
-fit.
-
 \begin{CodeChunk}
 \begin{figure}
-
-{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/erspc-cox-cif-1} 
-
-}
-
-\caption{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
+\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/erspc-cox-cif-1} \caption{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
 \end{figure}
 \end{CodeChunk}
 
-In the following table, we present a side-by-side comparison of the
-hazard ratios and confidence intervals estimated from
+In Table \ref{tab:print-erspc-estimates}, we present a side-by-side
+comparison of the hazard ratios and confidence intervals estimated from
 \code{fitSmoothHazard} and the corresponding parametric model using
 \code{survival::survreg}, as well as the Cox model estimate. The hazard
 ratio estimates and confidence intervals are similar across all four
@@ -778,13 +767,13 @@ different estimates for the CIF.
 \toprule
 Model & casebase::fitSmoothHazard & survival::survreg\\
 \midrule
-Exponential & 0.81 (0.68, 0.96) & 0.81 (0.68, 0.96)\\
+Exponential & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
 \cmidrule{1-3}
-Gompertz & 0.79 (0.66, 0.94) & 0.80 (0.67, 0.95)\\
+Gompertz & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
 \cmidrule{1-3}
 Weibull & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
 \cmidrule{1-3}
-Splines & 0.81 (0.68, 0.96) & --\\
+Splines & 0.79 (0.66, 0.94) & --\\
 \bottomrule
 \multicolumn{3}{l}{Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
 \end{tabular}
@@ -792,9 +781,60 @@ Splines & 0.81 (0.68, 0.96) & --\\
 
 \end{CodeChunk}
 
+Previous re-analyses of these data suggested that the overall screening
+attributed reduction in death due to prostate cancer of 20\% was an
+underestimate \citep{hanley2010mortality}. The estimated 20\% (from a
+proportional hazards model) did not account for the delay between
+screening and the time the effect is expected to be observed. As a
+result, the null effects in years 1--7 masked the substantial reductions
+that began to appear from year 8 onwards. This motivates the use of a
+time-dependent hazard ratio which can easily be fit with the
+\pkg{casebase} package by including an interaction term with time in the
+model:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> fit_inter <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) * ScrArm, data = ERSPC)
+\end{CodeInput}
+\end{CodeChunk}
+
+In Figure \ref{fig:interaction-ERSPC} we plot the estimated death from
+prostate cancer hazard ratio and 95\textbackslash\% confidence interval
+for screening vs.~control group as a function of time using the
+\code{plot} method for objects of class \code{singleEventCB}:
+
+\begin{CodeChunk}
+
+\begin{CodeInput}
+R> plot(fit_inter, type = "hr", newdata = new_data,
+R>      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
+\end{CodeInput}
+\end{CodeChunk}
+
+The plot shows that the cures attributable to the screening only begin
+to become statistically apparent by year 7 and later. The 25-60\%
+reductions seen in years 8-12 of the study suggests a much higher
+reduction in prostate cancer due to screening than the single overall
+20\% reported in the original article.
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/interaction-ERSPC-1} 
+
+}
+
+\caption[Estimated death from prostate cancer hazard ratio and 95\% confidence interval for screening vs]{Estimated death from prostate cancer hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the cures attributable to the screening only begin to become statistically apparent by year 7 and later. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
+\end{figure}
+\end{CodeChunk}
+
 With this first case study, we explored how \pkg{casebase} allows us to
-fit different parametric survival models, and how we can compare the fit
-of each model with tools from GLMs.
+fit different parametric survival models with possible time-varying
+effects, and how we can compare the fit of each model with tools from
+GLMs.
+
+\newpage
 
 \hypertarget{case-study-2bone-marrow-transplant}{%
 \section{Case study 2---Bone-marrow
@@ -865,14 +905,14 @@ R+ )
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% CI & HR & 95\% CI\\
 \midrule
-Sex & 0.70 & (0.4, 1.23) & 0.68 & (0.39, 1.19)\\
-Disease & 0.53 & (0.29, 0.95) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.12 & (0.45, 2.78) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.45 & (0.37, 5.66) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 4.04 & (1.88, 8.68) & 4.55 & (2.09, 9.9)\\
+Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
+Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
+Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
+Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
+Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
 \addlinespace
-Source & 1.48 & (0.48, 4.54) & 1.46 & (0.47, 4.54)\\
-Age & 0.99 & (0.97, 1.01) & 0.99 & (0.97, 1.02)\\
+Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
+Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1251,7 +1291,7 @@ Akaike Information Criterion (AIC).
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 
-#>    827    790    788
+#>    827    791    790
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1303,7 +1343,7 @@ hazard function into estimates of the cumulative incidence functions.
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> [1] "absRiskCB" "matrix"    "array"
+#> [1] "absRiskCB" "matrix"
 \end{CodeOutput}
 
 
@@ -1316,7 +1356,7 @@ We can also plot the hazard ratio:
 \begin{CodeChunk}
 
 
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/unnamed-chunk-9-1} \end{center}
+\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/unnamed-chunk-11-1} \end{center}
 
 \end{CodeChunk}
 
@@ -1471,22 +1511,27 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-07 09:30:39 using the following
+This report was generated on 2020-08-21 16:53:49 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> R version 4.0.2 (2020-06-22)
-#> Platform: x86_64-apple-darwin17.0 (64-bit)
-#> Running under: macOS Catalina 10.15.6
+#> R version 3.6.2 (2019-12-12)
+#> Platform: x86_64-pc-linux-gnu (64-bit)
+#> Running under: Pop!_OS 19.10
 #> 
 #> Matrix products: default
-#> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
+#> LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.3.7.so
 #> 
 #> locale:
-#> [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
+#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 #> 
 #> attached base packages:
 #> [1] splines   stats     graphics  grDevices utils     datasets  methods  
@@ -1496,52 +1541,51 @@ computational environment and dependencies:
 #>  [1] broom_0.7.0               dotwhisker_0.5.0         
 #>  [3] timereg_1.9.4             glue_1.4.1               
 #>  [5] scales_1.1.1              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_1.0.1              
+#>  [7] stringr_1.4.0             dplyr_1.0.0              
 #>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.1.1               ggplot2_3.3.2            
-#> [13] tidyverse_1.3.0           lubridate_1.7.9          
-#> [15] visreg_2.7.0              tibble_3.0.3             
+#> [11] tidyr_1.1.0               ggplot2_3.3.2.9000       
+#> [13] tidyverse_1.3.0           lubridate_1.7.4          
+#> [15] visreg_2.7.0              tibble_3.0.1             
 #> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [19] flexsurv_1.1.1            survival_3.2-3           
+#> [19] flexsurv_1.1.1            survival_3.1-8           
 #> [21] pracma_2.2.9              magrittr_1.5             
 #> [23] kableExtra_1.1.0          glmnet_4.0-2             
-#> [25] Matrix_1.2-18             data.table_1.13.0        
+#> [25] Matrix_1.2-18             data.table_1.12.8        
 #> [27] cowplot_1.0.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0.9000      
+#> [29] casebase_0.9.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.4      htmlTable_1.13.3    base64enc_0.1-3    
-#>  [7] fs_1.4.1            rstudioapi_0.11     farver_2.0.3       
-#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
-#> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
+#>  [4] ggstance_0.3.3      htmlTable_1.13.3    base64enc_0.1-3    
+#>  [7] fs_1.3.2            rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.0-12     
+#> [13] xml2_1.3.0          codetools_0.2-16    knitr_1.29         
 #> [16] Formula_1.2-3       jsonlite_1.7.0      cluster_2.1.0      
-#> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
-#> [22] httr_1.4.2          backports_1.1.8     assertthat_0.2.1   
+#> [19] dbplyr_1.4.2        png_0.1-7           compiler_3.6.2     
+#> [22] httr_1.4.1          backports_1.1.8     assertthat_0.2.1   
 #> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.55       tools_4.0.2         gtable_0.3.0       
-#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
-#> [34] nlme_3.1-148        iterators_1.0.12    xfun_0.15          
-#> [37] rvest_0.3.6         lifecycle_0.2.0     polspline_1.1.17   
-#> [40] muhaz_1.2.6.1       MASS_7.3-51.6       zoo_1.8-8          
+#> [28] quantreg_5.54       tools_3.6.2         gtable_0.3.0       
+#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.3.1        
+#> [34] nlme_3.1-143        iterators_1.0.12    xfun_0.15          
+#> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
+#> [40] muhaz_1.2.6.1       MASS_7.3-51.5       zoo_1.8-7          
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
-#> [46] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
+#> [46] RColorBrewer_1.1-2  rticles_0.13        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
 #> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
-#> [58] rlang_0.4.7         pkgconfig_2.0.3     evaluate_0.14      
-#> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
+#> [55] checkmate_2.0.0     lava_1.6.6          shape_1.4.4        
+#> [58] rlang_0.4.6         pkgconfig_2.0.3     evaluate_0.14      
+#> [61] lattice_0.20-38     labeling_0.3        htmlwidgets_1.5.1  
+#> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.27.1     
 #> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [70] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
-#> [73] withr_2.2.0         pillar_1.4.6        haven_2.3.1        
-#> [76] foreign_0.8-80      mgcv_1.8-31         nnet_7.3-14        
-#> [79] mstate_0.2.12       modelr_0.1.8        crayon_1.3.4       
-#> [82] rmarkdown_2.3       jpeg_0.1-8.1        grid_4.0.2         
-#> [85] readxl_1.3.1        blob_1.2.1          reprex_0.3.0       
-#> [88] digest_0.6.25       webshot_0.5.2       numDeriv_2016.8-1.1
-#> [91] stats4_4.0.2        munsell_0.5.0       viridisLite_0.3.0  
-#> [94] quadprog_1.5-8
+#> [70] Hmisc_4.3-1         multcomp_1.4-12     DBI_1.1.0          
+#> [73] withr_2.2.0         pillar_1.4.4        haven_2.3.1        
+#> [76] foreign_0.8-74      mgcv_1.8-31         nnet_7.3-12        
+#> [79] mstate_0.2.12       modelr_0.1.5        crayon_1.3.4       
+#> [82] rmarkdown_2.3       jpeg_0.1-8.1        grid_3.6.2         
+#> [85] readxl_1.3.1        reprex_0.3.0        digest_0.6.25      
+#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_3.6.2       
+#> [91] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1550,9 +1594,9 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    master /Users/maxturgeon/Documents/git_repos/cbpaper
-#> Remote:   master @ origin (git@github.com:sahirbhatnagar/cbpaper.git)
-#> Head:     [06b07b3] 2020-08-06: incorporate Ollis comments on CS 3
+#> Local:    fix-cs1 /home/sahir/git_repositories/cbpaper
+#> Remote:   fix-cs1 @ origin (https://github.com/sahirbhatnagar/cbpaper.git)
+#> Head:     [349d153] 2020-08-21: fix merge conflicts
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1560,3 +1604,4 @@ The current Git commit details are:
 
 
 \end{document}
+

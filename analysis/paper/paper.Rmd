@@ -113,7 +113,7 @@ library(visreg)
 library(lubridate)
 library(tidyverse)
 library(scales)
-options(digits = 2, scipen = 999)
+options(digits = 2)
 # set the seed for reproducible output
 set.seed(1234)
 
@@ -237,45 +237,20 @@ Finally, several packages include functions to estimate the CIF. The correspondi
 \label{tab:surv-pkgs}
 \end{table}
 
-<!--
-\begin{table}
-  \begin{tabular}{p{1.8in}lll}
-\hline
-    &  Parameters &  Density \proglang{R} function & \code{dist}\\
-    & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
-\hline
-    Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
-    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
-    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
-    Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
-    Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
-    Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
-    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
-    Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
-    Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
-    Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
-    Generalized F     (original)  & \code{{\color{red}{mu}}, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
-\hline
-  \end{tabular}
-  \caption{Built-in parametric survival distributions in \pkg{flexsurv}.}
-  \label{tab:dists}
-\end{table}
--->
-
 # Implementation details
 
 The functions in the \pkg{casebase} package can be divided into two categories: 1) exploratory data analysis, in the form of population-time plots; and 2) parametric modeling of the hazard function. We strove for compatibility with both \code{data.frame}s and \code{data.table}s; this can be seen in the coding choices we made and the unit tests we wrote.
 
 ## Population-time plots
 
-The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
+Population-time plots are a descriptive visualization of incidence density, where aggregate person-time is represented by area and events as points within the area. The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
 
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime}.  
 2. The corresponding \code{plot} method for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
 By splitting these tasks, we give flexibility to the user. While the method call in Step 2 allows further customization by using the \pkg{ggplot2} [@ggplot2] family of functions, users can use for the graphics system of their choice to create population-time plots from the object created in Step 1.
 
-To illustrate these functions, we will use the European Randomized Study of Prostate Cancer Screening (ERSPC) data [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering] This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
+To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering] This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
 
 We first create the necessary dataset for producing the population time plot using the \code{popTime} function. In this example, we stratify the plot by treatment group. The resulting object inherits from class \code{popTime} and stores the exposure variable as an attribute:
 
@@ -285,10 +260,8 @@ ERSPC$ScrArm <- factor(ERSPC$ScrArm,
                        levels = c(0,1), 
                        labels = c("Control group", "Screening group"))
 
-pt_object <- casebase::popTime(ERSPC, 
-                               time = "Follow.Up.Time",
-                               event = "DeadOfPrCa",
-                               exposure = "ScrArm")
+pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
+                               event = "DeadOfPrCa", exposure = "ScrArm")
 inherits(pt_object, "popTime")
 attr(pt_object, "exposure")
 ```
@@ -299,7 +272,7 @@ We then pass this object to the corresponding \code{plot} method:
 plot(pt_object, add.base.series = TRUE)
 ```
 
-```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for ERSPC data."}
+```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The grey area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely small rectangles (person-moments). The points shown in the figure are select person-moments from the case and base series. We see that more events are observed at later follow-up times, motivating the use of a non-constant in time hazard model."}
 label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
     sep <- if (is.null(unit)) 
         ""
@@ -325,12 +298,13 @@ plot(pt_object,
      case.params = list(size = 0.8),
      base.params = list(size = 0.8)) + 
   paper_gg_theme +  
-  scale_y_continuous(labels = label_number_si())
+  scale_y_continuous(labels = label_number_si()) + 
+  ylab("Population Size")
 ```
 
 Figure \ref{fig:plot-stratified-erspc-data} is built sequentially by first adding a layer for the area representing the population time in gray, with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive *stepwise shape* in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e. from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e. from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment--in December 2003--the minimum potential follow-up is three years. Tracked further forwards in time (i.e. after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
 
-Next, layers for the case series and base series are added. The case series is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. By randomly distributing the cases, we can get a better sense of the incidence density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the cumulative incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time. The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
+Next, layers for the case series and base series are added. The y-axis location of each case moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the cumulative incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time. The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
 
 ## Parametric modeling
 
@@ -384,66 +358,111 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1---European Randomized Study of Prostate Cancer Screening
 
-```{r, eval = eval_cs1, echo=FALSE}
+For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor, 2) linear function, 3) log function, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard} with the familiar formula interface:
+
+```{r, eval = eval_cs1, echo = -1}
+set.seed(12)
 fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
 
 fits <- lapply(fmla, function(i) {
-  casebase::fitSmoothHazard(i, data = ERSPC, ratio = 100)
+  fitSmoothHazard(i, data = ERSPC, ratio = 100)
 })
 ```
 
-For our first case study, we return to the ERSPC study and investigate the differences in survival between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor, 2) linear function, 3) log function, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard}. Since the output object from \code{fitSmoothHazard} inherits from the \code{glm} class, we can directly use the function \code{summary}:
+The output object from \code{fitSmoothHazard} inherits from the \code{singleEventCB} and \code{glm} classes. As such, we can directly use the \code{summary} generic:
 
-```{r, eval = FALSE, echo = TRUE}
-fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-             gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-             weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-             splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
-
-fits <- lapply(fmla, function(i) {
-  casebase::fitSmoothHazard(i, data = ERSPC, ratio = 100)
-})
-
-summary(fits[["gompertz"]])
+```{r, eval = FALSE, echo=TRUE}
+summary(fits[["splines"]]) 
 ```
+
 
 ```{r, eval = eval_cs1, echo=FALSE}
-summary(fits[["gompertz"]])
+print.summary.glm <- function(x,digits=max(3,getOption("digits")-3),symbolic.cor=x$symbolic.cor,
+                              signif.stars = getOption("show.signif.stars"),show.call=FALSE,show.resids=FALSE,...) {
+  if (show.call) cat("Call:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n", sep = "")
+  if (show.resids) {
+    cat("Deviance Residuals: \n")
+    if (x$df.residual > 5) {
+      x$deviance.resid <- stats::quantile(x$deviance.resid, na.rm = TRUE)
+      names(x$deviance.resid) <- c("Min", "1Q", "Median", "3Q", "Max")
+    }
+    xx <- zapsmall(x$deviance.resid, digits + 1)
+    print.default(xx, digits = digits, na.print = "", print.gap = 2)
+    cat("\n")
+  }
+  if (length(x$aliased) == 0L) cat("No Coefficients\n")
+  else {
+    df <- if ("df" %in% names(x)) x[["df"]]
+    else NULL
+    if (!is.null(df) && (nsingular <- df[3L] - df[1L])) 
+      cat("Coefficients: (", nsingular, " not defined because of singularities)\n", sep = "")
+    else cat("\nCoefficients:\n")
+    coefs <- x$coefficients
+    if (!is.null(aliased <- x$aliased) && any(aliased)) {
+      cn <- names(aliased)
+      coefs <- matrix(NA, length(aliased), 4L, dimnames = list(cn,colnames(coefs)))
+      coefs[!aliased, ] <- x$coefficients
+    }
+    stats::printCoefmat(coefs, digits = digits, signif.stars = signif.stars,na.print = "NA", ...)
+  }
+  cat("\n(Dispersion parameter for ", x$family$family, " family taken to be ", 
+      format(x$dispersion), ")\n\n", apply(cbind(paste(format(c("Null","Residual"), 
+                                                              justify = "right"), "deviance:"),
+                                                 format(unlist(x[c("null.deviance","deviance")]), digits = max(5, digits + 1)), " on", 
+                                                 format(unlist(x[c("df.null", "df.residual")])), " degrees of freedom\n"),1L,
+                                           paste, collapse = " "), sep = "")
+  if (nzchar(mess <- stats::naprint(x$na.action))) cat("  (", mess, ")\n",sep="")
+  cat("AIC: ",format(x$aic,digits=max(4,digits+1)),"\n\n",
+      "Number of Fisher Scoring iterations: ",x$iter,"\n",sep="")
+  correl <- x$correlation
+  if (!is.null(correl)) {
+    p <- NCOL(correl)
+    if (p > 1) {
+      cat("\nCorrelation of Coefficients:\n")
+      if (is.logical(symbolic.cor) && symbolic.cor) print(stats::symnum(correl,abbr.colnames=NULL))
+      else {
+        correl <- format(round(correl, 2),nsmall=2,digits=digits)
+        correl[!lower.tri(correl)] <- ""
+        print(correl[-1,-p,drop=FALSE],quote=FALSE)
+      }
+    }
+  }
+  cat("\n")
+  invisible(x)
+}
+
+print(summary(fits[["splines"]]), signif.stars = F)
 ```
 
 Next, the \code{absoluteRisk} function takes as input the \code{fitSmoothHazard} object and returns a matrix where each column corresponds to the covariate profiles specified in the \code{newdata} argument, and each row corresponds to a specified time point:
 
 ```{r, eval=FALSE, echo=echo_plot_code}
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+new_time <- seq(0,14,0.1)
 
 risks <- lapply(fits, function(i) {
-  casebase::absoluteRisk(object = i, time = seq(0,15,0.1), newdata = new_data)
+  absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
 })
-
-head(risks[["gompertz"]])
 ```
 
-In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from \pkg{casebase} on the Cox model CIF. The CIF estimates for the exponential model in panel (1) overestimate the cumulative incidence earlier on in time, and underestimate it later on. Based on our earlier discussion of the population-time plot, this poor fit for the exponential hazard was expected. 
-
-In Figure \ref{fig:erspc-cox-cif} (panels 2--4), we notice a better fit with increasing complexity of our model for time. As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) splines model:
+In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from \pkg{casebase} on the Cox model CIF. The CIF estimates for the exponential model in panel (1) overestimate the cumulative incidence earlier on in time, and underestimate it later on. Based on our earlier discussion of the population-time plot, this poor fit for the exponential hazard was expected. We notice a better fit with increasing complexity of our model for time in Figure \ref{fig:erspc-cox-cif} (panels 2--4). As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the Weibull model is just as good as the larger (in terms of number of parameters) spline model:
 
 ```{r erscp-compare, eval = eval_cs1, echo = FALSE}
-anova(fits$exponential, fits$splines, test = "LRT")
+anova(fits$weibull, fits$splines, test = "LRT")
 ```
 
-As expected, we see that splines model provides a better fit. Similarly, we can compare the AIC for all four case-base models:
+The null hypothesis is rejected in favor of the spline model. Similarly, the AIC provides further evidence that the flexible function of time provides the best fit:
 
 ```{r erscp-aic, eval = eval_cs1, echo=FALSE}
 c("Exp." = AIC(fits$exponential),
-  "Gomp." = AIC(fits$gompertz),
-  "Weib." = AIC(fits$exponential),
+  "Gompertz" = AIC(fits$gompertz),
+  "Weibull" = AIC(fits$weibull),
   "Splines" = AIC(fits$splines))
 ```
 
-Once again, we have evidence that the splines model provides the best fit.
 
 <!--A common choice for this type of analysis is to use a Cox regression model and estimate the hazard ratio for the screening group (relative to the control group). In \proglang{R}, it can be done as follows:-->
 
@@ -452,24 +471,16 @@ surv_obj <- with(ERSPC, Surv(Follow.Up.Time, DeadOfPrCa))
 cox_model <- survival::coxph(surv_obj ~ ScrArm, data = ERSPC)
 ```
 
-```{r erspc-cox-cif, eval = eval_cs1, echo = FALSE, fig.width=8, fig.height=6, fig.cap="CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \\code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time."}
+```{r erspc-cox-cif, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \\code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time."}
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 myCols <- cbPalette[c(4,7)]
-new_data <- data.frame(
-  ScrArm = c("Control group", "Screening group")#,
-  # ignore = 99
-)
+
+new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+new_time <- seq(0,14.5,0.1)
 
 risks <- lapply(fits, function(i) {
-  casebase::absoluteRisk(object = i, time = seq(0,15,0.1), newdata = new_data)
+  casebase::absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
 })
-
-aft_fits <- lapply(list("exp","gompertz","weibull"), function(i)
-  flexsurv::flexsurvreg(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
-                           data = ERSPC, dist = i)
-  )
-
-names(aft_fits) <- list("exponential","gompertz","weibull")
 
 # dev.off()
 layout(matrix(1:4, ncol = 2, byrow = FALSE), respect = FALSE)
@@ -478,7 +489,9 @@ plot(survfit(cox_model, newdata = new_data),
      ylab = "",
      xlab = "",
      fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = myCols, 
+     xmax = max(new_time),
+     # xlim = range(new_time), 
+     conf.int = FALSE, col = myCols, 
      # main = sprintf("Estimated Cumulative Incidence (risk) of Death from Prostate 
      #                Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
      #                exp(coef(cox_model)), 
@@ -497,43 +510,51 @@ legend("topleft",
        bg = "gray90")
 lines(risks$exponential[,1], risks$exponential[,2], col = myCols[1], lty = 2, lwd = 2)
 lines(risks$exponential[,1], risks$exponential[,3], col = myCols[2], lty = 2, lwd = 2)
-text(x = 15*0.97, y = 0.05/100, labels = "(1)", cex = 1.5)
+text(x = max(new_time)*0.97, y = 0.05/100, labels = "(1)", cex = 1.5)
 
 par(mar = c(4.1, 4.1, 0, 0))
 plot(survfit(cox_model, newdata = new_data),
      ylab = "", xlab = "",
      fun = "event",
-     xlim = c(0,15), conf.int = FALSE, col = myCols, 
+     # xlim = c(0,15), 
+     xmax = max(new_time),
+     conf.int = FALSE, col = myCols, 
      lwd = 2,
      yscale = 100)
 lines(risks$weibull[,1], risks$weibull[,2], col = myCols[1], lty = 2, lwd = 2)
 lines(risks$weibull[,1], risks$weibull[,3], col = myCols[2], lty = 2, lwd = 2)  
-text(x = 15*0.97, y = 0.05/100, labels = "(3)", cex = 1.5)
+text(x = max(new_time)*0.97, y = 0.05/100, labels = "(3)", cex = 1.5)
 mtext("Cumulative incidence (%)", side = 2, line = -1.5, outer = TRUE)
 
 par(mar = c(0, 0, 4.1, 3.9))
 plot(survfit(cox_model, newdata = new_data),
      ylab = "",xlab = "",
      fun = "event",
-     xaxt = 'n', yaxt = 'n',
-     xlim = c(0,15), conf.int = FALSE, col = myCols, 
+      xaxt = 'n', yaxt = 'n',
+     # xlim = c(0,15), 
+     xmax = max(new_time),
+     conf.int = FALSE, col = myCols, 
      lwd = 2,
      yscale = 100)
 lines(risks$gompertz[,1], risks$gompertz[,2], col = myCols[1], lty = 2, lwd = 2)
 lines(risks$gompertz[,1], risks$gompertz[,3], col = myCols[2], lty = 2, lwd = 2)
-text(x = 15*0.97, y = 0.05/100, labels = "(2)", cex = 1.5)
+text(x = max(new_time)*0.97, y = 0.05/100, labels = "(2)", cex = 1.5)
+
+
 
 par(mar = c(4.1, 0, 0, 3.9))
 plot(survfit(cox_model, newdata = new_data),
      ylab = "",xlab = "",
      fun = "event",
      yaxt = 'n',
-     xlim = c(0,15), conf.int = FALSE, col = myCols, 
+     # xlim = c(0,15), 
+     xmax = max(new_time),
+     conf.int = FALSE, col = myCols, 
      lwd = 2,
      yscale = 100)
 lines(risks$splines[,1], risks$splines[,2], col = myCols[1], lty = 2, lwd = 2)
 lines(risks$splines[,1], risks$splines[,3], col = myCols[2], lty = 2, lwd = 2)
-text(x = 15*0.97, y = 0.05/100, labels = "(4)", cex = 1.5)
+text(x = max(new_time)*0.97, y = 0.05/100, labels = "(4)", cex = 1.5)
 mtext("Years since randomization", side = 1, line = -1.5, outer = TRUE)
 ```
 
@@ -573,79 +594,11 @@ mtext("Years since randomization", side = 1, line = -1.5, outer = TRUE)
 # coef(casebase_weibull)
 ```
 
-```{r erspc-casebase-cif, eval = FALSE, echo = FALSE}
-# smooth_risk_exp <- casebase::absoluteRisk(
-#   object = casebase_exponential,
-#   time = seq(0, 15, 0.1),
-#   newdata = new_data
-# )
-# 
-# plot(survfit(cox_model, newdata = new_data),
-#   xlab = "Years since Randomization",
-#   ylab = "Cumulative Incidence (%)",
-#   fun = "event",
-#   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-#   main = sprintf(
-#     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-#                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-#     exp(coef(cox_model)),
-#     exp(confint(cox_model))[1],
-#     exp(confint(cox_model))[2]
-#   ),
-#   ylim = c(0, 2), yscale = 100
-# )
-# lines(smooth_risk_exp[, 1], smooth_risk_exp[, 2], col = "red", lty = 2)
-# lines(smooth_risk_exp[, 1], smooth_risk_exp[, 3], col = "blue", lty = 2)
-# 
-# legend("topleft",
-#   legend = c(
-#     "Control group (Cox)", "Control group (Casebase)",
-#     "Screening group (Cox)", "Screening group (Casebase)"
-#   ),
-#   col = c("red", "red", "blue", "blue"),
-#   lty = c(1, 2, 1, 2),
-#   bg = "gray90"
-# )
-```
 
 <!-- The \code{fitSmoothHazard} function provides an estimate of the hazard function $h(x, t)$ is the hazard function, where $t$ denotes the numerical value of a point in prognostic/prospective time and $x$ is the realization of the vector $X$ of variates based on the patient's profile and intervention (if any). -->
 <!-- The \code{absoluteRisk} function provides an estimate of the cumulative incidence curves for a specific risk profile using the following equation: -->
 <!-- $$ CI(x, t) = 1 - \exp\left( - \int_0^t h(x, u) \textrm{d}u \right) $$ -->
 
-```{r erspc-casebase-weibull-cif, eval = FALSE, echo = FALSE}
-# smooth_risk_time <- casebase::absoluteRisk(
-#   object = casebase_time,
-#   time = seq(0, 15, 0.1),
-#   newdata = new_data
-# )
-# 
-# plot(survfit(cox_model, newdata = new_data),
-#   xlab = "Years since Randomization",
-#   ylab = "Cumulative Incidence (%)",
-#   fun = "event",
-#   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-#   main = sprintf(
-#     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-#                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-#     exp(coef(cox_model)),
-#     exp(confint(cox_model))[1],
-#     exp(confint(cox_model))[2]
-#   ),
-#   ylim = c(0, 2), yscale = 100
-# )
-# lines(smooth_risk_time[, 1], smooth_risk_time[, 2], col = "red", lty = 2)
-# lines(smooth_risk_time[, 1], smooth_risk_time[, 3], col = "blue", lty = 2)
-# 
-# legend("topleft",
-#   legend = c(
-#     "Control group (Cox)", "Control group (Casebase)",
-#     "Screening group (Cox)", "Screening group (Casebase)"
-#   ),
-#   col = c("red", "red", "blue", "blue"),
-#   lty = c(1, 2, 1, 2),
-#   bg = "gray90"
-# )
-```
 
 ```{r erspc-95ci22, echo = FALSE, eval = eval_cs1}
 CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
@@ -653,6 +606,14 @@ CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
 # CI_gompertz <- c(exp(coef(fits$gompertz))["ScrArmScreening group"], exp(confint(fits$gompertz))["ScrArmScreening group",])
 # CI_weibull <- c(exp(coef(fits$weibull))["ScrArmScreening group"], exp(confint(fits$weibull))["ScrArmScreening group",])
 # CI_splines <- c(exp(coef(fits$splines))["ScrArmScreening group"], exp(confint(fits$splines))["ScrArmScreening group",])
+
+aft_fits <- lapply(list("exp","gompertz","weibull"), function(i)
+  flexsurv::flexsurvreg(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm,
+                           data = ERSPC, dist = i)
+  )
+
+names(aft_fits) <- list("exponential","gompertz","weibull")
+
 
 # function to exponentiate HR and CI and return a HR (lower, Upper) character
 exp_est_ci <- function(model = c("exponential","gompertz","weibull","splines"),
@@ -730,42 +691,8 @@ ptable <- cbind(list("Exponential","Gompertz","Weibull","Splines"),
 #   kable_styling()
 ```
 
-```{r erspc-casebase-splines-cif, eval = FALSE, echo = FALSE}
-# smooth_risk_splines <- absoluteRisk(
-#   object = casebase_splines,
-#   time = seq(0, 15, 0.1),
-#   newdata = new_data
-# )
-# 
-# plot(survfit(cox_model, newdata = new_data),
-#   xlab = "Years since Randomization",
-#   ylab = "Cumulative Incidence (%)",
-#   fun = "event",
-#   xlim = c(0, 15), conf.int = FALSE, col = c("red", "blue"),
-#   main = sprintf(
-#     "Estimated Cumulative Incidence (risk) of Death from Prostate 
-#                     Cancer Screening group Hazard Ratio: %.2g (%.2g, %.2g)",
-#     exp(coef(cox_model)),
-#     exp(confint(cox_model))[1],
-#     exp(confint(cox_model))[2]
-#   ),
-#   ylim = c(0, 2), yscale = 100
-# )
-# lines(smooth_risk_splines[, 1], smooth_risk_splines[, 2], col = "red", lty = 2)
-# lines(smooth_risk_splines[, 1], smooth_risk_splines[, 3], col = "blue", lty = 2)
-# 
-# legend("topleft",
-#   legend = c(
-#     "Control group (Cox)", "Control group (Casebase)",
-#     "Screening group (Cox)", "Screening group (Casebase)"
-#   ),
-#   col = c("red", "red", "blue", "blue"),
-#   lty = c(1, 2, 1, 2),
-#   bg = "gray90"
-# )
-```
 
-In the following table, we present a side-by-side comparison of the hazard ratios and confidence intervals estimated from \code{fitSmoothHazard} and the corresponding parametric model using \code{survival::survreg}, as well as the Cox model estimate. The hazard ratio estimates and confidence intervals are similar across all four models. This reinforces the idea that, under proportional hazards, we do not need to model the full hazard to obtain reliable estimates of the hazard ratio. Nevertheless, Figure \ref{fig:erspc-cox-cif} shows that different parametric models can still give rise to qualitatively different estimates for the CIF. 
+In Table \ref{tab:print-erspc-estimates}, we present a side-by-side comparison of the hazard ratios and confidence intervals estimated from \code{fitSmoothHazard} and the corresponding parametric model using \code{survival::survreg}, as well as the Cox model estimate. The hazard ratio estimates and confidence intervals are similar across all four models. This reinforces the idea that, under proportional hazards, we do not need to model the full hazard to obtain reliable estimates of the hazard ratio. Nevertheless, Figure \ref{fig:erspc-cox-cif} shows that different parametric models can still give rise to qualitatively different estimates for the CIF. 
 
 ```{r print-erspc-estimates, eval = eval_cs1}
 ## ---- print-sim-table ----
@@ -791,29 +718,106 @@ kable(ptable, "latex", booktabs = TRUE, align = c("l","c","c"),
 ```
 
 ```{r erspc-95ci, echo = FALSE, eval = FALSE}
-CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
-CI_exp <- c(exp(coef(casebase_exponential))["ScrArmScreening group"], exp(confint(casebase_exponential))["ScrArmScreening group", ])
-CI_time <- c(exp(coef(casebase_time))["ScrArmScreening group"], exp(confint(casebase_time))["ScrArmScreening group", ])
-CI_splines <- c(exp(coef(casebase_splines))["ScrArmScreening group"], exp(confint(casebase_splines))["ScrArmScreening group", ])
-
-table_ci <- rbind(CI_cox, CI_exp, CI_time, CI_splines)
-colnames(table_ci) <- c("HR", "LB", "UB")
-
-data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>%
-  bind_cols(as.data.frame(table_ci)) %>%
-  mutate(
-    CI = paste0(
-      "(", round(LB, 2), ", ",
-      round(UB, 2), ")"
-    ),
-    Width = UB - LB
-  ) %>%
-  dplyr::select(-LB, -UB) %>%
-  knitr::kable(format = "latex", booktabs = TRUE) %>%
-  kable_styling()
+# CI_cox <- c(exp(coef(cox_model)), exp(confint(cox_model)))
+# CI_exp <- c(exp(coef(casebase_exponential))["ScrArmScreening group"], exp(confint(casebase_exponential))["ScrArmScreening group", ])
+# CI_time <- c(exp(coef(casebase_time))["ScrArmScreening group"], exp(confint(casebase_time))["ScrArmScreening group", ])
+# CI_splines <- c(exp(coef(casebase_splines))["ScrArmScreening group"], exp(confint(casebase_splines))["ScrArmScreening group", ])
+# 
+# table_ci <- rbind(CI_cox, CI_exp, CI_time, CI_splines)
+# colnames(table_ci) <- c("HR", "LB", "UB")
+# 
+# data.frame(Model = c("Cox", "Exponential", "Weibull", "Splines")) %>%
+#   bind_cols(as.data.frame(table_ci)) %>%
+#   mutate(
+#     CI = paste0(
+#       "(", round(LB, 2), ", ",
+#       round(UB, 2), ")"
+#     ),
+#     Width = UB - LB
+#   ) %>%
+#   dplyr::select(-LB, -UB) %>%
+#   knitr::kable(format = "latex", booktabs = TRUE) %>%
+#   kable_styling()
 ```
 
-With this first case study, we explored how \pkg{casebase} allows us to fit different parametric survival models, and how we can compare the fit of each model with tools from GLMs.
+Previous re-analyses of these data suggested that the overall screening attributed reduction in death due to prostate cancer of 20% was an underestimate [@hanley2010mortality]. The estimated 20% (from a proportional hazards model) did not account for the delay between screening and the time the effect is expected to be observed. As a result, the null effects in years 1–7 masked the substantial reductions that began to appear from year 8 onwards. This motivates the use of a time-dependent hazard ratio which can easily be fit with the \pkg{casebase} package by including an interaction term with time in the model:
+
+```{r, echo=-1, eval = eval_cs1}
+set.seed(12)
+fit_inter <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) * ScrArm, data = ERSPC)
+```
+
+In Figure \ref{fig:interaction-ERSPC} we plot the estimated death from prostate cancer hazard ratio and 95\\% confidence interval for screening vs. control group as a function of time using the \code{plot} method for objects of class \code{singleEventCB}:
+
+```{r, echo = TRUE, eval = FALSE}
+plot(fit_inter, type = "hr", newdata = new_data,
+     var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
+```
+
+The plot shows that the cures attributable to the screening only begin to become statistically apparent by year 7 and later. The 25-60% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20% reported in the original article. 
+
+```{r interaction-ERSPC, eval = eval_cs1, fig.width=8, fig.height=6, fig.cap='Estimated death from prostate cancer hazard ratio and 95\\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\\% confidence intervals are calculated using the delta method. The plot shows that the cures attributable to the screening only begin to become statistically apparent by year 7 and later. The 25-60\\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\\% reported in the original article.'}
+
+# library(casebase)
+# library(splines)
+# data("ERSPC")
+# ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+#                        levels = c(0,1), 
+#                        labels = c("Control group", "Screening group"))
+# set.seed(12345)
+# fit_inter <- casebase::fitSmoothHazard(DeadOfPrCa ~ poly(Follow.Up.Time,2)*ScrArm, data = ERSPC)
+# summary(fit_inter)
+
+# library(visreg)
+# plot(fit_inter,
+#      type = "hazard",
+#      hazard.params = list(xvar = "Follow.Up.Time",
+#                           by = "ScrArm",
+#                           alpha = 0.05,
+#                           ylab = "Hazard"))
+
+# reference category
+#dev.off()
+new_time <- seq(1, 12, by  = 0.1)
+new_data <- data.frame(ScrArm = factor("Control group",
+                                         levels = c("Control group","Screening group")),
+                      Follow.Up.Time = new_time)
+
+par(oma = c(0,1,0,8))
+tt <- plot(fit_inter,
+     type = "hr",
+     newdata = new_data,
+     var = "ScrArm",
+     increment = 1,
+     xvar = "Follow.Up.Time",
+     ci = T,
+     xlab = "Follow-up time (years)",
+     ylab = "Death from prostate cancer hazard ratio",
+     ylim = c(0,1.50),
+     yaxt = 'n',
+     xaxt = "n",
+     rug = T)
+# abline(a=1,b=0, lty = 2)
+axis(2, at = seq(0,1.50, by=0.25), las = 2)
+axis(1, at = seq(min(new_time),max(new_time), by=1))
+for( i in seq(0,1.50, by=0.25)) {
+  abline(h = i, lty = 1, col = "lightgrey")
+}
+for( i in seq(min(new_time),max(new_time), by=1)) {
+  abline(v = i, lty = 1, col = "lightgrey")
+}
+for(i in seq_along(seq(0, 0.75, by = 0.25))) {
+  mtext(paste0(seq(0, 0.75, by = 0.25)[i]*100,"%"), side = 4, las = 2, adj = 1, outer = TRUE, line = 2, at = c(0.63-0.11*(i-1)))
+}
+lines(tt$Follow.Up.Time, tt$hazard_ratio, lwd = 2, lty = 1)
+mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, outer = TRUE, line = -1, at = 0.7)
+```
+
+
+With this first case study, we explored how \pkg{casebase} allows us to fit different parametric survival models with possible time-varying effects, and how we can compare the fit of each model with tools from GLMs.
+
+
+\newpage
 
 # Case study 2---Bone-marrow transplant
 
