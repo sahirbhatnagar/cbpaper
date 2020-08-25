@@ -767,13 +767,13 @@ different estimates for the CIF.
 \toprule
 Model & casebase::fitSmoothHazard & survival::survreg\\
 \midrule
-Exponential & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
+Exponential & 0.81 (0.68, 0.96) & 0.81 (0.68, 0.96)\\
 \cmidrule{1-3}
-Gompertz & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
+Gompertz & 0.79 (0.66, 0.94) & 0.80 (0.67, 0.95)\\
 \cmidrule{1-3}
 Weibull & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
 \cmidrule{1-3}
-Splines & 0.79 (0.66, 0.94) & --\\
+Splines & 0.81 (0.68, 0.96) & --\\
 \bottomrule
 \multicolumn{3}{l}{Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
 \end{tabular}
@@ -905,14 +905,14 @@ R+ )
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% CI & HR & 95\% CI\\
 \midrule
-Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
-Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
+Sex & 0.70 & (0.4, 1.23) & 0.68 & (0.39, 1.19)\\
+Disease & 0.53 & (0.29, 0.95) & 0.52 & (0.29, 0.93)\\
+Phase (CR2 vs. CR1) & 1.12 & (0.45, 2.78) & 1.21 & (0.48, 3.02)\\
+Phase (CR3 vs. CR1) & 1.45 & (0.37, 5.66) & 1.67 & (0.43, 6.5)\\
+Phase (Relapse vs. CR1) & 4.04 & (1.88, 8.68) & 4.55 & (2.09, 9.9)\\
 \addlinespace
-Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
-Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
+Source & 1.48 & (0.48, 4.54) & 1.46 & (0.47, 4.54)\\
+Age & 0.99 & (0.97, 1.01) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -975,10 +975,7 @@ approaches agree quite well for AML; however, there seems to be a
 difference of about 5\% between the two curves for ALL. This difference
 does not appear to be significant: the curve from case-base sampling is
 contained within a 95\% confidence band around the Fine-Gray absolute
-risk curve (figure not shown).
-
-\hypertarget{case-study-3support-data}{%
-\section{Case study 3---SUPPORT Data}\label{case-study-3support-data}}
+risk curve (figure not shown). \# Case study 3---SUPPORT Data
 
 In the first two case studies, we described the basic functionalities of
 the \pkg{casebase} package: creating population-time plots, fitting
@@ -1116,14 +1113,14 @@ approach from \pkg{casebase}.
 \end{figure}
 \end{CodeChunk}
 
-For our penalized model, we opt for the natural log of time; recall that
-this corresponds to a Weibull distribution. For fitting the penalized
-hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface
-to the function \code{fitSmoothHazard}. In order to use this interface,
-we first create a matrix \code{y} containing the time and event
-variables, and a matrix \code{x} containing all remaining covariates we
-would like to include in the model space. We used lasso penalization by
-setting \code{alpha = 1}. Moreover, we use the argument
+For our penalized logistic regression model, we opt for the natural log
+of time; recall that this corresponds to a Weibull distribution. For
+fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which
+is a matrix interface to the function \code{fitSmoothHazard}. In order
+to use this interface, we first create a matrix \code{y} containing the
+time and event variables, and a matrix \code{x} containing all remaining
+covariates we would like to include in the model space. We used lasso
+penalization by setting \code{alpha = 1}. Moreover, we use the argument
 \code{penalty.factor} to force the time variable into the final model.
 
 \begin{CodeChunk}
@@ -1146,10 +1143,10 @@ R+ )
 
 Next, we can use the object \code{cbFull} to estimate the absolute risk
 curve on the test data. We first create a matrix \code{newx} containing
-the relevant variables. Next, using \code{times}, we specify the time
-points at which the cumulative incidence will be computed. Finally,
-using the parameter \code{s = "lambda.1se"}, we specify at which value
-of the tuning parameter we want to retrieve the coefficient estimates.
+the relevant variables. Using \code{times}, we specify the time points
+at which the cumulative incidence will be computed. Finally, using the
+parameter \code{s = "lambda.1se"}, we specify at which value of the
+tuning parameter we want to retrieve the coefficient estimates.
 
 \begin{CodeChunk}
 
@@ -1175,8 +1172,8 @@ intersection of coefficients with values greater than 0 are displayed in
 \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have
 larger estimated coefficients. This is expected, as there are no
 restrictions on the size of coefficients. The smallest coefficient
-estimates are found in penalized case-base model, aside from cancer
-state (cano).
+estimates are found in penalized logistic model, aside from cancer state
+(cano).
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1189,6 +1186,17 @@ state (cano).
 \end{figure}
 \end{CodeChunk}
 
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/riskregressionBrier-1} 
+
+}
+
+\caption{\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used to generate the curves. The Cox-based curves appear to be smooth, but this is due to the 1703 follow-up times seen while fitting the models and the 319 time points used to estimate the curves. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest Brier scores over follow-up time.}\label{fig:riskregressionBrier}
+\end{figure}
+\end{CodeChunk}
+
 These values do not inform us of model performance. To do so, we take
 our hazard functions and use them to predict the absolute risk of
 everyone in our test set, over time. The probabilities over time for
@@ -1197,20 +1205,9 @@ Figure \ref{fig:cs3FinalBrier} (A). There is separation between the
 curves, but it is minimal. To better demonstrate the differences in
 performance between the models, we compare Brier scores over time. In
 Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our
-penalized case-base model compared to both Cox regression models. The
-differences, however, are minimal. All three outperform the Kaplan-Meier
-estimator.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/riskregressionBrier-1} 
-
-}
-
-\caption{\label{fig:cs3FinalBrier} Comparison of Cox regression, penalized Cox regression, penalized case-base estimation, and Kaplan-Meier. (A)  Probabilities of death as it changes over follow-up time. (B) Brier scores as they change over time, where a lower score corresponds to better performace. Penalized case-base estimation produced the lowest results over follow-up time.}\label{fig:riskregressionBrier}
-\end{figure}
-\end{CodeChunk}
+penalized logistic regression model compared to both Cox regression
+models. The differences, however, are minimal. All three outperform the
+Kaplan-Meier model.
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
 \section{Case study 4---Stanford Heart Transplant
@@ -1291,7 +1288,7 @@ Akaike Information Criterion (AIC).
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 
-#>    827    791    790
+#>    827    790    788
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1343,7 +1340,7 @@ hazard function into estimates of the cumulative incidence functions.
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> [1] "absRiskCB" "matrix"
+#> [1] "absRiskCB" "matrix"    "array"
 \end{CodeOutput}
 
 
@@ -1511,19 +1508,19 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-21 16:53:49 using the following
+This report was generated on 2020-08-25 12:59:22 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> R version 3.6.2 (2019-12-12)
+#> R version 4.0.2 (2020-06-22)
 #> Platform: x86_64-pc-linux-gnu (64-bit)
-#> Running under: Pop!_OS 19.10
+#> Running under: Pop!_OS 20.04 LTS
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
-#> LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.3.7.so
+#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0
 #> 
 #> locale:
 #>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -1539,53 +1536,54 @@ computational environment and dependencies:
 #> 
 #> other attached packages:
 #>  [1] broom_0.7.0               dotwhisker_0.5.0         
-#>  [3] timereg_1.9.4             glue_1.4.1               
+#>  [3] timereg_1.9.6             glue_1.4.1               
 #>  [5] scales_1.1.1              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_1.0.0              
+#>  [7] stringr_1.4.0             dplyr_1.0.1              
 #>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.1.0               ggplot2_3.3.2.9000       
-#> [13] tidyverse_1.3.0           lubridate_1.7.4          
-#> [15] visreg_2.7.0              tibble_3.0.1             
-#> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [19] flexsurv_1.1.1            survival_3.1-8           
+#> [11] tidyr_1.1.1               ggplot2_3.3.2            
+#> [13] tidyverse_1.3.0           lubridate_1.7.9          
+#> [15] visreg_2.7.0              tibble_3.0.3             
+#> [17] riskRegression_2020.06.25 prodlim_2019.11.13       
+#> [19] flexsurv_1.1.1            survival_3.2-3           
 #> [21] pracma_2.2.9              magrittr_1.5             
 #> [23] kableExtra_1.1.0          glmnet_4.0-2             
-#> [25] Matrix_1.2-18             data.table_1.12.8        
+#> [25] Matrix_1.2-18             data.table_1.13.0        
 #> [27] cowplot_1.0.0             colorspace_1.4-1         
 #> [29] casebase_0.9.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.3      htmlTable_1.13.3    base64enc_0.1-3    
-#>  [7] fs_1.3.2            rstudioapi_0.11     farver_2.0.3       
-#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.0-12     
-#> [13] xml2_1.3.0          codetools_0.2-16    knitr_1.29         
+#>  [4] ggstance_0.3.4      htmlTable_2.0.1     fs_1.4.2           
+#>  [7] base64enc_0.1-3     rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
+#> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
 #> [16] Formula_1.2-3       jsonlite_1.7.0      cluster_2.1.0      
-#> [19] dbplyr_1.4.2        png_0.1-7           compiler_3.6.2     
-#> [22] httr_1.4.1          backports_1.1.8     assertthat_0.2.1   
+#> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
+#> [22] httr_1.4.2          backports_1.1.8     assertthat_0.2.1   
 #> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.54       tools_3.6.2         gtable_0.3.0       
-#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.3.1        
-#> [34] nlme_3.1-143        iterators_1.0.12    xfun_0.15          
-#> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
-#> [40] muhaz_1.2.6.1       MASS_7.3-51.5       zoo_1.8-7          
-#> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
-#> [46] RColorBrewer_1.1-2  rticles_0.13        yaml_2.2.1         
-#> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
-#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.6          shape_1.4.4        
-#> [58] rlang_0.4.6         pkgconfig_2.0.3     evaluate_0.14      
-#> [61] lattice_0.20-38     labeling_0.3        htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.27.1     
-#> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [70] Hmisc_4.3-1         multcomp_1.4-12     DBI_1.1.0          
-#> [73] withr_2.2.0         pillar_1.4.4        haven_2.3.1        
-#> [76] foreign_0.8-74      mgcv_1.8-31         nnet_7.3-12        
-#> [79] mstate_0.2.12       modelr_0.1.5        crayon_1.3.4       
-#> [82] rmarkdown_2.3       jpeg_0.1-8.1        grid_3.6.2         
-#> [85] readxl_1.3.1        reprex_0.3.0        digest_0.6.25      
-#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_3.6.2       
-#> [91] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
+#> [28] quantreg_5.61       tools_4.0.2         gtable_0.3.0       
+#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
+#> [34] nlme_3.1-148        conquer_1.0.1       iterators_1.0.12   
+#> [37] xfun_0.16           rvest_0.3.6         lifecycle_0.2.0    
+#> [40] polspline_1.1.19    muhaz_1.2.6.1       MASS_7.3-51.6      
+#> [43] zoo_1.8-8           hms_0.5.3           sandwich_2.5-1     
+#> [46] SparseM_1.78        RColorBrewer_1.1-2  rticles_0.14       
+#> [49] yaml_2.2.1          gridExtra_2.3       rms_6.0-1          
+#> [52] rpart_4.1-15        latticeExtra_0.6-29 stringi_1.4.6      
+#> [55] foreach_1.5.0       checkmate_2.0.0     lava_1.6.7         
+#> [58] shape_1.4.4         mets_1.2.7.1        rlang_0.4.7        
+#> [61] pkgconfig_2.0.3     matrixStats_0.56.0  evaluate_0.14      
+#> [64] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
+#> [67] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
+#> [70] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
+#> [73] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
+#> [76] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
+#> [79] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
+#> [82] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
+#> [85] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
+#> [88] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
+#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
+#> [94] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1594,9 +1592,9 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    fix-cs1 /home/sahir/git_repositories/cbpaper
-#> Remote:   fix-cs1 @ origin (https://github.com/sahirbhatnagar/cbpaper.git)
-#> Head:     [349d153] 2020-08-21: fix merge conflicts
+#> Local:    master /home/jesseislam/Documents/gits/cbpaper
+#> Remote:   master @ origin (git@github.com:Jesse-Islam/cbpaper.git)
+#> Head:     [ffe8b03] 2020-08-25: Merge branch 'master' into sbmaster
 \end{CodeOutput}
 \end{CodeChunk}
 
