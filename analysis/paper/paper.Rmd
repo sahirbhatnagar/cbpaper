@@ -1306,6 +1306,7 @@ Next, we can use the object \code{cbFull} to estimate the absolute risk curve on
 newx <- model.matrix(death ~ . - d.time - aps - sps, 
                   data = test)[, -c(1)]
 times <- sort(unique(test$d.time))
+#times<-seq(from=min(times),to=max(times),length.out = 100)
 
 abCbFull <- casebase::absoluteRisk(cbFull,
   time = times,
@@ -1356,6 +1357,9 @@ abCB <- data.frame(Time = abCbFull[, 1],
 abCB$Model <- "Penalized logistic"
 
 ab <- rbind(abCB, abCN)
+
+
+
 ```
 
 
@@ -1468,7 +1472,7 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
 }
 ```
 
-```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used to generate the curves. The Cox-based curves appear to be smooth, but this is due to the 1703 follow-up times seen while fitting the models and the 319 time points used to estimate the curves. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest Brier scores over follow-up time.", warning = FALSE}
+```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used to generate the penalized casebase and K-M curves. The Cox-based curves, estimated using the survival package, appear to be smooth because all 1703 follow-up times seen while fitting are used. Using user specified times is not permitted in the survival package. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest Brier scores over follow-up time.", warning = FALSE}
 # Compute Brier score for penalized models
 brierFinalResults <- Score(list("Penalized Cox" = coxNet, "Penalized Logistic" = cbFull),
                            data = cbind(subset(test, select = c(d.time, death)),
