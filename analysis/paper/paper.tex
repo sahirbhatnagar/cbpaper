@@ -7,15 +7,19 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University of Manitoba \AND Jesse Islam\\McGill University \And James A. Hanley\\McGill University \And Olli Saarela\\University of Toronto
+Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
+of Manitoba \AND Jesse Islam\\McGill University \And James A.
+Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
-Comparison of Event Rates}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
+and Comparison of Event Rates}
 
-\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, Olli Saarela}
-\Plaintitle{casebase: An Alternative Framework For Survival Analysis and Comparison
-of Event Rates}
-\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
+\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
+A. Hanley, Olli Saarela}
+\Plaintitle{casebase: An Alternative Framework For Survival Analysis and
+Comparison of Event Rates}
+\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
+Analysis}
 
 \Abstract{
 The abstract of the article. *SRB and MT contributed equally to this
@@ -57,7 +61,7 @@ work.
       Olli Saarela\\
   University of Toronto\\
   Dalla Lana School of Public Health, 155 College Street, 6th floor,
-  Toronto, Ontario M5T 3M7, Canada\\
+Toronto, Ontario M5T 3M7, Canada\\
   E-mail: \email{olli.saarela@utoronto.ca}\\
   URL: \url{http://individual.utoronto.ca/osaarela/}\\~\\
   }
@@ -1297,38 +1301,18 @@ Akaike Information Criterion (AIC).
 
 As we can see, the best fit is the third model. By visualizing the
 hazard functions for both exposed and unexposed individuals, we can more
-clearly see how the hazards are no longer proportional.
+clearly see how the hazards are no longer proportional. We can easily
+obtain a plot of the hazards by using the \texttt{plot.singleEventCB}
+method:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> # Compute hazards---
-R> # First, create a list of time points for both exposure status
-R> hazard_data <- expand.grid(
-R+   exposure = c(0, 1),
-R+   futime = seq(0, 425,
-R+     length.out = 100
-R+   )
-R+ )
-R> 
-R> # Set the offset to zero
-R> hazard_data$offset <- 0
-R> # Use predict to get the fitted values, and exponentiate to
-R> # transform to the right scale
-R> hazard_data$hazard <- exp(predict(fit3,
-R+   newdata = hazard_data,
-R+   type = "link"
-R+ ))
-R> # Add labels for plots
-R> hazard_data$Status <- factor(hazard_data$exposure,
-R+   labels = c("No Tx", "Tx")
-R+ )
-R> 
-R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
-R+   geom_line() +
-R+   paper_gg_theme +  
-R+   ylab("Hazard") +
-R+   xlab("Follow-up time (in days)")
+R> plot(fit3, hazard.params = list(xvar = "futime",
+R+                                 by = "exposure",
+R+                                 alpha = 0.05,
+R+                                 ylab = "Hazard",
+R+                                 data = cb_data))
 \end{CodeInput}
 
 
@@ -1342,21 +1326,32 @@ hazard function into estimates of the cumulative incidence functions.
 
 \begin{CodeChunk}
 
+\begin{CodeInput}
+R> # Compute absolute risk curves
+R> newdata <- data.frame(exposure = c(0, 1))
+R> absrisk <- absoluteRisk(fit3,
+R+   newdata = newdata,
+R+   time = seq(0, 425, length.out = 100)
+R+ )
+R> 
+R> class(absrisk)
+\end{CodeInput}
+
 \begin{CodeOutput}
-#> [1] "absRiskCB" "matrix"
+#> [1] "absRiskCB" "matrix"    "array"
 \end{CodeOutput}
+
+\begin{CodeInput}
+R> 
+R> plot(absrisk,
+R+      id.names = c("No Tx", "Tx")) + 
+R+   ylab("Cumulative Incidence") +
+R+   xlab("Follow-up time (in days)") +
+R+   paper_gg_theme
+\end{CodeInput}
 
 
 \begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-risk-1} \end{center}
-
-\end{CodeChunk}
-
-We can also plot the hazard ratio:
-
-\begin{CodeChunk}
-
-
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/unnamed-chunk-11-1} \end{center}
 
 \end{CodeChunk}
 
@@ -1511,27 +1506,22 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-21 16:53:49 using the following
+This report was generated on 2020-08-25 10:58:13 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> R version 3.6.2 (2019-12-12)
-#> Platform: x86_64-pc-linux-gnu (64-bit)
-#> Running under: Pop!_OS 19.10
+#> R version 4.0.2 (2020-06-22)
+#> Platform: x86_64-apple-darwin17.0 (64-bit)
+#> Running under: macOS Catalina 10.15.6
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas/libblas.so.3
-#> LAPACK: /usr/lib/x86_64-linux-gnu/libopenblasp-r0.3.7.so
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 #> 
 #> locale:
-#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
-#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
-#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
-#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+#> [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
 #> 
 #> attached base packages:
 #> [1] splines   stats     graphics  grDevices utils     datasets  methods  
@@ -1541,50 +1531,50 @@ computational environment and dependencies:
 #>  [1] broom_0.7.0               dotwhisker_0.5.0         
 #>  [3] timereg_1.9.4             glue_1.4.1               
 #>  [5] scales_1.1.1              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_1.0.0              
+#>  [7] stringr_1.4.0             dplyr_1.0.2              
 #>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.1.0               ggplot2_3.3.2.9000       
-#> [13] tidyverse_1.3.0           lubridate_1.7.4          
-#> [15] visreg_2.7.0              tibble_3.0.1             
+#> [11] tidyr_1.1.1               ggplot2_3.3.2            
+#> [13] tidyverse_1.3.0           lubridate_1.7.9          
+#> [15] visreg_2.7.0              tibble_3.0.3             
 #> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [19] flexsurv_1.1.1            survival_3.1-8           
+#> [19] flexsurv_1.1.1            survival_3.2-3           
 #> [21] pracma_2.2.9              magrittr_1.5             
 #> [23] kableExtra_1.1.0          glmnet_4.0-2             
-#> [25] Matrix_1.2-18             data.table_1.12.8        
+#> [25] Matrix_1.2-18             data.table_1.13.0        
 #> [27] cowplot_1.0.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0           
+#> [29] casebase_0.9.0.9000      
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.3      htmlTable_1.13.3    base64enc_0.1-3    
-#>  [7] fs_1.3.2            rstudioapi_0.11     farver_2.0.3       
-#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.0-12     
-#> [13] xml2_1.3.0          codetools_0.2-16    knitr_1.29         
+#>  [4] ggstance_0.3.4      htmlTable_1.13.3    base64enc_0.1-3    
+#>  [7] fs_1.4.1            rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
+#> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
 #> [16] Formula_1.2-3       jsonlite_1.7.0      cluster_2.1.0      
-#> [19] dbplyr_1.4.2        png_0.1-7           compiler_3.6.2     
-#> [22] httr_1.4.1          backports_1.1.8     assertthat_0.2.1   
+#> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
+#> [22] httr_1.4.2          backports_1.1.8     assertthat_0.2.1   
 #> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.54       tools_3.6.2         gtable_0.3.0       
-#> [31] Rcpp_1.0.4.6        cellranger_1.1.0    vctrs_0.3.1        
-#> [34] nlme_3.1-143        iterators_1.0.12    xfun_0.15          
-#> [37] rvest_0.3.5         lifecycle_0.2.0     polspline_1.1.17   
-#> [40] muhaz_1.2.6.1       MASS_7.3-51.5       zoo_1.8-7          
+#> [28] quantreg_5.55       tools_4.0.2         gtable_0.3.0       
+#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
+#> [34] nlme_3.1-148        iterators_1.0.12    xfun_0.15          
+#> [37] rvest_0.3.6         lifecycle_0.2.0     polspline_1.1.17   
+#> [40] muhaz_1.2.6.1       MASS_7.3-51.6       zoo_1.8-8          
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
-#> [46] RColorBrewer_1.1-2  rticles_0.13        yaml_2.2.1         
+#> [46] RColorBrewer_1.1-2  rticles_0.14        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_5.1-4           rpart_4.1-15       
 #> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.6          shape_1.4.4        
-#> [58] rlang_0.4.6         pkgconfig_2.0.3     evaluate_0.14      
-#> [61] lattice_0.20-38     labeling_0.3        htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-9        tidyselect_1.1.0    deSolve_1.27.1     
-#> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
-#> [70] Hmisc_4.3-1         multcomp_1.4-12     DBI_1.1.0          
-#> [73] withr_2.2.0         pillar_1.4.4        haven_2.3.1        
-#> [76] foreign_0.8-74      mgcv_1.8-31         nnet_7.3-12        
-#> [79] mstate_0.2.12       modelr_0.1.5        crayon_1.3.4       
-#> [82] rmarkdown_2.3       jpeg_0.1-8.1        grid_3.6.2         
-#> [85] readxl_1.3.1        reprex_0.3.0        digest_0.6.25      
-#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_3.6.2       
+#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
+#> [58] rlang_0.4.7         pkgconfig_2.0.3     evaluate_0.14      
+#> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
+#> [64] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
+#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
+#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
+#> [73] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
+#> [76] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
+#> [79] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
+#> [82] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
+#> [85] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
+#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
 #> [91] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
@@ -1594,9 +1584,8 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    fix-cs1 /home/sahir/git_repositories/cbpaper
-#> Remote:   fix-cs1 @ origin (https://github.com/sahirbhatnagar/cbpaper.git)
-#> Head:     [349d153] 2020-08-21: fix merge conflicts
+#> Local:    editMax /Users/maxturgeon/Documents/git_repos/cbpaper
+#> Head:     [08c024e] 2020-08-21: Merge pull request #26 from sahirbhatnagar/fix-cs1
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1604,4 +1593,3 @@ The current Git commit details are:
 
 
 \end{document}
-
