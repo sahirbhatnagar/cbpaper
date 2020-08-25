@@ -1358,7 +1358,7 @@ abCB$Model <- "Penalized logistic"
 ab <- rbind(abCB, abCN)
 ```
 
-Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). 
+
 
 ```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity. Shrinkage occurs due to penalization."}
 library(dotwhisker)
@@ -1410,6 +1410,8 @@ dwplot(lolliplotDots) +
   labs(color = "Models") +
   scale_color_manual(values = q4[1:3])
 ```
+
+Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in Figure \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). 
 
 ```{r cs3Final, echo=FALSE, eval=eval_cs3}
 reg_ci <- ggplot(ab, aes(Time)) +
