@@ -86,7 +86,7 @@ decoupling the baseline hazard from the effect of the covariates. To
 recover the whole survival curve---or the cumulative incidence function
 (CIF)---we then need to separately estimate the baseline hazard
 \citep{breslow1972discussion}. This in turn leads to stepwise estimates
-of the survival function.
+of the survival function that can be hard to interpret.
 
 From the perspective of clinicians and their patients, the most relevant
 quantity is often the 5- or 10-year risk of having a certain event given
@@ -101,12 +101,15 @@ survival function estimates also vary smoothly over time.
 With the goal of fitting smooth-in-time hazard functions, Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} proposed a general framework
 for estimating fully parametric hazard models via logistic regression.
-Their approach provides users that are familiar with generalized linear
-models with a natural way of fitting parametric survival models.
-Moreover, their framework is very flexible: general functions of time
-can be estimated (e.g.~using splines or general additive models), and
-hence these models retain some of the flexibility of Cox's partial
-likelihood approach.
+Their main idea is simple: comparing person-moments when the event of
+interest occurred with moments when patients were at risk. Their
+approach provides users familiar with generalized linear models with a
+natural way of fitting parametric survival models. Moreover, their
+framework is very flexible: general functions of time can be estimated
+(e.g.~using splines or general additive models), and hence these models
+retain some of the flexibility of Cox's partial likelihood approach. And
+since the unit of analysis is a person moment, time-varying covariates
+can also easily be included in this framework.
 
 Using the framework of logistic regression for analysing time-to-event
 data opens the door to an extensive array of powerful modeling tools.
@@ -1224,8 +1227,8 @@ In the previous case studies, we only considered covariates that were
 fixed at baseline. In this next case study, we will use the Stanford
 Heart Transplant data
 \citep[\citet{crowley1977covariance}]{clark1971cardiac} to show how
-case-base sampling can also be used in the context of time-varying
-covariates. As an example that already appeared in the literature,
+case-base sampling can also be used in the context of time-dependent
+exposure. As an example that already appeared in the literature,
 case-base sampling was used to study vaccination safety, where the
 exposure period was defined as the week following vaccination
 \citep{saarela2015case}. Hence, the main covariate of interest,
@@ -1288,7 +1291,7 @@ proportional hazards. The evidence of non-proportionality of hazards in
 the Stanford Heart Transplant data has been widely discussed
 \citep{arjas1988graphical}.
 
-We can then compare the goodness of fit of these four models using the
+We can then compare the goodness of fit of these three models using the
 Akaike Information Criterion (AIC).
 
 \begin{CodeChunk}
@@ -1370,32 +1373,34 @@ results. We outlined the theoretical underpinnings of the approach, we
 provided details about our implementation, and we illustrated the merits
 of the approach and the package through four case studies.
 
-As a methodological framework, case-base sampling is very flexible. This
-flexibility has been explored before in the literature: for example,
-Saarela and Hanley \citeyearpar{saarela2015case} used case-base sampling
-to model a time-dependent exposure variable in a vaccine safety study.
-As another example, Saarela and Arjas \citeyearpar{saarela2015non}
-combined case-base sampling and a Bayesian non-parametric framework to
-compute individualized risk assessments for chronic diseases. In the
-case studies above, we further explored this flexibility along two
-fronts. On the one hand, we showed how splines could be used as part of
-the linear predictor to model the effect of time on the hazard. This
-strategy yielded estimates of the survival function that were
-qualitatively similar to semiparametric estimates derived from Cox
-regression; however, case-base sampling led to estimates of the survival
-function that \emph{vary smoothly in time} and are thus easier to
-interpret. On the other hand, we also displayed the flexibility of
-case-base sampling by showing how it could be combined with penalized
-logistic regression to perform variable selection. Even though we did
-not illustrate it in this article, case-base sampling can also be
-combined with the framework of \emph{generalized additive models}. This
-functionality has already been implemented in the package. Similarly,
-case-base sampling can be combined with quasi-likelihood estimation to
-fit survival models that can account for the presence of
-over-dispersion. All of these examples illustrate how the case-base
-sampling framework in general, and the package \pkg{casebase} in
-particular, allows the user to fit a broad and flexible family of
-survival functions.
+As a methodological framework, case-base sampling is very flexible. Some
+of this flexibility has been explored before in the literature: for
+example, Saarela and Hanley \citeyearpar{saarela2015case} used case-base
+sampling to model a time-dependent exposure variable in a vaccine safety
+study. As another example, Saarela and Arjas
+\citeyearpar{saarela2015non} combined case-base sampling and a Bayesian
+non-parametric framework to compute individualized risk assessments for
+chronic diseases. In the case studies above, we further explored this
+flexibility along two fronts. On the one hand, we showed how splines
+could be used as part of the linear predictor to model the effect of
+time on the hazard. This strategy yielded estimates of the survival
+function that were qualitatively similar to semiparametric estimates
+derived from Cox regression; however, case-base sampling led to
+estimates of the survival function that \emph{vary smoothly in time} and
+are thus easier to interpret. On the other hand, we also displayed the
+flexibility of case-base sampling by showing how it could be combined
+with penalized logistic regression to perform variable selection.
+Furthermore, the second and fourth case studies showed how case-base
+sampling can respectively be applied to competing risks and time-varying
+exposure settings. Even though we did not illustrate it in this article,
+case-base sampling can also be combined with the framework of
+\emph{generalized additive models}. This functionality has already been
+implemented in the package. Similarly, case-base sampling can be
+combined with quasi-likelihood estimation to fit survival models that
+can account for the presence of over-dispersion. All of these examples
+illustrate how the case-base sampling framework in general, and the
+package \pkg{casebase} in particular, allows the user to fit a broad and
+flexible family of survival functions.
 
 As presented in Hanley \& Miettinen \citeyearpar{hanley2009fitting},
 case-base sampling is comprised of three steps: 1) sampling a case
@@ -1506,7 +1511,7 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-25 10:58:13 using the following
+This report was generated on 2020-08-31 10:05:10 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1567,15 +1572,16 @@ computational environment and dependencies:
 #> [58] rlang_0.4.7         pkgconfig_2.0.3     evaluate_0.14      
 #> [61] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
 #> [64] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
-#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
-#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [73] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
-#> [76] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
-#> [79] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
-#> [82] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
-#> [85] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
-#> [88] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
-#> [91] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
+#> [67] plyr_1.8.6          R6_2.4.1            generics_0.0.2     
+#> [70] Hmisc_4.4-0         multcomp_1.4-13     DBI_1.1.0          
+#> [73] withr_2.2.0         pillar_1.4.6        haven_2.3.1        
+#> [76] foreign_0.8-80      mgcv_1.8-31         nnet_7.3-14        
+#> [79] mstate_0.2.12       modelr_0.1.8        crayon_1.3.4       
+#> [82] rmarkdown_2.3       jpeg_0.1-8.1        grid_4.0.2         
+#> [85] readxl_1.3.1        blob_1.2.1          reprex_0.3.0       
+#> [88] digest_0.6.25       webshot_0.5.2       numDeriv_2016.8-1.1
+#> [91] stats4_4.0.2        munsell_0.5.0       viridisLite_0.3.0  
+#> [94] quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1585,7 +1591,7 @@ The current Git commit details are:
 
 \begin{CodeOutput}
 #> Local:    editMax /Users/maxturgeon/Documents/git_repos/cbpaper
-#> Head:     [08c024e] 2020-08-21: Merge pull request #26 from sahirbhatnagar/fix-cs1
+#> Head:     [0be28f4] 2020-08-25: switch to plot method for hazard
 \end{CodeOutput}
 \end{CodeChunk}
 
