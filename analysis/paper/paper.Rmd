@@ -51,6 +51,7 @@ keywords:
   plain:     [survival analysis, absolute risk, data visualization]
 preamble: >
   \usepackage{amsmath}
+  \usepackage{amssymb}
   \usepackage{longtable}
   \usepackage{graphicx}
   \usepackage{tabularx}
@@ -210,30 +211,30 @@ Finally, several packages include functions to estimate the CIF. The correspondi
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
-\hline
+\toprule
 & \textbf{Competing} & \textbf{Allows} &  \textbf{Penalized}   &    &  & \textbf{Semi} & \textbf{Interval/Left} & \textbf{Absolute}  \\
 \textbf{Package}        & \textbf{Risks}  & \textbf{Non PH} & \textbf{Regression} & \textbf{Splines} & \textbf{Parametric} & \textbf{Parametric} & \textbf{Censoring} & \textbf{Risk}           \\
-\hline
-\textbf{casebase}        & x                        & x                         & x                     & x                & x                   &                          &                                  & x                                \\ \bottomrule
-\textbf{CFC}             & x                        & x                         &                       &                  & x                   &                          &                                  & x                                \\ \bottomrule
-\textbf{cmprsk}             & x                        &                           &                       &                  &                     &  x                        &                                  & x                                \\ \bottomrule
-\textbf{CoxRidge}        &                          & x                         & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{crrp}            & x                        &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{fastcox}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{flexrsurv}       &                          & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
-\textbf{flexsurv}        & x                        & x                         &                       & x                & x                   &                          &                                  & x               \\ \bottomrule
-\textbf{glmnet}          &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{glmpath}         &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{mets}            & x                        &                           &                       & x                &                     & x                        &                                  & x                                \\ \bottomrule
-\textbf{penalized}       &                          &                           & x                     &                  &                     & x                        &                                  &                                  \\ \bottomrule
-\textbf{riskRegression}  & x                         &                           & x                     &                  &                     & x                        &                                  & x                                \\ \bottomrule
-\textbf{rstpm2}          &                          & x                         &                      & x                & x                   & x                        & x                                & x                         \\ \bottomrule
-\textbf{SmoothHazard}    &                          & x                         &                       & x                & x                   &                          & x                            &                                      \\ \bottomrule
-\textbf{survival}        & x                        & x                         &                       &                  & x                   & x                        & x                                & x                               \\ \bottomrule
-\hline
+\bottomrule
+\textbf{casebase}        & \checkmark                        & \checkmark                         & \checkmark                     & \checkmark                & \checkmark                   &                          &                                  & \checkmark                                \\ \hline
+\textbf{CFC}             & \checkmark                        & \checkmark                         &                       &                  & \checkmark                   &                          &                                  & \checkmark                                \\ \hline
+\textbf{cmprsk}             & \checkmark                        &                           &                       &                  &                     &  \checkmark                        &                                  & \checkmark                                \\ \hline
+\textbf{CoxRidge}        &                          & \checkmark                         & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{crrp}            & \checkmark                        &                           & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{fastcox}         &                          &                           & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{flexrsurv}       &                          & \checkmark                         &                       & \checkmark                & \checkmark                   &                          &                                  & \checkmark               \\ \hline
+\textbf{flexsurv}        & \checkmark                        & \checkmark                         &                       & \checkmark                & \checkmark                   &                          &                                  & \checkmark               \\ \hline
+\textbf{glmnet}          &                          &                           & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{glmpath}         &                          &                           & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{mets}            & \checkmark                        &                           &                       & \checkmark                &                     & \checkmark                        &                                  & \checkmark                                \\ \hline
+\textbf{penalized}       &                          &                           & \checkmark                     &                  &                     & \checkmark                        &                                  &                                  \\ \hline
+\textbf{riskRegression}  & \checkmark                         &                           & \checkmark                     &                  &                     & \checkmark                        &                                  & \checkmark                                \\ \hline
+\textbf{rstpm2}          &                          & \checkmark                         &                      & \checkmark                & \checkmark                   & \checkmark                        & \checkmark                                & \checkmark                         \\ \hline
+\textbf{SmoothHazard}    &                          & \checkmark                         &                       & \checkmark                & \checkmark                   &                          & \checkmark                            &                                      \\ \hline
+\textbf{survival}        & \checkmark                        & \checkmark                         &                       &                  & \checkmark                   & \checkmark                        & \checkmark                                & \checkmark                               \\ 
+\bottomrule
 \end{tabular}%
 }
-\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features. Competing Risks: whether or not an implementation for competing risks is present. Allows Non-PH: permits models for non-proportional hazards. Penalized Regression: allows for a penalty term when estimating hazards (e.g. lasso or ridge). Splines: permits a flexible fit on time through the use of splines. Parametric: implementation for parametric models. Semi-parametric: implementation for semi-parametric models. Interval/left censoring: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. Absolute Risk: computation for survival curves, cumulative incidence or cumulative hazard is available.}
+\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features. \textbf{Competing Risks}: whether or not an implementation for competing risks is present. \textbf{Allows Non PH}: permits models for non-proportional hazards. \textbf{Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf{Splines}: permits a flexible fit on time through the use of splines. \textbf{Parametric}: implementation for parametric models. \textbf{Semi-parametric}: implementation for semi-parametric models. \textbf{Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf{Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.}
 \label{tab:surv-pkgs}
 \end{table}
 
@@ -448,10 +449,10 @@ risks <- lapply(fits, function(i) {
 })
 ```
 
-In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from \pkg{casebase} on the Cox model CIF. The CIF estimates for the exponential model in panel (1) overestimate the cumulative incidence earlier on in time, and underestimate it later on. Based on our earlier discussion of the population-time plot, this poor fit for the exponential hazard was expected. We notice a better fit with increasing complexity of our model for time in Figure \ref{fig:erspc-cox-cif} (panels 2--4). As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the Weibull model is just as good as the larger (in terms of number of parameters) spline model:
+In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from \pkg{casebase} on the Cox model CIF. The CIF estimates for the exponential model in panel (1) overestimate the cumulative incidence earlier on in time, and underestimate it later on. Based on our earlier discussion of the population-time plot, this poor fit for the exponential hazard was expected. We notice a better fit with increasing complexity of our model for time in Figure \ref{fig:erspc-cox-cif} (panels 2--4). As noted above, the usual asymptotic results hold for likelihood ratio tests built using case-base sampling models. Therefore, we can easily test the null hypothesis that the exponential model is just as good as the larger (in terms of number of parameters) spline model:
 
 ```{r erscp-compare, eval = eval_cs1, echo = FALSE}
-anova(fits$weibull, fits$splines, test = "LRT")
+anova(fits$exponential, fits$splines, test = "LRT")
 ```
 
 The null hypothesis is rejected in favor of the spline model. Similarly, the AIC provides further evidence that the flexible function of time provides the best fit:
@@ -747,7 +748,7 @@ set.seed(12)
 fit_inter <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) * ScrArm, data = ERSPC)
 ```
 
-In Figure \ref{fig:interaction-ERSPC} we plot the estimated death from prostate cancer hazard ratio and 95\\% confidence interval for screening vs. control group as a function of time using the \code{plot} method for objects of class \code{singleEventCB}:
+In Figure \ref{fig:interaction-ERSPC} we plot the estimated death from prostate cancer hazard ratio and 95% confidence interval for screening vs. control group as a function of time using the \code{plot} method for objects of class \code{singleEventCB}:
 
 ```{r, echo = TRUE, eval = FALSE}
 plot(fit_inter, type = "hr", newdata = new_data,
@@ -1076,6 +1077,7 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
 ```
 
 Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base sampling and the Fine-Gray model. As we can see, the two approaches agree quite well for AML; however, there seems to be a difference of about 5% between the two curves for ALL. This difference does not appear to be significant: the curve from case-base sampling is contained within a 95% confidence band around the Fine-Gray absolute risk curve (figure not shown).
+
 # Case study 3---SUPPORT Data
 
 In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. <!--In the next two case studies, we explore more advanced features.--> For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function. To do this, we simply replace logistic regression with a penalized counterpart. In \pkg{casebase}, we achieve this by using the \pkg{glmnet} package [@friedman2010jss]. 
@@ -1164,9 +1166,11 @@ ca       & Yes                                           \\
 
 <!--Two variables are SUPPORT day 3 physiology score (sps) and APACHE III day 3 physiology score (aps). These scores were developed for a period of 180 days, which makes our comparison over 5.56 years exploratory. Therefore, we will assess these two models before using either as our baseline, by comparing them to a full model using all variables. Also, our single imputation introduces bias in the data. As the goal here is purely demonstrative, this bias will be consistent with any of the following models. As such, their comparison is still valid, though any interpretation requires an awareness of said bias. The SUPPORT dataset will be used to demonstrate regularization within casebase, while comparing their absolute risk predictions for a new individual.--> 
 
-In the original study, the authors developed two scores for predicting the outcome. These scores are available as part of the data: SUPPORT day 3 physiology score (\code{sps}) and APACHE III day 3 physiology score (\code{aps}). Using these scores, we will explore three Cox regression scenarios as a baseline comparison for \pkg{casebase}: \code{sps} only, \code{aps} only, and all covariates excluding \code{sps} and \code{aps}. We will compare the three models using a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used to assess both discrimination and calibration in a single model. Moreover, it provides a metric that can be used to compare parametric and semi-parametric survival models. To account for overfitting, we will use 95% of the observations to train our models, while the remaining 5% will be used to compute absolute risk curves and the Brier scores. 
+In the original study, the authors developed two scores for predicting the outcome. These scores are available as part of the data: SUPPORT day 3 physiology score (\code{sps}) and APACHE III day 3 physiology score (\code{aps}). Using these scores, we will explore three Cox regression scenarios as a baseline comparison for \pkg{casebase}: \code{sps} only, \code{aps} only, and all covariates excluding \code{sps} and \code{aps}. We will compare the three models using a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used to assess both discrimination and calibration in a single model. Moreover, it provides a metric that can be used to compare parametric and semi-parametric survival models. We will use 95% of the observations to train our models, and the remaining 5% to compute absolute risk curves and Brier scores. 
 
 ```{r supportData, eval = eval_cs3}
+scaleFUNy <- function(x) sprintf("%.2f", x)
+scaleFUNx <- function(x) sprintf("%.0f", x)
 data(support)
 # Change time to years
 support$d.time <- support$d.time/365.25
@@ -1179,9 +1183,9 @@ train <- support[train_index,]
 test <- support[test_index,]
 ```
 
-In Figure\ref{fig:brier1} (A), we can see that all Cox models have similar average survival curves. On the other hand, Figure \ref{fig:brier1} (B) shows that the full model has the lowest Brier score overall. For this reason, we will use this model in our comparison between regularized Cox regression, Kaplan-Meier estimation, and the approach from \pkg{casebase}.
+In Figure \ref{fig:brier1} (A), we can see that all Cox models have similar average survival curves. On the other hand, Figure \ref{fig:brier1} (B) shows that the full model has the lowest Brier score overall. For this reason, we will use this model in our comparison between regularized Cox regression, Kaplan-Meier estimation, and the approach from \pkg{casebase}.
 
-<!--Before generating an absolute risk curve using regularized logistic regression, we will explore three options as a baseline comparison. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years. Therefore, we will examine three Cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. Next, we will compare each modeling using the Brier score [@graf1999ass]. The Brier score can demonstrate both discrimination and calibration in a single model [@graf1999ass] and provide a comparable metric between semi-parametric and parametric methods in the survival context. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score on overall, it will be used in the following absolute risk comparison to regularized cox, regularized logistic regression and the unadjusted Kaplan-Meier curve.-->
+<!--Before generating an absolute risk curve using regularized estimation, we will explore three options as a baseline comparison. The original study compared these scores over a span of 180 days, which may not be comparable over the full 5.56 years. Therefore, we will examine three Cox regression scenarios: sps only, aps only and all covariates excluding sps and aps. Next, we will compare each modeling using the Brier score [@graf1999ass]. The Brier score can demonstrate both discrimination and calibration in a single model [@graf1999ass] and provide a comparable metric between semi-parametric and parametric methods in the survival context. For all the following analyses in this case study, we will use 80% of the observations to train our models, while 20% will be used to generate absolute risk curves, all of which will be averaged to demonstrate each model's predictive ability. Over 5.56 years, \ref{fig:baselines} demonstrates that all the cox models have similar, if not identical average predictions. Figure \ref{fig:brier1} examines the brier scores as they change over time. As the full model has the lowest brier score on overall, it will be used in the following absolute risk comparison to regularized cox, regularized estimation and the unadjusted Kaplan-Meier curve.-->
 
 ```{r baselinePlotsPrep, eval=eval_cs3, echo = FALSE}
 # Define colour palette for this section
@@ -1224,7 +1228,9 @@ cox_ci <- ggplot(baseCoxComparisonData, aes(Time)) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
   labs(y = "Probability of Death", x = "Follow-up time (Years)", color = "Models") +
   scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
-  paper_gg_theme
+  paper_gg_theme + 
+  scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
 ```
 
 ```{r brierpt1, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:brier1} Comparison of three Cox regression models to the unadjusted Kaplan-Meier curve. (A) Cumulative Incidence curves. For a given model, the plotted curve is the average curve of each individual in the study. Each follow-up time seen in the study was used. There are minimal differences between the curves. APS coincides with the SPS curve, as they are considerably overlapped.(B) Time-dependent Brier scores, where a lower score is better. The full model performs best overall."}
@@ -1266,7 +1272,7 @@ cox_brier <- ggplot(data = brierPlotter, mapping = aes(x = times, y = brierScore
   labs(color = "Models") +
   # ggtitle("Brier scores over time") +
   scale_color_manual(values = q4, breaks = c("APS", "Full", "SPS", "K-M")) + 
-  paper_gg_theme
+  paper_gg_theme+ scale_x_continuous(labels=scaleFUNx,breaks = round(seq(0, 5, by = 1)))+scale_y_continuous(labels=scaleFUNy,n.breaks=8)
 
 # Combine both plots using cowplot
 plot_row <- cowplot::plot_grid(cox_ci + theme(legend.position = 'none'),
@@ -1282,7 +1288,9 @@ cowplot::plot_grid(plot_row, legend, rel_heights = c(3, .4), nrow = 2)
 
 <!--To get the absolute risk following regularized cox regression, we had to work around limitations in existing packages. To make use of the \pkg{survival} package, we first estimate the hazard coefficients using thecoxnet implementation for lasso penalization in \pkg{glmnet} [@regpathcox]. Next, we fit a cox model using the survival package with the selected variables only, from our regularized fit. Finally, we replaced the coefficients in the survival object with those from our glmnet fit, allowing us to make use of the absolute risk tools available in the \pkg{survival} package.-->
 
-For our penalized logistic regression model, we opt for the natural log of time; recall that this corresponds to a Weibull distribution. For fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface to the function \code{fitSmoothHazard}. In order to use this interface, we first create a matrix \code{y} containing the time and event variables, and a matrix \code{x} containing all remaining covariates we would like to include in the model space. We used lasso penalization by setting \code{alpha = 1}. Moreover, we use the argument \code{penalty.factor} to force the time variable into the final model. 
+\newpage 
+
+For our penalized model, we opt for the natural log of time; recall that this corresponds to a Weibull distribution. For fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface to the function \code{fitSmoothHazard}. In order to use this interface, we first create a matrix \code{y} containing the time and event variables, and a matrix \code{x} containing all remaining covariates we would like to include in the model space. We used lasso penalization by setting \code{alpha = 1}. Moreover, we use the argument \code{penalty.factor} to force the time variable into the final model. 
  
 ```{r supportCB_fit, eval=eval_cs3, echo=TRUE, cache=FALSE}
 x <- model.matrix(death ~ . - d.time - aps - sps, 
@@ -1299,7 +1307,7 @@ cbFull <- casebase::fitSmoothHazard.fit(x, y,
 )
 ```
 
-Next, we can use the object \code{cbFull} to estimate the absolute risk curve on the test data. We first create a matrix \code{newx} containing the relevant variables. Using \code{times}, we specify the time points at which the cumulative incidence will be computed. Finally, using the parameter \code{s = "lambda.1se"}, we specify at which value of the tuning parameter we want to retrieve the coefficient estimates.
+Next, we can use the object \code{cbFull} to estimate the absolute risk curve on the test data. We first create a matrix \code{newx} containing the relevant variables. Next, using \code{times}, we specify the time points at which the cumulative incidence will be computed. Finally, using the parameter \code{s = "lambda.1se"}, we specify at which value of the tuning parameter we want to retrieve the coefficient estimates.
 
 ```{r supportCB_abs, eval=eval_cs3, echo=TRUE, cache=TRUE}
 # Estimating the absolute risk curve using the newdata parameter
@@ -1354,7 +1362,7 @@ abCN$Model <- "Penalized Cox"
 
 abCB <- data.frame(Time = abCbFull[, 1],
                    absRisk = rowMeans(abCbFull[, -c(1)]))
-abCB$Model <- "Penalized logistic"
+abCB$Model <- "Penalized CB"
 
 ab <- rbind(abCB, abCN)
 
@@ -1362,7 +1370,7 @@ ab <- rbind(abCB, abCN)
 
 ```
 
-
+Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized case-base model, aside from cancer state (cano). 
 
 ```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. If a coefficient estimate is 0 in any model, it is removed from the plot for simplicity. Shrinkage occurs due to penalization."}
 library(dotwhisker)
@@ -1379,7 +1387,7 @@ colnames(estimatescoxNet) <- c("term", "estimate", "model")
 estimatescb <- data.table::setDT(as.data.frame(coef(cbFull)[-c(1, 2), 1]), 
                      keep.rownames = TRUE)
 # estimatescb$std.error<-0
-estimatescb$Model <- "Pen. logistic"
+estimatescb$Model <- "Pen. CB"
 colnames(estimatescb) <- c("term", "estimate", "model")
 
 estimatescoxFull <- data.table::setDT(as.data.frame(coef(coxFull)), 
@@ -1415,17 +1423,19 @@ dwplot(lolliplotDots) +
   scale_color_manual(values = q4[1:3])
 ```
 
-Our first comparison plot examines the covariates that were selected between all three hazard functions. Note that Cox regression without penalization selected more covariates than the other two, but only the intersection of coefficients with values greater than 0 are displayed in Figure \ref{fig:cs3lolliPlot}. A visible tendency is for Cox regression to have larger estimated coefficients. This is expected, as there are no restrictions on the size of coefficients. The smallest coefficient estimates are found in penalized logistic model, aside from cancer state (cano). 
+These values do not inform us of model performance. To do so, we take our hazard functions and use them to predict the absolute risk of everyone in our test set, over time. The probabilities over time for each individual are averaged, resulting in the absolute risk curves in Figure \ref{fig:cs3FinalBrier} (A). There is separation between the curves, but it is minimal. To better demonstrate the differences in performance between the models, we compare Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), the Brier score is lower in our penalized case-base model compared to both Cox regression models. The differences, however, are minimal. All three outperform the Kaplan-Meier estimator.
 
 ```{r cs3Final, echo=FALSE, eval=eval_cs3}
 reg_ci <- ggplot(ab, aes(Time)) +
   geom_step(data = baseCoxComparisonData, mapping = aes(x = Time,y = Full, colour = "Cox")) +
   geom_line(aes(y = absRisk, colour = Model)) +
   geom_step(data = abKMcompare, mapping = aes(x = Time, y = KM, color = "K-M")) +
-  labs(y = "Probability of Death", x = "Follow-up time (Years)", color = "Models") +
+  labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
   # ggtitle("Absolute risk curves") +
-  scale_color_manual(values = q4, breaks = c("K-M","Cox","Penalized Cox","Penalized logistic")) + 
-  paper_gg_theme
+  scale_color_manual(values = q4, breaks = c("K-M", "Cox", "Penalized Cox", "Penalized CB")) + 
+  paper_gg_theme + 
+  scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 9)
 ```
   
 ```{r eval = eval_cs3, echo = FALSE, warning = FALSE}
@@ -1439,7 +1449,7 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
   }
   
   # if (missing(cause)) stop("Argument cause should be the event type for which we predict the absolute risk.")
-  # the output of absoluteRisk is an array with dimension dependening on the length of the requested times:
+  # the output of absoluteRisk is an array with dimension depending on the length of the requested times:
   # case 1: the number of time points is 1
   #         dim(array) =  (length(time), NROW(newdata), number of causes in the data)
   if (length(times) == 1) {
@@ -1472,9 +1482,9 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
 }
 ```
 
-```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} (A) Four curves comparing the probabilities of death as it changes over follow-up time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. All follow-up times seen in the new data were used to generate the penalized casebase and K-M curves. The Cox-based curves, estimated using the survival package, appear to be smooth because all 1703 follow-up times seen while fitting are used. Using user specified times is not permitted in the survival package. (B) Four curves demonstrating the Brier scores as they change over time between Cox regression, penalized Cox regression, penalized logistic regression, and Kaplan-Meier. Lower is better. Penalized logistic regression produced the lowest Brier scores over follow-up time.", warning = FALSE}
+```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} Comparison of Cox regression, penalized Cox regression, penalized case-base estimation, and Kaplan-Meier. (A)  Probabilities of death as it changes over follow-up time. (B) Brier scores as they change over time, where a lower score corresponds to better performace. Penalized case-base estimation produced the lowest results over follow-up time.", warning = FALSE}
 # Compute Brier score for penalized models
-brierFinalResults <- Score(list("Penalized Cox" = coxNet, "Penalized Logistic" = cbFull),
+brierFinalResults <- Score(list("Penalized Cox" = coxNet, "Penalized CB" = cbFull),
                            data = cbind(subset(test, select = c(d.time, death)),
                                         as.data.frame(newx)), 
                            formula = Hist(d.time, death != 0) ~ 1, summary = NULL, 
@@ -1485,20 +1495,27 @@ brierFinalResults <- Score(list("Penalized Cox" = coxNet, "Penalized Logistic" =
 data_brier <- bind_rows(
   brierFinalResults$Brier$score,
   filter(brierFull$Brier$score, model == "PredictionModel")
-  )
-data_brier$model<-factor(data_brier$model,c("Null model", "PredictionModel","Penalized Cox", "Penalized Logistic"))
-levels(data_brier$model)<-c("Kaplan-Meier","Cox","Penalized Cox","Penalized logistic")
-
-
+  ) %>% 
+  mutate(model = as.character(model), # First return to string, so types match
+         model = case_when(
+    model == "Null model" ~ "K-M",
+    model == "PredictionModel" ~ "Cox",
+    TRUE ~ model
+  ),
+  model = factor(model, levels = c("Cox", "Penalized Cox", "Penalized CB", "K-M"),
+                 labels = c("Cox", "Pen. Cox", "Pen. CB", "K-M")))
 
 reg_brier <- ggplot(data = data_brier, mapping = aes(x = times, y = Brier, col = model)) +
   geom_line() +
-  xlab("Follow-up time (Years)") +
+  xlab("Follow-up time (years)") +
   ylab("Brier score") +
   # ggtitle("Brier score over time") +
   labs(color = "Models") +
   paper_gg_theme +  
-  scale_color_manual(values = q4)
+  scale_color_manual(values = q4) + 
+  scale_x_continuous(labels = scaleFUNx, 
+                     breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
 
 # Combine both plots using cowplot
 plot_row_reg <- cowplot::plot_grid(reg_ci + theme(legend.position = 'none'),
