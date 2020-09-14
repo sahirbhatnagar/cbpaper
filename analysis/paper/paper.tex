@@ -7,15 +7,19 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University of Manitoba \AND Jesse Islam\\McGill University \And James A. Hanley\\McGill University \And Olli Saarela\\University of Toronto
+Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
+of Manitoba \AND Jesse Islam\\McGill University \And James A.
+Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
-Comparison of Event Rates}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
+and Comparison of Event Rates}
 
-\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, Olli Saarela}
-\Plaintitle{casebase: An Alternative Framework For Survival Analysis and Comparison
-of Event Rates}
-\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
+\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
+A. Hanley, Olli Saarela}
+\Plaintitle{casebase: An Alternative Framework For Survival Analysis and
+Comparison of Event Rates}
+\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
+Analysis}
 
 \Abstract{
 The abstract of the article. *SRB and MT contributed equally to this
@@ -35,29 +39,29 @@ work.
 
 \Address{
     Sahir Rai Bhatnagar*\\
-  McGill University\\
-  1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+    McGill University\\
+    1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{sahir.bhatnagar@mail.mcgill.ca}\\
   URL: \url{http://sahirbhatnagar.com/}\\~\\
       Maxime Turgeon*\\
-  University of Manitoba\\
-  186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
+    University of Manitoba\\
+    186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
   E-mail: \email{max.turgeon@umanitoba.ca}\\
   URL: \url{https://maxturgeon.ca/}\\~\\
       Jesse Islam\\
-  McGill University\\
-  1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+    McGill University\\
+    1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{jesse.islam@mail.mcgill.ca}\\
   
       James A. Hanley\\
-  McGill University\\
-  1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+    McGill University\\
+    1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
   E-mail: \email{james.hanley@mcgill.ca}\\
   URL: \url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\~\\
       Olli Saarela\\
-  University of Toronto\\
-  Dalla Lana School of Public Health, 155 College Street, 6th floor,
-  Toronto, Ontario M5T 3M7, Canada\\
+    University of Toronto\\
+    Dalla Lana School of Public Health, 155 College Street, 6th floor,
+Toronto, Ontario M5T 3M7, Canada\\
   E-mail: \email{olli.saarela@utoronto.ca}\\
   URL: \url{http://individual.utoronto.ca/osaarela/}\\~\\
   }
@@ -82,7 +86,7 @@ decoupling the baseline hazard from the effect of the covariates. To
 recover the whole survival curve---or the cumulative incidence function
 (CIF)---we then need to separately estimate the baseline hazard
 \citep{breslow1972discussion}. This in turn leads to stepwise estimates
-of the survival function.
+of the survival function that can be hard to interpret.
 
 From the perspective of clinicians and their patients, the most relevant
 quantity is often the 5- or 10-year risk of having a certain event given
@@ -97,12 +101,15 @@ survival function estimates also vary smoothly over time.
 With the goal of fitting smooth-in-time hazard functions, Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} proposed a general framework
 for estimating fully parametric hazard models via logistic regression.
-Their approach provides users that are familiar with generalized linear
-models with a natural way of fitting parametric survival models.
-Moreover, their framework is very flexible: general functions of time
-can be estimated (e.g.~using splines or general additive models), and
-hence these models retain some of the flexibility of Cox's partial
-likelihood approach.
+Their main idea is simple: comparing person-moments when the event of
+interest occurred with moments when patients were at risk. Their
+approach provides users familiar with generalized linear models with a
+natural way of fitting parametric survival models. Moreover, their
+framework is very flexible: general functions of time can be estimated
+(e.g.~using splines or general additive models), and hence these models
+retain some of the flexibility of Cox's partial likelihood approach. And
+since the unit of analysis is a person moment, time-varying covariates
+can also easily be included in this framework.
 
 Using the framework of logistic regression for analysing time-to-event
 data opens the door to an extensive array of powerful modeling tools.
@@ -767,13 +774,13 @@ different estimates for the CIF.
 \toprule
 Model & casebase::fitSmoothHazard & survival::survreg\\
 \midrule
-Exponential & 0.81 (0.68, 0.96) & 0.81 (0.68, 0.96)\\
+Exponential & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
 \cmidrule{1-3}
-Gompertz & 0.79 (0.66, 0.94) & 0.80 (0.67, 0.95)\\
+Gompertz & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
 \cmidrule{1-3}
 Weibull & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
 \cmidrule{1-3}
-Splines & 0.81 (0.68, 0.96) & --\\
+Splines & 0.79 (0.66, 0.94) & --\\
 \bottomrule
 \multicolumn{3}{l}{Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
 \end{tabular}
@@ -905,14 +912,14 @@ R+ )
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% CI & HR & 95\% CI\\
 \midrule
-Sex & 0.70 & (0.4, 1.23) & 0.68 & (0.39, 1.19)\\
-Disease & 0.53 & (0.29, 0.95) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.12 & (0.45, 2.78) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.45 & (0.37, 5.66) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 4.04 & (1.88, 8.68) & 4.55 & (2.09, 9.9)\\
+Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
+Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
+Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
+Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
+Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
 \addlinespace
-Source & 1.48 & (0.48, 4.54) & 1.46 & (0.47, 4.54)\\
-Age & 0.99 & (0.97, 1.01) & 0.99 & (0.97, 1.02)\\
+Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
+Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1127,17 +1134,17 @@ penalization by setting \code{alpha = 1}. Moreover, we use the argument
 
 \begin{CodeInput}
 R> x <- model.matrix(death ~ . - d.time - aps - sps, 
-R+                   data = train)[, -c(1)] # Remove intercept
++                   data = train)[, -c(1)] # Remove intercept
 R> y <- data.matrix(subset(train, select = c(d.time, death)))
 R> 
 R> # Regularized logistic regression to estimate hazard
 R> cbFull <- casebase::fitSmoothHazard.fit(x, y,
-R+   family = "glmnet",
-R+   time = "d.time", event = "death",
-R+   formula_time = ~ log(d.time), alpha = 1,
-R+   ratio = 10, standardize = TRUE,
-R+   penalty.factor = c(0, rep(1, ncol(x)))
-R+ )
++   family = "glmnet",
++   time = "d.time", event = "death",
++   formula_time = ~ log(d.time), alpha = 1,
++   ratio = 10, standardize = TRUE,
++   penalty.factor = c(0, rep(1, ncol(x)))
++ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1153,16 +1160,16 @@ tuning parameter we want to retrieve the coefficient estimates.
 \begin{CodeInput}
 R> # Estimating the absolute risk curve using the newdata parameter
 R> newx <- model.matrix(death ~ . - d.time - aps - sps, 
-R+                   data = test)[, -c(1)]
++                   data = test)[, -c(1)]
 R> times <- sort(unique(test$d.time))
 R> #times<-seq(from=min(times),to=max(times),length.out = 100)
 R> 
 R> abCbFull <- casebase::absoluteRisk(cbFull,
-R+   time = times,
-R+   newdata = newx,
-R+   s = "lambda.1se",
-R+   method = "numerical"
-R+ )
++   time = times,
++   newdata = newx,
++   s = "lambda.1se",
++   method = "numerical"
++ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1218,8 +1225,8 @@ In the previous case studies, we only considered covariates that were
 fixed at baseline. In this next case study, we will use the Stanford
 Heart Transplant data
 \citep[\citet{crowley1977covariance}]{clark1971cardiac} to show how
-case-base sampling can also be used in the context of time-varying
-covariates. As an example that already appeared in the literature,
+case-base sampling can also be used in the context of time-dependent
+exposure. As an example that already appeared in the literature,
 case-base sampling was used to study vaccination safety, where the
 exposure period was defined as the week following vaccination
 \citep{saarela2015case}. Hence, the main covariate of interest,
@@ -1282,51 +1289,31 @@ proportional hazards. The evidence of non-proportionality of hazards in
 the Stanford Heart Transplant data has been widely discussed
 \citep{arjas1988graphical}.
 
-We can then compare the goodness of fit of these four models using the
+We can then compare the goodness of fit of these three models using the
 Akaike Information Criterion (AIC).
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
 #> Model1 Model2 Model3 
-#>    827    790    788
+#>    827    791    790
 \end{CodeOutput}
 \end{CodeChunk}
 
 As we can see, the best fit is the third model. By visualizing the
 hazard functions for both exposed and unexposed individuals, we can more
-clearly see how the hazards are no longer proportional.
+clearly see how the hazards are no longer proportional. We can easily
+obtain a plot of the hazards by using the \texttt{plot.singleEventCB}
+method:
 
 \begin{CodeChunk}
 
 \begin{CodeInput}
-R> # Compute hazards---
-R> # First, create a list of time points for both exposure status
-R> hazard_data <- expand.grid(
-R+   exposure = c(0, 1),
-R+   futime = seq(0, 425,
-R+     length.out = 100
-R+   )
-R+ )
-R> 
-R> # Set the offset to zero
-R> hazard_data$offset <- 0
-R> # Use predict to get the fitted values, and exponentiate to
-R> # transform to the right scale
-R> hazard_data$hazard <- exp(predict(fit3,
-R+   newdata = hazard_data,
-R+   type = "link"
-R+ ))
-R> # Add labels for plots
-R> hazard_data$Status <- factor(hazard_data$exposure,
-R+   labels = c("No Tx", "Tx")
-R+ )
-R> 
-R> ggplot(hazard_data, aes(futime, hazard, colour = Status)) +
-R+   geom_line() +
-R+   paper_gg_theme +  
-R+   ylab("Hazard") +
-R+   xlab("Follow-up time (in days)")
+R> plot(fit3, hazard.params = list(xvar = "futime",
+R+                                 by = "exposure",
+R+                                 alpha = 0.05,
+R+                                 ylab = "Hazard",
+R+                                 data = cb_data))
 \end{CodeInput}
 
 
@@ -1340,21 +1327,32 @@ hazard function into estimates of the cumulative incidence functions.
 
 \begin{CodeChunk}
 
+\begin{CodeInput}
+R> # Compute absolute risk curves
+R> newdata <- data.frame(exposure = c(0, 1))
+R> absrisk <- absoluteRisk(fit3,
+R+   newdata = newdata,
+R+   time = seq(0, 425, length.out = 100)
+R+ )
+R> 
+R> class(absrisk)
+\end{CodeInput}
+
 \begin{CodeOutput}
 #> [1] "absRiskCB" "matrix"    "array"
 \end{CodeOutput}
 
+\begin{CodeInput}
+R> 
+R> plot(absrisk,
+R+      id.names = c("No Tx", "Tx")) + 
+R+   ylab("Cumulative Incidence") +
+R+   xlab("Follow-up time (in days)") +
+R+   paper_gg_theme
+\end{CodeInput}
+
 
 \begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-risk-1} \end{center}
-
-\end{CodeChunk}
-
-We can also plot the hazard ratio:
-
-\begin{CodeChunk}
-
-
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/unnamed-chunk-11-1} \end{center}
 
 \end{CodeChunk}
 
@@ -1373,32 +1371,34 @@ results. We outlined the theoretical underpinnings of the approach, we
 provided details about our implementation, and we illustrated the merits
 of the approach and the package through four case studies.
 
-As a methodological framework, case-base sampling is very flexible. This
-flexibility has been explored before in the literature: for example,
-Saarela and Hanley \citeyearpar{saarela2015case} used case-base sampling
-to model a time-dependent exposure variable in a vaccine safety study.
-As another example, Saarela and Arjas \citeyearpar{saarela2015non}
-combined case-base sampling and a Bayesian non-parametric framework to
-compute individualized risk assessments for chronic diseases. In the
-case studies above, we further explored this flexibility along two
-fronts. On the one hand, we showed how splines could be used as part of
-the linear predictor to model the effect of time on the hazard. This
-strategy yielded estimates of the survival function that were
-qualitatively similar to semiparametric estimates derived from Cox
-regression; however, case-base sampling led to estimates of the survival
-function that \emph{vary smoothly in time} and are thus easier to
-interpret. On the other hand, we also displayed the flexibility of
-case-base sampling by showing how it could be combined with penalized
-logistic regression to perform variable selection. Even though we did
-not illustrate it in this article, case-base sampling can also be
-combined with the framework of \emph{generalized additive models}. This
-functionality has already been implemented in the package. Similarly,
-case-base sampling can be combined with quasi-likelihood estimation to
-fit survival models that can account for the presence of
-over-dispersion. All of these examples illustrate how the case-base
-sampling framework in general, and the package \pkg{casebase} in
-particular, allows the user to fit a broad and flexible family of
-survival functions.
+As a methodological framework, case-base sampling is very flexible. Some
+of this flexibility has been explored before in the literature: for
+example, Saarela and Hanley \citeyearpar{saarela2015case} used case-base
+sampling to model a time-dependent exposure variable in a vaccine safety
+study. As another example, Saarela and Arjas
+\citeyearpar{saarela2015non} combined case-base sampling and a Bayesian
+non-parametric framework to compute individualized risk assessments for
+chronic diseases. In the case studies above, we further explored this
+flexibility along two fronts. On the one hand, we showed how splines
+could be used as part of the linear predictor to model the effect of
+time on the hazard. This strategy yielded estimates of the survival
+function that were qualitatively similar to semiparametric estimates
+derived from Cox regression; however, case-base sampling led to
+estimates of the survival function that \emph{vary smoothly in time} and
+are thus easier to interpret. On the other hand, we also displayed the
+flexibility of case-base sampling by showing how it could be combined
+with penalized logistic regression to perform variable selection.
+Furthermore, the second and fourth case studies showed how case-base
+sampling can respectively be applied to competing risks and time-varying
+exposure settings. Even though we did not illustrate it in this article,
+case-base sampling can also be combined with the framework of
+\emph{generalized additive models}. This functionality has already been
+implemented in the package. Similarly, case-base sampling can be
+combined with quasi-likelihood estimation to fit survival models that
+can account for the presence of over-dispersion. All of these examples
+illustrate how the case-base sampling framework in general, and the
+package \pkg{casebase} in particular, allows the user to fit a broad and
+flexible family of survival functions.
 
 As presented in Hanley \& Miettinen \citeyearpar{hanley2009fitting},
 case-base sampling is comprised of three steps: 1) sampling a case
@@ -1509,27 +1509,22 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-08-25 15:21:11 using the following
+This report was generated on 2020-09-14 12:43:13 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
 #> R version 4.0.2 (2020-06-22)
-#> Platform: x86_64-pc-linux-gnu (64-bit)
-#> Running under: Pop!_OS 20.04 LTS
+#> Platform: x86_64-apple-darwin17.0 (64-bit)
+#> Running under: macOS Catalina 10.15.6
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0
-#> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 #> 
 #> locale:
-#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
-#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
-#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
-#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+#> [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
 #> 
 #> attached base packages:
 #> [1] splines   stats     graphics  grDevices utils     datasets  methods  
@@ -1537,54 +1532,54 @@ computational environment and dependencies:
 #> 
 #> other attached packages:
 #>  [1] broom_0.7.0               dotwhisker_0.5.0         
-#>  [3] timereg_1.9.6             glue_1.4.1               
+#>  [3] timereg_1.9.7             glue_1.4.2               
 #>  [5] scales_1.1.1              forcats_0.5.0            
-#>  [7] stringr_1.4.0             dplyr_1.0.1              
+#>  [7] stringr_1.4.0             dplyr_1.0.2              
 #>  [9] purrr_0.3.4               readr_1.3.1              
-#> [11] tidyr_1.1.1               ggplot2_3.3.2            
+#> [11] tidyr_1.1.2               ggplot2_3.3.2            
 #> [13] tidyverse_1.3.0           lubridate_1.7.9          
 #> [15] visreg_2.7.0              tibble_3.0.3             
-#> [17] riskRegression_2020.06.25 prodlim_2019.11.13       
+#> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
 #> [19] flexsurv_1.1.1            survival_3.2-3           
 #> [21] pracma_2.2.9              magrittr_1.5             
-#> [23] kableExtra_1.1.0          glmnet_4.0-2             
+#> [23] kableExtra_1.2.1          glmnet_4.0-2             
 #> [25] Matrix_1.2-18             data.table_1.13.0        
-#> [27] cowplot_1.0.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0           
+#> [27] cowplot_1.1.0             colorspace_1.4-1         
+#> [29] casebase_0.9.0.9000      
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.4      htmlTable_2.0.1     fs_1.4.2           
-#>  [7] base64enc_0.1-3     rstudioapi_0.11     farver_2.0.3       
+#>  [4] ggstance_0.3.4      htmlTable_2.0.1     base64enc_0.1-3    
+#>  [7] fs_1.5.0            rstudioapi_0.11     farver_2.0.3       
 #> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
 #> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
-#> [16] Formula_1.2-3       jsonlite_1.7.0      cluster_2.1.0      
+#> [16] Formula_1.2-3       jsonlite_1.7.1      cluster_2.1.0      
 #> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
-#> [22] httr_1.4.2          backports_1.1.8     assertthat_0.2.1   
-#> [25] cli_2.0.2           acepack_1.4.1       htmltools_0.5.0    
-#> [28] quantreg_5.61       tools_4.0.2         gtable_0.3.0       
-#> [31] Rcpp_1.0.5          cellranger_1.1.0    vctrs_0.3.2        
-#> [34] nlme_3.1-148        conquer_1.0.1       iterators_1.0.12   
-#> [37] xfun_0.16           rvest_0.3.6         lifecycle_0.2.0    
-#> [40] polspline_1.1.19    muhaz_1.2.6.1       MASS_7.3-51.6      
-#> [43] zoo_1.8-8           hms_0.5.3           sandwich_2.5-1     
-#> [46] SparseM_1.78        RColorBrewer_1.1-2  rticles_0.14       
-#> [49] yaml_2.2.1          gridExtra_2.3       rms_6.0-1          
-#> [52] rpart_4.1-15        latticeExtra_0.6-29 stringi_1.4.6      
-#> [55] foreach_1.5.0       checkmate_2.0.0     lava_1.6.7         
-#> [58] shape_1.4.4         mets_1.2.7.1        rlang_0.4.7        
-#> [61] pkgconfig_2.0.3     matrixStats_0.56.0  evaluate_0.14      
-#> [64] lattice_0.20-41     labeling_0.3        htmlwidgets_1.5.1  
-#> [67] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
-#> [70] R6_2.4.1            generics_0.0.2      Hmisc_4.4-0        
-#> [73] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [76] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
-#> [79] mgcv_1.8-31         nnet_7.3-14         mstate_0.2.12      
-#> [82] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
-#> [85] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
-#> [88] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
-#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
-#> [94] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
+#> [22] httr_1.4.2          backports_1.1.9     assertthat_0.2.1   
+#> [25] cli_2.0.2           htmltools_0.5.0     quantreg_5.67      
+#> [28] tools_4.0.2         gtable_0.3.0        Rcpp_1.0.5         
+#> [31] cellranger_1.1.0    vctrs_0.3.4         nlme_3.1-149       
+#> [34] conquer_1.0.2       iterators_1.0.12    xfun_0.17          
+#> [37] rvest_0.3.6         lifecycle_0.2.0     polspline_1.1.19   
+#> [40] muhaz_1.2.6.1       MASS_7.3-53         zoo_1.8-8          
+#> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
+#> [46] RColorBrewer_1.1-2  rticles_0.15        yaml_2.2.1         
+#> [49] gridExtra_2.3       rms_6.0-1           rpart_4.1-15       
+#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
+#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
+#> [58] rlang_0.4.7         pkgconfig_2.0.3     matrixStats_0.56.0 
+#> [61] evaluate_0.14       lattice_0.20-41     labeling_0.3       
+#> [64] htmlwidgets_1.5.1   cmprsk_2.2-10       tidyselect_1.1.0   
+#> [67] deSolve_1.28        plyr_1.8.6          R6_2.4.1           
+#> [70] generics_0.0.2      Hmisc_4.4-1         multcomp_1.4-13    
+#> [73] DBI_1.1.0           withr_2.2.0         pillar_1.4.6       
+#> [76] haven_2.3.1         foreign_0.8-80      mgcv_1.8-33        
+#> [79] nnet_7.3-14         mstate_0.2.12       modelr_0.1.8       
+#> [82] crayon_1.3.4        rmarkdown_2.3       jpeg_0.1-8.1       
+#> [85] grid_4.0.2          readxl_1.3.1        blob_1.2.1         
+#> [88] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
+#> [91] numDeriv_2016.8-1.1 stats4_4.0.2        munsell_0.5.0      
+#> [94] viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1593,9 +1588,8 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    master /home/jesseislam/Documents/gits/cbpaper
-#> Remote:   master @ origin (git@github.com:Jesse-Islam/cbpaper.git)
-#> Head:     [ffe8b03] 2020-08-25: Merge branch 'master' into sbmaster
+#> Local:    editMax /Users/maxturgeon/Documents/git_repos/cbpaper
+#> Head:     [0be28f4] 2020-08-25: switch to plot method for hazard
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1603,4 +1597,3 @@ The current Git commit details are:
 
 
 \end{document}
-
