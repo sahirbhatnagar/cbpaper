@@ -22,12 +22,31 @@ Comparison of Event Rates}
 Analysis}
 
 \Abstract{
-The abstract of the article. *SRB and MT contributed equally to this
-work.
+In epidemiological studies of time-to-event data, a quantity of interest
+to the clinician and the patient is the risk of an event given a
+covariate profile. However, methods relying on time matching or risk-set
+sampling (including Cox regression) eliminate the baseline hazard from
+the likelihood expression or the estimating function. But to estimate
+risks, the baseline hazard needs to be estimated separately using a
+non-parametric method. This apparoch leads to step-wise estimates of the
+cumulative incidence that are difficult to interpret. Using case-base
+sampling, Hanley \& Miettinen explained how the parametric hazard
+functions can be estimated using logistic regression. Their approach
+naturally leads to estimates of the cumulative incidence that are
+smooth-in-time.\\
+In this paper, we present the casebase R package, which implements the
+ideas of Hanley \& Miettinen through a simple and flexible interface. We
+describe how the case-base framework can also be used in more complex
+settings: competing risks, time-varying exposure, and variable
+selection. Our package also includes an extensive array of visualization
+tools to complement the analysis of time-to-event data. We illustrate
+all these features through four different case studies.\\
+*SRB and MT contributed equally to this work.
 }
 
-\Keywords{survival analysis, absolute risk, data visualization}
-\Plainkeywords{survival analysis, absolute risk, data visualization}
+\Keywords{survival analysis, absolute risk, \proglang{R}, data
+visualization}
+\Plainkeywords{survival analysis, absolute risk, R, data visualization}
 
 %% publication information
 %% \Volume{50}
@@ -111,7 +130,7 @@ retain some of the flexibility of Cox's partial likelihood approach. And
 since the unit of analysis is a person moment, time-varying covariates
 can also easily be included in this framework.
 
-Using the framework of logistic regression for analysing time-to-event
+Using the framework of logistic regression for analyzing time-to-event
 data opens the door to an extensive array of powerful modeling tools.
 Indeed, lasso and elastic-net regression can then be used to select
 variables that are associated with the hazard function. Logistic
@@ -481,7 +500,7 @@ R> plot(pt_object, add.base.series = TRUE)
 
 }
 
-\caption[Population time plots for both treatment arms in the ERSPC dataset]{Population time plots for both treatment arms in the ERSPC dataset. The grey area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely small rectangles (person-moments). The points shown in the figure are select person-moments from the case and base series. We see that more events are observed at later follow-up times, motivating the use of a non-constant in time hazard model.}\label{fig:plot-stratified-erspc-data}
+\caption[Population time plots for both treatment arms in the ERSPC dataset]{Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely small rectangles (person-moments). The points shown in the figure are select person-moments from the case and base series. We see that more events are observed at later follow-up times, motivating the use of a non-constant in time hazard model.}\label{fig:plot-stratified-erspc-data}
 \end{figure}
 \end{CodeChunk}
 
@@ -1125,16 +1144,21 @@ survival; therefore, the patient is considered exposed only after the
 transplant has occurred.
 
 As above, we can look at the population-time plot for a graphical
-summary of the event incidence. Here, we colour the exposed person-time
-(i.e.~after transplant) in a darker shade of gray. As we can see, most
-events occur early during the follow-up period, and therefore we do not
-expect the hazard to be constant.
+summary of the event incidence (see Figure \ref{fig:cs4PopTime}. Here,
+we colour the exposed person-time (i.e.~after transplant) in a darker
+shade of gray. As we can see, most events occur early during the
+follow-up period, and therefore we do not expect the hazard to be
+constant.
 
 \begin{CodeChunk}
+\begin{figure}
 
+{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-poptime-1} 
 
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-poptime-1} \end{center}
+}
 
+\caption{\label{fig:cs4PopTime} Population-time for the Stanford Transplant study. The darker shade of gray corresponds to the exposed person-time.}\label{fig:stanford-poptime}
+\end{figure}
 \end{CodeChunk}
 
 Since the exposure is time-dependent, we need to manually define the
@@ -1223,14 +1247,19 @@ R> plot(fit3, hazard.params = list(xvar = "futime",
 +                                 ylab = "Hazard",
 +                                 data = cb_data))
 \end{CodeInput}
+\begin{figure}
 
+{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-hazard-1} 
 
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-hazard-1} \end{center}
+}
 
+\caption{\label{fig:cs4hazardPlot} Plot of the hazard function for exposed and unexposed individuals.}\label{fig:stanford-hazard}
+\end{figure}
 \end{CodeChunk}
 
-The non-proportionality seems to be more pronounced at the beginning of
-follow-up than the end. Finally, we can turn these estimates of the
+Looking at Figure \ref{fig:cs4hazardPlot}, the non-proportionality seems
+to be more pronounced at the beginning of follow-up than the end.
+Finally, in Figure \ref{fig:cs4CIF}, we turn these estimates of the
 hazard function into estimates of the cumulative incidence functions.
 
 \begin{CodeChunk}
@@ -1258,10 +1287,14 @@ R> plot(absrisk,
 +   xlab("Follow-up time (in days)") +
 +   paper_gg_theme
 \end{CodeInput}
+\begin{figure}
 
+{\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-risk-1} 
 
-\begin{center}\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-risk-1} \end{center}
+}
 
+\caption{\label{fig:cs4CIF} Plot of the cumulative incidence function for exposed and unexposed individuals.}\label{fig:stanford-risk}
+\end{figure}
 \end{CodeChunk}
 
 As we can see in the above case-study, the \pkg{casebase} package can
@@ -1417,7 +1450,7 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-09-15 17:46:19 using the following
+This report was generated on 2020-09-16 10:30:17 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1473,21 +1506,21 @@ computational environment and dependencies:
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
 #> [46] RColorBrewer_1.1-2  rticles_0.15        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_6.0-1           rpart_4.1-15       
-#> [52] latticeExtra_0.6-29 stringi_1.4.6       highr_0.8          
-#> [55] foreach_1.5.0       checkmate_2.0.0     lava_1.6.7         
-#> [58] shape_1.4.4         rlang_0.4.7         pkgconfig_2.0.3    
-#> [61] matrixStats_0.56.0  evaluate_0.14       lattice_0.20-41    
-#> [64] labeling_0.3        htmlwidgets_1.5.1   cmprsk_2.2-10      
-#> [67] tidyselect_1.1.0    deSolve_1.28        plyr_1.8.6         
-#> [70] R6_2.4.1            generics_0.0.2      Hmisc_4.4-1        
-#> [73] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [76] pillar_1.4.6        haven_2.3.1         foreign_0.8-80     
-#> [79] mgcv_1.8-33         nnet_7.3-14         mstate_0.2.12      
-#> [82] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
-#> [85] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
-#> [88] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
-#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
-#> [94] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
+#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
+#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
+#> [58] rlang_0.4.7         pkgconfig_2.0.3     matrixStats_0.56.0 
+#> [61] evaluate_0.14       lattice_0.20-41     labeling_0.3       
+#> [64] htmlwidgets_1.5.1   cmprsk_2.2-10       tidyselect_1.1.0   
+#> [67] deSolve_1.28        plyr_1.8.6          R6_2.4.1           
+#> [70] generics_0.0.2      Hmisc_4.4-1         multcomp_1.4-13    
+#> [73] DBI_1.1.0           withr_2.2.0         pillar_1.4.6       
+#> [76] haven_2.3.1         foreign_0.8-80      mgcv_1.8-33        
+#> [79] nnet_7.3-14         mstate_0.2.12       modelr_0.1.8       
+#> [82] crayon_1.3.4        rmarkdown_2.3       jpeg_0.1-8.1       
+#> [85] grid_4.0.2          readxl_1.3.1        blob_1.2.1         
+#> [88] reprex_0.3.0        digest_0.6.25       webshot_0.5.2      
+#> [91] numDeriv_2016.8-1.1 stats4_4.0.2        munsell_0.5.0      
+#> [94] viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1498,7 +1531,7 @@ The current Git commit details are:
 \begin{CodeOutput}
 #> Local:    master /Users/maxturgeon/Documents/git_repos/cbpaper
 #> Remote:   master @ origin (git@github.com:sahirbhatnagar/cbpaper.git)
-#> Head:     [ddc5b48] 2020-09-14: Merge pull request #29 from sahirbhatnagar/editSahir
+#> Head:     [73c0393] 2020-09-15: update CS3
 \end{CodeOutput}
 \end{CodeChunk}
 
