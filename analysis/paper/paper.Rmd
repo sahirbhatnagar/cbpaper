@@ -44,8 +44,8 @@ title:
   # For running headers, if needed
   short:     "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
 abstract: |
-  | In epidemiological studies of time-to-event data, a quantity of interest to the clinician and the patient is the risk of an event given a covariate profile. However, methods relying on time matching or risk-set sampling (including Cox regression) eliminate the baseline hazard from the likelihood expression or the estimating function. But to estimate risks, the baseline hazard needs to be estimated separately using a non-parametric method. This apparoch leads to step-wise estimates of the cumulative incidence that are difficult to interpret. Using case-base sampling, Hanley & Miettinen explained how the parametric hazard functions can be estimated using logistic regression. Their approach naturally leads to estimates of the cumulative incidence that are smooth-in-time.
-  | In this paper, we present the casebase R package, which implements the ideas of Hanley & Miettinen through a simple and flexible interface. We describe how the case-base framework can also be used in more complex settings: competing risks, time-varying exposure, and variable selection. Our package also includes an extensive array of visualization tools to complement the analysis of time-to-event data. We illustrate all these features through four different case studies.
+  | In epidemiological studies of time-to-event data, a quantity of interest to the clinician and the patient is the risk of an event given a covariate profile. However, methods relying on time matching or risk-set sampling (including Cox regression) eliminate the baseline hazard from the likelihood expression or the estimating function and therefore needs to be estimated separately using a non-parametric approach. This leads to step-wise estimates of the cumulative incidence that are difficult to interpret. Using case-base sampling, Hanley & Miettinen (2009) explained how the parametric hazard functions can be estimated using logistic regression. Their approach naturally leads to estimates of the cumulative incidence that are smooth-in-time.
+  | In this paper, we present the **casebase** R package, a comprehensive and flexible toolkit for parametric survival analysis. We describe how the case-base framework can also be used in more complex settings: competing risks, time-varying exposure, and variable selection. Our package also includes an extensive array of visualization tools to complement the analysis of time-to-event data. We illustrate all these features through four different case studies.
   | *SRB and MT contributed equally to this work.
 keywords:
   # at least one keyword must be supplied
@@ -1162,7 +1162,7 @@ names(coxNet$coefficients) <- coxNet_coefnames
 
 Our first comparison plot examines the covariates that were selected between all three hazard functions. In \ref{fig:cs3lolliPlot}, we show the coefficient estimates for covariates that we selected by both penalized Cox and penalized case-base. From this plot, we can clearly see the shrinkage effect of using penalized estimation. 
 
-```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. Only covariates common among all three models were retained. Shrinkage occurs due to penalization."}
+```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \\pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\\ell_1$ penalty."}
 library(dotwhisker)
 library(broom)
 library(dplyr)
@@ -1330,7 +1330,7 @@ brierPenalized <- Score(list("Pen. Cox" = coxNet,
                         times = times)
 ```
 
-```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} Comparison of Cox regression, penalized Cox regression, penalized case-base estimation, and Kaplan-Meier. (A)  Probabilities of death as it changes over follow-up time. (B) Brier scores as they change over time, where a lower score corresponds to better performace.", warning = FALSE}
+```{r riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.", warning = FALSE}
 # Combine scores
 data_brier <- bind_rows(
   brierCoxKM$Brier$score %>% 

@@ -7,35 +7,30 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University
-of Manitoba \AND Jesse Islam\\McGill University \And James A.
-Hanley\\McGill University \And Olli Saarela\\University of Toronto
+Sahir Rai Bhatnagar*\\McGill University \And Maxime Turgeon*\\University of Manitoba \AND Jesse Islam\\McGill University \And James A. Hanley\\McGill University \And Olli Saarela\\University of Toronto
 }
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
-and Comparison of Event Rates}
-
-\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James
-A. Hanley, Olli Saarela}
-\Plaintitle{casebase: An Alternative Framework For Survival Analysis and
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
 Comparison of Event Rates}
-\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival
-Analysis}
+
+\Plainauthor{Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, Olli Saarela}
+\Plaintitle{casebase: An Alternative Framework For Survival Analysis and Comparison
+of Event Rates}
+\Shorttitle{\pkg{casebase}: An Alternative Framework For Survival Analysis}
 
 \Abstract{
 In epidemiological studies of time-to-event data, a quantity of interest
 to the clinician and the patient is the risk of an event given a
 covariate profile. However, methods relying on time matching or risk-set
 sampling (including Cox regression) eliminate the baseline hazard from
-the likelihood expression or the estimating function. But to estimate
-risks, the baseline hazard needs to be estimated separately using a
-non-parametric method. This apparoch leads to step-wise estimates of the
-cumulative incidence that are difficult to interpret. Using case-base
-sampling, Hanley \& Miettinen explained how the parametric hazard
-functions can be estimated using logistic regression. Their approach
-naturally leads to estimates of the cumulative incidence that are
-smooth-in-time.\\
-In this paper, we present the casebase R package, which implements the
-ideas of Hanley \& Miettinen through a simple and flexible interface. We
+the likelihood expression or the estimating function and therefore needs
+to be estimated separately using a non-parametric approach. This leads
+to step-wise estimates of the cumulative incidence that are difficult to
+interpret. Using case-base sampling, Hanley \& Miettinen (2009)
+explained how the parametric hazard functions can be estimated using
+logistic regression. Their approach naturally leads to estimates of the
+cumulative incidence that are smooth-in-time.\\
+In this paper, we present the \textbf{casebase} R package, a
+comprehensive and flexible toolkit for parametric survival analysis. We
 describe how the case-base framework can also be used in more complex
 settings: competing risks, time-varying exposure, and variable
 selection. Our package also includes an extensive array of visualization
@@ -44,8 +39,7 @@ all these features through four different case studies.\\
 *SRB and MT contributed equally to this work.
 }
 
-\Keywords{survival analysis, absolute risk, \proglang{R}, data
-visualization}
+\Keywords{survival analysis, absolute risk, \proglang{R}, data visualization}
 \Plainkeywords{survival analysis, absolute risk, R, data visualization}
 
 %% publication information
@@ -467,7 +461,7 @@ plot by treatment group. The resulting object inherits from class
 
 \begin{CodeInput}
 R> pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
-+                                event = "DeadOfPrCa", exposure = "ScrArm")
+R+                                event = "DeadOfPrCa", exposure = "ScrArm")
 R> inherits(pt_object, "popTime")
 \end{CodeInput}
 
@@ -668,13 +662,13 @@ and 4) a smooth function using cubic B-splines. The models are fit using
 
 \begin{CodeInput}
 R> fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-+              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-+              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-+              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
+R+              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
+R+              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
+R+              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
 R> 
 R> fits <- lapply(fmla, function(i) {
-+   fitSmoothHazard(i, data = ERSPC, ratio = 100)
-+ })
+R+   fitSmoothHazard(i, data = ERSPC, ratio = 100)
+R+ })
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -723,8 +717,8 @@ R> new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 R> new_time <- seq(0,14,0.1)
 R> 
 R> risks <- lapply(fits, function(i) {
-+   absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
-+ })
+R>   absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
+R> })
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -790,19 +784,19 @@ different estimates for the CIF.
 
 \caption{\label{tab:print-erspc-estimates}Comparison of estimated hazard ratios and 95\% confidence intervals for ERSPC data.}
 \centering
-\begin{tabular}[t]{>{}lcc}
+\begin{tabular}[t]{>{\bfseries}lcc}
 \toprule
 Model & casebase::fitSmoothHazard & survival::survreg\\
 \midrule
-\textbf{Exponential} & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
+Exponential & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
 \cmidrule{1-3}
-\textbf{Gompertz} & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
+Gompertz & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
 \cmidrule{1-3}
-\textbf{Weibull} & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
+Weibull & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
 \cmidrule{1-3}
-\textbf{Splines} & 0.79 (0.66, 0.94) & --\\
+Splines & 0.79 (0.66, 0.94) & --\\
 \bottomrule
-\multicolumn{3}{l}{\rule{0pt}{1em}Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
+\multicolumn{3}{l}{Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
 \end{tabular}
 \end{table}
 
@@ -835,7 +829,7 @@ objects of class \code{singleEventCB}:
 
 \begin{CodeInput}
 R> plot(fit_inter, type = "hr", newdata = new_data,
-+      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
+R>      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -916,8 +910,8 @@ regression. To do so, we need to treat the competing event as censoring.
 R> library(survival)
 R> # Treat competing event as censoring
 R> model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-+   data = bmtcrr
-+ )
+R+   data = bmtcrr
+R+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -977,8 +971,8 @@ we will use the \pkg{timereg} package \citep{timereg}:
 \begin{CodeInput}
 R> library(timereg)
 R> model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
-+                         const(Phase) + const(Source) + const(Age),
-+                       data = bmtcrr, cause = 1, model = "fg")
+R+                         const(Phase) + const(Source) + const(Age),
+R+                       data = bmtcrr, cause = 1, model = "fg")
 R> 
 R> # Estimate absolute risk curve
 R> risk_fg <- predict(model_fg, newdata, times = time_points)
@@ -1086,7 +1080,7 @@ see the shrinkage effect of using penalized estimation.
 
 }
 
-\caption{\label{fig:cs3lolliPlot} Lollipop plot showing the coefficient estimates between three models. Only covariates common among all three models were retained. Shrinkage occurs due to penalization.}\label{fig:coefplots}
+\caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
 \end{figure}
 \end{CodeChunk}
 
@@ -1450,22 +1444,27 @@ will make it appealing to new and established practitioners.
 \hypertarget{environment-details}{%
 \section{Environment Details}\label{environment-details}}
 
-This report was generated on 2020-09-16 10:30:17 using the following
+This report was generated on 2020-09-19 21:55:49 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
 
 \begin{CodeOutput}
 #> R version 4.0.2 (2020-06-22)
-#> Platform: x86_64-apple-darwin17.0 (64-bit)
-#> Running under: macOS Catalina 10.15.6
+#> Platform: x86_64-pc-linux-gnu (64-bit)
+#> Running under: Pop!_OS 20.04 LTS
 #> 
 #> Matrix products: default
-#> BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-#> LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
+#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
 #> 
 #> locale:
-#> [1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
+#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 #> 
 #> attached base packages:
 #> [1] splines   stats     graphics  grDevices utils     datasets  methods  
@@ -1486,11 +1485,11 @@ computational environment and dependencies:
 #> [23] kableExtra_1.2.1          glmnet_4.0-2             
 #> [25] Matrix_1.2-18             data.table_1.13.0        
 #> [27] cowplot_1.1.0             colorspace_1.4-1         
-#> [29] casebase_0.9.0.9000      
+#> [29] casebase_0.9.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] ggstance_0.3.4      htmlTable_2.0.1     base64enc_0.1-3    
+#>  [4] ggstance_0.3.4      htmlTable_2.1.0     base64enc_0.1-3    
 #>  [7] fs_1.5.0            rstudioapi_0.11     farver_2.0.3       
 #> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
 #> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
@@ -1506,15 +1505,15 @@ computational environment and dependencies:
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
 #> [46] RColorBrewer_1.1-2  rticles_0.15        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_6.0-1           rpart_4.1-15       
-#> [52] latticeExtra_0.6-29 stringi_1.4.6       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.4        
+#> [52] latticeExtra_0.6-29 stringi_1.5.3       foreach_1.5.0      
+#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.5        
 #> [58] rlang_0.4.7         pkgconfig_2.0.3     matrixStats_0.56.0 
 #> [61] evaluate_0.14       lattice_0.20-41     labeling_0.3       
 #> [64] htmlwidgets_1.5.1   cmprsk_2.2-10       tidyselect_1.1.0   
 #> [67] deSolve_1.28        plyr_1.8.6          R6_2.4.1           
 #> [70] generics_0.0.2      Hmisc_4.4-1         multcomp_1.4-13    
 #> [73] DBI_1.1.0           withr_2.2.0         pillar_1.4.6       
-#> [76] haven_2.3.1         foreign_0.8-80      mgcv_1.8-33        
+#> [76] haven_2.3.1         foreign_0.8-79      mgcv_1.8-33        
 #> [79] nnet_7.3-14         mstate_0.2.12       modelr_0.1.8       
 #> [82] crayon_1.3.4        rmarkdown_2.3       jpeg_0.1-8.1       
 #> [85] grid_4.0.2          readxl_1.3.1        blob_1.2.1         
@@ -1529,9 +1528,9 @@ The current Git commit details are:
 \begin{CodeChunk}
 
 \begin{CodeOutput}
-#> Local:    master /Users/maxturgeon/Documents/git_repos/cbpaper
-#> Remote:   master @ origin (git@github.com:sahirbhatnagar/cbpaper.git)
-#> Head:     [73c0393] 2020-09-15: update CS3
+#> Local:    editSahir /home/sahir/git_repositories/cbpaper
+#> Remote:   editSahir @ origin (https://github.com/sahirbhatnagar/cbpaper.git)
+#> Head:     [d691836] 2020-09-19: Merge remote-tracking branch 'origin/master' into editSahir
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1539,3 +1538,4 @@ The current Git commit details are:
 
 
 \end{document}
+
