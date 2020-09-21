@@ -116,13 +116,14 @@ Miettinen \citeyearpar{hanley2009fitting} proposed a general framework
 for estimating fully parametric hazard models via logistic regression.
 Their main idea is simple: comparing person-moments when the event of
 interest occurred with moments when patients were at risk. Their
-approach provides users familiar with generalized linear models a
-natural way of fitting parametric survival models. Moreover, their
-framework is very flexible: general functions of time can be estimated
-(e.g.~using splines or general additive models), and hence these models
-retain some of the flexibility of Cox's partial likelihood approach. And
-since the unit of analysis is a person moment, time-varying covariates
-can also easily be included in this framework.
+approach handles censored data effortlessly and provides users familiar
+with generalized linear models a natural way of fitting parametric
+survival models. Moreover, their framework is very flexible: general
+functions of time can be estimated (e.g.~using splines or general
+additive models), and hence these models retain some of the flexibility
+of Cox's partial likelihood approach. And since the unit of analysis is
+a person moment, time-varying covariates can also easily be included in
+this framework.
 
 Using the framework of logistic regression for analyzing time-to-event
 data opens the door to an extensive array of powerful modeling tools.
@@ -280,15 +281,15 @@ regression.\footnote{Specifically, it corresponds to the following parametrizati
 To perform variable selection on the regression parameters
 \(\theta \in \mathbb{R}^p\) of the hazard function, we can add a penalty
 to the likelihood and solve the following problem: \begin{equation}
-\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j P(\theta_j;\lambda,\alpha)
+\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j P(\theta_j;\lambda,\alpha) \label{eq:penest}
 \end{equation} where \(\ell\left(\theta\right)\) is the log of the
 likelihood function given in \eqref{eq:lik-function},
-\(P(\theta_j;\lambda,\alpha)\) is a penalty term controlled controlled
-by the non-negative regularization parameters \(\lambda\) and
-\(\alpha\), and \(w_j\) is the penalty factor for the \(j\)th covariate.
-These penalty factors serve as a way of allowing parameters to be
-penalized differently. For example, we could set the penalty factor for
-time to be 0 to ensure it is always included in the selected model.
+\(P(\theta_j;\lambda,\alpha)\) is a penalty term controlled by the
+non-negative regularization parameters \(\lambda\) and \(\alpha\), and
+\(w_j\) is the penalty factor for the \(j\)th covariate. These penalty
+factors serve as a way of allowing parameters to be penalized
+differently. For example, we could set the penalty factor for time to be
+0 to ensure it is always included in the selected model.
 
 \hypertarget{existing-packages}{%
 \section{Existing packages}\label{existing-packages}}
@@ -386,7 +387,7 @@ second category often produces estimates in the form of stepwise
 functions. Providing smooth estimates of the CIF was one of the main
 motivations for introducing case-base sampling in survival analysis.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
@@ -454,14 +455,14 @@ facilitate this task:
 
 By splitting these tasks, we give flexibility to the user. While the
 method call in Step 2 allows further customization by using the
-\pkg{ggplot2} \citep{ggplot2} family of functions, users can use for the
+\pkg{ggplot2} \citep{ggplot2} family of functions, users may choose the
 graphics system of their choice to create population-time plots from the
 object created in Step 1.
 
 To illustrate these functions, we will use data from the European
 Randomized Study of Prostate Cancer Screening (ERSPC)
 \citep{schroder2009screening} which was extracted using the approach
-described in Liu \emph{et al.} \citeyearpar{liu2014recovering} This
+described in Liu \emph{et al.} \citeyearpar{liu2014recovering}. This
 dataset is available through the \pkg{casebase} package. It contains the
 individual observations for 159,893 men from seven European countries,
 who were between the ages of 55 and 69 years when recruited for the
@@ -476,7 +477,7 @@ plot by treatment group. The resulting object inherits from class
 
 \begin{CodeInput}
 R> pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
-R+                                event = "DeadOfPrCa", exposure = "ScrArm")
++                                event = "DeadOfPrCa", exposure = "ScrArm")
 R> inherits(pt_object, "popTime")
 \end{CodeInput}
 
@@ -503,7 +504,7 @@ R> plot(pt_object, add.base.series = TRUE)
 \end{CodeChunk}
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/plot-stratified-erspc-data-1} 
 
@@ -611,9 +612,10 @@ available via the \code{family} parameter. These approaches are:
 \item
   \code{glm}: This is the familiar logistic regression.
 \item
-  \code{glmnet}: This option allows for variable selection using Lasso
-  or elastic-net (cf.~Case Study 3). This functionality is provided
-  through the \pkg{glmnet} package \citep{friedman2010jss}.
+  \code{glmnet}: This option allows for variable selection using the
+  elastic-net \citep{zou2005regularization} penalty (cf.~Case Study 3).
+  This functionality is provided through the \pkg{glmnet} package
+  \citep{friedman2010jss}.
 \item
   \code{gam}: This option provides support for \emph{Generalized
   Additive Models} via the \pkg{mgcv} package
@@ -677,13 +679,13 @@ and 4) a smooth function using cubic B-splines. The models are fit using
 
 \begin{CodeInput}
 R> fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-R+              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-R+              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-R+              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
++              gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
++              weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
++              splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
 R> 
 R> fits <- lapply(fmla, function(i) {
-R+   fitSmoothHazard(i, data = ERSPC, ratio = 100)
-R+ })
++   fitSmoothHazard(i, data = ERSPC, ratio = 100)
++ })
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -732,8 +734,8 @@ R> new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 R> new_time <- seq(0,14,0.1)
 R> 
 R> risks <- lapply(fits, function(i) {
-R>   absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
-R> })
++   absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
++ })
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -778,7 +780,7 @@ provides the best fit:
 \end{CodeChunk}
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/erspc-cox-cif-1} \caption{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
 \end{figure}
 \end{CodeChunk}
@@ -799,19 +801,19 @@ different estimates for the CIF.
 
 \caption{\label{tab:print-erspc-estimates}Comparison of estimated hazard ratios and 95\% confidence intervals for ERSPC data.}
 \centering
-\begin{tabular}[t]{>{\bfseries}lcc}
+\begin{tabular}[t]{>{}lcc}
 \toprule
 Model & casebase::fitSmoothHazard & survival::survreg\\
 \midrule
-Exponential & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
+\textbf{Exponential} & 0.79 (0.67, 0.94) & 0.81 (0.68, 0.96)\\
 \cmidrule{1-3}
-Gompertz & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
+\textbf{Gompertz} & 0.80 (0.67, 0.95) & 0.80 (0.67, 0.95)\\
 \cmidrule{1-3}
-Weibull & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
+\textbf{Weibull} & 0.81 (0.68, 0.96) & 0.80 (0.65, 0.96)\\
 \cmidrule{1-3}
-Splines & 0.79 (0.66, 0.94) & --\\
+\textbf{Splines} & 0.79 (0.66, 0.94) & --\\
 \bottomrule
-\multicolumn{3}{l}{Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
+\multicolumn{3}{l}{\rule{0pt}{1em}Cox model estimate: HR (95\% CI) = 0.80 (0.67, 0.95)}\\
 \end{tabular}
 \end{table}
 
@@ -844,7 +846,7 @@ objects of class \code{singleEventCB}:
 
 \begin{CodeInput}
 R> plot(fit_inter, type = "hr", newdata = new_data,
-R>      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
++      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -855,7 +857,7 @@ reduction in prostate cancer due to screening than the single overall
 20\% reported in the original article.
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/interaction-ERSPC-1} 
 
@@ -902,7 +904,7 @@ hazard function: the density of points is larger at the beginning of
 follow-up than at the end.
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/compPop-1} 
 
@@ -925,8 +927,8 @@ regression. To do so, we need to treat the competing event as censoring.
 R> library(survival)
 R> # Treat competing event as censoring
 R> model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-R+   data = bmtcrr
-R+ )
++   data = bmtcrr
++ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -986,8 +988,8 @@ we will use the \pkg{timereg} package \citep{timereg}:
 \begin{CodeInput}
 R> library(timereg)
 R> model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
-R+                         const(Phase) + const(Source) + const(Age),
-R+                       data = bmtcrr, cause = 1, model = "fg")
++                         const(Phase) + const(Source) + const(Age),
++                       data = bmtcrr, cause = 1, model = "fg")
 R> 
 R> # Estimate absolute risk curve
 R> risk_fg <- predict(model_fg, newdata, times = time_points)
@@ -995,7 +997,7 @@ R> risk_fg <- predict(model_fg, newdata, times = time_points)
 \end{CodeChunk}
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/bmtcrr-risk-1} 
 
@@ -1021,10 +1023,8 @@ the \pkg{casebase} package: creating population-time plots, fitting
 parametric models for hazard functions, and estimating the corresponding
 cumulative incidence curves. For the third case study, we show how
 \pkg{casebase} can also be used for variable selection through
-regularized estimation of the hazard function. To do this, we simply
-replace logistic regression with a penalized counterpart. In
-\pkg{casebase}, we achieve this by using the \pkg{glmnet} package
-\citep{friedman2010jss}.
+regularized estimation of the hazard function as given by
+\eqref{eq:penest}.
 
 To illustrate this functionality, we use the dataset from the Study to
 Understand Prognoses Preferences Outcomes and Risks of Treatment
@@ -1033,35 +1033,31 @@ five American hospitals within individuals who are considered seriously
 ill.~The original data is available online from the Department of
 Biostatistics at Vanderbilt University \citep{harrell_2020}. The cleaned
 and imputed data consists of 9104 observations and 30 variables, and it
-is available as part of the \pkg{casebase} package. For more information
-about this dataset, the reader is encouraged to look at the
-documentation in our package.
+is available as part of the \pkg{casebase} package. In the comparisons
+below, all covariates except \code{sps} and \code{aps} were modeled.
+These two variables correspond to scores for predicting the outcome that
+were developed as part of the original study. For more information about
+this dataset, the reader is encouraged to look at the documentation in
+our package.
 
-In this section, we compare our penalized case-base approach to two
-other models: Cox regression, and penalized Cox regression (using the
-\pkg{glmnet} package). In all three models, we use all covariates except
-\code{sps} and \code{aps}. These two variables correspond to scores for
-predicting the outcome that were developed as part of the original
-study.
+For our penalized case-base model, we opted for the natural log of time
+which corresponds to a Weibull distribution. For fitting the penalized
+hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface
+to the \code{fitSmoothHazard} function. We must supply both a matrix
+\code{y} containing the time and event variables, and a matrix \code{x}
+containing all other covariates. We applied the lasso penalty by setting
+\code{alpha = 1} and assigned a \code{penalty.factor} (\(w_j\)) of 0 to
+the time variable to ensure it was in the selected model. We compared
+our approach to both Cox regression, and lasso penalized Cox regression
+(fitted via the \pkg{glmnet} package).
 
-To compare the performance of our models, we first divide the data into
-a training and a test data, with 95\% of the observations used for
-training all three models. To assess both discrimination and
-calibration, we use a time-dependent version of the classical Brier
+To compare the performance of our models, we split the data into 95\%
+training and 5\% test sets. To assess both discrimination and
+calibration, we used a time-dependent version of the classical Brier
 score that is adjusted for censoring \citep{graf1999ass}. The Brier
 score can be used with both parametric and semi-parametric models. We
-use the \pkg{riskRegression} to compute these scores for all models.
-
-For our penalized case-base model, we opt for the natural log of time;
-recall that this corresponds to a Weibull distribution. For fitting the
-penalized hazard, we use \code{fitSmoothHazard.fit}, which is a matrix
-interface to the function \code{fitSmoothHazard}. In order to use this
-interface, we first create a matrix \code{y} containing the time and
-event variables, and a matrix \code{x} containing all remaining
-covariates we would like to include in the model space. We used lasso
-penalization by setting \code{alpha = 1}. Moreover, we use the argument
-\code{penalty.factor} to give a regularization weight of 0 to the time
-variable, and therefore force it into the final model.
+used the \pkg{riskRegression} package to compute these scores for all
+models.
 
 \begin{CodeChunk}
 
@@ -1082,14 +1078,14 @@ R> pen_cb <- casebase::fitSmoothHazard.fit(x, y,
 \end{CodeInput}
 \end{CodeChunk}
 
-Our first comparison plot examines the covariates that were selected
-between all three hazard functions. In \ref{fig:cs3lolliPlot}, we show
-the coefficient estimates for covariates that we selected by both
-penalized Cox and penalized case-base. From this plot, we can clearly
-see the shrinkage effect of using penalized estimation.
+In Figure \ref{fig:cs3lolliPlot}, we show the coefficient estimates for
+covariates that we selected by both penalized Cox and penalized
+case-base. We note that both penalized approaches produce similar
+results, and can clearly see the shrinkage effect owing to the
+\(\ell_1\) penalty.
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/coefplots-1} 
 
@@ -1099,22 +1095,22 @@ see the shrinkage effect of using penalized estimation.
 \end{figure}
 \end{CodeChunk}
 
-Next, we compare the cumulative incidence estimation over the test set.
+We then compared the cumulative incidence estimation over the test set.
 The probabilities over time for each observation are averaged, resulting
-in the absolute risk curves in Figure \ref{fig:cs3FinalBrier} (A). We
-can see some minimal differences between the three models, with the
-Kaplan-Meier estimate giving a lower estimate than our three models. We
-also note that the apparent smoothness of the Cox and penalized Cox
-curves is due to the large number of observations in the training set,
-which is used to derive the Breslow estimate of the baseline hazard. As
-described above, we compare the performance between the models by
-computing the Brier scores over time. In Figure \ref{fig:cs3FinalBrier}
-(B), we can see that the Brier score is larger for the Kaplan-Meier
-estimate than for the other three models. On the other hand, the
-differences between these three models are minimal.
+in the absolute risk curves shown in Figure \ref{fig:cs3FinalBrier} (A).
+We can see some minimal differences between the three models, with the
+Kaplan-Meier giving the lowest estimates across follow-up-time. Note
+that the apparent smoothness of the Cox and penalized Cox curves is due
+to the large number of observations in the training set, which is used
+to derive the Breslow estimate of the baseline hazard. As described
+above, we compare the performance between the models by computing the
+Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), we can
+see that the Brier score is larger for the Kaplan-Meier estimate than
+for the other three models. On the other hand, the differences between
+these three models are minimal.
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/riskregressionBrier-1} 
 
@@ -1124,8 +1120,9 @@ differences between these three models are minimal.
 \end{figure}
 \end{CodeChunk}
 
-In brief, case-base sampling can be used in conjunction with penalized
-logistic regression to perform variable selection with survival models.
+In this third case study, we showed how case-base sampling can be used
+in conjunction with penalized logistic regression to perform variable
+selection in survival models.
 
 \hypertarget{case-study-4stanford-heart-transplant-data}{%
 \section{Case study 4---Stanford Heart Transplant
@@ -1160,7 +1157,7 @@ follow-up period, and therefore we do not expect the hazard to be
 constant.
 
 \begin{CodeChunk}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-poptime-1} 
 
@@ -1256,7 +1253,7 @@ R> plot(fit3, hazard.params = list(xvar = "futime",
 +                                 ylab = "Hazard",
 +                                 data = cb_data))
 \end{CodeInput}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-hazard-1} 
 
@@ -1296,7 +1293,7 @@ R> plot(absrisk,
 +   xlab("Follow-up time (in days)") +
 +   paper_gg_theme
 \end{CodeInput}
-\begin{figure}
+\begin{figure}[ht]
 
 {\centering \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/stanford-risk-1} 
 
@@ -1462,14 +1459,14 @@ will make it appealing to new and established practitioners.
 
 We would like to thank Yi Yang for helpful discussions on penalized
 regression models. \mbox{Bhatnagar} gratefully acknowledges funding via
-Discovery Grants from the Natural Sciences and Engineering Research
+a Discovery Grant from the Natural Sciences and Engineering Research
 Council of Canada (NSERC).
 
 \hypertarget{environment-details}{%
 \section*{Environment Details}\label{environment-details}}
 \addcontentsline{toc}{section}{Environment Details}
 
-This report was generated on 2020-09-20 12:00:27 using the following
+This report was generated on 2020-09-20 20:42:38 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
@@ -1496,31 +1493,33 @@ computational environment and dependencies:
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] scales_1.1.1              forcats_0.5.0            
-#>  [3] stringr_1.4.0             dplyr_1.0.2              
-#>  [5] purrr_0.3.4               readr_1.3.1              
-#>  [7] tidyr_1.1.2               ggplot2_3.3.2            
-#>  [9] tidyverse_1.3.0           lubridate_1.7.9          
-#> [11] visreg_2.7.0              tibble_3.0.3             
-#> [13] riskRegression_2020.02.05 prodlim_2019.11.13       
-#> [15] flexsurv_1.1.1            survival_3.2-3           
-#> [17] pracma_2.2.9              magrittr_1.5             
-#> [19] kableExtra_1.2.1          glmnet_4.0-2             
-#> [21] Matrix_1.2-18             data.table_1.13.0        
-#> [23] cowplot_1.1.0             colorspace_1.4-1         
-#> [25] casebase_0.9.0           
+#>  [1] broom_0.7.0               dotwhisker_0.5.0         
+#>  [3] timereg_1.9.7             glue_1.4.2               
+#>  [5] scales_1.1.1              forcats_0.5.0            
+#>  [7] stringr_1.4.0             dplyr_1.0.2              
+#>  [9] purrr_0.3.4               readr_1.3.1              
+#> [11] tidyr_1.1.2               ggplot2_3.3.2            
+#> [13] tidyverse_1.3.0           lubridate_1.7.9          
+#> [15] visreg_2.7.0              tibble_3.0.3             
+#> [17] riskRegression_2020.02.05 prodlim_2019.11.13       
+#> [19] flexsurv_1.1.1            survival_3.2-3           
+#> [21] pracma_2.2.9              magrittr_1.5             
+#> [23] kableExtra_1.2.1          glmnet_4.0-2             
+#> [25] Matrix_1.2-18             data.table_1.13.0        
+#> [27] cowplot_1.1.0             colorspace_1.4-1         
+#> [29] casebase_0.9.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] TH.data_1.0-10      VGAM_1.1-3          ellipsis_0.3.1     
-#>  [4] htmlTable_2.1.0     base64enc_0.1-3     fs_1.5.0           
-#>  [7] rstudioapi_0.11     MatrixModels_0.4-1  fansi_0.4.1        
-#> [10] mvtnorm_1.1-1       xml2_1.3.2          codetools_0.2-16   
-#> [13] knitr_1.29          Formula_1.2-3       jsonlite_1.7.1     
-#> [16] broom_0.7.0         cluster_2.1.0       dbplyr_1.4.4       
-#> [19] png_0.1-7           compiler_4.0.2      httr_1.4.2         
-#> [22] backports_1.1.9     assertthat_0.2.1    cli_2.0.2          
-#> [25] htmltools_0.5.0     quantreg_5.67       tools_4.0.2        
-#> [28] gtable_0.3.0        glue_1.4.2          Rcpp_1.0.5         
+#>  [4] ggstance_0.3.4      htmlTable_2.1.0     base64enc_0.1-3    
+#>  [7] fs_1.5.0            rstudioapi_0.11     farver_2.0.3       
+#> [10] MatrixModels_0.4-1  fansi_0.4.1         mvtnorm_1.1-1      
+#> [13] xml2_1.3.2          codetools_0.2-16    knitr_1.29         
+#> [16] Formula_1.2-3       jsonlite_1.7.1      cluster_2.1.0      
+#> [19] dbplyr_1.4.4        png_0.1-7           compiler_4.0.2     
+#> [22] httr_1.4.2          backports_1.1.9     assertthat_0.2.1   
+#> [25] cli_2.0.2           htmltools_0.5.0     quantreg_5.67      
+#> [28] tools_4.0.2         gtable_0.3.0        Rcpp_1.0.5         
 #> [31] cellranger_1.1.0    vctrs_0.3.4         nlme_3.1-149       
 #> [34] conquer_1.0.2       iterators_1.0.12    xfun_0.17          
 #> [37] rvest_0.3.6         lifecycle_0.2.0     polspline_1.1.19   
@@ -1528,21 +1527,21 @@ computational environment and dependencies:
 #> [43] hms_0.5.3           sandwich_2.5-1      SparseM_1.78       
 #> [46] RColorBrewer_1.1-2  rticles_0.15        yaml_2.2.1         
 #> [49] gridExtra_2.3       rms_6.0-1           rpart_4.1-15       
-#> [52] latticeExtra_0.6-29 stringi_1.5.3       foreach_1.5.0      
-#> [55] checkmate_2.0.0     lava_1.6.7          shape_1.4.5        
-#> [58] rlang_0.4.7         pkgconfig_2.0.3     matrixStats_0.56.0 
-#> [61] evaluate_0.14       lattice_0.20-41     htmlwidgets_1.5.1  
-#> [64] cmprsk_2.2-10       tidyselect_1.1.0    deSolve_1.28       
-#> [67] R6_2.4.1            generics_0.0.2      Hmisc_4.4-1        
-#> [70] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
-#> [73] pillar_1.4.6        haven_2.3.1         foreign_0.8-79     
-#> [76] mgcv_1.8-33         nnet_7.3-14         mstate_0.2.12      
-#> [79] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
-#> [82] timereg_1.9.7       jpeg_0.1-8.1        grid_4.0.2         
-#> [85] readxl_1.3.1        blob_1.2.1          reprex_0.3.0       
-#> [88] digest_0.6.25       webshot_0.5.2       numDeriv_2016.8-1.1
-#> [91] stats4_4.0.2        munsell_0.5.0       viridisLite_0.3.0  
-#> [94] quadprog_1.5-8
+#> [52] latticeExtra_0.6-29 stringi_1.5.3       highr_0.8          
+#> [55] foreach_1.5.0       checkmate_2.0.0     lava_1.6.7         
+#> [58] shape_1.4.5         rlang_0.4.7         pkgconfig_2.0.3    
+#> [61] matrixStats_0.56.0  evaluate_0.14       lattice_0.20-41    
+#> [64] labeling_0.3        htmlwidgets_1.5.1   cmprsk_2.2-10      
+#> [67] tidyselect_1.1.0    deSolve_1.28        plyr_1.8.6         
+#> [70] R6_2.4.1            generics_0.0.2      Hmisc_4.4-1        
+#> [73] multcomp_1.4-13     DBI_1.1.0           withr_2.2.0        
+#> [76] pillar_1.4.6        haven_2.3.1         foreign_0.8-79     
+#> [79] mgcv_1.8-33         nnet_7.3-14         mstate_0.2.12      
+#> [82] modelr_0.1.8        crayon_1.3.4        rmarkdown_2.3      
+#> [85] jpeg_0.1-8.1        grid_4.0.2          readxl_1.3.1       
+#> [88] blob_1.2.1          reprex_0.3.0        digest_0.6.25      
+#> [91] webshot_0.5.2       numDeriv_2016.8-1.1 stats4_4.0.2       
+#> [94] munsell_0.5.0       viridisLite_0.3.0   quadprog_1.5-8
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -1553,7 +1552,7 @@ The current Git commit details are:
 \begin{CodeOutput}
 #> Local:    editSahir /home/sahir/git_repositories/cbpaper
 #> Remote:   editSahir @ origin (https://github.com/sahirbhatnagar/cbpaper.git)
-#> Head:     [d691836] 2020-09-19: Merge remote-tracking branch 'origin/master' into editSahir
+#> Head:     [dace5dd] 2020-09-20: added paragraph on variable selection in theoretical details
 \end{CodeOutput}
 \end{CodeChunk}
 

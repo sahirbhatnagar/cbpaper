@@ -91,6 +91,7 @@ knitr::opts_chunk$set(
   message = FALSE,
   echo = FALSE,
   cache = TRUE, 
+  fig.pos = 'ht',
   comment = "#>",
   fig.path = "../figures/",
   out.width = "\\textwidth",
@@ -143,7 +144,7 @@ Survival analysis and the comparison of event rates has been greatly influenced 
 
 From the perspective of clinicians and their patients, the most relevant quantity is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances, and not the hazard ratio between a treatment and control group. Therefore, to make sound clinical decisions, it is important to accurately estimate the *full* hazard function, which can subsequently be used to estimate the cumulative incidence function (CIF). Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the CIF and the survival function estimates also vary smoothly over time.
 
-With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@hanley2009fitting] proposed a general framework for estimating fully parametric hazard models via logistic regression. Their main idea is simple: comparing person-moments when the event of interest occurred with moments when patients were at risk. Their approach provides users familiar with generalized linear models a natural way of fitting parametric survival models. Moreover, their framework is very flexible: general functions of time can be estimated (e.g. using splines or general additive models), and hence these models retain some of the flexibility of Cox's partial likelihood approach. And since the unit of analysis is a person moment, time-varying covariates can also easily be included in this framework.
+With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@hanley2009fitting] proposed a general framework for estimating fully parametric hazard models via logistic regression. Their main idea is simple: comparing person-moments when the event of interest occurred with moments when patients were at risk. Their approach handles censored data effortlessly and provides users familiar with generalized linear models a natural way of fitting parametric survival models. Moreover, their framework is very flexible: general functions of time can be estimated (e.g. using splines or general additive models), and hence these models retain some of the flexibility of Cox's partial likelihood approach. And since the unit of analysis is a person moment, time-varying covariates can also easily be included in this framework.
 
 Using the framework of logistic regression for analyzing time-to-event data opens the door to an extensive array of powerful modeling tools. Indeed, lasso and elastic-net regression can be used to select variables that are associated with the hazard function. Logistic regression can also be replaced by multinomial regression to analyse data with multiple competing events. 
 
@@ -202,7 +203,7 @@ where $N_j(t)$ is the counting process associated with the event of type $j$ and
 
 To perform variable selection on the regression parameters $\theta \in \mathbb{R}^p$ of the hazard function, we can add a penalty to the likelihood and solve the following problem:
 \begin{equation}
-\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j P(\theta_j;\lambda,\alpha)
+\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j P(\theta_j;\lambda,\alpha) \label{eq:penest}
 \end{equation}
 where $\ell\left(\theta\right)$ is the log of the likelihood function given in \eqref{eq:lik-function}, $P(\theta_j;\lambda,\alpha)$ is a penalty term controlled by the non-negative regularization parameters $\lambda$ and $\alpha$, and $w_j$ is the penalty factor for the $j$th covariate. These penalty factors serve as a way of allowing parameters to be penalized differently. For example, we could set the penalty factor for time to be 0 to ensure it is always included in the selected model. 
 
@@ -220,7 +221,7 @@ Next, several \proglang{R} packages implement methodologies for competing risk a
 
 Finally, several packages include functions to estimate the CIF. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CIF can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below). Packages providing this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing-risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{riskRegression}, \pkg{rstpm2}, and \pkg{survival}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the cumulative incidence function, whereas the second category often produces estimates in the form of stepwise functions. Providing smooth estimates of the CIF was one of the main motivations for introducing case-base sampling in survival analysis.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
@@ -262,9 +263,9 @@ Population-time plots are a descriptive visualization of incidence density, wher
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime}.  
 2. The corresponding \code{plot} method for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
-By splitting these tasks, we give flexibility to the user. While the method call in Step 2 allows further customization by using the \pkg{ggplot2} [@ggplot2] family of functions, users can use for the graphics system of their choice to create population-time plots from the object created in Step 1.
+By splitting these tasks, we give flexibility to the user. While the method call in Step 2 allows further customization by using the \pkg{ggplot2} [@ggplot2] family of functions, users may choose the graphics system of their choice to create population-time plots from the object created in Step 1.
 
-To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering] This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
+To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering]. This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
 
 We first create the necessary dataset for producing the population time plot using the \code{popTime} function. In this example, we stratify the plot by treatment group. The resulting object inherits from class \code{popTime} and stores the exposure variable as an attribute:
 
@@ -339,7 +340,7 @@ The fitting function retains the familiar formula interface of \code{glm}. The l
 To fit the hazard function, we provide several approaches that are available via the \code{family} parameter. These approaches are:
 
   - \code{glm}: This is the familiar logistic regression.
-  - \code{glmnet}: This option allows for variable selection using Lasso or elastic-net (cf. Case Study 3). This functionality is provided through the \pkg{glmnet} package [@friedman2010jss].
+  - \code{glmnet}: This option allows for variable selection using the elastic-net [@zou2005regularization] penalty (cf. Case Study 3). This functionality is provided through the \pkg{glmnet} package [@friedman2010jss].
   - \code{gam}: This option provides support for *Generalized Additive Models* via the \pkg{mgcv} package [@hastie1987generalized].
   - \code{gbm}: This option provides support for *Gradient Boosted Trees* via the \pkg{gbm} package. This feature is still experimental.
   
@@ -1093,13 +1094,13 @@ Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both case-base s
 
 # Case study 3---SUPPORT Data
 
-In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function. To do this, we simply replace logistic regression with a penalized counterpart. In \pkg{casebase}, we achieve this by using the \pkg{glmnet} package [@friedman2010jss]. 
+In the first two case studies, we described the basic functionalities of the \pkg{casebase} package: creating population-time plots, fitting parametric models for hazard functions, and estimating the corresponding cumulative incidence curves. For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function as given by \eqref{eq:penest}. 
 
-To illustrate this functionality, we use the dataset from the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) [@knaus1995support]. The SUPPORT dataset tracks death in five American hospitals within individuals who are considered seriously ill. The original data is available online from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. The cleaned and imputed data consists of 9104 observations and 30 variables, and it is available as part of the \pkg{casebase} package. For more information about this dataset, the reader is encouraged to look at the documentation in our package.
+To illustrate this functionality, we use the dataset from the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) [@knaus1995support]. The SUPPORT dataset tracks death in five American hospitals within individuals who are considered seriously ill. The original data is available online from the Department of Biostatistics at Vanderbilt University [@harrell_2020]. The cleaned and imputed data consists of 9104 observations and 30 variables, and it is available as part of the \pkg{casebase} package. In the comparisons below, all covariates except \code{sps} and \code{aps} were modeled. These two variables correspond to scores for predicting the outcome that were developed as part of the original study. For more information about this dataset, the reader is encouraged to look at the documentation in our package. 
 
-In this section, we compare our penalized case-base approach to two other models: Cox regression, and penalized Cox regression (using the \pkg{glmnet} package). In all three models, we use all covariates except \code{sps} and \code{aps}. These two variables correspond to scores for predicting the outcome that were developed as part of the original study.
+For our penalized case-base model, we opted for the natural log of time which corresponds to a Weibull distribution. For fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface to the \code{fitSmoothHazard} function. We must supply both a matrix \code{y} containing the time and event variables, and a matrix \code{x} containing all other covariates. We applied the lasso penalty by setting \code{alpha = 1} and assigned a \code{penalty.factor} ($w_j$) of 0 to the time variable to ensure it was in the selected model. We compared our approach to both Cox regression, and lasso penalized Cox regression (fitted via the \pkg{glmnet} package). 
 
-To compare the performance of our models, we first divide the data into a training and a test data, with 95% of the observations used for training all three models. To assess both discrimination and calibration, we use a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used with both parametric and semi-parametric models. We use the \pkg{riskRegression} to compute these scores for all models.
+To compare the performance of our models, we split the data into 95% training and 5% test sets. To assess both discrimination and calibration, we used a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used with both parametric and semi-parametric models. We used the \pkg{riskRegression} package to compute these scores for all models.
 
 ```{r supportData, eval = eval_cs3}
 scaleFUNy <- function(x) sprintf("%.2f", x)
@@ -1122,7 +1123,7 @@ cox <- survival::coxph(Surv(time = d.time, event = death) ~ . - aps - sps,
                            data = train, x = TRUE)
 ```
 
-For our penalized case-base model, we opt for the natural log of time; recall that this corresponds to a Weibull distribution. For fitting the penalized hazard, we use \code{fitSmoothHazard.fit}, which is a matrix interface to the function \code{fitSmoothHazard}. In order to use this interface, we first create a matrix \code{y} containing the time and event variables, and a matrix \code{x} containing all remaining covariates we would like to include in the model space. We used lasso penalization by setting \code{alpha = 1}. Moreover, we use the argument \code{penalty.factor} to give a regularization weight of 0 to the time variable, and therefore force it into the final model.
+
 
 ```{r supportCB_fit, eval=eval_cs3, echo=TRUE, cache=FALSE}
 # Create matrices for inputs
@@ -1168,7 +1169,7 @@ coxNet$coefficients <- nonzero_coef_cox@x
 names(coxNet$coefficients) <- coxNet_coefnames
 ```
 
-Our first comparison plot examines the covariates that were selected between all three hazard functions. In \ref{fig:cs3lolliPlot}, we show the coefficient estimates for covariates that we selected by both penalized Cox and penalized case-base. From this plot, we can clearly see the shrinkage effect of using penalized estimation. 
+In Figure \ref{fig:cs3lolliPlot}, we show the coefficient estimates for covariates that we selected by both penalized Cox and penalized case-base. We note that both penalized approaches produce similar results, and can clearly see the shrinkage effect owing to the $\ell_1$ penalty.
 
 ```{r coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \\pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\\ell_1$ penalty."}
 library(dotwhisker)
@@ -1222,7 +1223,7 @@ dwplot(lolliplotDots) +
   scale_color_manual(values = q4)
 ```
 
-Next, we compare the cumulative incidence estimation over the test set. The probabilities over time for each observation are averaged, resulting in the absolute risk curves in Figure \ref{fig:cs3FinalBrier} (A). We can see some minimal differences between the three models, with the Kaplan-Meier estimate giving a lower estimate than our three models. We also note that the apparent smoothness of the Cox and penalized Cox curves is due to the large number of observations in the training set, which is used to derive the Breslow estimate of the baseline hazard. As described above, we compare the performance between the models by computing the Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), we can see that the Brier score is larger for the Kaplan-Meier estimate than for the other three models. On the other hand, the differences between these three models are minimal.
+We then compared the cumulative incidence estimation over the test set. The probabilities over time for each observation are averaged, resulting in the absolute risk curves shown in Figure \ref{fig:cs3FinalBrier} (A). We can see some minimal differences between the three models, with the Kaplan-Meier giving the lowest estimates across follow-up-time. Note that the apparent smoothness of the Cox and penalized Cox curves is due to the large number of observations in the training set, which is used to derive the Breslow estimate of the baseline hazard. As described above, we compare the performance between the models by computing the Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), we can see that the Brier score is larger for the Kaplan-Meier estimate than for the other three models. On the other hand, the differences between these three models are minimal.
 
 ```{r support_abs, eval=eval_cs3, echo=FALSE}
 # Absolute Risks
@@ -1373,7 +1374,7 @@ legend_reg <- cowplot::get_legend(
 cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 ```
 
-In brief, case-base sampling can be used in conjunction with penalized logistic regression to perform variable selection with survival models.
+In this third case study, we showed how case-base sampling can be used in conjunction with penalized logistic regression to perform variable selection in survival models.
 
 # Case study 4---Stanford Heart Transplant Data
 
@@ -1537,7 +1538,7 @@ In conclusion, we presented the \proglang{R} package \pkg{casebase} which implem
 
 # Acknowledgments {-}
 
-We would like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via Discovery Grants from the Natural Sciences and Engineering Research Council of Canada (NSERC).
+We would like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
 
 # Environment Details {-}
 
