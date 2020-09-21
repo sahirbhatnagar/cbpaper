@@ -148,7 +148,7 @@ With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@
 
 Using the framework of logistic regression for analyzing time-to-event data opens the door to an extensive array of powerful modeling tools. Indeed, lasso and elastic-net regression can be used to select variables that are associated with the hazard function. Logistic regression can also be replaced by multinomial regression to analyse data with multiple competing events. 
 
-In this article, we present a comprehensive and flexible \proglang{R} package for parametric survival analysis that combines the ideas of Hanley & Miettinen [-@hanley2009fitting] into a simple interface. The purpose of the \pkg{casebase} package is to provide practitioners with an easy-to-use software tool to compute a patient's risk (or cumulative incidence) of an event, conditional on a particular patient's covariate profile. Our package retains the flexibility of case-base sampling and the familiar interface of the \code{glm} function. It also provides tools for variable selection and competing-risk analysis. In addition, we provide extensive visualization tools.
+In this article, we present the \pkg{casebase} package [@casebase-package] implemented in \proglang{R} [@r-core], for parametric survival analysis that combines the ideas of Hanley & Miettinen [-@hanley2009fitting] into a simple interface. The purpose of the \pkg{casebase} package is to provide practitioners with an easy-to-use software tool to compute a patient's risk (or cumulative incidence) of an event, conditional on a particular patient's covariate profile. Our package retains the flexibility of case-base sampling and the familiar interface of the \code{glm} function. It also provides tools for variable selection and competing-risk analysis. In addition, we provide extensive visualization tools.
 
 In what follows, we first recall some theoretical details on case-base sampling and its use for estimating parametric hazard functions. We then give a short review of existing \proglang{R} packages that implement comparable features as \pkg{casebase}. Next, we provide some details about the implementation of case-base sampling in our package, and we give a brief survey of its main functions. This is followed by four case studies that illustrate the flexibility and capabilities of \pkg{casebase}. We show how the same framework can be used for competing risk analyses, penalized estimation, and for studies with time-dependent exposures. Finally, we end the article with a discussion of the results and of future directions.
 
@@ -221,7 +221,7 @@ Next, several \proglang{R} packages implement methodologies for competing risk a
 
 Finally, several packages include functions to estimate the CIF. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CIF can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI} below). Packages providing this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing-risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{riskRegression}, \pkg{rstpm2}, and \pkg{survival}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the cumulative incidence function, whereas the second category often produces estimates in the form of stepwise functions. Providing smooth estimates of the CIF was one of the main motivations for introducing case-base sampling in survival analysis.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
@@ -373,7 +373,14 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1---European Randomized Study of Prostate Cancer Screening
 
-For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear function as seen in \eqref{eq:gomp}, 3) log function as seen in \eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard} with the familiar formula interface:
+
+For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. 
+
+
+\subsection{Different functional forms of time}
+
+
+We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear function as seen in \eqref{eq:gomp}, 3) log function as seen in \eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard} with the familiar formula interface:
 
 ```{r, eval = eval_cs1, echo = -1}
 set.seed(12)
@@ -754,6 +761,8 @@ kable(ptable, "latex", booktabs = TRUE, align = c("l","c","c"),
 #   knitr::kable(format = "latex", booktabs = TRUE) %>%
 #   kable_styling()
 ```
+
+\subsection{Time-dependent hazard ratios}
 
 Previous re-analyses of these data suggested that the overall screening attributed reduction in death due to prostate cancer of 20% was an underestimate [@hanley2010mortality]. The estimated 20% (from a proportional hazards model) did not account for the delay between screening and the time the effect is expected to be observed. As a result, the null effects in years 1–7 masked the substantial reductions that began to appear from year 8 onwards. This motivates the use of a time-dependent hazard ratio which can easily be fit with the \pkg{casebase} package by including an interaction term with time in the model:
 
@@ -1533,12 +1542,12 @@ Future work will look at some of the methodological extensions of case-base samp
 
 In future versions of the package, we also want to increase the complement of diagnostic and inferential tools that are currently available. For example, we would like to include the ability to compute confidence intervals for the cumulative incidence curve. The delta method or parametric bootstrap are two different strategies we can use to construct approximate confidence intervals. Furthermore, we would like to include more functions to compute calibration and discrimination statistics (e.g. AUC) for our models. Saarela and Arjas [-@saarela2015non] also describe how to obtain a posterior distribution for the AUC from their model. Their approach could potentially be included in \pkg{casebase}. Finally, we want to provide more flexibility in how the case-base sampling is performed. This could be achieved by adding a \code{hazard} argument to the function \code{sampleCaseBase}. In this way, users could specify their own sampling mechanism. For example, they could provide a hazard that gives sampling probabilities that are proportional to the cardiovascular disease event rate given by the Framingham score [@saarela2015non]. 
 
-In conclusion, we presented the \proglang{R} package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practitioners. 
+In conclusion, we presented the \proglang{R} package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practitioners. The \pkg{casebase} package is freely available from the Comprehensive \proglang{R} Archive Network at https://cran.r-project.org/package=casebase. Interested users can visit http://sahirbhatnagar.com/casebase/ for detailed package documentation and vignettes.
 
 
 # Acknowledgments {-}
 
-We would like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
+We would like to thank Yi Yang for helpful discussions on penalized regression models and gradient boosting. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
 
 # Environment Details {-}
 

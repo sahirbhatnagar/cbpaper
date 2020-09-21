@@ -132,17 +132,17 @@ that are associated with the hazard function. Logistic regression can
 also be replaced by multinomial regression to analyse data with multiple
 competing events.
 
-In this article, we present a comprehensive and flexible \proglang{R}
-package for parametric survival analysis that combines the ideas of
-Hanley \& Miettinen \citeyearpar{hanley2009fitting} into a simple
-interface. The purpose of the \pkg{casebase} package is to provide
-practitioners with an easy-to-use software tool to compute a patient's
-risk (or cumulative incidence) of an event, conditional on a particular
-patient's covariate profile. Our package retains the flexibility of
-case-base sampling and the familiar interface of the \code{glm}
-function. It also provides tools for variable selection and
-competing-risk analysis. In addition, we provide extensive visualization
-tools.
+In this article, we present the \pkg{casebase} package
+\citep{casebase-package} implemented in \proglang{R} \citep{r-core}, for
+parametric survival analysis that combines the ideas of Hanley \&
+Miettinen \citeyearpar{hanley2009fitting} into a simple interface. The
+purpose of the \pkg{casebase} package is to provide practitioners with
+an easy-to-use software tool to compute a patient's risk (or cumulative
+incidence) of an event, conditional on a particular patient's covariate
+profile. Our package retains the flexibility of case-base sampling and
+the familiar interface of the \code{glm} function. It also provides
+tools for variable selection and competing-risk analysis. In addition,
+we provide extensive visualization tools.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
@@ -387,7 +387,7 @@ second category often produces estimates in the form of stepwise
 functions. Providing smooth estimates of the CIF was one of the main
 motivations for introducing case-base sampling in survival analysis.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ccccccccc}
@@ -669,10 +669,13 @@ context of four case studies.
 Screening}\label{case-study-1european-randomized-study-of-prostate-cancer-screening}}
 
 For our first case study, we return to the ERSPC study and investigate
-the differences in risk between the control and screening arms. We fit
-four models that differ in which functional form of time is used: 1)
-excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear
-function as seen in \eqref{eq:gomp}, 3) log function as seen in
+the differences in risk between the control and screening arms.
+
+\subsection{Different functional forms of time}
+
+We fit four models that differ in which functional form of time is used:
+1) excluded from the linear predictor as seen in \eqref{eq:exp}, 2)
+linear function as seen in \eqref{eq:gomp}, 3) log function as seen in
 \eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The
 models are fit using \code{fitSmoothHazard} with the familiar formula
 interface:
@@ -820,6 +823,8 @@ Model & casebase::fitSmoothHazard & survival::survreg\\
 \end{table}
 
 \end{CodeChunk}
+
+\subsection{Time-dependent hazard ratios}
 
 Previous re-analyses of these data suggested that the overall screening
 attributed reduction in death due to prostate cancer of 20\% was an
@@ -1453,22 +1458,27 @@ which implements case-base sampling for fitting parametric survival
 models and for estimating smooth cumulative incidence functions using
 the framework of generalized linear models. We strongly believe that its
 flexibility and its foundation on the familiar logistic regression model
-will make it appealing to new and established practitioners.
+will make it appealing to new and established practitioners. The
+\pkg{casebase} package is freely available from the Comprehensive
+\proglang{R} Archive Network at
+\url{https://cran.r-project.org/package=casebase}. Interested users can
+visit \url{http://sahirbhatnagar.com/casebase/} for detailed package
+documentation and vignettes.
 
 \hypertarget{acknowledgments}{%
 \section*{Acknowledgments}\label{acknowledgments}}
 \addcontentsline{toc}{section}{Acknowledgments}
 
 We would like to thank Yi Yang for helpful discussions on penalized
-regression models. \mbox{Bhatnagar} gratefully acknowledges funding via
-a Discovery Grant from the Natural Sciences and Engineering Research
-Council of Canada (NSERC).
+regression models and gradient boosting. \mbox{Bhatnagar} gratefully
+acknowledges funding via a Discovery Grant from the Natural Sciences and
+Engineering Research Council of Canada (NSERC).
 
 \hypertarget{environment-details}{%
 \section*{Environment Details}\label{environment-details}}
 \addcontentsline{toc}{section}{Environment Details}
 
-This report was generated on 2020-09-21 12:49:15 using the following
+This report was generated on 2020-09-21 14:06:21 using the following
 computational environment and dependencies:
 
 \begin{CodeChunk}
