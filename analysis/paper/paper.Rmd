@@ -373,7 +373,7 @@ In the following sections, we illustrate these functionalities in the context of
 
 # Case study 1---European Randomized Study of Prostate Cancer Screening
 
-For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor, 2) linear function, 3) log function, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard} with the familiar formula interface:
+For our first case study, we return to the ERSPC study and investigate the differences in risk between the control and screening arms. We fit four models that differ in which functional form of time is used: 1) excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear function as seen in \eqref{eq:gomp}, 3) log function as seen in \eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The models are fit using \code{fitSmoothHazard} with the familiar formula interface:
 
 ```{r, eval = eval_cs1, echo = -1}
 set.seed(12)
