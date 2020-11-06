@@ -1,5 +1,6 @@
 % !TeX root = RJwrapper.tex
-\title{true}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
+and Comparison of Event Rates}
 \author{by Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A.
 Hanley, and Olli Saarela}
 
@@ -76,7 +77,7 @@ regression can also be replaced by multinomial regression to analyse
 data with multiple competing events.
 
 In this article, we present the \pkg{casebase} package
-\citep{casebase-package} implemented in \proglang{R} \citep{r-core}, for
+\citep{casebase-package} implemented in \textsf{R} \citep{r-core}, for
 parametric survival analysis that combines the ideas of Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} into a simple interface. The
 purpose of the \pkg{casebase} package is to provide practitioners with
@@ -89,7 +90,7 @@ we provide extensive visualization tools.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
-give a short review of existing \proglang{R} packages that implement
+give a short review of existing \textsf{R} packages that implement
 comparable features as \pkg{casebase}. Next, we provide some details
 about the implementation of case-base sampling in our package, and we
 give a brief survey of its main functions. This is followed by four case
@@ -251,7 +252,7 @@ differently. For example, we could set the penalty factor for time to be
 
 Survival analysis is an important branch of applied statistics and
 epidemiology. Accordingly, there is already a vast ecosystem of
-\proglang{R} packages implementing different methodologies. In this
+\textsf{R} packages implementing different methodologies. In this
 section, we describe how the functionalities of \pkg{casebase} compare
 to these packages.
 
@@ -306,17 +307,16 @@ penalized estimation of the hazard function. To our knowledge,
 \pkg{casebase} and \pkg{rsptm2} are the only packages to offer this
 functionality.
 
-Next, several \proglang{R} packages implement methodologies for
-competing risk analysis; for a different perspective on this topic, see
-Mahani \& Sharabiani \citeyearpar{mahani2015bayesian}. The package
-\pkg{cmprsk} provides methods for cause-specific subdistribution
-hazards, such as in the Fine-Gray model
-\citeyearpar{fine1999proportional}. On the other hand, the package
-\pkg{CFC} estimates cause-specific CIFs from unadjusted, non-parametric
-survival functions. Our package \pkg{casebase} also provides
-functionalities for competing risk analysis by estimating parametrically
-the cause-specific hazards. From these quantities, we can then estimate
-the cause-specific CIFs.
+Next, several \textsf{R} packages implement methodologies for competing
+risk analysis; for a different perspective on this topic, see Mahani \&
+Sharabiani \citeyearpar{mahani2015bayesian}. The package \pkg{cmprsk}
+provides methods for cause-specific subdistribution hazards, such as in
+the Fine-Gray model \citeyearpar{fine1999proportional}. On the other
+hand, the package \pkg{CFC} estimates cause-specific CIFs from
+unadjusted, non-parametric survival functions. Our package
+\pkg{casebase} also provides functionalities for competing risk analysis
+by estimating parametrically the cause-specific hazards. From these
+quantities, we can then estimate the cause-specific CIFs.
 
 Finally, several packages include functions to estimate the CIF. The
 corresponding methods generally fall into two categories: transformation
@@ -369,7 +369,7 @@ motivations for introducing case-base sampling in survival analysis.
 \bottomrule
 \end{tabular}%
 }
-\caption{Comparison of various \proglang{R} packages for survival analysis based on several defining features. \textbf{Competing Risks}: whether or not an implementation for competing risks is present. \textbf{Allows Non PH}: permits models for non-proportional hazards. \textbf{Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf{Splines}: permits a flexible fit on time through the use of splines. \textbf{Parametric}: implementation for parametric models. \textbf{Semi-parametric}: implementation for semi-parametric models. \textbf{Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf{Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.}
+\caption{Comparison of various \textsf{R} packages for survival analysis based on several defining features. \textbf{Competing Risks}: whether or not an implementation for competing risks is present. \textbf{Allows Non PH}: permits models for non-proportional hazards. \textbf{Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf{Splines}: permits a flexible fit on time through the use of splines. \textbf{Parametric}: implementation for parametric models. \textbf{Semi-parametric}: implementation for semi-parametric models. \textbf{Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf{Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.}
 \label{tab:surv-pkgs}
 \end{table}
 
@@ -1205,7 +1205,7 @@ functions.
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
-In this article, we presented the \proglang{R} package \pkg{casebase},
+In this article, we presented the \textsf{R} package \pkg{casebase},
 which provides functions for fitting smooth parametric hazards and
 estimating CIFs using case-base sampling. Our package also provide
 several functions to produce graphical summaries of the data and the
@@ -1341,17 +1341,16 @@ sampling mechanism. For example, they could provide a hazard that gives
 sampling probabilities that are proportional to the cardiovascular
 disease event rate given by the Framingham score \citep{saarela2015non}.
 
-In conclusion, we presented the \proglang{R} package \pkg{casebase}
-which implements case-base sampling for fitting parametric survival
-models and for estimating smooth cumulative incidence functions using
-the framework of generalized linear models. We strongly believe that its
-flexibility and its foundation on the familiar logistic regression model
-will make it appealing to new and established practitioners. The
-\pkg{casebase} package is freely available from the Comprehensive
-\proglang{R} Archive Network at
-\url{https://cran.r-project.org/package=casebase}. Interested users can
-visit \url{http://sahirbhatnagar.com/casebase/} for detailed package
-documentation and vignettes.
+In conclusion, we presented the \textsf{R} package \pkg{casebase} which
+implements case-base sampling for fitting parametric survival models and
+for estimating smooth cumulative incidence functions using the framework
+of generalized linear models. We strongly believe that its flexibility
+and its foundation on the familiar logistic regression model will make
+it appealing to new and established practitioners. The \pkg{casebase}
+package is freely available from the Comprehensive \textsf{R} Archive
+Network at \url{https://cran.r-project.org/package=casebase}. Interested
+users can visit \url{http://sahirbhatnagar.com/casebase/} for detailed
+package documentation and vignettes.
 
 \hypertarget{acknowledgments}{%
 \section*{Acknowledgments}\label{acknowledgments}}
@@ -1362,7 +1361,7 @@ regression models and gradient boosting. \mbox{Bhatnagar} gratefully
 acknowledges funding via a Discovery Grant from the Natural Sciences and
 Engineering Research Council of Canada (NSERC).
 
-\bibliography{references.bib}
+\bibliography{casebase-manuscript.bib}
 
 \address{%
 Sahir Rai Bhatnagar*\\
@@ -1376,7 +1375,7 @@ McGill University\\%
 
 \address{%
 Maxime Turgeon*\\
-University of Manitoba \AND\\%
+University of Manitoba\\%
 186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
 %
 \url{https://maxturgeon.ca/}%

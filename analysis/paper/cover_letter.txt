@@ -1,0 +1,19 @@
+Dear Editor,
+
+We are pleased to submit a manuscript titled "casebase: An Alternative Framework For Survival Analysis and Comparison of Event Rates" for consideration by the Journal of Statistical Software. This work describes a very flexible toolkit for parametric survival models. This work has been presented at several conferences in North America and Europe, where it has garnered significant interest from both statisticians and epidemiologists.
+
+In a 2009 publication, Hanley & Miettinen explained how parametric hazard functions can be estimated using logistic regression. Their approach is based on the idea of case-base sampling: sample two series of discrete person-moments from the study base and compare their covariate profiles. Their approach naturally leads to estimates of the cumulative incidence that are smooth-in-time, which makes them easier to interpret for clinicians and patients.
+
+Our package builds on those ideas to provide an intuitive interface to a full complement of modeling functions and data visualization tools. In this manuscript, we show how their approach can be used in the context of competing risks, variable selection, and time-varying covariates.
+
+We have chosen to submit this manuscript to the Journal of Statistical Software since we believe the broad readership of your journal can benefit from a discussion of our package and its features.
+
+We look forward to hearing from you, and note further that none of the authors has a competing interest to declare.
+
+Sincerely,
+
+Maxime Turgeon
+Assistant Professor
+Department of Statistics
+Department of Computer Science
+University of Manitoba, Winnipeg MB

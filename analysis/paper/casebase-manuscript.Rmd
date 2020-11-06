@@ -1,5 +1,4 @@
 ---
-documentclass: jss
 author:
   - name: Sahir Rai Bhatnagar*
     affiliation: McGill University
@@ -9,7 +8,7 @@ author:
     email: \email{sahir.bhatnagar@mail.mcgill.ca}
     url: http://sahirbhatnagar.com/
   - name: Maxime Turgeon*
-    affiliation: 'University of Manitoba \AND'
+    affiliation: 'University of Manitoba'
     address: >
       186 Dysart Road
       Winnipeg, MB, Canada R3T 2N2
@@ -37,20 +36,11 @@ author:
       M5T 3M7, Canada
     email: \email{olli.saarela@utoronto.ca}
     url: http://individual.utoronto.ca/osaarela/
-title:
-  formatted: "\\pkg{casebase}: An Alternative Framework For Survival Analysis and Comparison of Event Rates"
-  # If you use tex in the formatted title, also supply version without
-  plain:     "casebase: An Alternative Framework For Survival Analysis and Comparison of Event Rates"
-  # For running headers, if needed
-  short:     "\\pkg{casebase}: An Alternative Framework For Survival Analysis"
+title: "\\pkg{casebase}: An Alternative Framework For Survival Analysis and Comparison of Event Rates"
 abstract: |
   | In epidemiological studies of time-to-event data, a quantity of interest to the clinician and the patient is the risk of an event given a covariate profile. However, methods relying on time matching or risk-set sampling (including Cox regression) eliminate the baseline hazard from the likelihood expression or the estimating function. The baseline hazard then needs to be estimated separately using a non-parametric approach. This leads to step-wise estimates of the cumulative incidence that are difficult to interpret. Using case-base sampling, Hanley & Miettinen (2009) explained how the parametric hazard functions can be estimated using logistic regression. Their approach naturally leads to estimates of the cumulative incidence that are smooth-in-time.
   | In this paper, we present the **casebase** R package, a comprehensive and flexible toolkit for parametric survival analysis. We describe how the case-base framework can also be used in more complex settings: competing risks, time-varying exposure, and variable selection. Our package also includes an extensive array of visualization tools to complement the analysis of time-to-event data. We illustrate all these features through four different case studies.
   | *SRB and MT contributed equally to this work.
-keywords:
-  # at least one keyword must be supplied
-  formatted: [survival analysis, absolute risk, "\\proglang{R}", data visualization]
-  plain:     [survival analysis, absolute risk, R, data visualization]
 preamble: >
   \usepackage{amsmath}
   \usepackage{amssymb}
@@ -62,13 +52,9 @@ preamble: >
   \usepackage{makecell}
   \usepackage{tabu}
   \DeclareUnicodeCharacter{2500}{-}
-  
-output: 
-  rticles::jss_article:
-    number_sections: TRUE     #added argument option 
-    citation_package: "natbib"  #All my citations use biblatex, not natbib. 
-biblio-style: jss      #Listed to use in JSS Instructions for Authors, but not in template by default. 
-bibliography: references.bib  #Also not included in template by default. 
+  \newcommand{\proglang}{\textsf}
+output: rticles::rjournal_article 
+bibliography: casebase-manuscript.bib 
 fig_width: 12
 fig_height: 9
 fig_caption: true

@@ -43,3 +43,4 @@ analysis/paper/*.log
 analysis/paper/*.blg
 analysis/paper/tmp*.tex
 analysis/paper/paper_cache/*
+analysis/paper/casebase-manuscript_cache/*
