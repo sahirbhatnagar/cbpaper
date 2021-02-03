@@ -20,11 +20,11 @@ estimated using logistic regression. Their approach naturally leads to
 estimates of the cumulative incidence that are smooth-in-time.\\
 In this paper, we present the \textbf{casebase} R package, a
 comprehensive and flexible toolkit for parametric survival analysis. We
-describe how the case-base framework can also be used in more complex
-settings: competing risks, time-varying exposure, and variable
+then describe how the case-base framework can be used in more complex
+settings: non-linear functions of time, competing risks, and variable
 selection. Our package also includes an extensive array of visualization
 tools to complement the analysis of time-to-event data. We illustrate
-all these features through four different case studies.\\
+all these features through three different case studies.\\
 *SRB and MT contributed equally to this work.
 }
 
@@ -48,10 +48,10 @@ quantity is often the 5- or 10-year risk of experiencing a certain event
 given the patient's particular circumstances, and not the hazard ratio
 between a treatment and control group. Therefore, to make sound clinical
 decisions, it is important to accurately estimate the \emph{full} hazard
-function, which can subsequently be used to estimate the cumulative
-incidence function (CIF). Using a parametric estimator of the hazard
-function leads to a smooth function of time; as a consequence, the CIF
-and the survival function estimates also vary smoothly over time.
+function, which can subsequently be used to estimate the CIF. Using a
+parametric estimator of the hazard function leads to a smooth function
+of time; as a consequence, the CIF and the survival function estimates
+also vary smoothly over time.
 
 With the goal of fitting smooth-in-time hazard functions, Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} proposed a general framework
@@ -85,20 +85,21 @@ an easy-to-use software tool to compute a patient's risk (or cumulative
 incidence) of an event, conditional on a particular patient's covariate
 profile. Our package retains the flexibility of case-base sampling and
 the familiar interface of the \code{glm} function. It also provides
-tools for variable selection and competing-risk analysis. In addition,
-we provide extensive visualization tools.
+tools for variable selection, competing-risk analysis, and dealing with
+time-dependent exposures. In addition, we provide functions for
+exploratory data analysis and visualizing the estimated quantities.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
 give a short review of existing \textsf{R} packages that implement
 comparable features as \pkg{casebase}. Next, we provide some details
 about the implementation of case-base sampling in our package, and we
-give a brief survey of its main functions. This is followed by four case
-studies that illustrate the flexibility and capabilities of
-\pkg{casebase}. We show how the same framework can be used for competing
-risk analyses, penalized estimation, and for studies with time-dependent
-exposures. Finally, we end the article with a discussion of the results
-and of future directions.
+give a brief survey of its main functions. This is followed by three
+case studies that illustrate the flexibility and capabilities of
+\pkg{casebase}. We show how the same framework can be used for
+non-linear functions of time, competing risks and variable selection via
+penalized regression. Finally, we end the article with a discussion of
+the results and of future directions.
 
 \hypertarget{theory}{%
 \section{Theoretical details}\label{theory}}
@@ -247,8 +248,9 @@ factors serve as a way of allowing parameters to be penalized
 differently. For example, we could set the penalty factor for time to be
 0 to ensure it is always included in the selected model.
 
-\hypertarget{existing-packages}{%
-\section{Existing packages}\label{existing-packages}}
+\hypertarget{comparison-with-existing-packages}{%
+\section{Comparison with existing
+packages}\label{comparison-with-existing-packages}}
 
 Survival analysis is an important branch of applied statistics and
 epidemiology. Accordingly, there is already a vast ecosystem of
@@ -271,27 +273,25 @@ frailty and multi-state models. The remaining 14 packages appear in
 Table \ref{tab:surv-pkgs}, along with some of the functionalities they
 offer.
 
-Parametric survival models are implemented in a handful of packages:
-\pkg{CFC} \citeyearpar{mahani2015bayesian}, \pkg{flexsurv}
-\citeyearpar{flexsurv}, \pkg{SmoothHazard} \citeyearpar{smoothHazard},
-\pkg{rsptm2} \citeyearpar{clements_liu}, \pkg{mets}
+Parametric survival models are implemented in a handful of packages,
+each differing in the underlying data distribution: \pkg{CFC}
+\citeyearpar{mahani2015bayesian}, \pkg{flexsurv} \citeyearpar{flexsurv},
+\pkg{SmoothHazard} \citeyearpar{smoothHazard}, \pkg{rsptm2}
+\citeyearpar{clements_liu}, \pkg{mets}
 \citeyearpar{scheike2014estimating}, and \pkg{survival}
-\citeyearpar{survival-package}. The types of models they allow vary for
-each package. For example, \pkg{SmoothHazard} is limited to Weibull
-distributions \citeyearpar{smoothHazard}, whereas both \pkg{flexsurv}
-and \pkg{survival} allow users to supply any distribution of their
-choice. Also, \pkg{flexsurv}, \pkg{smoothhazard}, \pkg{mets} and
-\pkg{rstpm2} also have the ability to model the effect of time using
-splines, which allows flexible modeling of the hazard function.
-Moreover, \pkg{flexsurv} has the ability to estimate both scale and
-shape parameters for a variety of parametric families. As discussed
+\citeyearpar{survival-package}. For example, \pkg{SmoothHazard} is
+limited to Weibull distributions \citeyearpar{smoothHazard}, whereas
+both \pkg{flexsurv} and \pkg{survival} allow users to supply any
+distribution of their choice. \pkg{flexsurv}, \pkg{smoothhazard},
+\pkg{mets} and \pkg{rstpm2} can model the effect of time using splines,
+which allows flexible modeling of the hazard function. As discussed
 above, \pkg{casebase} can model any parametric family whose log-hazard
 can be expressed as a linear combination of covariates (including time).
 Therefore, our package allows the user to model the effect of time using
 splines. Also, by including interaction terms between covariates and
 time, it also allows users to fit (non-proportional) time-varying
-coefficient models. However, we do not explicitly model any shape
-parameter, unlike \pkg{flexsurv}.
+coefficient models. However, unlike \pkg{flexsurv}, we do not explicitly
+model any shape parameter.
 
 Several packages implement penalized estimation for the Cox model:
 \pkg{glmnet} \citeyearpar{regpathcox}, \pkg{glmpath}
