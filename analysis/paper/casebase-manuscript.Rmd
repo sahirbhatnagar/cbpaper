@@ -93,7 +93,7 @@ library(glmnet)
 library(kableExtra)
 library(magrittr)
 library(pracma)
-library(flexsurv) # for fitting gompertz AFT
+library(flexsurv) 
 library(prodlim)
 library(riskRegression)
 library(splines)
@@ -114,7 +114,7 @@ eval_implementation <- TRUE
 eval_cs1 <- TRUE
 eval_cs2 <- TRUE
 eval_cs3 <- TRUE
-eval_cs4 <- TRUE
+eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
 echo_plot_code <- TRUE
 # Define theme for plots
@@ -1208,6 +1208,7 @@ cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 
 In this third case study, we showed how case-base sampling can be used in conjunction with penalized logistic regression to perform variable selection in survival models.
 
+<!--
 # Case study 4---Stanford Heart Transplant Data
 
 In the previous case studies, we only considered covariates that were fixed at baseline. In this next case study, we use the Stanford Heart Transplant data [@clark1971cardiac,@crowley1977covariance] to show how case-base sampling can also be used in the context of time-dependent exposure. This feature of case-base sampling has been explored in the literature, in the context of vaccination safety  [@saarela2015case]. In this study, the exposure period was defined as the week following vaccination. Hence, the main covariate of interest, i.e. exposure to the vaccine, was changing over time. In this context, case-base sampling offers an efficient alternative to nested case-control designs or self-matching.
@@ -1215,6 +1216,8 @@ In the previous case studies, we only considered covariates that were fixed at b
 Recall the setting of Stanford Heart Transplant study: patients were admitted to the Stanford program after meeting with their physician and determining that they were unlikely to respond to other forms of treatment. After enrollment, the program searched for a suitable donor for the patient, which could take anywhere between a few days to almost a year. We are interested in the effect of a heart transplant on survival; therefore, the patient is considered exposed only after the transplant has occurred. 
 
 As above, we can look at the population-time plot for a graphical summary of the event incidence (see Figure \ref{fig:cs4PopTime}. Here, we colour the exposed person-time (i.e. after transplant) in a darker shade of gray. As we can see, most events occur early during the follow-up period, and therefore we do not expect the hazard to be constant.
+
+-->
 
 ```{r stanford-poptime, eval = eval_cs4, fig.cap="\\label{fig:cs4PopTime} Population-time for the Stanford Transplant study. The darker shade of gray corresponds to the exposed person-time."}
 stanford_popTime <- popTime(jasa,
@@ -1243,18 +1246,23 @@ plot(stanford_popTime,
   paper_gg_theme
 ```
 
+<!--
 Since the exposure is time-dependent, we need to manually define the exposure variable *after* case-base sampling and *before* fitting the hazard function. For this reason, we use the `sampleCaseBase` function directly.
+-->
 
-```{r stanford_cb, eval = eval_cs4, echo = TRUE}
+```{r stanford_cb, eval = eval_cs4}
 cb_data <- sampleCaseBase(jasa,
   time = "futime",
   event = "fustat", ratio = 100
 )
 ```
 
+<!--
 Next, we compute the number of days from acceptance into the program to transplant, and we use this variable to determine whether each population-moment is exposed or not.
 
-```{r stanford_exp, eval = eval_cs4, dependson="stanford_cb", echo = TRUE}
+-->
+
+```{r stanford_exp, eval = eval_cs4, dependson="stanford_cb"}
 # Define exposure variable
 cb_data <- mutate(cb_data,
   txtime = time_length(accept.dt %--% tx.date,
@@ -1268,9 +1276,11 @@ cb_data <- mutate(cb_data,
 )
 ```
 
+<!--
 Finally, we can fit the hazard using various linear predictors.
+-->
 
-```{r stanford_fit, eval = eval_cs4, warning = FALSE, echo=TRUE, dependson="stanford_exp"}
+```{r stanford_fit, eval = eval_cs4, warning = FALSE, dependson="stanford_exp"}
 # Fit several models
 fit1 <- fitSmoothHazard(fustat ~ exposure,
   data = cb_data, time = "futime"
@@ -1283,9 +1293,11 @@ fit3 <- fitSmoothHazard(fustat ~ exposure * futime,
 )
 ```
 
+<!--
 Note that the third model includes an interaction term between exposure and follow-up time. In other words, this model no longer exhibits proportional hazards. The evidence of non-proportionality of hazards in the Stanford Heart Transplant data has been widely discussed [@arjas1988graphical].
 
 We can then compare the goodness of fit of these three models using the Akaike Information Criterion (AIC).
+-->
 
 ```{r, eval = eval_cs4, dependson="stanford_fit", digits = 4}
 # Compute AIC
@@ -1294,9 +1306,11 @@ c("Model1" = AIC(fit1),
   "Model3" = AIC(fit3))
 ```
 
+<!--
 As we can see, the best fit is the third model. By visualizing the hazard functions for both exposed and unexposed individuals, we can more clearly see how the hazards are no longer proportional. We can easily obtain a plot of the hazards by using the `plot.singleEventCB` method:
+-->
 
-```{r stanford-hazard, eval = eval_cs4, echo=TRUE, dependson="stanford_fit", message = FALSE, results="hide", fig.cap="\\label{fig:cs4hazardPlot} Plot of the hazard function for exposed and unexposed individuals."}
+```{r stanford-hazard, eval = eval_cs4, dependson="stanford_fit", message = FALSE, results="hide", fig.cap="\\label{fig:cs4hazardPlot} Plot of the hazard function for exposed and unexposed individuals."}
 plot(fit3, hazard.params = list(xvar = "futime",
                                 by = "exposure",
                                 alpha = 0.05,
@@ -1304,9 +1318,11 @@ plot(fit3, hazard.params = list(xvar = "futime",
                                 data = cb_data))
 ```
 
+<!--
 Looking at Figure \ref{fig:cs4hazardPlot}, the non-proportionality seems to be more pronounced at the beginning of follow-up than the end. Finally, in Figure \ref{fig:cs4CIF}, we turn these estimates of the hazard function into estimates of the cumulative incidence functions.
+-->
 
-```{r stanford-risk, eval = eval_cs4, echo = TRUE, dependson="stanford_fit", fig.cap="\\label{fig:cs4CIF} Plot of the cumulative incidence function for exposed and unexposed individuals."}
+```{r stanford-risk, eval = eval_cs4, dependson="stanford_fit", fig.cap="\\label{fig:cs4CIF} Plot of the cumulative incidence function for exposed and unexposed individuals."}
 # Compute absolute risk curves
 newdata <- data.frame(exposure = c(0, 1))
 absrisk <- absoluteRisk(fit3,
@@ -1323,7 +1339,9 @@ plot(absrisk,
   paper_gg_theme
 ```
 
+<!--
 As we can see in the above case-study, the \pkg{casebase} package can also be used to model time-varying exposures and non-proportional hazard functions. 
+-->
 
 # Discussion
 
