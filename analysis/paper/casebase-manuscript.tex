@@ -21,10 +21,11 @@ estimates of the cumulative incidence that are smooth-in-time.\\
 In this paper, we present the \textbf{casebase} R package, a
 comprehensive and flexible toolkit for parametric survival analysis. We
 then describe how the case-base framework can be used in more complex
-settings: non-linear functions of time, competing risks, and variable
-selection. Our package also includes an extensive array of visualization
-tools to complement the analysis of time-to-event data. We illustrate
-all these features through three different case studies.\\
+settings: non-linear functions of time and non-proportional hazards,
+competing risks, and variable selection. Our package also includes an
+extensive array of visualization tools to complement the analysis of
+time-to-event data. We illustrate all these features through three
+different case studies.\\
 *SRB and MT contributed equally to this work.
 }
 
@@ -97,9 +98,9 @@ about the implementation of case-base sampling in our package, and we
 give a brief survey of its main functions. This is followed by three
 case studies that illustrate the flexibility and capabilities of
 \pkg{casebase}. We show how the same framework can be used for
-non-linear functions of time, competing risks and variable selection via
-penalized regression. Finally, we end the article with a discussion of
-the results and of future directions.
+non-linear functions of time and non-proportional hazards, competing
+risks and variable selection via penalized regression. Finally, we end
+the article with a discussion of the results and of future directions.
 
 \hypertarget{theory}{%
 \section{Theoretical details}\label{theory}}
@@ -287,11 +288,12 @@ distribution of their choice. \pkg{flexsurv}, \pkg{smoothhazard},
 which allows flexible modeling of the hazard function. As discussed
 above, \pkg{casebase} can model any parametric family whose log-hazard
 can be expressed as a linear combination of covariates (including time).
-Therefore, our package allows the user to model the effect of time using
-splines. Also, by including interaction terms between covariates and
-time, it also allows users to fit (non-proportional) time-varying
-coefficient models. However, unlike \pkg{flexsurv}, we do not explicitly
-model any shape parameter.
+Therefore, our package is more general in that it allows the user to
+model any linear or non-linear transformation of time including splines
+and higher order polynomials. Also, by including interaction terms
+between covariates and time, it also allows users to fit
+(non-proportional) time-varying coefficient models. However, unlike
+\pkg{flexsurv}, we do not explicitly model any shape parameter.
 
 Several packages implement penalized estimation for the Cox model:
 \pkg{glmnet} \citeyearpar{regpathcox}, \pkg{glmpath}
@@ -545,7 +547,7 @@ column corresponding to the event type. The right-hand side can be any
 combination of the covariates, along with an explicit functional form
 for the time variable. Note that non-proportional hazard models can be
 achieved at this stage by adding an interaction term involving time
-(cf.~Case Study 4 below). The offset term does not need to be specified
+(cf.~Case Study 1 below). The offset term does not need to be specified
 by the user, as it is automatically added to the formula before calling
 \code{glm}.
 
@@ -600,28 +602,32 @@ From this, we can derive the event-specific subdensities:
 Finally, by integrating these subdensities, we obtain the event-specific
 cumulative incidence functions:
 
-\[ CI_j(t) = \int_0^t f_j(u)du.\] Again, he integrals are computed using
-either numerical integration (via the trapezoidal rule) or Monte Carlo
-integration. This option is controlled by the argument \code{method} of
-the \code{absoluteRisk} function.
+\[ CI_j(t) = \int_0^t f_j(u)du.\] Again, the integrals are computed
+using either numerical integration (via the trapezoidal rule) or Monte
+Carlo integration. This option is controlled by the argument
+\code{method} of the \code{absoluteRisk} function.
 
-In the following sections, we illustrate these functionalities in the
-context of four case studies.
+\hypertarget{illustration-of-package}{%
+\section{Illustration of package}\label{illustration-of-package}}
 
-\hypertarget{case-study-1european-randomized-study-of-prostate-cancer-screening}{%
-\section{Case study 1---European Randomized Study of Prostate Cancer
-Screening}\label{case-study-1european-randomized-study-of-prostate-cancer-screening}}
+In the following sections, we illustrate the main functions of the
+\pkg{casebase} package through three case studies; each one showcasing a
+different analysis type. First, we show how to model different
+functional forms of time as well as non-proportional hazards. Then we
+perform a competing risks analysis and compare our results with the
+Fine-Gray model. The third case study illustrates how to perform
+variable selection in dataset with a large number of covariates.
+
+\hypertarget{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}{%
+\subsection{Case study 1---Modeling different functions of time and
+non-proportional
+hazards}\label{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}}
 
 For our first case study, we return to the ERSPC study and investigate
-the differences in risk between the control and screening arms.
-
-\hypertarget{different-functional-forms-of-time}{%
-\subsection{Different functional forms of
-time}\label{different-functional-forms-of-time}}
-
-We fit four models that differ in which functional form of time is used:
-1) excluded from the linear predictor as seen in \eqref{eq:exp}, 2)
-linear function as seen in \eqref{eq:gomp}, 3) log function as seen in
+the differences in risk between the control and screening arms. We fit
+four models that differ in which functional form of time is used: 1)
+excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear
+function as seen in \eqref{eq:gomp}, 3) log function as seen in
 \eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The
 models are fit using \code{fitSmoothHazard} with the familiar formula
 interface:
@@ -764,10 +770,6 @@ Model & casebase::fitSmoothHazard & survival::survreg\\
 
 \end{Schunk}
 
-\hypertarget{time-dependent-hazard-ratios}{%
-\subsection{Time-dependent hazard
-ratios}\label{time-dependent-hazard-ratios}}
-
 Previous re-analyses of these data suggested that the overall screening
 attributed reduction in death due to prostate cancer of 20\% was an
 underestimate \citep{hanley2010mortality}. The estimated 20\% (from a
@@ -815,13 +817,13 @@ fit different parametric survival models with possible time-varying
 effects, and how we can compare the fit of each model with tools from
 GLMs.
 
-\hypertarget{case-study-2bone-marrow-transplant}{%
-\section{Case study 2---Bone-marrow
-transplant}\label{case-study-2bone-marrow-transplant}}
+\hypertarget{case-study-2competing-risk-analysis}{%
+\subsection{Case study 2---Competing risk
+analysis}\label{case-study-2competing-risk-analysis}}
 
-In the next case study, we show how case-base sampling can be used in
-the context of a competing-risk analysis. For illustrative purposes, we
-use the same data that was used in Scrucca \emph{et al}
+In this case study, we show how case-base sampling can be used in the
+context of a competing-risk analysis. For illustrative purposes, we use
+the same data that was used in Scrucca \emph{et al}
 \citeyearpar{scrucca2010regression}. The data was downloaded from the
 first author's website, and it is now available as part of the
 \pkg{casebase} package.
@@ -943,21 +945,17 @@ does not appear to be significant: the curve from case-base sampling is
 contained within a 95\% confidence band around the Fine-Gray absolute
 risk curve (figure not shown).
 
-\hypertarget{case-study-3support-data}{%
-\section{Case study 3---SUPPORT Data}\label{case-study-3support-data}}
+\hypertarget{case-study-3variable-selection}{%
+\subsection{Case study 3---Variable
+selection}\label{case-study-3variable-selection}}
 
-In the first two case studies, we described the basic functionalities of
-the \pkg{casebase} package: creating population-time plots, fitting
-parametric models for hazard functions, and estimating the corresponding
-cumulative incidence curves. For the third case study, we show how
-\pkg{casebase} can also be used for variable selection through
-regularized estimation of the hazard function as given by
-\eqref{eq:penest}.
-
-To illustrate this functionality, we use the dataset from the Study to
-Understand Prognoses Preferences Outcomes and Risks of Treatment
-(SUPPORT) \citep{knaus1995support}. The SUPPORT dataset tracks death in
-five American hospitals within individuals who are considered seriously
+For the third case study, we show how \pkg{casebase} can also be used
+for variable selection through regularized estimation of the hazard
+function as given by \eqref{eq:penest}. To illustrate this
+functionality, we use the dataset from the Study to Understand Prognoses
+Preferences Outcomes and Risks of Treatment (SUPPORT)
+\citep{knaus1995support}. The SUPPORT dataset tracks death in five
+American hospitals within individuals who are considered seriously
 ill.~The original data is available online from the Department of
 Biostatistics at Vanderbilt University \citep{harrell_2020}. The cleaned
 and imputed data consists of 9104 observations and 30 variables, and it
@@ -1051,7 +1049,7 @@ estimating CIFs using case-base sampling. Our package also provide
 several functions to produce graphical summaries of the data and the
 results. We outlined the theoretical underpinnings of the approach, we
 provided details about our implementation, and we illustrated the merits
-of the approach and the package through four case studies.
+of the approach and the package through three case studies.
 
 As a methodological framework, case-base sampling is very flexible. Some
 of this flexibility has been explored before in the literature: for
@@ -1070,17 +1068,27 @@ estimates of the survival function that \emph{vary smoothly in time} and
 are thus easier to interpret. On the other hand, we also displayed the
 flexibility of case-base sampling by showing how it could be combined
 with penalized logistic regression to perform variable selection.
-Furthermore, the second and fourth case studies showed how case-base
-sampling can respectively be applied to competing risks and time-varying
-exposure settings. Even though we did not illustrate it in this article,
-case-base sampling can also be combined with the framework of
-\emph{generalized additive models}. This functionality has already been
-implemented in the package. Similarly, case-base sampling can be
-combined with quasi-likelihood estimation to fit survival models that
-can account for the presence of over-dispersion. All of these examples
-illustrate how the case-base sampling framework in general, and the
-package \pkg{casebase} in particular, allows the user to fit a broad and
-flexible family of survival functions.
+Furthermore, the second case study showed how case-base sampling can be
+applied to competing risks settings. It should be noted that the three
+case studies presented above only considered covariates that were fixed
+at baseline. In the package vignette, we use the Stanford Heart
+Transplant data \citep[\citet{crowley1977covariance}]{clark1971cardiac}
+to show how case-base sampling can also be used in the context of
+time-dependent exposure. In this study, the exposure period was defined
+as the week following vaccination. Hence, the main covariate of
+interest, i.e.~exposure to the vaccine, was changing over time. In this
+context, case-base sampling offers an efficient alternative to nested
+case-control designs or self-matching.
+
+Even though we did not illustrate it in this article, case-base sampling
+can also be combined with the framework of \emph{generalized additive
+models}. This functionality has already been implemented in the package.
+Similarly, case-base sampling can be combined with quasi-likelihood
+estimation to fit survival models that can account for the presence of
+over-dispersion. All of these examples illustrate how the case-base
+sampling framework in general, and the package \pkg{casebase} in
+particular, allows the user to fit a broad and flexible family of
+survival functions.
 
 As presented in Hanley \& Miettinen \citeyearpar{hanley2009fitting},
 case-base sampling is comprised of three steps: 1) sampling a case
