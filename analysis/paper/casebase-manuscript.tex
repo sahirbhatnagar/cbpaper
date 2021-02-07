@@ -8,7 +8,7 @@ Hanley, and Olli Saarela}
 
 \abstract{%
 In epidemiological studies of time-to-event data, a quantity of interest
-to the clinician and the patient is the risk of an event given a
+to the clinician and the patient is the risk of an event given their
 covariate profile. However, methods relying on time matching or risk-set
 sampling (including Cox regression) eliminate the baseline hazard from
 the likelihood expression or the estimating function. The baseline
@@ -20,13 +20,13 @@ estimated using logistic regression. Their approach naturally leads to
 estimates of the cumulative incidence that are smooth-in-time.\\
 In this paper, we present the \textbf{casebase} R package, a
 comprehensive and flexible toolkit for parametric survival analysis. We
-then describe how the case-base framework can be used in more complex
+describe how the case-base framework can be used in more complex
 settings: non-linear functions of time and non-proportional hazards,
 competing risks, and variable selection. Our package also includes an
 extensive array of visualization tools to complement the analysis of
 time-to-event data. We illustrate all these features through three
 different case studies.\\
-*SRB and MT contributed equally to this work.
+* SRB and MT contributed equally to this work.
 }
 
 \hypertarget{introduction}{%
@@ -610,13 +610,13 @@ Carlo integration. This option is controlled by the argument
 \hypertarget{illustration-of-package}{%
 \section{Illustration of package}\label{illustration-of-package}}
 
-In the following sections, we illustrate the main functions of the
-\pkg{casebase} package through three case studies; each one showcasing a
-different analysis type. First, we show how to model different
-functional forms of time as well as non-proportional hazards. Then we
-perform a competing risks analysis and compare our results with the
-Fine-Gray model. The third case study illustrates how to perform
-variable selection in dataset with a large number of covariates.
+In this section, we illustrate the main functions of the \pkg{casebase}
+package through three case studies. Each one showcases a different type
+of analysis. First, we show how to model different functional forms of
+time as well as non-proportional hazards. Then we perform a
+competing-risk analysis and compare our results with the Fine-Gray
+model. The third case study illustrates how to perform variable
+selection in high-dimensional datasets.
 
 \hypertarget{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}{%
 \subsection{Case study 1---Modeling different functions of time and
@@ -626,45 +626,58 @@ hazards}\label{case-study-1modeling-different-functions-of-time-and-non-proporti
 For our first case study, we return to the ERSPC study and investigate
 the differences in risk between the control and screening arms. We fit
 four models that differ in which functional form of time is used: 1)
-excluded from the linear predictor as seen in \eqref{eq:exp}, 2) linear
-function as seen in \eqref{eq:gomp}, 3) log function as seen in
-\eqref{eq:weibull}, and 4) a smooth function using cubic B-splines. The
+excluded from the linear predictor (Eq. \eqref{eq:exp}); 2) linear
+function (Eq. \eqref{eq:gomp}); 3) log function (Eq.
+\eqref{eq:weibull}); and 4) a smooth function using cubic B-splines. The
 models are fit using \code{fitSmoothHazard} with the familiar formula
 interface:
 
 \begin{Schunk}
 \begin{Sinput}
-fmla <- list(exponential = as.formula(DeadOfPrCa ~ ScrArm),
-             gompertz = as.formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
-             weibull = as.formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
-             splines = as.formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
+fmla <- list(exponential = formula(DeadOfPrCa ~ ScrArm),
+             gompertz = formula(DeadOfPrCa ~ Follow.Up.Time + ScrArm),
+             weibull = formula(DeadOfPrCa ~ log(Follow.Up.Time) + ScrArm),
+             splines = formula(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm))
 
-fits <- lapply(fmla, function(i) {
-  fitSmoothHazard(i, data = ERSPC, ratio = 100)
+fits <- lapply(fmla, function(form) {
+  fitSmoothHazard(form, data = ERSPC, ratio = 100)
 })
 \end{Sinput}
 \end{Schunk}
 
 The output object from \code{fitSmoothHazard} inherits from the
-\code{singleEventCB} and \code{glm} classes. As such, we can directly
-use the \code{summary} generic:
+\code{singleEventCB} and \code{glm} classes. For this reason, we
+leveraged the \code{summary} method for \code{glm} objects to output a
+familiar summary of the results:
 
 \begin{Schunk}
 \begin{Sinput}
 summary(fits[["splines"]]) 
 \end{Sinput}
-\end{Schunk}
-
-\begin{Schunk}
 \begin{Soutput}
+#> Fitting smooth hazards with case-base sampling
+#> 
+#> Sample size: 159893 
+#> Number of events: 540 
+#> Number of base moments: 54000 
+#> ----
+#> 
+#> Call:
+#> fitSmoothHazard(formula = form, data = ERSPC, ratio = 100)
+#> 
+#> Deviance Residuals: 
+#>    Min      1Q  Median      3Q     Max  
+#> -0.409  -0.172  -0.135  -0.084   3.808  
 #> 
 #> Coefficients:
-#>                       Estimate Std. Error z value Pr(>|z|)
-#> (Intercept)           -10.2905     0.3185  -32.31  < 2e-16
-#> bs(Follow.Up.Time)1     4.3587     0.8008    5.44  5.2e-08
-#> bs(Follow.Up.Time)2     2.0890     0.4721    4.42  9.7e-06
-#> bs(Follow.Up.Time)3     4.6266     0.6910    6.70  2.1e-11
-#> ScrArmScreening group  -0.2354     0.0886   -2.66   0.0079
+#>                       Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)           -10.2905     0.3185  -32.31  < 2e-16 ***
+#> bs(Follow.Up.Time)1     4.3587     0.8008    5.44  5.2e-08 ***
+#> bs(Follow.Up.Time)2     2.0890     0.4721    4.42  9.7e-06 ***
+#> bs(Follow.Up.Time)3     4.6266     0.6910    6.70  2.1e-11 ***
+#> ScrArmScreening group  -0.2354     0.0886   -2.66   0.0079 ** 
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> (Dispersion parameter for binomial family taken to be 1)
 #> 
@@ -677,17 +690,18 @@ summary(fits[["splines"]])
 \end{Schunk}
 
 Next, the \code{absoluteRisk} function takes as input the
-\code{fitSmoothHazard} object and returns a matrix where each column
+\code{singleEventCB} object and returns a matrix where each column
 corresponds to the covariate profiles specified in the \code{newdata}
-argument, and each row corresponds to a specified time point:
+argument, and each row corresponds to time points specified by the
+\code{time} argument:
 
 \begin{Schunk}
 \begin{Sinput}
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
-new_time <- seq(0,14,0.1)
+new_time <- seq(0, 14, by = 0.1)
 
-risks <- lapply(fits, function(i) {
-  absoluteRisk(object = i, time = new_time, newdata = new_data, method = "mont")
+risks <- lapply(fits, function(fit) {
+  absoluteRisk(fit, time = new_time, newdata = new_data)
 })
 \end{Sinput}
 \end{Schunk}
@@ -699,11 +713,11 @@ earlier on in time, and underestimate it later on. Based on our earlier
 discussion of the population-time plot, this poor fit for the
 exponential hazard was expected. We notice a better fit with increasing
 complexity of our model for time in Figure \ref{fig:erspc-cox-cif}
-(panels 2--4). As noted above, the usual asymptotic results hold for
-likelihood ratio tests built using case-base sampling models. Therefore,
-we can easily test the null hypothesis that the exponential model is
-just as good as the larger (in terms of number of parameters) spline
-model:
+(panels 2--4). As noted in Theoretical Details section, the usual
+asymptotic results hold for likelihood ratio tests built using case-base
+sampling models. Therefore, we can easily test the null hypothesis that
+the exponential model is just as good as the larger (in terms of number
+of parameters) spline model:
 
 \begin{Schunk}
 \begin{Soutput}
@@ -776,7 +790,7 @@ underestimate \citep{hanley2010mortality}. The estimated 20\% (from a
 proportional hazards model) did not account for the delay between
 screening and the time the effect is expected to be observed. As a
 result, the null effects in years 1--7 masked the substantial reductions
-that began to appear from year 8 onwards. This motivates the use of a
+that began to appear from year 8 onward. This motivates the use of a
 time-dependent hazard ratio which can easily be fit with the
 \pkg{casebase} package by including an interaction term with time in the
 model:
@@ -811,11 +825,6 @@ reduction in prostate cancer due to screening than the single overall
 \includegraphics[width=\textwidth,keepaspectratio=true]{../figures/interaction-ERSPC-1} \caption[Estimated hazard ratio and 95\% confidence interval for screening vs]{Estimated hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
 \end{figure}
 \end{Schunk}
-
-With this first case study, we explored how \pkg{casebase} allows us to
-fit different parametric survival models with possible time-varying
-effects, and how we can compare the fit of each model with tools from
-GLMs.
 
 \hypertarget{case-study-2competing-risk-analysis}{%
 \subsection{Case study 2---Competing risk
@@ -855,6 +864,17 @@ follow-up than at the end.
 Our main objective is to compute the cumulative incidence of relapse for
 a given set of covariates. We start by fitting a smooth hazard to the
 data using a linear term for time:
+
+\begin{Schunk}
+\begin{Sinput}
+model_cb <- fitSmoothHazard(
+  Status ~ ftime + Sex + D + Phase + Source + Age,
+  data = bmtcrr,
+  ratio = 100,
+  time = "ftime"
+)
+\end{Sinput}
+\end{Schunk}
 
 We want to compare our hazard ratio estimates to that obtained from a
 Cox regression. To obtain these estimates, we need to treat the
@@ -1036,16 +1056,12 @@ these three models are minimal.
 \end{figure}
 \end{Schunk}
 
-In this third case study, we showed how case-base sampling can be used
-in conjunction with penalized logistic regression to perform variable
-selection in survival models.
-
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
 In this article, we presented the \textsf{R} package \pkg{casebase},
 which provides functions for fitting smooth parametric hazards and
-estimating CIFs using case-base sampling. Our package also provide
+estimating CIFs using case-base sampling. Our package also provides
 several functions to produce graphical summaries of the data and the
 results. We outlined the theoretical underpinnings of the approach, we
 provided details about our implementation, and we illustrated the merits
@@ -1071,7 +1087,7 @@ with penalized logistic regression to perform variable selection.
 Furthermore, the second case study showed how case-base sampling can be
 applied to competing risks settings. It should be noted that the three
 case studies presented above only considered covariates that were fixed
-at baseline. In the package vignette, we use the Stanford Heart
+at baseline. In one of the package vignettes, we use the Stanford Heart
 Transplant data \citep[\citet{crowley1977covariance}]{clark1971cardiac}
 to show how case-base sampling can also be used in the context of
 time-dependent exposure. In this study, the exposure period was defined
@@ -1125,12 +1141,13 @@ Cox model and case-base sampling.
 \begin{tabular}[t]{llp{5cm}}
 \toprule
 Feature & Cox model & Case-base sampling\\
-\midrule
-Model type & Semi-parametric & Fully parametric\\
-Time & Left hand side of the formula & Right hand side (allows flexible modeling of time)\\
-Cumulative incidence & Step function & Smooth-in-time curve\\
-Non-proportional hazards & Interaction of covariates with time & Interaction of covariates with time\\
-Model testing &  & Use GLM framework \newline (e.g.\ LRT, AIC, BIC)\\
+\toprule
+Model type & Semi-parametric & Fully parametric\\\midrule
+Time & Left hand side of the formula & Right hand side (allows flexible modeling of time)\\\midrule
+Cumulative incidence & Step function & Smooth-in-time curve\\\midrule
+Non-proportional hazards & Interaction of covariates with time & Interaction of covariates with time\\\midrule
+Model testing & Likelihood-ratio tests, score tests, & Use GLM framework\\
+ & information criteria & (e.g.\ LRT, AIC, BIC)\\\midrule
 \addlinespace
 Competing risks & Difficult & Cause-specific CIFs\\
 % Prediction & Kaplan-Meier-based & ROC, AUC, risk reclassification probabilities\\
@@ -1218,7 +1235,7 @@ McGill University\\%
 %
 \url{http://sahirbhatnagar.com/}%
 %
-\\\email{sahir.bhatnagar@mail.mcgill.ca}
+\\\email{sahir.bhatnagar@mcgill.ca}
 }
 
 \address{%
