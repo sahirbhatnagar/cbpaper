@@ -42,16 +42,12 @@ abstract: |
   | In this paper, we present the \CRANpkg{casebase} R package, a comprehensive and flexible toolkit for parametric survival analysis. We describe how the case-base framework can be used in more complex settings: non-linear functions of time and non-proportional hazards, competing risks, and variable selection. Our package also includes an extensive array of visualization tools to complement the analysis. We illustrate all these features through three different case studies.
   | * SRB and MT contributed equally to this work.
 preamble: >
-  \usepackage{amsmath}
-  \usepackage{amssymb}
   \usepackage{longtable}
   \usepackage{graphicx}
   \usepackage{tabularx}
   \usepackage{float}
-  \usepackage{booktabs}
   \usepackage{makecell}
   \usepackage{tabu}
-  \DeclareUnicodeCharacter{2500}{-}
 output: rticles::rjournal_article 
 bibliography: bhatnagar-turgeon-islam-hanley-saarela.bib 
 fig_width: 12
