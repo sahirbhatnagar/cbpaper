@@ -7,25 +7,23 @@ Comparison of Event Rates}
 
 \abstract{%
 In epidemiological studies of time-to-event data, a quantity of interest
-to the clinician and the patient is the risk of an event given their
-covariate profile. However, methods relying on time matching or risk-set
-sampling (including Cox regression) eliminate the baseline hazard from
-the likelihood expression or the estimating function. The baseline
+to the clinician is their patient's risk of an event. However, methods
+relying on time matching or risk-set sampling (including Cox regression)
+eliminate the baseline hazard from the estimating function. The baseline
 hazard then needs to be estimated separately using a non-parametric
 approach. This leads to step-wise estimates of the cumulative incidence
 that are difficult to interpret. Using case-base sampling, Hanley \&
-Miettinen (2009) explained how the parametric hazard functions can be
+Miettinen (2009) explained how parametric hazard functions can be
 estimated using logistic regression. Their approach naturally leads to
 estimates of the cumulative incidence that are smooth-in-time.\\
-* SRB and MT contributed equally to this work.\\
 In this paper, we present the \CRANpkg{casebase} R package, a
 comprehensive and flexible toolkit for parametric survival analysis. We
 describe how the case-base framework can be used in more complex
 settings: non-linear functions of time and non-proportional hazards,
 competing risks, and variable selection. Our package also includes an
-extensive array of visualization tools to complement the analysis of
-time-to-event data. We illustrate all these features through three
-different case studies.
+extensive array of visualization tools to complement the analysis. We
+illustrate all these features through three different case studies.\\
+* SRB and MT contributed equally to this work.
 }
 
 \hypertarget{introduction}{%
@@ -77,29 +75,29 @@ regression can also be replaced by multinomial regression to analyse
 data with multiple competing events.
 
 In this article, we present the \CRANpkg{casebase} package
-\citep{casebase-package} implemented in \textsf{R} \citep{r-core}, for
-parametric survival analysis that combines the ideas of Hanley \&
-Miettinen \citeyearpar{hanley2009fitting} into a simple interface. The
-purpose of the \CRANpkg{casebase} package is to provide practitioners
-with an easy-to-use software tool to compute a patient's risk (or
-cumulative incidence) of an event, conditional on a particular patient's
-covariate profile. Our package retains the flexibility of case-base
-sampling and the familiar interface of the \code{glm} function. It also
-provides tools for variable selection, competing-risk analysis, and
-dealing with time-dependent exposures. In addition, we provide functions
-for exploratory data analysis and visualizing the estimated quantities.
+\citep{casebase-package} implemented in R, for parametric survival
+analysis that combines the ideas of Hanley \& Miettinen
+\citeyearpar{hanley2009fitting} into a simple interface. The purpose of
+the \pkg{casebase} package is to provide practitioners with an
+easy-to-use software tool to compute a patient's risk (or cumulative
+incidence) of an event, conditional on a particular patient's covariate
+profile. Our package retains the flexibility of case-base sampling and
+the familiar interface of the \code{glm} function. It also provides
+tools for variable selection, competing-risk analysis, and dealing with
+time-dependent exposures. In addition, we provide functions for
+exploratory data analysis and visualizing the estimated quantities.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
-give a short review of existing \textsf{R} packages that implement
-comparable features as \CRANpkg{casebase}. Next, we provide some details
-about the implementation of case-base sampling in our package, and we
-give a brief survey of its main functions. This is followed by three
-case studies that illustrate the flexibility and capabilities of
-\CRANpkg{casebase}. We show how the same framework can be used for
-non-linear functions of time and non-proportional hazards, competing
-risks and variable selection via penalized regression. Finally, we end
-the article with a discussion of the results and of future directions.
+give a short review of existing R packages that implement comparable
+features as \pkg{casebase}. Next, we provide some details about the
+implementation of case-base sampling in our package, and we give a brief
+survey of its main functions. This is followed by three case studies
+that illustrate the flexibility and capabilities of \pkg{casebase}. We
+show how the same framework can be used for non-linear functions of time
+and non-proportional hazards, competing risks and variable selection via
+penalized regression. Finally, we end the article with a discussion of
+the results and of future directions.
 
 \hypertarget{theory}{%
 \section{Theoretical details}\label{theory}}
@@ -122,7 +120,7 @@ function}\label{likelihood-and-estimating-function}}
 To describe the theoretical foundations of case-base sampling, we use
 the framework of counting processes. In what follows, we abuse notation
 slightly and omit any mention of \(\sigma\)-algebras. Instead, following
-Aalen \emph{et al} \citeyearpar{aalen2008survival}, we use the
+Aalen \textit{et al} \citeyearpar{aalen2008survival}, we use the
 placeholder ``past'' to denote the past history of the corresponding
 process. The reader interested in more details can refer to Saarela \&
 Arjas \citeyearpar{saarela2015non} and Saarela
@@ -202,7 +200,7 @@ hazard function to be constant over the range of \(t\):
 \end{equation}
 
 In this model, the instantaneous failure rate is independent of
-\(t\).\footnote{The conditional chance of failure in a time interval of specified length is the same regardless of how long the individual has been in the study. This is also known as the \textit{memoryless property} \citep{kalbfleisch2011statistical}.}
+\(t\).\footnote{The conditional chance of failure in a time interval of specified length is the same regardless of how long the individual has been in the study. This is also known as the \dfn{memoryless property} \citep{kalbfleisch2011statistical}.}
 
 The Gompertz hazard model is given by including a linear term for time:
 
@@ -253,10 +251,10 @@ differently. For example, we could set the penalty factor for time to be
 packages}\label{comparison-with-existing-packages}}
 
 Survival analysis is an important branch of applied statistics and
-epidemiology. Accordingly, there is already a vast ecosystem of
-\textsf{R} packages implementing different methodologies. In this
-section, we describe how the functionalities of \CRANpkg{casebase}
-compare to these packages.
+epidemiology. Accordingly, there is already a vast ecosystem of R
+packages implementing different methodologies. In this section, we
+describe how the functionalities of \pkg{casebase} compare to these
+packages.
 
 At the time of writing, a cursory examination of CRAN's \ctv{Survival}
 Task View reveals that there are over 250 packages related to survival
@@ -267,32 +265,32 @@ competing risk analysis, penalized estimation, and CIF estimation. By
 searching for appropriate keywords in the \code{DESCRIPTION} file of
 these packages, we found 60 relevant packages. These 60 packages were
 then manually examined to determine which ones are comparable to
-\CRANpkg{casebase}. In particular, we excluded packages that were
-focused on a different set of problems, such as frailty and multi-state
-models. The remaining 14 packages appear in Table \ref{tab:surv-pkgs},
-along with some of the functionalities they offer.
+\pkg{casebase}. In particular, we excluded packages that were focused on
+a different set of problems, such as frailty and multi-state models. The
+remaining 14 packages appear in Table \ref{tab:surv-pkgs}, along with
+some of the functionalities they offer.
 
 Parametric survival models are implemented in a handful of packages,
 each differing in the underlying data distribution: \CRANpkg{CFC}
 \citeyearpar{mahani2015bayesian}, \CRANpkg{flexsurv}
 \citeyearpar{flexsurv}, \CRANpkg{SmoothHazard}
-\citeyearpar{smoothHazard}, \CRANpkg{rsptm2} \citeyearpar{clements_liu},
+\citeyearpar{smoothHazard}, \CRANpkg{rstpm2} \citeyearpar{clements_liu},
 \CRANpkg{mets} \citeyearpar{scheike2014estimating}, and
 \CRANpkg{survival} \citeyearpar{survival-package}. For example,
-\CRANpkg{SmoothHazard} is limited to Weibull distributions
-\citeyearpar{smoothHazard}, whereas both \CRANpkg{flexsurv} and
-\CRANpkg{survival} allow users to supply any distribution of their
-choice. \CRANpkg{flexsurv}, \CRANpkg{smoothhazard}, \CRANpkg{mets} and
-\CRANpkg{rstpm2} can model the effect of time using splines, which
-allows flexible modeling of the hazard function. As discussed above,
-\CRANpkg{casebase} can model any parametric family whose log-hazard can
-be expressed as a linear combination of covariates (including time).
-Therefore, our package is more general in that it allows the user to
-model any linear or non-linear transformation of time including splines
-and higher order polynomials. Also, by including interaction terms
-between covariates and time, it also allows users to fit
-(non-proportional) time-varying coefficient models. However, unlike
-\CRANpkg{flexsurv}, we do not explicitly model any shape parameter.
+\pkg{SmoothHazard} is limited to Weibull distributions
+\citeyearpar{smoothHazard}, whereas both \pkg{flexsurv} and
+\pkg{survival} allow users to supply any distribution of their choice.
+\pkg{flexsurv}, \pkg{SmoothHazard}, \pkg{mets} and \pkg{rstpm2} can
+model the effect of time using splines, which allows flexible modeling
+of the hazard function. As discussed above, \pkg{casebase} can model any
+parametric family whose log-hazard can be expressed as a linear
+combination of covariates (including time). Therefore, our package is
+more general in that it allows the user to model any linear or
+non-linear transformation of time including splines and higher order
+polynomials. Also, by including interaction terms between covariates and
+time, it also allows users to fit (non-proportional) time-varying
+coefficient models. However, unlike \pkg{flexsurv}, we do not explicitly
+model any shape parameter.
 
 Several packages implement penalized estimation for the Cox model:
 \CRANpkg{glmnet} \citeyearpar{regpathcox}, \CRANpkg{glmpath}
@@ -300,24 +298,24 @@ Several packages implement penalized estimation for the Cox model:
 \CRANpkg{riskRegression} \citeyearpar{gerds_blanche}. Moreover, some
 packages also include penalized estimation in the context of Cox models
 with time-varying coefficients: elastic-net penalization with
-\CRANpkg{rstpm2} \citeyearpar{clements_liu}, while \CRANpkg{survival}
+\pkg{rstpm2} \citeyearpar{clements_liu}, while \pkg{survival}
 \citeyearpar{survival-package} has an implementation of ridge-penalized
-estimation. On the other hand, our package \CRANpkg{casebase} provides
+estimation. On the other hand, our package \pkg{casebase} provides
 penalized estimation of the hazard function. To our knowledge,
-\CRANpkg{casebase} and \CRANpkg{rsptm2} are the only packages to offer
-this functionality.
+\pkg{casebase} and \pkg{rstpm2} are the only packages to offer this
+functionality.
 
-Next, several \textsf{R} packages implement methodologies for competing
-risk analysis; for a different perspective on this topic, see Mahani \&
+Next, several R packages implement methodologies for competing risk
+analysis; for a different perspective on this topic, see Mahani \&
 Sharabiani \citeyearpar{mahani2015bayesian}. The package
 \CRANpkg{cmprsk} provides methods for cause-specific subdistribution
 hazards, such as in the Fine-Gray model
 \citeyearpar{fine1999proportional}. On the other hand, the package
-\CRANpkg{CFC} estimates cause-specific CIFs from unadjusted,
-non-parametric survival functions. Our package \CRANpkg{casebase} also
-provides functionalities for competing risk analysis by estimating
-parametrically the cause-specific hazards. From these quantities, we can
-then estimate the cause-specific CIFs.
+\pkg{CFC} estimates cause-specific CIFs from unadjusted, non-parametric
+survival functions. Our package \pkg{casebase} also provides
+functionalities for competing risk analysis by estimating parametrically
+the cause-specific hazards. From these quantities, we can then estimate
+the cause-specific CIFs.
 
 Finally, several packages include functions to estimate the CIF. The
 corresponding methods generally fall into two categories: transformation
@@ -326,23 +324,22 @@ baseline hazard. The first category broadly corresponds to parametric
 survival models, where the full hazard is explicitly modeled. Using this
 estimate, the survival function and the CIF can be obtained using their
 functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CI}
-below). Packages providing this functionality include \CRANpkg{CFC},
-\CRANpkg{flexsurv}, \CRANpkg{mets}, and \CRANpkg{survival}. Our package
-\CRANpkg{casebase} also follows this approach for both single-event and
+below). Packages providing this functionality include \pkg{CFC},
+\pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package
+\pkg{casebase} also follows this approach for both single-event and
 competing-risk analyses. The second category outlined above broadly
 corresponds to semi-parametric models. These models do not model the
 full hazard function, and therefore the baseline hazard needs to be
 estimated separately in order to estimate the survival function. This is
 achieved using semi-parametric estimators (e.g.~Breslow's estimator) or
 parametric estimators (e.g.~spline functions). Packages that implement
-this approach include \CRANpkg{riskRegression}, \CRANpkg{rstpm2}, and
-\CRANpkg{survival}. As mentioned in the introduction, a key
-distinguishing factor between these two approaches is that the first
-category leads to smooth estimates of the cumulative incidence function,
-whereas the second category often produces estimates in the form of
-stepwise functions. Providing smooth estimates of the CIF was one of the
-main motivations for introducing case-base sampling in survival
-analysis.
+this approach include \pkg{riskRegression}, \pkg{rstpm2}, and
+\pkg{survival}. As mentioned in the introduction, a key distinguishing
+factor between these two approaches is that the first category leads to
+smooth estimates of the cumulative incidence function, whereas the
+second category often produces estimates in the form of stepwise
+functions. Providing smooth estimates of the CIF was one of the main
+motivations for introducing case-base sampling in survival analysis.
 
 \begin{table}[ht]
 \centering
@@ -370,14 +367,14 @@ analysis.
 \bottomrule
 \end{tabular}%
 }
-\caption{Comparison of various \textsf{R} packages for survival analysis based on several defining features. \textbf{Competing Risks}: whether or not an implementation for competing risks is present. \textbf{Allows Non PH}: permits models for non-proportional hazards. \textbf{Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf{Splines}: permits a flexible fit on time through the use of splines. \textbf{Parametric}: implementation for parametric models. \textbf{Semi-parametric}: implementation for semi-parametric models. \textbf{Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf{Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.}
+\caption{Comparison of various R packages for survival analysis based on several defining features. \textbf{Competing Risks}: whether or not an implementation for competing risks is present. \textbf{Allows Non PH}: permits models for non-proportional hazards. \textbf{Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf{Splines}: permits a flexible fit on time through the use of splines. \textbf{Parametric}: implementation for parametric models. \textbf{Semi-parametric}: implementation for semi-parametric models. \textbf{Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf{Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.}
 \label{tab:surv-pkgs}
 \end{table}
 
 \hypertarget{implementation-details}{%
 \section{Implementation details}\label{implementation-details}}
 
-The functions in the \CRANpkg{casebase} package can be divided into two
+The functions in the \pkg{casebase} package can be divided into two
 categories: 1) exploratory data analysis, in the form of population-time
 plots; and 2) parametric modeling of the hazard function. We strove for
 compatibility with both \code{data.frame}s and \code{data.table}s; this
@@ -419,10 +416,10 @@ To illustrate these functions, we will use data from the European
 Randomized Study of Prostate Cancer Screening (ERSPC)
 \citep{schroder2009screening} which was extracted using the approach
 described in Liu \emph{et al.} \citeyearpar{liu2014recovering}. This
-dataset is available through the \CRANpkg{casebase} package. It contains
-the individual observations for 159,893 men from seven European
-countries, who were between the ages of 55 and 69 years when recruited
-for the trial.
+dataset is available through the \pkg{casebase} package. It contains the
+individual observations for 159,893 men from seven European countries,
+who were between the ages of 55 and 69 years when recruited for the
+trial.
 
 We first create the necessary dataset for producing the population time
 plot using the \code{popTime} function. In this example, we stratify the
@@ -560,7 +557,7 @@ available via the \code{family} parameter. These approaches are:
 \item
   \code{glmnet}: This option allows for variable selection using the
   elastic-net \citep{zou2005regularization} penalty (cf.~Case Study 3).
-  This functionality is provided through the \CRANpkg{glmnet} package
+  This functionality is provided through the \pkg{glmnet} package
   \citep{friedman2010jss}.
 \item
   \code{gam}: This option provides support for \emph{Generalized
@@ -610,13 +607,13 @@ Carlo integration. This option is controlled by the argument
 \hypertarget{illustration-of-package}{%
 \section{Illustration of package}\label{illustration-of-package}}
 
-In this section, we illustrate the main functions of the
-\CRANpkg{casebase} package through three case studies. Each one
-showcases a different type of analysis. First, we show how to model
-different functional forms of time as well as non-proportional hazards.
-Then we perform a competing-risk analysis and compare our results with
-the Fine-Gray model. The third case study illustrates how to perform
-variable selection in high-dimensional datasets.
+In this section, we illustrate the main functions of the \pkg{casebase}
+package through three case studies. Each one showcases a different type
+of analysis. First, we show how to model different functional forms of
+time as well as non-proportional hazards. Then we perform a
+competing-risk analysis and compare our results with the Fine-Gray
+model. The third case study illustrates how to perform variable
+selection in high-dimensional datasets.
 
 \hypertarget{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}{%
 \subsection{Case study 1---Modeling different functions of time and
@@ -707,7 +704,7 @@ risks <- lapply(fits, function(fit) {
 \end{Schunk}
 
 In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated CIFs from
-\CRANpkg{casebase} on the Cox model CIF. The CIF estimates for the
+\pkg{casebase} on the Cox model CIF. The CIF estimates for the
 exponential model in panel (1) overestimate the cumulative incidence
 earlier on in time, and underestimate it later on. Based on our earlier
 discussion of the population-time plot, this poor fit for the
@@ -792,8 +789,8 @@ screening and the time the effect is expected to be observed. As a
 result, the null effects in years 1--7 masked the substantial reductions
 that began to appear from year 8 onward. This motivates the use of a
 time-dependent hazard ratio which can easily be fit with the
-\CRANpkg{casebase} package by including an interaction term with time in
-the model:
+\pkg{casebase} package by including an interaction term with time in the
+model:
 
 \begin{Schunk}
 \begin{Sinput}
@@ -835,7 +832,7 @@ context of a competing-risk analysis. For illustrative purposes, we use
 the same data that was used in Scrucca \emph{et al}
 \citeyearpar{scrucca2010regression}. The data was downloaded from the
 first author's website, and it is now available as part of the
-\CRANpkg{casebase} package.
+\pkg{casebase} package.
 
 The data contains information on 177 patients who received a stem-cell
 transplant for acute leukemia. The event of interest is relapse, but
@@ -969,22 +966,21 @@ risk curve (figure not shown).
 \subsection{Case study 3---Variable
 selection}\label{case-study-3variable-selection}}
 
-For the third case study, we show how \CRANpkg{casebase} can also be
-used for variable selection through regularized estimation of the hazard
+For the third case study, we show how \pkg{casebase} can also be used
+for variable selection through regularized estimation of the hazard
 function as given by \eqref{eq:penest}. To illustrate this
 functionality, we use the dataset from the Study to Understand Prognoses
 Preferences Outcomes and Risks of Treatment (SUPPORT)
-\citep{knaus1995support}. The SUPPORT dataset tracks death in five
-American hospitals within individuals who are considered seriously ill.
-The original data is available online from the Department of
-Biostatistics at Vanderbilt University \citep{harrell_2020}. The cleaned
-and imputed data consists of 9104 observations and 30 variables, and it
-is available as part of the \CRANpkg{casebase} package. In the
-comparisons below, all covariates except \code{sps} and \code{aps} were
-used. These two variables correspond to scores for predicting the
-outcome that were developed as part of the original study. For more
-information about this dataset, the reader is encouraged to look at the
-documentation in our package.
+\citep{knaus1995support}.\footnote{The original data is available online from the Department of Biostatistics at Vanderbilt University: \url{https://biostat.app.vumc.org/wiki/Main/SupportDesc}}
+The SUPPORT dataset tracks death in five American hospitals within
+individuals who are considered seriously ill. The cleaned and imputed
+data consists of 9104 observations and 30 variables, and it is available
+as part of the \pkg{casebase} package. In the comparisons below, all
+covariates except \code{sps} and \code{aps} were used. These two
+variables correspond to scores for predicting the outcome that were
+developed as part of the original study. For more information about this
+dataset, the reader is encouraged to look at the documentation in our
+package.
 
 For our penalized case-base model, we opt for the natural log of time
 which corresponds to a Weibull distribution. For fitting the penalized
@@ -995,7 +991,7 @@ containing all other covariates. We apply the lasso penalty by setting
 \code{alpha = 1} and assign a \code{penalty.factor} (\(w_j\);
 cf.~Equation \ref{eq:penest}) of 0 to the time variable to ensure it is
 in the selected model. We compare our approach to both Cox regression,
-and lasso penalized Cox regression (fitted via the \CRANpkg{glmnet}
+and lasso penalized Cox regression (fitted via the \pkg{glmnet}
 package).
 
 To compare the performance of our models, we split the data into 95\%
@@ -1003,7 +999,7 @@ training and 5\% test sets. To assess both discrimination and
 calibration, we use a time-dependent version of the classical Brier
 score that is adjusted for censoring \citep{graf1999ass}. The Brier
 score can be used with both parametric and semi-parametric models. We
-use the \CRANpkg{riskRegression} package to compute these scores for all
+use the \pkg{riskRegression} package to compute these scores for all
 models.
 
 \begin{Schunk}
@@ -1032,7 +1028,7 @@ results. We can also clearly see the shrinkage effect owing to the
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/coefplots-1} \caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \CRANpkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
+\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/coefplots-1} \caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
 \end{figure}
 \end{Schunk}
 
@@ -1059,13 +1055,13 @@ these three models are minimal.
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
-In this article, we presented the \textsf{R} package \CRANpkg{casebase},
-which provides functions for fitting smooth parametric hazards and
-estimating CIFs using case-base sampling. Our package also provides
-several functions to produce graphical summaries of the data and the
-results. We outlined the theoretical underpinnings of the approach, we
-provided details about our implementation, and we illustrated the merits
-of the approach and the package through three case studies.
+In this article, we presented the R package \pkg{casebase}, which
+provides functions for fitting smooth parametric hazards and estimating
+CIFs using case-base sampling. Our package also provides several
+functions to produce graphical summaries of the data and the results. We
+outlined the theoretical underpinnings of the approach, we provided
+details about our implementation, and we illustrated the merits of the
+approach and the package through three case studies.
 
 As a methodological framework, case-base sampling is very flexible. Some
 of this flexibility has been explored before in the literature: for
@@ -1102,7 +1098,7 @@ models}. This functionality has already been implemented in the package.
 Similarly, case-base sampling can be combined with quasi-likelihood
 estimation to fit survival models that can account for the presence of
 over-dispersion. All of these examples illustrate how the case-base
-sampling framework in general, and the package \CRANpkg{casebase} in
+sampling framework in general, and the package \pkg{casebase} in
 particular, allows the user to fit a broad and flexible family of
 survival functions.
 
@@ -1119,7 +1115,7 @@ fitting strategies.
 
 In the case studies above, we compared the performance of case-base
 sampling with that of Cox regression and Fine-Gray models. In terms of
-function interface, \CRANpkg{casebase} uses a formula interface that is
+function interface, \pkg{casebase} uses a formula interface that is
 closer to that of \code{glm}, in that the event variable is the only
 variable appearing on the left-hand side of the formula. By contrast,
 both \code{survival::coxph} and \code{timereg::comp.risk} use arrays
@@ -1130,12 +1126,12 @@ smooth cumulative incidence curves, whereas Cox regression and Fine-Gray
 models produce stepwise CIFs and never explicitly model the hazard
 function. Qualitatively, we showed that by using splines in the linear
 predictor, all three models yielded similar curves. However, the smooth
-nature of the output of \CRANpkg{casebase} provides a more intuitive
+nature of the output of \pkg{casebase} provides a more intuitive
 interpretation for consumers of these predictions. In Table
 \ref{tab:compCBvsCox}, we provide a side-by-side comparison between the
 Cox model and case-base sampling.
 
-\begin{table}
+\begin{widetable}
 \caption{\label{tab:compCBvsCox}Comparison between the Cox model and case-base sampling}
 \centering
 \begin{tabular}[t]{llp{5cm}}
@@ -1153,27 +1149,27 @@ Competing risks & Difficult & Cause-specific CIFs\\
 % Prediction & Kaplan-Meier-based & ROC, AUC, risk reclassification probabilities\\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{widetable}
 
 Our choice of modeling the log-hazard as a linear function of covariates
 allows us to develop a simple computational scheme for estimation.
 However, as a downside, it does not allow us to model location and scale
-parameters separately like the package \CRANpkg{flexsurv}. For example,
-if we look at the Weibull distribution as parametrised in
+parameters separately like the package \pkg{flexsurv}. For example, if
+we look at the Weibull distribution as parametrised in
 \code{stats::pweibull}, the log-hazard function is given by
 \[ \log \lambda(t; \alpha, \beta) = \left[\log(\alpha/\beta) - (\alpha - 1)\log(\beta)\right] + (\alpha - 1)\log t,\]
 where \(\alpha,\beta\) are shape and scale parameters, respectively.
-Unlike \CRANpkg{casebase}, the approach taken by \CRANpkg{flexsurv} also
-allows the user to model the scale parameter as a function of
-covariates. Of course, this added flexibility comes at the cost of
-interpretability: by modeling the log-hazard directly, the parameter
-estimates from \CRANpkg{casebase} can be interpreted as estimates of
-log-hazard ratios. To improve the flexibility of \CRANpkg{casebase} at
-capturing the scale of a parametric family, we could replace the
-logistic regression with its quasi-likelihood counterpart and therefore
-model over- and under-dispersion with respect to the logistic
-likelihood. We defer the study of the properties and performance of such
-a model to a future article.
+Unlike \pkg{casebase}, the approach taken by \pkg{flexsurv} also allows
+the user to model the scale parameter as a function of covariates. Of
+course, this added flexibility comes at the cost of interpretability: by
+modeling the log-hazard directly, the parameter estimates from
+\pkg{casebase} can be interpreted as estimates of log-hazard ratios. To
+improve the flexibility of \pkg{casebase} at capturing the scale of a
+parametric family, we could replace the logistic regression with its
+quasi-likelihood counterpart and therefore model over- and
+under-dispersion with respect to the logistic likelihood. We defer the
+study of the properties and performance of such a model to a future
+article.
 
 Future work will look at some of the methodological extensions of
 case-base sampling. First, to assess the quality of the model fit, we
@@ -1183,10 +1179,10 @@ the context of the partial likelihood underlying case-base sampling. The
 resulting diagnostic tools could then be integrated in this package.
 Also, we are interested in extending case-base sampling to account for
 interval censoring. This type of censoring is very common in
-longitudinal studies, and many packages (e.g. \CRANpkg{SmoothHazard},
-\CRANpkg{survival} and \CRANpkg{rstpm2}) provide functions to account
-for it. Again, we hope to include any resulting methodology as part of
-this package.
+longitudinal studies, and many packages (e.g. \pkg{SmoothHazard},
+\pkg{survival} and \pkg{rstpm2}) provide functions to account for it.
+Again, we hope to include any resulting methodology as part of this
+package.
 
 In future versions of the package, we also want to increase the
 complement of diagnostic and inferential tools that are currently
@@ -1198,29 +1194,27 @@ like to include more functions to compute calibration and discrimination
 statistics (e.g.~AUC) for our models. Saarela and Arjas
 \citeyearpar{saarela2015non} also describe how to obtain a posterior
 distribution for the AUC from their model. Their approach could
-potentially be included in \CRANpkg{casebase}. Finally, we want to
-provide more flexibility in how the case-base sampling is performed.
-This could be achieved by adding a \code{hazard} argument to the
-function \code{sampleCaseBase}. In this way, users could specify their
-own sampling mechanism. For example, they could provide a hazard that
-gives sampling probabilities that are proportional to the cardiovascular
+potentially be included in \pkg{casebase}. Finally, we want to provide
+more flexibility in how the case-base sampling is performed. This could
+be achieved by adding a \code{hazard} argument to the function
+\code{sampleCaseBase}. In this way, users could specify their own
+sampling mechanism. For example, they could provide a hazard that gives
+sampling probabilities that are proportional to the cardiovascular
 disease event rate given by the Framingham score \citep{saarela2015non}.
 
-In conclusion, we presented the \textsf{R} package \CRANpkg{casebase}
-which implements case-base sampling for fitting parametric survival
-models and for estimating smooth cumulative incidence functions using
-the framework of generalized linear models. We strongly believe that its
-flexibility and its foundation on the familiar logistic regression model
-will make it appealing to new and established practitioners. The
-\CRANpkg{casebase} package is freely available from the Comprehensive
-\textsf{R} Archive Network at
+In conclusion, we presented the R package \pkg{casebase} which
+implements case-base sampling for fitting parametric survival models and
+for estimating smooth cumulative incidence functions using the framework
+of generalized linear models. We strongly believe that its flexibility
+and its foundation on the familiar logistic regression model will make
+it appealing to new and established practitioners. The \pkg{casebase}
+package is freely available from the Comprehensive R Archive Network at
 \url{https://cran.r-project.org/package=casebase}. Interested users can
 visit \url{http://sahirbhatnagar.com/casebase/} for detailed package
 documentation and vignettes.
 
 \hypertarget{acknowledgments}{%
-\section*{Acknowledgments}\label{acknowledgments}}
-\addcontentsline{toc}{section}{Acknowledgments}
+\section{Acknowledgments}\label{acknowledgments}}
 
 We would like to thank Yi Yang for helpful discussions on penalized
 regression models and gradient boosting. \mbox{Bhatnagar} gratefully
