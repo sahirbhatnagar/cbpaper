@@ -1,8 +1,7 @@
 % !TeX root = RJwrapper.tex
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
-and Comparison of Event Rates}
-\author{by Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A.
-Hanley, and Olli Saarela}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
+Comparison of Event Rates}
+\author{by Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, and Olli Saarela}
 
 \maketitle
 
@@ -454,7 +453,7 @@ plot(pt_object, add.base.series = TRUE)
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/plot-stratified-erspc-data-1} \caption[Population time plots for both treatment arms in the ERSPC dataset]{Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models.}\label{fig:plot-stratified-erspc-data}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./plot-stratified-erspc-data-1} \caption[Population time plots for both treatment arms in the ERSPC dataset]{Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models.}\label{fig:plot-stratified-erspc-data}
 \end{figure}
 \end{Schunk}
 
@@ -744,7 +743,7 @@ provides the best fit:
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/erspc-cox-cif-1} \caption{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cox-cif-1} \caption{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code{survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
 \end{figure}
 \end{Schunk}
 
@@ -820,7 +819,7 @@ reduction in prostate cancer due to screening than the single overall
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/interaction-ERSPC-1} \caption[Estimated hazard ratio and 95\% confidence interval for screening vs]{Estimated hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./interaction-ERSPC-1} \caption[Estimated hazard ratio and 95\% confidence interval for screening vs]{Estimated hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
 \end{figure}
 \end{Schunk}
 
@@ -855,7 +854,7 @@ follow-up than at the end.
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/compPop-1} \caption[Population-time plot for the stem-cell transplant study with both relapse and competing events]{Population-time plot for the stem-cell transplant study with both relapse and competing events.}\label{fig:compPop}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./compPop-1} \caption[Population-time plot for the stem-cell transplant study with both relapse and competing events]{Population-time plot for the stem-cell transplant study with both relapse and competing events.}\label{fig:compPop}
 \end{figure}
 \end{Schunk}
 
@@ -951,7 +950,7 @@ risk_fg <- predict(model_fg, newdata, times = time_points)
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/bmtcrr-risk-1} \caption{\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./bmtcrr-risk-1} \caption{\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
 \end{figure}
 \end{Schunk}
 
@@ -974,7 +973,7 @@ functionality, we use the dataset from the Study to Understand Prognoses
 Preferences Outcomes and Risks of Treatment (SUPPORT)
 \citep{knaus1995support}.\footnote{The original data is available online from the Department of Biostatistics at Vanderbilt University: \url{https://biostat.app.vumc.org/wiki/Main/SupportDesc}}
 The SUPPORT dataset tracks death in five American hospitals within
-individuals who are considered seriously ill.~The cleaned and imputed
+individuals who are considered seriously ill. The cleaned and imputed
 data consists of 9104 observations and 30 variables, and it is available
 as part of the \pkg{casebase} package. In the comparisons below, all
 covariates except \code{sps} and \code{aps} were used. These two
@@ -1029,7 +1028,7 @@ results. We can also clearly see the shrinkage effect owing to the
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/coefplots-1} \caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./coefplots-1} \caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
 \end{figure}
 \end{Schunk}
 
@@ -1049,7 +1048,7 @@ these three models are minimal.
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{../figures/riskregressionBrier-1} \caption{\label{fig:cs3FinalBrier} Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.}\label{fig:riskregressionBrier}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./riskregressionBrier-1} \caption{\label{fig:cs3FinalBrier} Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.}\label{fig:riskregressionBrier}
 \end{figure}
 \end{Schunk}
 
@@ -1180,7 +1179,7 @@ the context of the partial likelihood underlying case-base sampling. The
 resulting diagnostic tools could then be integrated in this package.
 Also, we are interested in extending case-base sampling to account for
 interval censoring. This type of censoring is very common in
-longitudinal studies, and many packages (e.g.~\pkg{SmoothHazard},
+longitudinal studies, and many packages (e.g. \pkg{SmoothHazard},
 \pkg{survival} and \pkg{rstpm2}) provide functions to account for it.
 Again, we hope to include any resulting methodology as part of this
 package.
@@ -1274,3 +1273,4 @@ Toronto, Ontario M5T 3M7, Canada\\
 %
 \\\email{olli.saarela@utoronto.ca}
 }
+

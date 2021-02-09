@@ -70,7 +70,7 @@ knitr::opts_chunk$set(
   cache = TRUE, 
   fig.pos = 'ht',
   comment = "#>",
-  fig.path = "../figures/",
+  fig.path = "./",
   out.width = "\\textwidth",
    out.extra = "keepaspectratio=true"
 )

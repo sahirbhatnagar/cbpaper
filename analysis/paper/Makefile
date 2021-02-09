@@ -11,11 +11,9 @@ all: totex rjournal
 
 totex:
 	Rscript -e "rmarkdown::render(input = 'bhatnagar-turgeon-islam-hanley-saarela.Rmd', clean = FALSE)"
-	#pdfunite $(OUTPUT)_handout.pdf PoissonAndExtraPoissonVariation_handout.pdf $(OUTPUT)_handout_JH.pdf
 
 rjournal:
 	bibexport -o bhatnagar-turgeon-islam-hanley-saarela.bib RJwrapper.aux
-	mv ../figures/* .
 	zip bhatnagar-turgeon-islam-hanley-saarela.zip \
 	bhatnagar-turgeon-islam-hanley-saarela.bib \
 	bhatnagar-turgeon-islam-hanley-saarela.Rmd \
@@ -32,5 +30,3 @@ rjournal:
 	plot-stratified-erspc-data-1.pdf \
 	riskregressionBrier-1.pdf
 
-
-	#pdfunite $(OUTPUT)_slides.pdf PoissonAndExtraPoissonVariation.pdf $(OUTPUT)_slides_JH.pdf
