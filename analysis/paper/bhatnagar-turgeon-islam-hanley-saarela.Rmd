@@ -48,9 +48,7 @@ preamble: >
   \usepackage{float}
   \usepackage{makecell}
   \usepackage{tabu}
-output: 
-  rticles::rjournal_article:
-    number_sections: true
+output: rticles::rjournal_article
 bibliography: bhatnagar-turgeon-islam-hanley-saarela.bib 
 fig_width: 12
 fig_height: 9
@@ -101,8 +99,8 @@ eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
-eval_cs2 <- TRUE
-eval_cs3 <- TRUE
+eval_cs2 <- FALSE
+eval_cs3 <- FALSE
 eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
 echo_plot_code <- TRUE
@@ -240,7 +238,7 @@ The functions in the \pkg{casebase} package can be divided into two categories: 
 
 ## Population-time plots
 
-Population-time plots are a descriptive visualization of incidence density, where aggregate person-time is represented by area and events as points within the area. The case-base sampling approach described in Section \ref{theory} can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
+Population-time plots are a descriptive visualization of incidence density, where aggregate person-time is represented by area and events as points within the area. The case-base sampling approach described above can be visualized in the form of a population time plot. These plots are extremely informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
 
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime}.  
 2. The corresponding \code{plot} method for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
@@ -365,7 +363,7 @@ fit <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
 
 The output object from \code{fitSmoothHazard} inherits from the \code{singleEventCB} and \code{glm} classes. For this reason, we can leverage the \code{summary} method for \code{glm} objects to output a familiar summary of the results:
 
-```{r, eval = TRUE, echo=eval_cs1}
+```{r, eval = eval_cs1, echo = TRUE}
 summary(fit) 
 ```
 
@@ -400,7 +398,7 @@ myCols <- cbPalette[c(4,7)]
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 new_time <- seq(0,14,0.1)
 # Recompute with more time points
-risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+risk_mp <- absoluteRisk(fit, time = new_time, newdata = new_data)
 
 plot(survfit(cox_model, newdata = new_data),
      ylab = "Cumulative incidence (%)",
@@ -419,8 +417,123 @@ legend("topleft",
        lwd = 2,
        cex = 1.1,
        bg = "gray90")
-lines(risk[,1], risk[,2], col = myCols[1], lty = 2, lwd = 2)
-lines(risk[,1], risk[,3], col = myCols[2], lty = 2, lwd = 2)
+lines(risk_mp[,1], risk_mp[,2], col = myCols[1], lty = 2, lwd = 2)
+lines(risk_mp[,1], risk_mp[,3], col = myCols[2], lty = 2, lwd = 2)
+```
+
+Moreover, we can also compute confidence intervals for the CIF using the method \code{confint.absRiskCB}. 
+
+```{r eval = eval_cs1, echo = -1}
+new_time <- c(0, 1)
+risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+conf_ints <- confint(risk, fit)
+conf_ints
+```
+
+These point-wise confidence intervals are constructed using parametric bootstrap; the validity of this approach relies on the asymptotic normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the 95% confidence bands around the CIF estimates.
+
+```{r erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="CIF estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."}
+# confidence interval
+tt <- confint(risk_mp, fit)
+
+# plot absrisk and 95% CI
+new_time <- seq(0,14,0.1)
+i.backw <- order(new_time, decreasing = TRUE)
+i.forw <- order(new_time)
+
+x.poly <- c(new_time[i.forw], new_time[i.backw])
+range_y <- 100 * range(c(tt$conf.high, tt$conf.low)) * c(0.99, 1.01)
+
+par(mfrow = c(1, 2))
+# 1. Control
+tt_sub <- subset(tt, cov_prof == "Control group")
+y.poly <- 100 * c(tt_sub$conf.low[i.forw], 
+                  tt_sub$conf.high[i.backw])
+do.call("plot", 
+    list(
+        x = range(x.poly),
+        y = range_y,
+        type = "n",
+        ylab = "Cumulative incidence (%)",
+        xlab = "Years since randomization",
+        main = "Control group"
+    )
+)
+
+graphics::polygon(x.poly, y.poly, col = "lightgray", border = NA)
+
+# Add KM
+km_fit <- survfit(Surv(Follow.Up.Time, DeadOfPrCa) ~ 1,
+                  data = ERSPC,
+                  subset = ScrArm == "Control group",
+                  conf.type = "log-log")
+
+lines(x = km_fit$time, y = 100 * (1 - km_fit$surv),
+      lwd = 1, lty = 1, col = myCols[2])
+lines(x = km_fit$time, y = 100 * (1 - km_fit$lower),
+      lwd = 2, lty = 3, col = myCols[2])
+lines(x = km_fit$time, y = 100 * (1 - km_fit$upper),
+      lwd = 2, lty = 3, col = myCols[2])
+
+do.call("lines", 
+        list(
+            x = new_time[i.forw],
+            y = 100 * tt_sub$estimate[i.forw],
+            lwd = 2,
+            lty = 1,
+            col = myCols[1]
+        )
+)
+
+# Add legend
+legend("topleft", 
+       legend = c("Case-base", "Kaplan-Meier"), 
+       col = myCols,
+       lty = c(1, 1), 
+       lwd = c(2, 1),
+       cex = 1.1,
+       bg = "gray90")
+
+# 2. Screening
+tt_sub <- subset(tt, cov_prof == "Screening group")
+y.poly <- 100 * c(tt_sub$conf.low[i.forw], 
+                  tt_sub$conf.high[i.backw])
+do.call("plot", 
+    list(
+        x = range(x.poly),
+        y = range_y,
+        type = "n",
+        # ylab = "Cumulative incidence (%)",
+        ylab = "",
+        xlab = "Years since randomization",
+        main = "Screening group"
+    )
+)
+
+graphics::polygon(x.poly, y.poly, col = "lightgray", border = NA)
+
+# Add KM
+km_fit <- survfit(Surv(Follow.Up.Time, DeadOfPrCa) ~ 1,
+                  data = ERSPC,
+                  subset = ScrArm == "Screening group",
+                  conf.type = "log-log")
+
+lines(x = km_fit$time, y = 100 * (1 - km_fit$surv),
+      lwd = 1, lty = 1, col = myCols[2])
+lines(x = km_fit$time, y = 100 * (1 - km_fit$lower),
+      lwd = 2, lty = 3, col = myCols[2])
+lines(x = km_fit$time, y = 100 * (1 - km_fit$upper),
+      lwd = 2, lty = 3, col = myCols[2])
+
+do.call("lines", 
+        list(
+            x = new_time[i.forw],
+            y = 100 * tt_sub$estimate[i.forw],
+            lwd = 2,
+            lty = 1,
+            col = myCols[1]
+        )
+)
 ```
 
 Previous re-analyses of these data suggested that the overall screening attributed reduction in death due to prostate cancer of 20% was an underestimate [@hanley2010mortality]. The estimated 20% (from a proportional hazards model) did not account for the delay between screening and the time the effect is expected to be observed. As a result, the null effects in years 1–7 masked the substantial reductions that began to appear from year 8 onward. This motivates the use of a time-dependent hazard ratio which can easily be fit with the \pkg{casebase} package by including an interaction term with time in the model:
@@ -978,13 +1091,13 @@ where $\alpha,\beta$ are shape and scale parameters, respectively. Unlike \pkg{c
 
 Future work will look at some of the methodological extensions of case-base sampling. First, to assess the quality of the model fit, we would like to study the properties of the residuals (e.g. Cox-Snell, martingale). More work needs to be done to understand these residuals in the context of the partial likelihood underlying case-base sampling. The resulting diagnostic tools could then be integrated in this package. Also, we are interested in extending case-base sampling to account for interval censoring. This type of censoring is very common in longitudinal studies, and many packages (e.g. \pkg{SmoothHazard}, \pkg{survival} and \pkg{rstpm2}) provide functions to account for it. Again, we hope to include any resulting methodology as part of this package.
 
-In future versions of the package, we also want to increase the complement of diagnostic and inferential tools that are currently available. For example, we would like to include the ability to compute confidence intervals for the cumulative incidence curve. The delta method or parametric bootstrap are two different strategies we can use to construct approximate confidence intervals. Furthermore, we would like to include more functions to compute calibration and discrimination statistics (e.g. AUC) for our models. Saarela and Arjas [-@saarela2015non] also describe how to obtain a posterior distribution for the AUC from their model. Their approach could potentially be included in \pkg{casebase}. Finally, we want to provide more flexibility in how the case-base sampling is performed. This could be achieved by adding a \code{hazard} argument to the function \code{sampleCaseBase}. In this way, users could specify their own sampling mechanism. For example, they could provide a hazard that gives sampling probabilities that are proportional to the cardiovascular disease event rate given by the Framingham score [@saarela2015non]. 
+In future versions of the package, we also want to increase the complement of diagnostic and inferential tools that are currently available. For example, we would like to include more functions to compute calibration and discrimination statistics (e.g. AUC) for our models. Saarela and Arjas [-@saarela2015non] also describe how to obtain a posterior distribution for the AUC from their model. Their approach could potentially be included in \pkg{casebase}. Finally, we want to provide more flexibility in how the case-base sampling is performed. This could be achieved by adding a \code{hazard} argument to the function \code{sampleCaseBase}. In this way, users could specify their own sampling mechanism. For example, they could provide a hazard that gives sampling probabilities that are proportional to the cardiovascular disease event rate given by the Framingham score [@saarela2015non]. 
 
 In conclusion, we presented the R package \pkg{casebase} which implements case-base sampling for fitting parametric survival models and for estimating smooth cumulative incidence functions using the framework of generalized linear models. We strongly believe that its flexibility and its foundation on the familiar logistic regression model will make it appealing to new and established practitioners. The \pkg{casebase} package is freely available from the Comprehensive R Archive Network at \url{https://cran.r-project.org/package=casebase}. Interested users can visit \url{http://sahirbhatnagar.com/casebase/} for detailed package documentation and vignettes.
 
 # Acknowledgments
 
-We would like to thank Yi Yang for helpful discussions on penalized regression models and gradient boosting. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
+We would like to thank the anonymous reviewers for their insightful comments and criticisms. We would also like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
 
 <!-- # Environment Details -->
 

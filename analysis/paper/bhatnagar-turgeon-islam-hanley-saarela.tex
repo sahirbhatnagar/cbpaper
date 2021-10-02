@@ -386,12 +386,11 @@ can be seen in the coding choices we made and the unit tests we wrote.
 
 Population-time plots are a descriptive visualization of incidence
 density, where aggregate person-time is represented by area and events
-as points within the area. The case-base sampling approach described in
-Section \ref{theory} can be visualized in the form of a population time
-plot. These plots are extremely informative graphical displays of
-survival data and should be one of the first steps in an exploratory
-data analysis. The \code{popTime} function and \code{plot} method
-facilitate this task:
+as points within the area. The case-base sampling approach described
+above can be visualized in the form of a population time plot. These
+plots are extremely informative graphical displays of survival data and
+should be one of the first steps in an exploratory data analysis. The
+\code{popTime} function and \code{plot} method facilitate this task:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -733,6 +732,35 @@ them.
 \end{figure}
 \end{Schunk}
 
+Moreover, we can also compute confidence intervals for the CIF using the
+method \code{confint.absRiskCB}.
+
+\begin{Schunk}
+\begin{Sinput}
+risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+conf_ints <- confint(risk, fit)
+conf_ints
+\end{Sinput}
+\begin{Soutput}
+#>   time estimate conf.low conf.high        cov_prof
+#> 1    0  0.0e+00  0.0e+00   0.0e+00   Control group
+#> 2    1  5.4e-05  3.5e-05   9.3e-05   Control group
+#> 3    0  0.0e+00  0.0e+00   0.0e+00 Screening group
+#> 4    1  4.2e-05  2.7e-05   7.3e-05 Screening group
+\end{Soutput}
+\end{Schunk}
+
+These point-wise confidence intervals are constructed using parametric
+bootstrap; the validity of this approach relies on the asymptotic
+normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the
+95\% confidence bands around the CIF estimates.
+
+\begin{Schunk}
+\begin{figure}[ht]
+\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cif-conf-1} \caption[CIF estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands]{CIF estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands.}\label{fig:erspc-cif-conf}
+\end{figure}
+\end{Schunk}
+
 Previous re-analyses of these data suggested that the overall screening
 attributed reduction in death due to prostate cancer of 20\% was an
 underestimate \citep{hanley2010mortality}. The estimated 20\% (from a
@@ -804,12 +832,6 @@ events (panel B). In both panels, we see evidence of a non-constant
 hazard function: the density of points is larger at the beginning of
 follow-up than at the end.
 
-\begin{Schunk}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./compPop-1} \caption[Population-time plot for the stem-cell transplant study with both relapse and competing events]{Population-time plot for the stem-cell transplant study with both relapse and competing events.}\label{fig:compPop}
-\end{figure}
-\end{Schunk}
-
 Our main objective is to compute the cumulative incidence of relapse for
 a given set of covariates. We start by fitting a smooth hazard to the
 data using a linear term for time:
@@ -836,31 +858,6 @@ library(survival)
 model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
                    data = bmtcrr)
 \end{Sinput}
-\end{Schunk}
-
-\begin{Schunk}
-\begin{table}
-
-\caption{\label{tab:bmtcrr-cis}Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.}
-\centering
-\begin{tabular}[t]{lrlrl}
-\toprule
-\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Case-Base} & \multicolumn{2}{c}{Cox} \\
-\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
-Covariates & HR & 95\% CI & HR & 95\% CI\\
-\midrule
-Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
-Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
-\addlinespace
-Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
-Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \end{Schunk}
 
 From the fit object, we can extract both the hazard ratios and their
@@ -898,12 +895,6 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
 # Estimate absolute risk curve
 risk_fg <- predict(model_fg, newdata, times = time_points)
 \end{Sinput}
-\end{Schunk}
-
-\begin{Schunk}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./bmtcrr-risk-1} \caption{\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
-\end{figure}
 \end{Schunk}
 
 Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both
@@ -978,12 +969,6 @@ case-base. We note that both penalized approaches produce similar
 results. We can also clearly see the shrinkage effect owing to the
 \(\ell_1\) penalty.
 
-\begin{Schunk}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./coefplots-1} \caption{\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:coefplots}
-\end{figure}
-\end{Schunk}
-
 We then compare the cumulative incidence estimation over the test set.
 The probabilities over time for each observation are averaged, resulting
 in the absolute risk curves shown in Figure \ref{fig:cs3FinalBrier} (A).
@@ -997,12 +982,6 @@ Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), we can
 see that the Brier score is larger for the Kaplan-Meier estimate than
 for the other three models. On the other hand, the differences between
 these three models are minimal.
-
-\begin{Schunk}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./riskregressionBrier-1} \caption{\label{fig:cs3FinalBrier} Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.}\label{fig:riskregressionBrier}
-\end{figure}
-\end{Schunk}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -1138,21 +1117,18 @@ package.
 
 In future versions of the package, we also want to increase the
 complement of diagnostic and inferential tools that are currently
-available. For example, we would like to include the ability to compute
-confidence intervals for the cumulative incidence curve. The delta
-method or parametric bootstrap are two different strategies we can use
-to construct approximate confidence intervals. Furthermore, we would
-like to include more functions to compute calibration and discrimination
-statistics (e.g.~AUC) for our models. Saarela and Arjas
-\citeyearpar{saarela2015non} also describe how to obtain a posterior
-distribution for the AUC from their model. Their approach could
-potentially be included in \pkg{casebase}. Finally, we want to provide
-more flexibility in how the case-base sampling is performed. This could
-be achieved by adding a \code{hazard} argument to the function
-\code{sampleCaseBase}. In this way, users could specify their own
-sampling mechanism. For example, they could provide a hazard that gives
-sampling probabilities that are proportional to the cardiovascular
-disease event rate given by the Framingham score \citep{saarela2015non}.
+available. For example, we would like to include more functions to
+compute calibration and discrimination statistics (e.g.~AUC) for our
+models. Saarela and Arjas \citeyearpar{saarela2015non} also describe how
+to obtain a posterior distribution for the AUC from their model. Their
+approach could potentially be included in \pkg{casebase}. Finally, we
+want to provide more flexibility in how the case-base sampling is
+performed. This could be achieved by adding a \code{hazard} argument to
+the function \code{sampleCaseBase}. In this way, users could specify
+their own sampling mechanism. For example, they could provide a hazard
+that gives sampling probabilities that are proportional to the
+cardiovascular disease event rate given by the Framingham score
+\citep{saarela2015non}.
 
 In conclusion, we presented the R package \pkg{casebase} which
 implements case-base sampling for fitting parametric survival models and
@@ -1168,8 +1144,9 @@ documentation and vignettes.
 \hypertarget{acknowledgments}{%
 \section{Acknowledgments}\label{acknowledgments}}
 
-We would like to thank Yi Yang for helpful discussions on penalized
-regression models and gradient boosting. \mbox{Bhatnagar} gratefully
+We would like to thank the anonymous reviewers for their insightful
+comments and criticisms. We would also like to thank Yi Yang for helpful
+discussions on penalized regression models. \mbox{Bhatnagar} gratefully
 acknowledges funding via a Discovery Grant from the Natural Sciences and
 Engineering Research Council of Canada (NSERC).
 
