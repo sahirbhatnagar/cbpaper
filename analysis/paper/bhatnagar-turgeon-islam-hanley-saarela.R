@@ -40,8 +40,8 @@ eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
-eval_cs2 <- FALSE
-eval_cs3 <- FALSE
+eval_cs2 <- TRUE
+eval_cs3 <- TRUE
 eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
 echo_plot_code <- TRUE
@@ -125,7 +125,7 @@ surv_obj <- with(ERSPC, Surv(Follow.Up.Time, DeadOfPrCa))
 cox_model <- survival::coxph(surv_obj ~ ScrArm, data = ERSPC)
 
 
-## ----erspc-cox-cif, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="CIF for control and screening groups in the ERSPC data. We plot the CIF from the Cox model using \\code{survival::survfit} (solid line) and the CIF from case-base sampling (dashed line). We used a cubic B-spline expansion of time."----
+## ----erspc-cox-cif, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \\code{survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time."----
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 myCols <- cbPalette[c(4,7)]
 
@@ -135,7 +135,7 @@ new_time <- seq(0,14,0.1)
 risk_mp <- absoluteRisk(fit, time = new_time, newdata = new_data)
 
 plot(survfit(cox_model, newdata = new_data),
-     ylab = "Cumulative incidence (%)",
+     ylab = "Risk probability (%)",
      xlab = "Years since randomization",
      fun = "event",
      xmax = max(new_time),
@@ -162,7 +162,7 @@ conf_ints <- confint(risk, fit)
 conf_ints
 
 
-## ----erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="CIF estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."----
+## ----erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."----
 # confidence interval
 tt <- confint(risk_mp, fit)
 
@@ -184,7 +184,7 @@ do.call("plot",
         x = range(x.poly),
         y = range_y,
         type = "n",
-        ylab = "Cumulative incidence (%)",
+        ylab = "Risk probability (%)",
         xlab = "Years since randomization",
         main = "Control group"
     )
@@ -233,7 +233,7 @@ do.call("plot",
         x = range(x.poly),
         y = range_y,
         type = "n",
-        # ylab = "Cumulative incidence (%)",
+        # ylab = "Risk probability (%)",
         ylab = "",
         xlab = "Years since randomization",
         main = "Screening group"
@@ -314,431 +314,431 @@ mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, oute
 
 
 ## ----bmtcrr-data, eval = eval_cs2, message = FALSE----------------------------
-#> data(bmtcrr)
+data(bmtcrr)
 
 
 ## ----compPop, fig.cap="Population-time plot for the stem-cell transplant study with both relapse and competing events.", echo=FALSE, eval = eval_cs2----
-#> popTimeData <- popTime(data = bmtcrr, time = "ftime")
-#> 
-#> plot(popTimeData,
-#>      add.competing.event = TRUE,
-#>      comprisk = TRUE,
-#>      ribbon.params = list(fill = "gray50"),
-#>      case.params = list(size = 0.8),
-#>      competing.params = list(size = 0.8)) +
-#>   paper_gg_theme +
-#>   scale_y_continuous(labels = label_number_si())
+popTimeData <- popTime(data = bmtcrr, time = "ftime")
+
+plot(popTimeData, 
+     add.competing.event = TRUE,
+     comprisk = TRUE,
+     ribbon.params = list(fill = "gray50"),
+     case.params = list(size = 0.8),
+     competing.params = list(size = 0.8)) + 
+  paper_gg_theme +  
+  scale_y_continuous(labels = label_number_si())
 
 
 ## ----bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2, echo = TRUE----
-#> model_cb <- fitSmoothHazard(
-#>   Status ~ ftime + Sex + D + Phase + Source + Age,
-#>   data = bmtcrr,
-#>   ratio = 100,
-#>   time = "ftime"
-#> )
+model_cb <- fitSmoothHazard(
+  Status ~ ftime + Sex + D + Phase + Source + Age,
+  data = bmtcrr,
+  ratio = 100,
+  time = "ftime"
+)
 
 
 ## ----bmtcrr-cox, echo = TRUE, eval = eval_cs2---------------------------------
-#> library(survival)
-#> # Treat competing event as censoring
-#> model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-#>                    data = bmtcrr)
+library(survival)
+# Treat competing event as censoring
+model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
+                   data = bmtcrr)
 
 
 ## ----bmtcrr-cis, echo=FALSE, eval = eval_cs2----------------------------------
-#> # Table of coefficients
-#> library(glue)
-#> z_value <- qnorm(0.975)
-#> foo <- summary(model_cb)@coef3
-#> table_cb <- foo[
-#>   !grepl("Intercept", rownames(foo)) &
-#>     !grepl("ftime", rownames(foo)) &
-#>     grepl(":1", rownames(foo)),
-#>   1:2
-#> ]
-#> table_cb <- cbind(
-#>   table_cb[, 1],
-#>   table_cb[, 1] - z_value * table_cb[, 2],
-#>   table_cb[, 1] + z_value * table_cb[, 2]
-#> )
-#> table_cb <- round(exp(table_cb), 2)
-#> 
-#> table_cox <- round(summary(model_cox)$conf.int[, -2], 2)
-#> rownames(table_cb) <- rownames(table_cox)
-#> colnames(table_cb) <- colnames(table_cox)
-#> 
-#> table_cb <- as.data.frame(table_cb) %>%
-#>   tibble::rownames_to_column("Covariates") %>%
-#>   mutate(CI = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
-#>   rename(HR = `exp(coef)`) %>%
-#>   select(Covariates, HR, CI)
-#> 
-#> table_cox <- as.data.frame(table_cox) %>%
-#>   tibble::rownames_to_column("Covariates") %>%
-#>   dplyr::mutate(CI_Cox = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
-#>   dplyr::rename(HR_Cox = `exp(coef)`) %>%
-#>   dplyr::select(Covariates, HR_Cox, CI_Cox)
-#> 
-#> table_cb %>%
-#>   dplyr::inner_join(table_cox, by = "Covariates") %>%
-#>   dplyr::mutate(Covariates = dplyr::case_when(
-#>     Covariates == "SexM" ~ "Sex",
-#>     Covariates == "DAML" ~ "Disease",
-#>     Covariates == "PhaseCR2" ~ "Phase (CR2 vs. CR1)",
-#>     Covariates == "PhaseCR3" ~ "Phase (CR3 vs. CR1)",
-#>     Covariates == "PhaseRelapse" ~ "Phase (Relapse vs. CR1)",
-#>     Covariates == "SourcePB" ~ "Source",
-#>     TRUE ~ Covariates
-#>   )) %>%
-#>   knitr::kable(
-#>     format = "latex", booktabs = TRUE,
-#>     col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
-#>     caption = "Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented."
-#>   ) %>%
-#>   kable_styling() %>%
-#>   add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
+# Table of coefficients
+library(glue)
+z_value <- qnorm(0.975)
+foo <- summary(model_cb)@coef3
+table_cb <- foo[
+  !grepl("Intercept", rownames(foo)) &
+    !grepl("ftime", rownames(foo)) &
+    grepl(":1", rownames(foo)),
+  1:2
+]
+table_cb <- cbind(
+  table_cb[, 1],
+  table_cb[, 1] - z_value * table_cb[, 2],
+  table_cb[, 1] + z_value * table_cb[, 2]
+)
+table_cb <- round(exp(table_cb), 2)
+
+table_cox <- round(summary(model_cox)$conf.int[, -2], 2)
+rownames(table_cb) <- rownames(table_cox)
+colnames(table_cb) <- colnames(table_cox)
+
+table_cb <- as.data.frame(table_cb) %>%
+  tibble::rownames_to_column("Covariates") %>%
+  mutate(CI = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
+  rename(HR = `exp(coef)`) %>%
+  select(Covariates, HR, CI)
+
+table_cox <- as.data.frame(table_cox) %>%
+  tibble::rownames_to_column("Covariates") %>%
+  dplyr::mutate(CI_Cox = glue::glue_data(., "({`lower .95`}, {`upper .95`})")) %>%
+  dplyr::rename(HR_Cox = `exp(coef)`) %>%
+  dplyr::select(Covariates, HR_Cox, CI_Cox)
+
+table_cb %>%
+  dplyr::inner_join(table_cox, by = "Covariates") %>%
+  dplyr::mutate(Covariates = dplyr::case_when(
+    Covariates == "SexM" ~ "Sex",
+    Covariates == "DAML" ~ "Disease",
+    Covariates == "PhaseCR2" ~ "Phase (CR2 vs. CR1)",
+    Covariates == "PhaseCR3" ~ "Phase (CR3 vs. CR1)",
+    Covariates == "PhaseRelapse" ~ "Phase (Relapse vs. CR1)",
+    Covariates == "SourcePB" ~ "Source",
+    TRUE ~ Covariates
+  )) %>%
+  knitr::kable(
+    format = "latex", booktabs = TRUE,
+    col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
+    caption = "Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented."
+  ) %>%
+  kable_styling() %>%
+  add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
 
 
 ## ----cb_risk, warning = FALSE, cache = FALSE, eval = eval_cs2-----------------
-#> # Pick 100 equidistant points between 0 and 60 months
-#> time_points <- seq(0, 60, length.out = 50)
-#> 
-#> # Data.frame containing risk profile
-#> newdata <- data.frame(
-#>   "Sex" = factor(c("F", "F"),
-#>     levels = levels(bmtcrr[, "Sex"])
-#>   ),
-#>   "D" = c("ALL", "AML"), # Both diseases
-#>   "Phase" = factor(c("Relapse", "Relapse"),
-#>     levels = levels(bmtcrr[, "Phase"])
-#>   ),
-#>   "Age" = c(35, 35),
-#>   "Source" = factor(c("PB", "PB"),
-#>     levels = levels(bmtcrr[, "Source"])
-#>   )
-#> )
-#> 
-#> # Estimate absolute risk curve
-#> risk_cb <- absoluteRisk(
-#>   object = model_cb, time = time_points,
-#>   method = "numerical", newdata = newdata
-#> )
+# Pick 100 equidistant points between 0 and 60 months
+time_points <- seq(0, 60, length.out = 50)
+
+# Data.frame containing risk profile
+newdata <- data.frame(
+  "Sex" = factor(c("F", "F"),
+    levels = levels(bmtcrr[, "Sex"])
+  ),
+  "D" = c("ALL", "AML"), # Both diseases
+  "Phase" = factor(c("Relapse", "Relapse"),
+    levels = levels(bmtcrr[, "Phase"])
+  ),
+  "Age" = c(35, 35),
+  "Source" = factor(c("PB", "PB"),
+    levels = levels(bmtcrr[, "Source"])
+  )
+)
+
+# Estimate absolute risk curve
+risk_cb <- absoluteRisk(
+  object = model_cb, time = time_points,
+  method = "numerical", newdata = newdata
+)
 
 
 ## ----fg_risk, eval = eval_cs2, echo = TRUE------------------------------------
-#> library(timereg)
-#> model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
-#>                         const(Phase) + const(Source) + const(Age),
-#>                       data = bmtcrr, cause = 1, model = "fg")
-#> 
-#> # Estimate absolute risk curve
-#> risk_fg <- predict(model_fg, newdata, times = time_points)
+library(timereg)
+model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
+                        const(Phase) + const(Source) + const(Age),
+                      data = bmtcrr, cause = 1, model = "fg")
+
+# Estimate absolute risk curve
+risk_fg <- predict(model_fg, newdata, times = time_points)
 
 
 ## ----bmtcrr-risk, echo = FALSE, fig.cap="\\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2----
-#> risk_all <- dplyr::bind_rows(
-#>   data.frame(
-#>     Time = time_points,
-#>     Method = "Case-base",
-#>     Risk = risk_cb[, 2],
-#>     Disease = "ALL",
-#>     stringsAsFactors = FALSE
-#>   ),
-#>   data.frame(
-#>     Time = time_points,
-#>     Method = "Case-base",
-#>     Risk = risk_cb[, 3],
-#>     Disease = "AML",
-#>     stringsAsFactors = FALSE
-#>   ),
-#>   data.frame(
-#>     Time = time_points,
-#>     Method = "Fine-Gray",
-#>     Risk = risk_fg$P1[1, ],
-#>     Disease = "ALL",
-#>     stringsAsFactors = FALSE
-#>   ),
-#>   data.frame(
-#>     Time = time_points,
-#>     Method = "Fine-Gray",
-#>     Risk = risk_fg$P1[2, ],
-#>     Disease = "AML",
-#>     stringsAsFactors = FALSE
-#>   )
-#> )
-#> 
-#> ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
-#>   # geom_line for smooth curve
-#>   geom_line(data = dplyr::filter(risk_all, Method == "Case-base")) +
-#>   # geom_step for step function
-#>   geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) +
-#>   facet_grid(Disease ~ .) +
-#>   ylim(c(0, 1)) +
-#>   paper_gg_theme +
-#>   xlab("Time (in Months)") +
-#>   ylab("Relapse risk")
+risk_all <- dplyr::bind_rows(
+  data.frame(
+    Time = time_points,
+    Method = "Case-base",
+    Risk = risk_cb[, 2],
+    Disease = "ALL",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Case-base",
+    Risk = risk_cb[, 3],
+    Disease = "AML",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Fine-Gray",
+    Risk = risk_fg$P1[1, ],
+    Disease = "ALL",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = time_points,
+    Method = "Fine-Gray",
+    Risk = risk_fg$P1[2, ],
+    Disease = "AML",
+    stringsAsFactors = FALSE
+  )
+)
+
+ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
+  # geom_line for smooth curve
+  geom_line(data = dplyr::filter(risk_all, Method == "Case-base")) +
+  # geom_step for step function
+  geom_step(data = dplyr::filter(risk_all, Method != "Case-base")) +
+  facet_grid(Disease ~ .) +
+  ylim(c(0, 1)) +
+  paper_gg_theme +  
+  xlab("Time (in Months)") +
+  ylab("Relapse risk")
 
 
 ## ----supportData, eval = eval_cs3---------------------------------------------
-#> scaleFUNy <- function(x) sprintf("%.2f", x)
-#> scaleFUNx <- function(x) sprintf("%.0f", x)
-#> data(support)
-#> # Change time to years
-#> support$d.time <- support$d.time/365.25
-#> 
-#> # Split into test and train
-#> train_index <- sample(nrow(support), 0.95*nrow(support))
-#> test_index <- setdiff(1:nrow(support), train_index)
-#> 
-#> train <- support[train_index,]
-#> test <- support[test_index,]
+scaleFUNy <- function(x) sprintf("%.2f", x)
+scaleFUNx <- function(x) sprintf("%.0f", x)
+data(support)
+# Change time to years
+support$d.time <- support$d.time/365.25
+
+# Split into test and train
+train_index <- sample(nrow(support), 0.95*nrow(support))
+test_index <- setdiff(1:nrow(support), train_index)
+
+train <- support[train_index,]
+test <- support[test_index,]
 
 
 ## ----supportCox_fit, eval=eval_cs3, echo=FALSE, cache=FALSE-------------------
-#> # Cox with everything but sps and aps
-#> cox <- survival::coxph(Surv(time = d.time, event = death) ~ . - aps - sps,
-#>                            data = train, x = TRUE)
+# Cox with everything but sps and aps
+cox <- survival::coxph(Surv(time = d.time, event = death) ~ . - aps - sps,
+                           data = train, x = TRUE)
 
 
 ## ----supportCB_fit, eval=eval_cs3, echo=TRUE, cache=FALSE---------------------
-#> # Create matrices for inputs
-#> x <- model.matrix(death ~ . - d.time - aps - sps,
-#>                   data = train)[, -c(1)] # Remove intercept
-#> y <- data.matrix(subset(train, select = c(d.time, death)))
-#> 
-#> # Regularized logistic regression to estimate hazard
-#> pen_cb <- casebase::fitSmoothHazard.fit(x, y,
-#>   family = "glmnet",
-#>   time = "d.time", event = "death",
-#>   formula_time = ~ log(d.time), alpha = 1,
-#>   ratio = 10, standardize = TRUE,
-#>   penalty.factor = c(0, rep(1, ncol(x)))
-#> )
+# Create matrices for inputs
+x <- model.matrix(death ~ . - d.time - aps - sps, 
+                  data = train)[, -c(1)] # Remove intercept
+y <- data.matrix(subset(train, select = c(d.time, death)))
+
+# Regularized logistic regression to estimate hazard
+pen_cb <- casebase::fitSmoothHazard.fit(x, y,
+  family = "glmnet",
+  time = "d.time", event = "death",
+  formula_time = ~ log(d.time), alpha = 1,
+  ratio = 10, standardize = TRUE,
+  penalty.factor = c(0, rep(1, ncol(x)))
+)
 
 
 ## ----coxHazAbsolute, echo = FALSE, eval = eval_cs3----------------------------
-#> # Create survival object for fitting Coxnet
-#> u <- with(train, survival::Surv(time = d.time, event = death))
-#> coxNet <- glmnet::cv.glmnet(x = x, y = u, family = "cox", alpha = 1, standardize = TRUE)
-#> 
-#> # Taking the coefficient estimates for later use
-#> nonzero_covariate_cox <- predict(coxNet, type = "nonzero", s = "lambda.1se")
-#> nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
-#> # Creating a new dataset that only contains the covariates chosen through glmnet
-#> cleanCoxData <- as.data.frame(cbind(y, x[, nonzero_covariate_cox$X1]))
-#> 
-#> # Fitting a cox model using regular estimation, however we will not keep it.
-#> # this is used more as an object place holder.
-#> coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ .,
-#>                           data = cleanCoxData, x = TRUE)
-#> 
-#> # The coefficients of this object will be replaced with the estimates from the
-#> # original coxNet. Doing so makes it so that everything is invalid aside from
-#> # the coefficients. In this case, all we need to estimate the absolute risk is
-#> # the coefficients. Std. error would be incorrect here, if we were to draw error
-#> # bars.
-#> coxNet_coefnames <- names(coxNet$coefficients)
-#> coxNet$coefficients <- nonzero_coef_cox@x
-#> names(coxNet$coefficients) <- coxNet_coefnames
+# Create survival object for fitting Coxnet
+u <- with(train, survival::Surv(time = d.time, event = death))
+coxNet <- glmnet::cv.glmnet(x = x, y = u, family = "cox", alpha = 1, standardize = TRUE)
+
+# Taking the coefficient estimates for later use
+nonzero_covariate_cox <- predict(coxNet, type = "nonzero", s = "lambda.1se")
+nonzero_coef_cox <- coef(coxNet, s = "lambda.1se")
+# Creating a new dataset that only contains the covariates chosen through glmnet
+cleanCoxData <- as.data.frame(cbind(y, x[, nonzero_covariate_cox$X1]))
+
+# Fitting a cox model using regular estimation, however we will not keep it.
+# this is used more as an object place holder.
+coxNet <- survival::coxph(Surv(time = d.time, event = death) ~ ., 
+                          data = cleanCoxData, x = TRUE)
+
+# The coefficients of this object will be replaced with the estimates from the
+# original coxNet. Doing so makes it so that everything is invalid aside from
+# the coefficients. In this case, all we need to estimate the absolute risk is
+# the coefficients. Std. error would be incorrect here, if we were to draw error
+# bars.
+coxNet_coefnames <- names(coxNet$coefficients)
+coxNet$coefficients <- nonzero_coef_cox@x
+names(coxNet$coefficients) <- coxNet_coefnames
 
 
 ## ----coefplots, echo=FALSE, eval=eval_cs3, fig.cap="\\label{fig:cs3lolliPlot} Coefficient estimates from the Cox model (Cox), penalized Cox model using the \\pkg{glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\\ell_1$ penalty."----
-#> library(dotwhisker)
-#> library(broom)
-#> library(dplyr)
-#> 
-#> # extract coefficients for lollipop plot
-#> estimatescoxNet <- data.table::setDT(as.data.frame(coef(coxNet)),
-#>                                      keep.rownames = TRUE)
-#> 
-#> estimatescoxNet$Model <- "Pen. Cox"
-#> colnames(estimatescoxNet) <- c("term", "estimate", "model")
-#> 
-#> estimatescb <- data.table::setDT(as.data.frame(coef(pen_cb)[-c(1, 2), 1]),
-#>                                  keep.rownames = TRUE)
-#> estimatescb$Model <- "Pen. CB"
-#> colnames(estimatescb) <- c("term", "estimate", "model")
-#> 
-#> estimatescox <- data.table::setDT(as.data.frame(coef(cox)),
-#>                                   keep.rownames = TRUE)
-#> cox$coefficients[which(is.na(cox$coefficients))] <- 0
-#> estimatescox$Model <- "Cox"
-#> colnames(estimatescox) <- c("term", "estimate", "model")
-#> 
-#> # Clean up the data and the variable names
-#> lolliplotDots <- rbind(estimatescox, estimatescoxNet, estimatescb)
-#> lolliplotDots$conf.low <- lolliplotDots$estimate
-#> lolliplotDots$conf.high <- lolliplotDots$estimate
-#> lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
-#> lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
-#> lolliplotDots$term <- gsub("\`", "", as.character(lolliplotDots$term))
-#> 
-#> lolliplotDots[which(lolliplotDots$estimate == 0), c(2, 4, 5)] <- NA
-#> unChosen <- unique(lolliplotDots[which(is.na(lolliplotDots$estimate)), 1])
-#> 
-#> lolliplotDots[which(lolliplotDots$term %in% unChosen$term), c(2, 4, 5)] <- NA
-#> 
-#> lolliplotDots <- lolliplotDots[-which(is.na(lolliplotDots$estimate)), ]
-#> dwplot(lolliplotDots) +
-#>   theme(
-#>     axis.text.y = element_text(size = 11, angle = 0, hjust = 1, vjust = 0),
-#>     strip.text.x = element_blank(),
-#>     strip.background = element_rect(colour = "white", fill = "white"),
-#>     legend.position = c(.855, 0.15), legend.text = element_text(size = 11)
-#>   ) +
-#>   paper_gg_theme +
-#>   labs(color = "Models") +
-#>   scale_color_manual(values = q4)
+library(dotwhisker)
+library(broom)
+library(dplyr)
+
+# extract coefficients for lollipop plot
+estimatescoxNet <- data.table::setDT(as.data.frame(coef(coxNet)), 
+                                     keep.rownames = TRUE)
+
+estimatescoxNet$Model <- "Pen. Cox"
+colnames(estimatescoxNet) <- c("term", "estimate", "model")
+
+estimatescb <- data.table::setDT(as.data.frame(coef(pen_cb)[-c(1, 2), 1]),
+                                 keep.rownames = TRUE)
+estimatescb$Model <- "Pen. CB"
+colnames(estimatescb) <- c("term", "estimate", "model")
+
+estimatescox <- data.table::setDT(as.data.frame(coef(cox)), 
+                                  keep.rownames = TRUE)
+cox$coefficients[which(is.na(cox$coefficients))] <- 0
+estimatescox$Model <- "Cox"
+colnames(estimatescox) <- c("term", "estimate", "model")
+
+# Clean up the data and the variable names
+lolliplotDots <- rbind(estimatescox, estimatescoxNet, estimatescb)
+lolliplotDots$conf.low <- lolliplotDots$estimate
+lolliplotDots$conf.high <- lolliplotDots$estimate
+lolliplotDots$conf.high[lolliplotDots$estimate < 0] <- 0
+lolliplotDots$conf.low[lolliplotDots$estimate > 0] <- 0
+lolliplotDots$term <- gsub("\`", "", as.character(lolliplotDots$term))
+
+lolliplotDots[which(lolliplotDots$estimate == 0), c(2, 4, 5)] <- NA
+unChosen <- unique(lolliplotDots[which(is.na(lolliplotDots$estimate)), 1])
+
+lolliplotDots[which(lolliplotDots$term %in% unChosen$term), c(2, 4, 5)] <- NA
+
+lolliplotDots <- lolliplotDots[-which(is.na(lolliplotDots$estimate)), ]
+dwplot(lolliplotDots) +
+  theme(
+    axis.text.y = element_text(size = 11, angle = 0, hjust = 1, vjust = 0),
+    strip.text.x = element_blank(),
+    strip.background = element_rect(colour = "white", fill = "white"),
+    legend.position = c(.855, 0.15), legend.text = element_text(size = 11)
+  ) +
+  paper_gg_theme +  
+  labs(color = "Models") +
+  scale_color_manual(values = q4)
 
 
 ## ----support_abs, eval=eval_cs3, echo=FALSE-----------------------------------
-#> # Absolute Risks
-#> newx <- model.matrix(death ~ . - d.time - aps - sps,
-#>                      data = test)[, -c(1)]
-#> times <- sort(unique(test$d.time))
-#> # 1. Unpenalized Cox
-#> abcox <- survival::survfit(cox, newdata = test)
-#> 
-#> # 2. Penalized Cox
-#> abcoxNet <- survival::survfit(coxNet, type = "breslow",
-#>                               newdata = as.data.frame(newx[, nonzero_covariate_cox$X1]))
-#> 
-#> # 3. Penalized Case-base
-#> abpen_cb <- casebase::absoluteRisk(pen_cb,
-#>   time = times,
-#>   newdata = newx,
-#>   s = "lambda.1se",
-#>   method = "numerical"
-#> )
-#> 
-#> # 4. Kaplan-Meier
-#> KM <- survival::coxph(Surv(time = d.time, event = death) ~ 1, data = test,
-#>                       x = TRUE)
-#> abKM <- survival::survfit(KM)
-#> 
-#> # Combine absolute risk estimates
-#> data_absRisk <- bind_rows(
-#>   data.frame(Time = abcox$time, Prob = 1 - rowMeans(abcox$surv),
-#>              Model = "Cox"),
-#>   data.frame(Time = abcoxNet$time, Prob = 1 - rowMeans(abcoxNet$surv),
-#>              Model = "Pen. Cox"),
-#>   data.frame(Time = abpen_cb[, 1], Prob = rowMeans(abpen_cb[, -c(1)]),
-#>              Model = "Pen. CB"),
-#>   data.frame(Time = abKM$time, Prob = 1 - abKM$surv,
-#>              Model = "K-M")
-#> ) %>%
-#>   mutate(Model = factor(Model, levels = names(q4)))
+# Absolute Risks
+newx <- model.matrix(death ~ . - d.time - aps - sps,
+                     data = test)[, -c(1)]
+times <- sort(unique(test$d.time))
+# 1. Unpenalized Cox
+abcox <- survival::survfit(cox, newdata = test)
+
+# 2. Penalized Cox
+abcoxNet <- survival::survfit(coxNet, type = "breslow", 
+                              newdata = as.data.frame(newx[, nonzero_covariate_cox$X1]))
+
+# 3. Penalized Case-base
+abpen_cb <- casebase::absoluteRisk(pen_cb,
+  time = times,
+  newdata = newx,
+  s = "lambda.1se",
+  method = "numerical"
+)
+
+# 4. Kaplan-Meier
+KM <- survival::coxph(Surv(time = d.time, event = death) ~ 1, data = test,
+                      x = TRUE)
+abKM <- survival::survfit(KM)
+
+# Combine absolute risk estimates
+data_absRisk <- bind_rows(
+  data.frame(Time = abcox$time, Prob = 1 - rowMeans(abcox$surv),
+             Model = "Cox"),
+  data.frame(Time = abcoxNet$time, Prob = 1 - rowMeans(abcoxNet$surv),
+             Model = "Pen. Cox"),
+  data.frame(Time = abpen_cb[, 1], Prob = rowMeans(abpen_cb[, -c(1)]),
+             Model = "Pen. CB"),
+  data.frame(Time = abKM$time, Prob = 1 - abKM$surv,
+             Model = "K-M")
+) %>% 
+  mutate(Model = factor(Model, levels = names(q4)))
 
 
 ## ----absRiskPlot, echo=FALSE, eval=eval_cs3-----------------------------------
-#> reg_ci <- ggplot(data_absRisk, aes(Time, Prob)) +
-#>   geom_line(aes(colour = Model)) +
-#>   labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
-#>   scale_color_manual(values = q4) +
-#>   expand_limits(y = 1) +
-#>   paper_gg_theme +
-#>   scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) +
-#>   scale_y_continuous(labels = scaleFUNy, n.breaks = 9)
+reg_ci <- ggplot(data_absRisk, aes(Time, Prob)) +
+  geom_line(aes(colour = Model)) +
+  labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
+  scale_color_manual(values = q4) + 
+  expand_limits(y = 1) +
+  paper_gg_theme + 
+  scale_x_continuous(labels = scaleFUNx, breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 9)
 
 
 ## ----eval = eval_cs3, echo = FALSE, warning = FALSE---------------------------
-#> # We need this chunk until this method reaches the CRAN version of riskRegression
-#> predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
-#>   if (!is.null(object$matrix.fit)) {
-#>     #get all covariates excluding intercept and time
-#>     coVars=colnames(object$originalData$x)
-#>     #coVars is used in lines 44 and 50
-#>     newdata=data.matrix(drop(subset(newdata, select=coVars)))
-#>   }
-#> 
-#>   # if (missing(cause)) stop("Argument cause should be the event type for which we predict the absolute risk.")
-#>   # the output of absoluteRisk is an array with dimension depending on the length of the requested times:
-#>   # case 1: the number of time points is 1
-#>   #         dim(array) =  (length(time), NROW(newdata), number of causes in the data)
-#>   if (length(times) == 1) {
-#>     a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
-#>     p <- matrix(a, ncol = 1)
-#>   } else {
-#>     # case 2 a) zero is included in the number of time points
-#>     if (0 %in% times) {
-#>       # dim(array) =  (length(time)+1, NROW(newdata)+1, number of causes in the data)
-#>       a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
-#>       p <- t(a)
-#>     } else {
-#>       # case 2 b) zero is not included in the number of time points (but the absoluteRisk function adds it)
-#>       a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
-#>       ### we need to invert the plot because, by default, we get cumulative incidence
-#>       #a[, -c(1)] <- 1 - a[, -c(1)]
-#>       ### we remove time 0 for everyone, and remove the time column
-#>       a <- a[-c(1), -c(1)] ### a[-c(1), ] to keep times column, but remove time 0 probabilities
-#>       # now we transpose the matrix because in riskRegression we work with number of
-#>       # observations in rows and time points in columns
-#>       p <- t(a)
-#>     }
-#>   }
-#>   if (NROW(p) != NROW(newdata) || NCOL(p) != length(times)) {
-#>     stop(paste("\nPrediction matrix has wrong dimensions:\nRequested newdata x times: ",
-#>                NROW(newdata), " x ", length(times), "\nProvided prediction matrix: ",
-#>                NROW(p), " x ", NCOL(p), "\n\n", sep = ""))
-#>   }
-#>   p
-#> }
+# We need this chunk until this method reaches the CRAN version of riskRegression
+predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
+  if (!is.null(object$matrix.fit)) {
+    #get all covariates excluding intercept and time
+    coVars=colnames(object$originalData$x)
+    #coVars is used in lines 44 and 50
+    newdata=data.matrix(drop(subset(newdata, select=coVars)))
+  }
+  
+  # if (missing(cause)) stop("Argument cause should be the event type for which we predict the absolute risk.")
+  # the output of absoluteRisk is an array with dimension depending on the length of the requested times:
+  # case 1: the number of time points is 1
+  #         dim(array) =  (length(time), NROW(newdata), number of causes in the data)
+  if (length(times) == 1) {
+    a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
+    p <- matrix(a, ncol = 1)
+  } else {
+    # case 2 a) zero is included in the number of time points
+    if (0 %in% times) {
+      # dim(array) =  (length(time)+1, NROW(newdata)+1, number of causes in the data)
+      a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
+      p <- t(a)
+    } else {
+      # case 2 b) zero is not included in the number of time points (but the absoluteRisk function adds it)
+      a <- casebase::absoluteRisk(object, newdata = newdata, time = times)
+      ### we need to invert the plot because, by default, we get cumulative incidence
+      #a[, -c(1)] <- 1 - a[, -c(1)]
+      ### we remove time 0 for everyone, and remove the time column
+      a <- a[-c(1), -c(1)] ### a[-c(1), ] to keep times column, but remove time 0 probabilities
+      # now we transpose the matrix because in riskRegression we work with number of
+      # observations in rows and time points in columns
+      p <- t(a)
+    }
+  }
+  if (NROW(p) != NROW(newdata) || NCOL(p) != length(times)) {
+    stop(paste("\nPrediction matrix has wrong dimensions:\nRequested newdata x times: ", 
+               NROW(newdata), " x ", length(times), "\nProvided prediction matrix: ", 
+               NROW(p), " x ", NCOL(p), "\n\n", sep = ""))
+  }
+  p
+}
 
 
 ## ----support_Brier, eval=eval_cs3, echo=FALSE---------------------------------
-#> # Brier score
-#> # 1. Unpenalized models
-#> # First fix NA coefficients, then compute Brier score
-#> brierCoxKM <- Score(list("Cox" = cox,
-#>                          "K-M" = KM), data = test,
-#>                    formula = Hist(d.time, death != 0) ~ 1, summary = NULL,
-#>                    se.fit = FALSE, metrics = "brier", contrasts = FALSE,
-#>                    times = times)
-#> 
-#> # 2. Penalized models
-#> brierPenalized <- Score(list("Pen. Cox" = coxNet,
-#>                              "Pen. CB" = pen_cb),
-#>                         data = cbind(subset(test, select = c(d.time, death)),
-#>                                      as.data.frame(newx)),
-#>                         formula = Hist(d.time, death != 0) ~ 1, summary = NULL,
-#>                         se.fit = FALSE, metrics = "brier", contrasts = FALSE,
-#>                         times = times)
+# Brier score
+# 1. Unpenalized models
+# First fix NA coefficients, then compute Brier score
+brierCoxKM <- Score(list("Cox" = cox,
+                         "K-M" = KM), data = test,
+                   formula = Hist(d.time, death != 0) ~ 1, summary = NULL,
+                   se.fit = FALSE, metrics = "brier", contrasts = FALSE, 
+                   times = times)
+
+# 2. Penalized models
+brierPenalized <- Score(list("Pen. Cox" = coxNet, 
+                             "Pen. CB" = pen_cb),
+                        data = cbind(subset(test, select = c(d.time, death)),
+                                     as.data.frame(newx)),
+                        formula = Hist(d.time, death != 0) ~ 1, summary = NULL, 
+                        se.fit = FALSE, metrics = "brier", contrasts = FALSE, 
+                        times = times)
 
 
 ## ----riskregressionBrier, echo = FALSE, eval = eval_cs3, fig.cap="\\label{fig:cs3FinalBrier} Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.", warning = FALSE----
-#> # Combine scores
-#> data_brier <- bind_rows(
-#>   brierCoxKM$Brier$score %>%
-#>     mutate(model = as.character(model)) %>%
-#>     filter(model != "Null model"),
-#>   brierPenalized$Brier$score %>%
-#>     mutate(model = as.character(model)) %>%
-#>     filter(model != "Null model")
-#>   ) %>%
-#>   mutate(model = factor(model, levels = c("Cox", "Pen. Cox", "Pen. CB", "K-M")))
-#> 
-#> reg_brier <- ggplot(data = data_brier, aes(x = times, y = Brier, col = model)) +
-#>   geom_line() +
-#>   xlab("Follow-up time (years)") +
-#>   ylab("Brier score") +
-#>   labs(color = "Models") +
-#>   paper_gg_theme +
-#>   scale_color_manual(values = q4) +
-#>   scale_x_continuous(labels = scaleFUNx,
-#>                      breaks = round(seq(0, 5, by = 1))) +
-#>   scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
-#> 
-#> # Combine both plots using cowplot
-#> plot_row_reg <- cowplot::plot_grid(reg_ci + theme(legend.position = 'none'),
-#>                                    reg_brier + theme(legend.position = 'none'),
-#>                                    labels = c("A", "B"))
-#> legend_reg <- cowplot::get_legend(
-#>   # create some space to the left of the legend
-#>   reg_ci + theme(legend.box.margin = margin(0, 0, 0, 12))
-#> )
-#> 
-#> cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
+# Combine scores
+data_brier <- bind_rows(
+  brierCoxKM$Brier$score %>% 
+    mutate(model = as.character(model)) %>% 
+    filter(model != "Null model"),
+  brierPenalized$Brier$score %>% 
+    mutate(model = as.character(model)) %>% 
+    filter(model != "Null model")
+  ) %>% 
+  mutate(model = factor(model, levels = c("Cox", "Pen. Cox", "Pen. CB", "K-M")))
+
+reg_brier <- ggplot(data = data_brier, aes(x = times, y = Brier, col = model)) +
+  geom_line() +
+  xlab("Follow-up time (years)") +
+  ylab("Brier score") +
+  labs(color = "Models") +
+  paper_gg_theme +  
+  scale_color_manual(values = q4) + 
+  scale_x_continuous(labels = scaleFUNx, 
+                     breaks = round(seq(0, 5, by = 1))) + 
+  scale_y_continuous(labels = scaleFUNy, n.breaks = 8)
+
+# Combine both plots using cowplot
+plot_row_reg <- cowplot::plot_grid(reg_ci + theme(legend.position = 'none'),
+                                   reg_brier + theme(legend.position = 'none'),
+                                   labels = c("A", "B"))
+legend_reg <- cowplot::get_legend(
+  # create some space to the left of the legend
+  reg_ci + theme(legend.box.margin = margin(0, 0, 0, 12))
+)
+
+cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 
 
 ## ----colophon, eval = eval_colophon, cache = FALSE----------------------------
