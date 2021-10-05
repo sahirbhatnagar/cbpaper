@@ -113,6 +113,20 @@ names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 # Introduction
 
+In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked how he would model a set of censored survival data, to which he responded: "I think I would normally want to tackle problems parametrically ... and if you want to do things like predict the outcome for a particular patient, it's much more convenient to do that parametrically" [@reid1994conversation]. Indeed, the most relevant quantity is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances. Unfortunately, the most reported metric from a Cox model is the (potentially time-dependent) hazard ratio (HR), which ignores the duration of follow-up or is subject to selection bias [@hernan2010hazards]. The covariate adjusted survival curve overcomes these limitations, and is arguably a more important summary measure to report than the HR. Stepwise survival curves can be computed with the Cox model but require a second step to separately estimate the baseline hazard [@breslow1972discussion].  
+
+In this article, we present the \CRANpkg{casebase} R package [@casebase-package] for fitting fully parametric hazard models and covariate adjusted survival curves using the familiar interface of the \code{glm} function. Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the survival function estimates also vary smoothly over time.
+
+Other packages can do this. 
+
+
+
+
+
+the familiar interface of the \code{glm} function. It also provides tools for variable selection, competing-risk analysis, and dealing with time-dependent exposures. In addition, we provide functions for exploratory data analysis and visualizing the estimated quantities. 
+
+
+
 Survival analysis and the comparison of event rates has been greatly influenced over the last 50 years by the partial likelihood approach of the Cox proportional hazard model [@cox1972regression]. This approach provides a flexible way of assessing the influence of covariates on the hazard function, without the need to specify a parametric survival model. This flexibility comes at the cost of decoupling the baseline hazard from the effect of the covariates. To recover the whole survival curve---or the cumulative incidence function (CIF)---we then need to separately estimate the baseline hazard [@breslow1972discussion]. This in turn leads to stepwise estimates of the survival function that can be difficult to interpret.
 
 From the perspective of clinicians and their patients, the most relevant quantity is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances, and not the hazard ratio between a treatment and control group. Therefore, to make sound clinical decisions, it is important to accurately estimate the *full* hazard function, which can subsequently be used to estimate the CIF. Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the CIF and the survival function estimates also vary smoothly over time.
