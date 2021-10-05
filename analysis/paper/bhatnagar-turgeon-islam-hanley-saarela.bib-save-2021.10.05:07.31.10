@@ -1,48 +1,5 @@
 
 
-@article{reid1994conversation,
-  author =        {Reid, Nancy},
-  journal =       {Statistical Science},
-  number =        {3},
-  pages =         {439--455},
-  publisher =     {JSTOR},
-  title =         {A conversation with sir david cox},
-  volume =        {9},
-  year =          {1994},
-}
-
-@article{hernan2010hazards,
-  author =        {Hern{\'a}n, Miguel A},
-  journal =       {Epidemiology (Cambridge, Mass.)},
-  number =        {1},
-  pages =         {13},
-  publisher =     {NIH Public Access},
-  title =         {The hazards of hazard ratios},
-  volume =        {21},
-  year =          {2010},
-}
-
-@article{breslow1972discussion,
-  author =        {Breslow, NE},
-  journal =       {Journal of the Royal Statistical Society: Series B
-                   (Methodological)},
-  pages =         {187--220},
-  title =         {Discussion of the paper by {Dr Cox} cited below},
-  volume =        {34},
-  year =          {1972},
-}
-
-@manual{casebase-package,
-  author =        {Sahir Bhatnagar and Maxime Turgeon and Jesse Islam and
-                   Olli Saarela and James Hanley},
-  note =          {R package version 0.9.1},
-  title =         {casebase: Fitting Flexible Smooth-in-Time Hazards and
-                   Risk Functions via Logistic and Multinomial
-                   Regression},
-  year =          {2021},
-  url =           {https://CRAN.R-project.org/package=casebase},
-}
-
 @article{cox1972regression,
   author =        {Cox, David R},
   journal =       {Journal of the Royal Statistical Society: Series B
@@ -55,6 +12,16 @@
   year =          {1972},
 }
 
+@article{breslow1972discussion,
+  author =        {Breslow, NE},
+  journal =       {Journal of the Royal Statistical Society: Series B
+                   (Methodological)},
+  pages =         {187--220},
+  title =         {Discussion of the paper by {Dr Cox} cited below},
+  volume =        {34},
+  year =          {1972},
+}
+
 @article{hanley2009fitting,
   author =        {Hanley, James A and Miettinen, Olli S},
   journal =       {The International Journal of Biostatistics},
@@ -63,6 +30,17 @@
                    via logistic regression},
   volume =        {5},
   year =          {2009},
+}
+
+@manual{casebase-package,
+  author =        {Sahir Bhatnagar and Maxime Turgeon and Jesse Islam and
+                   Olli Saarela and James Hanley},
+  note =          {R package version 0.9.1},
+  title =         {casebase: Fitting Flexible Smooth-in-Time Hazards and
+                   Risk Functions via Logistic and Multinomial
+                   Regression},
+  year =          {2021},
+  url =           {https://CRAN.R-project.org/package=casebase},
 }
 
 @book{aalen2008survival,
@@ -411,29 +389,24 @@
   year =          {1977},
 }
 
-
-@article{efron1988logistic,
-  title={Logistic regression, survival analysis, and the Kaplan-Meier curve},
-  author={Efron, Bradley},
-  journal={Journal of the American statistical Association},
-  volume={83},
-  number={402},
-  pages={414--425},
-  year={1988},
-  publisher={Taylor \& Francis}
-}
-
-@article{arjas1987logistic,
-  title={A logistic regression model for hazard: asymptotic results},
-  author={Arjas, Elja and Haara, Pentti},
-  journal={Scandinavian Journal of Statistics},
-  pages={1--18},
-  year={1987},
+@article{reid1994conversation,
+  title={A conversation with sir david cox},
+  author={Reid, Nancy},
+  journal={Statistical Science},
+  volume={9},
+  number={3},
+  pages={439--455},
+  year={1994},
   publisher={JSTOR}
 }
 
-@article{copenhagen2012needs,
-  title={Who needs the Cox model anyway},
-  author={Copenhagen, Bendix Carstensen Steno Diabetes Center},
-  url={http://bendixcarstensen.com/WntCma.pdf}
+@article{hernan2010hazards,
+  title={The hazards of hazard ratios},
+  author={Hern{\'a}n, Miguel A},
+  journal={Epidemiology (Cambridge, Mass.)},
+  volume={21},
+  number={1},
+  pages={13},
+  year={2010},
+  publisher={NIH Public Access}
 }

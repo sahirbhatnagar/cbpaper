@@ -1,7 +1,8 @@
 % !TeX root = RJwrapper.tex
-\title{\pkg{casebase}: An Alternative Framework For Survival Analysis and
-Comparison of Event Rates}
-\author{by Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A. Hanley, and Olli Saarela}
+\title{\pkg{casebase}: An Alternative Framework For Survival Analysis
+and Comparison of Event Rates}
+\author{by Sahir Rai Bhatnagar*, Maxime Turgeon*, Jesse Islam, James A.
+Hanley, and Olli Saarela}
 
 \maketitle
 
@@ -28,6 +29,37 @@ illustrate all these features through three different case studies.\\
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
+
+In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked
+how he would model a set of censored survival data, to which he
+responded: ``I think I would normally want to tackle problems
+parametrically \ldots{} and if you want to do things like predict the
+outcome for a particular patient, it's much more convenient to do that
+parametrically'' \citep{reid1994conversation}. Indeed, the most relevant
+quantity in a clinical setting is often the 5- or 10-year risk of
+experiencing a certain event given the patient's particular
+circumstances. Unfortunately, the most reported metric from a Cox model
+is the (potentially time-dependent) hazard ratio (HR), which ignores the
+duration of follow-up or is subject to selection bias
+\citep{hernan2010hazards}. The covariate adjusted survival curve
+overcomes these limitations, and is arguably a more important summary
+measure to report than the HR. Stepwise survival curves can be computed
+with the Cox model but require a second step to separately estimate the
+baseline hazard \citep{breslow1972discussion}.
+
+In this article, we present the \CRANpkg{casebase} R package
+\citep{casebase-package} for fitting fully parametric hazard models and
+covariate adjusted survival curves using the familiar interface of the
+\code{glm} function. Using a parametric estimator of the hazard function
+leads to a smooth function of time; as a consequence, the survival
+function estimates also vary smoothly over time.
+
+Other packages can do this.
+
+the familiar interface of the \code{glm} function. It also provides
+tools for variable selection, competing-risk analysis, and dealing with
+time-dependent exposures. In addition, we provide functions for
+exploratory data analysis and visualizing the estimated quantities.
 
 Survival analysis and the comparison of event rates has been greatly
 influenced over the last 50 years by the partial likelihood approach of
@@ -973,7 +1005,7 @@ functionality, we use the dataset from the Study to Understand Prognoses
 Preferences Outcomes and Risks of Treatment (SUPPORT)
 \citep{knaus1995support}.\footnote{The original data is available online from the Department of Biostatistics at Vanderbilt University: \url{https://biostat.app.vumc.org/wiki/Main/SupportDesc}}
 The SUPPORT dataset tracks death in five American hospitals within
-individuals who are considered seriously ill. The cleaned and imputed
+individuals who are considered seriously ill.~The cleaned and imputed
 data consists of 9104 observations and 30 variables, and it is available
 as part of the \pkg{casebase} package. In the comparisons below, all
 covariates except \code{sps} and \code{aps} were used. These two
@@ -1179,7 +1211,7 @@ the context of the partial likelihood underlying case-base sampling. The
 resulting diagnostic tools could then be integrated in this package.
 Also, we are interested in extending case-base sampling to account for
 interval censoring. This type of censoring is very common in
-longitudinal studies, and many packages (e.g. \pkg{SmoothHazard},
+longitudinal studies, and many packages (e.g.~\pkg{SmoothHazard},
 \pkg{survival} and \pkg{rstpm2}) provide functions to account for it.
 Again, we hope to include any resulting methodology as part of this
 package.
@@ -1273,4 +1305,3 @@ Toronto, Ontario M5T 3M7, Canada\\
 %
 \\\email{olli.saarela@utoronto.ca}
 }
-

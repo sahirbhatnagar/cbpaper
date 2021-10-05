@@ -113,7 +113,24 @@ names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 # Introduction
 
-In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked how he would model a set of censored survival data, to which he responded: "I think I would normally want to tackle problems parametrically ... and if you want to do things like predict the outcome for a particular patient, it's much more convenient to do that parametrically" [@reid1994conversation]. Indeed, the most relevant quantity is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances. Unfortunately, the most reported metric from a Cox model is the (potentially time-dependent) hazard ratio (HR), which ignores the duration of follow-up or is subject to selection bias [@hernan2010hazards]. The covariate adjusted survival curve overcomes these limitations, and is arguably a more important summary measure to report than the HR. Stepwise survival curves can be computed with the Cox model but require a second step to separately estimate the baseline hazard [@breslow1972discussion].  
+The semiparametric Cox model has become the default approach to survival analysis even though Cox himself later suggested he would prefer to model the hazard function directly. In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked how he would model a set of censored survival data, to which he responded: "I think I would normally want to tackle problems parametrically ... and if you want to do things like predict the outcome for a particular patient, it's much more convenient to do that parametrically" [@reid1994conversation]. Indeed, the most relevant quantity in a clinical setting is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances. Unfortunately, the most reported metric from a Cox model is the (potentially time-dependent) hazard ratio (HR), which ignores the duration of follow-up or is subject to selection bias [@hernan2010hazards]. The covariate adjusted survival curve overcomes these limitations, and is arguably a more important summary measure to report than the HR. While stepwise survival curves can be computed with the Cox model, they require a second step to separately estimate the baseline hazard [@breslow1972discussion].  
+
+[-@arjas1987logistic] and [-@efron1988logistic] were some of the first authors to pursue approaches that made the fitting of smooth hazard functions much more transparent and intuitive through generalized linear models. They focused on categorizing the time axis (e.g days) and treated each patient-day as a Bernoulli random variable with probability equal to the discrete hazard rate. Rather than discretizing time, Hanley & Miettinen [-@hanley2009fitting] selected a discrete set of person-time coordinates (`person-moments') in continuous time from all observed follow-up experience constituting the study base to obtain the logistic form likelihood expression. More specifically, all person-moments when the event of interest occurred are selected as the case series, complemented by a randomly sampled base series of person-moments serving as controls.
+
+
+
+[-@copenhagen2012needs] has an R package that uses as the slices of person time as the units of analysis. Can keep subdividing them, but in the limit the file becomes infinite. Cite estimation issue from IRLS in Kalbfleish and Prentice.
+
+Just like Efron, we can use the well-understood logistic regression for everything. We are not saying it is better, just an attractive alternative (and a general framework). One that with our package, is well within the reach of more endusers.
+
+We also bring hazard functions out of the closet. Where they tend to be kept by the Cox Model.
+
+
+With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@hanley2009fitting] proposed a general framework for estimating fully parametric hazard models via logistic regression. 
+
+
+Their main idea is simple: comparing person-moments when the event of interest occurred with moments when patients were at risk. Their approach handles censored data effortlessly and provides users familiar with generalized linear models a natural way of fitting parametric survival models. Moreover, their framework is very flexible: general functions of time can be estimated (e.g. using splines or general additive models), and hence these models retain some of the flexibility of Cox's partial likelihood approach. And since the unit of analysis is a person moment, time-varying covariates can also easily be included in this framework.
+
 
 In this article, we present the \CRANpkg{casebase} R package [@casebase-package] for fitting fully parametric hazard models and covariate adjusted survival curves using the familiar interface of the \code{glm} function. Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the survival function estimates also vary smoothly over time.
 
