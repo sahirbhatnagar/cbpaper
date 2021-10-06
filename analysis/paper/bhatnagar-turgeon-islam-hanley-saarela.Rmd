@@ -113,48 +113,75 @@ names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 # Introduction
 
-The semiparametric Cox model has become the default approach to survival analysis even though Cox himself later suggested he would prefer to model the hazard function directly. In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked how he would model a set of censored survival data, to which he responded: "I think I would normally want to tackle problems parametrically ... and if you want to do things like predict the outcome for a particular patient, it's much more convenient to do that parametrically" [@reid1994conversation]. Indeed, the most relevant quantity in a clinical setting is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances. Unfortunately, the most reported metric from a Cox model is the (potentially time-dependent) hazard ratio (HR), which ignores the duration of follow-up or is subject to selection bias [@hernan2010hazards]. The covariate adjusted survival curve overcomes these limitations, and is arguably a more important summary measure to report than the HR. While stepwise survival curves can be computed with the Cox model, they require a second step to separately estimate the baseline hazard [@breslow1972discussion].  
+The semiparametric Cox model has become the default approach to survival analysis 
+even though Cox himself later suggested he would prefer to model the hazard function 
+directly. In a 1994 interview with Professor Nancy Reid, Sir David Cox was asked 
+how he would model a set of censored survival data, to which he responded: "I 
+think I would normally want to tackle problems parametrically ... and if you want 
+to do things like predict the outcome for a particular patient, it's much more 
+convenient to do that parametrically" [@reid1994conversation]. Indeed, the most 
+relevant quantity in a clinical setting is often the 5- or 10-year risk of 
+experiencing a certain event given the patient's particular circumstances. 
+Unfortunately, the most reported metric from a Cox model is the (potentially 
+time-dependent) hazard ratio (HR), which ignores the duration of follow-up or 
+is subject to selection bias [@hernan2010hazards]. The covariate adjusted 
+survival curve overcomes these limitations, and is arguably a more important 
+summary measure to report than the HR. While stepwise survival curves can be 
+computed with the Cox model, they require a second step to separately estimate 
+the baseline hazard [@breslow1972discussion].  
 
-[-@arjas1987logistic] and [-@efron1988logistic] were some of the first authors to pursue approaches that made the fitting of smooth hazard functions much more transparent and intuitive through generalized linear models. They focused on categorizing the time axis (e.g days) and treated each patient-day as a Bernoulli random variable with probability equal to the discrete hazard rate. Rather than discretizing time, Hanley & Miettinen [-@hanley2009fitting] selected a discrete set of person-time coordinates (`person-moments') in continuous time from all observed follow-up experience constituting the study base to obtain the logistic form likelihood expression. More specifically, all person-moments when the event of interest occurred are selected as the case series, complemented by a randomly sampled base series of person-moments serving as controls.
+Several authors have since pursued fully parametric approaches that made the 
+fitting of smooth hazard functions much more transparent and intuitive through 
+generalized linear models. The key feature of these procedures is splitting the 
+time axis into discrete intervals. [@whitehead1980fitting] showed the 
+equivalence between a Cox model and a Poisson regression with a parameter for 
+each event time. [@copenhagen2012needs] provides a nice exposition of this 
+equivalence with a real data example and supporting R code for computing 
+standard errors. [@arjas1987logistic] and [@efron1988logistic] treated each 
+patient-day as a Bernoulli random variable with probability equal to the 
+discrete hazard rate. A potential issue with these approaches is that the 
+number of time bins need to be chosen by the data analyst. A fine grouping 
+of times may result in few (or none) events per interval, which then leads 
+to instability in the Newton-Raphson procedure for estimation 
+[@kalbfleisch2011statistical]. A coarse grouping could potentially mask 
+nonlinear trends in the hazard function. 
 
+Rather than discretizing time, Hanley & Miettinen [-@hanley2009fitting] 
+selected a discrete set of person-time coordinates (`person-moments') in 
+continuous time from all observed follow-up experience constituting the 
+study base to obtain the logistic form likelihood expression for the hazard 
+function. More specifically, all person-moments when the event of interest 
+occurred are selected as the case series, complemented by a randomly sampled 
+base series of person-moments serving as controls. This approach allows 
+flexible modeling of the hazard function by including time as a covariate 
+(e.g. using splines or general additive models). Furthermore, time-dependent 
+covariates can be modeled through interactions with time. In short, Hanley & 
+Miettinen [-@hanley2009fitting] use the well-understood logistic regression 
+for directly modeling the hazard function, but do not require an arbitrary 
+choice of splitting time. 
 
+In this article, we present the \CRANpkg{casebase} R package [@casebase-package] 
+which implements the Hanley & Miettinen [-@hanley2009fitting] approach for 
+fitting fully parametric hazard models and covariate adjusted survival curves 
+using the familiar interface of the \code{glm} function. Our implementation 
+allows for straightforward extensions to other models such as penalized 
+regression for variable selection and competing-risk analysis. In addition, 
+we provide functions for exploratory data analysis and visualizing the estimated 
+quantities such as the hazard function, survival curve and its standard errors. 
+The ultimate goal of our package is to make fitting flexible hazards accessible 
+to more endusers with the hopes that they will favor reporting absolute risks 
+over hazard ratios. 
 
-[-@copenhagen2012needs] has an R package that uses as the slices of person time as the units of analysis. Can keep subdividing them, but in the limit the file becomes infinite. Cite estimation issue from IRLS in Kalbfleish and Prentice.
-
-Just like Efron, we can use the well-understood logistic regression for everything. We are not saying it is better, just an attractive alternative (and a general framework). One that with our package, is well within the reach of more endusers.
-
-We also bring hazard functions out of the closet. Where they tend to be kept by the Cox Model.
-
-
-With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@hanley2009fitting] proposed a general framework for estimating fully parametric hazard models via logistic regression. 
-
-
-Their main idea is simple: comparing person-moments when the event of interest occurred with moments when patients were at risk. Their approach handles censored data effortlessly and provides users familiar with generalized linear models a natural way of fitting parametric survival models. Moreover, their framework is very flexible: general functions of time can be estimated (e.g. using splines or general additive models), and hence these models retain some of the flexibility of Cox's partial likelihood approach. And since the unit of analysis is a person moment, time-varying covariates can also easily be included in this framework.
-
-
-In this article, we present the \CRANpkg{casebase} R package [@casebase-package] for fitting fully parametric hazard models and covariate adjusted survival curves using the familiar interface of the \code{glm} function. Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the survival function estimates also vary smoothly over time.
-
-Other packages can do this. 
-
-
-
-
-
-the familiar interface of the \code{glm} function. It also provides tools for variable selection, competing-risk analysis, and dealing with time-dependent exposures. In addition, we provide functions for exploratory data analysis and visualizing the estimated quantities. 
-
-
-
-Survival analysis and the comparison of event rates has been greatly influenced over the last 50 years by the partial likelihood approach of the Cox proportional hazard model [@cox1972regression]. This approach provides a flexible way of assessing the influence of covariates on the hazard function, without the need to specify a parametric survival model. This flexibility comes at the cost of decoupling the baseline hazard from the effect of the covariates. To recover the whole survival curve---or the cumulative incidence function (CIF)---we then need to separately estimate the baseline hazard [@breslow1972discussion]. This in turn leads to stepwise estimates of the survival function that can be difficult to interpret.
-
-From the perspective of clinicians and their patients, the most relevant quantity is often the 5- or 10-year risk of experiencing a certain event given the patient's particular circumstances, and not the hazard ratio between a treatment and control group. Therefore, to make sound clinical decisions, it is important to accurately estimate the *full* hazard function, which can subsequently be used to estimate the CIF. Using a parametric estimator of the hazard function leads to a smooth function of time; as a consequence, the CIF and the survival function estimates also vary smoothly over time.
-
-With the goal of fitting smooth-in-time hazard functions, Hanley & Miettinen [-@hanley2009fitting] proposed a general framework for estimating fully parametric hazard models via logistic regression. Their main idea is simple: comparing person-moments when the event of interest occurred with moments when patients were at risk. Their approach handles censored data effortlessly and provides users familiar with generalized linear models a natural way of fitting parametric survival models. Moreover, their framework is very flexible: general functions of time can be estimated (e.g. using splines or general additive models), and hence these models retain some of the flexibility of Cox's partial likelihood approach. And since the unit of analysis is a person moment, time-varying covariates can also easily be included in this framework.
-
-Logistic regression had already been used in the context of discrete-time survival modeling [@cox1972regression]. But in the context of continuous-time survival modeling, using the framework of logistic regression opens the door to an extensive array of powerful modeling tools. Indeed, lasso and elastic-net regression can be used to select variables that are associated with the hazard function. Logistic regression can also be replaced by multinomial regression to analyse data with multiple competing events. 
-
-In this article, we present the \CRANpkg{casebase} package [@casebase-package] implemented in R, for parametric survival analysis that combines the ideas of Hanley & Miettinen [-@hanley2009fitting] into a simple interface. The purpose of the \pkg{casebase} package is to provide practitioners with an easy-to-use software tool to compute a patient's risk (or cumulative incidence) of an event, conditional on a particular patient's covariate profile. Our package retains the flexibility of case-base sampling and the familiar interface of the \code{glm} function. It also provides tools for variable selection, competing-risk analysis, and dealing with time-dependent exposures. In addition, we provide functions for exploratory data analysis and visualizing the estimated quantities. 
-
-In what follows, we first recall some theoretical details on case-base sampling and its use for estimating parametric hazard functions. We then give a short review of existing R packages that implement comparable features as \pkg{casebase}. Next, we provide some details about the implementation of case-base sampling in our package, and we give a brief survey of its main functions. This is followed by three case studies that illustrate the flexibility and capabilities of \pkg{casebase}. We show how the same framework can be used for non-linear functions of time and non-proportional hazards, competing risks and variable selection via penalized regression. Finally, we end the article with a discussion of the results and of future directions.
+In what follows, we first recall some theoretical details on case-base sampling 
+and its use for estimating parametric hazard functions. We then give a short 
+review of existing R packages that implement comparable features as \pkg{casebase}. 
+Next, we provide some details about the implementation of case-base sampling in 
+our package, and we give a brief survey of its main functions. This is followed 
+by three case studies that illustrate the flexibility and capabilities of 
+\pkg{casebase}. We show how the same framework can be used for non-linear 
+functions of time and non-proportional hazards, competing risks and variable 
+selection via penalized regression. Finally, we end the article with a 
+discussion of the results and of future directions.
 
 # Theoretical details {#theory}
 

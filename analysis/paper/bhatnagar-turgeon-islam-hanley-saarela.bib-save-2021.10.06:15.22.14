@@ -1,15 +1,25 @@
 
 
-@article{cox1972regression,
-  author =        {Cox, David R},
-  journal =       {Journal of the Royal Statistical Society: Series B
-                   (Methodological)},
-  number =        {2},
-  pages =         {187--202},
-  publisher =     {Wiley Online Library},
-  title =         {Regression models and life-tables},
-  volume =        {34},
-  year =          {1972},
+@article{reid1994conversation,
+  author =        {Reid, Nancy},
+  journal =       {Statistical Science},
+  number =        {3},
+  pages =         {439--455},
+  publisher =     {JSTOR},
+  title =         {A conversation with sir david cox},
+  volume =        {9},
+  year =          {1994},
+}
+
+@article{hernan2010hazards,
+  author =        {Hern{\'a}n, Miguel A},
+  journal =       {Epidemiology (Cambridge, Mass.)},
+  number =        {1},
+  pages =         {13},
+  publisher =     {NIH Public Access},
+  title =         {The hazards of hazard ratios},
+  volume =        {21},
+  year =          {2010},
 }
 
 @article{breslow1972discussion,
@@ -20,6 +30,57 @@
   title =         {Discussion of the paper by {Dr Cox} cited below},
   volume =        {34},
   year =          {1972},
+}
+
+@article{whitehead1980fitting,
+  author =        {Whitehead, John},
+  journal =       {Journal of the Royal Statistical Society: Series C
+                   (Applied Statistics)},
+  number =        {3},
+  pages =         {268--275},
+  publisher =     {Wiley Online Library},
+  title =         {Fitting Cox's regression model to survival data using
+                   GLIM},
+  volume =        {29},
+  year =          {1980},
+}
+
+@article{copenhagen2012needs,
+  author =        {Carstensen, Bendix},
+  publisher =     {Steno Diabetes Center, Copenhagen},
+  title =         {Who needs the Cox model anyway},
+  year =          {2019},
+  url =           {http://bendixcarstensen.com/WntCma.pdf},
+}
+
+@article{arjas1987logistic,
+  author =        {Arjas, Elja and Haara, Pentti},
+  journal =       {Scandinavian Journal of Statistics},
+  pages =         {1--18},
+  publisher =     {JSTOR},
+  title =         {A logistic regression model for hazard: asymptotic
+                   results},
+  year =          {1987},
+}
+
+@article{efron1988logistic,
+  author =        {Efron, Bradley},
+  journal =       {Journal of the American statistical Association},
+  number =        {402},
+  pages =         {414--425},
+  publisher =     {Taylor \& Francis},
+  title =         {Logistic regression, survival analysis, and the
+                   Kaplan-Meier curve},
+  volume =        {83},
+  year =          {1988},
+}
+
+@book{kalbfleisch2011statistical,
+  author =        {Kalbfleisch, John D and Prentice, Ross L},
+  publisher =     {John Wiley \& Sons},
+  title =         {The statistical analysis of failure time data},
+  volume =        {360},
+  year =          {2011},
 }
 
 @article{hanley2009fitting,
@@ -73,14 +134,6 @@
                    event intensities},
   volume =        {22},
   year =          {2016},
-}
-
-@book{kalbfleisch2011statistical,
-  author =        {Kalbfleisch, John D and Prentice, Ross L},
-  publisher =     {John Wiley \& Sons},
-  title =         {The statistical analysis of failure time data},
-  volume =        {360},
-  year =          {2011},
 }
 
 @misc{survTaskView,
@@ -389,24 +442,3 @@
   year =          {1977},
 }
 
-@article{reid1994conversation,
-  title={A conversation with sir david cox},
-  author={Reid, Nancy},
-  journal={Statistical Science},
-  volume={9},
-  number={3},
-  pages={439--455},
-  year={1994},
-  publisher={JSTOR}
-}
-
-@article{hernan2010hazards,
-  title={The hazards of hazard ratios},
-  author={Hern{\'a}n, Miguel A},
-  journal={Epidemiology (Cambridge, Mass.)},
-  volume={21},
-  number={1},
-  pages={13},
-  year={2010},
-  publisher={NIH Public Access}
-}
