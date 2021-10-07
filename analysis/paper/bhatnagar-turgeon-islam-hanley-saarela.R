@@ -341,9 +341,13 @@ model_cb <- fitSmoothHazard(
 
 ## ----bmtcrr-cox, echo = TRUE, eval = eval_cs2---------------------------------
 library(survival)
-# Treat competing event as censoring
-model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-                   data = bmtcrr)
+# Prepare data for coxph
+bmtcrr_cox <- transform(bmtcrr, 
+                        id = seq_len(nrow(bmtcrr)),
+                        Status = factor(Status))
+
+model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
+                   data = bmtcrr_cox, id = id)
 
 
 ## ----bmtcrr-cis, echo=FALSE, eval = eval_cs2----------------------------------
@@ -364,7 +368,10 @@ table_cb <- cbind(
 )
 table_cb <- round(exp(table_cb), 2)
 
-table_cox <- round(summary(model_cox)$conf.int[, -2], 2)
+# Identify relevant coefficients
+coef_relev <- grepl("_1:2$", names(coef(model_cox)))
+table_cox <- round(summary(model_cox)$conf.int[coef_relev, -2], 2)
+rownames(table_cox) <- gsub("_1:2$", "", rownames(table_cox))
 rownames(table_cb) <- rownames(table_cox)
 colnames(table_cb) <- colnames(table_cox)
 
@@ -432,11 +439,16 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
                         const(Phase) + const(Source) + const(Age),
                       data = bmtcrr, cause = 1, model = "fg")
 
-# Estimate absolute risk curve
+# Estimate CI curve
 risk_fg <- predict(model_fg, newdata, times = time_points)
 
 
-## ----bmtcrr-risk, echo = FALSE, fig.cap="\\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.", eval = eval_cs2----
+## ----cox_risk, eval = eval_cs2, echo = TRUE-----------------------------------
+# Estimate absolute risk curve
+risk_cox <- survfit(model_cox, newdata = newdata)
+
+
+## ----bmtcrr-risk, echo = FALSE, fig.cap="\\label{fig:compAbsrisk} Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.", eval = eval_cs2----
 risk_all <- dplyr::bind_rows(
   data.frame(
     Time = time_points,
@@ -449,6 +461,20 @@ risk_all <- dplyr::bind_rows(
     Time = time_points,
     Method = "Case-base",
     Risk = risk_cb[, 3],
+    Disease = "AML",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = risk_cox$time,
+    Method = "Cox",
+    Risk = risk_cox[,2]$pstate[,1,1],
+    Disease = "ALL",
+    stringsAsFactors = FALSE
+  ),
+  data.frame(
+    Time = risk_cox$time,
+    Method = "Cox",
+    Risk = risk_cox[,2]$pstate[,2,1],
     Disease = "AML",
     stringsAsFactors = FALSE
   ),
@@ -466,7 +492,8 @@ risk_all <- dplyr::bind_rows(
     Disease = "AML",
     stringsAsFactors = FALSE
   )
-)
+) %>% 
+  dplyr::filter(Time <= 60)
 
 ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   # geom_line for smooth curve

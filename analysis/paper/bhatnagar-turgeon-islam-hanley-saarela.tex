@@ -851,15 +851,18 @@ model_cb <- fitSmoothHazard(
 \end{Schunk}
 
 We want to compare our hazard ratio estimates to that obtained from a
-Cox regression. To obtain these estimates, we need to treat the
-competing event as censoring:
+Cox regression.
 
 \begin{Schunk}
 \begin{Sinput}
 library(survival)
-# Treat competing event as censoring
-model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
-                   data = bmtcrr)
+# Prepare data for coxph
+bmtcrr_cox <- transform(bmtcrr, 
+                        id = seq_len(nrow(bmtcrr)),
+                        Status = factor(Status))
+
+model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
+                   data = bmtcrr_cox, id = id)
 \end{Sinput}
 \end{Schunk}
 
@@ -874,13 +877,13 @@ model_cox <- coxph(Surv(ftime, Status == 1) ~ Sex + D + Phase + Source + Age,
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% CI & HR & 95\% CI\\
 \midrule
-Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
-Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
-Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
-Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
-Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
+Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.21)\\
+Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.28, 0.94)\\
+Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.47, 3.09)\\
+Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.46, 6.08)\\
+Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (1.98, 10.46)\\
 \addlinespace
-Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
+Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.53)\\
 Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
@@ -896,10 +899,10 @@ the disease at transplant. More precisely, being in relapse at
 transplant is associated with a hazard ratio of 3.89 when compared to
 CR1.
 
-Given the estimate of the hazard function obtained using case-base
-sampling, we can compute the absolute risk curve for a fixed covariate
-profile. We perform this computation for a 35 year old woman who
-received a stem-cell transplant from peripheral blood at relapse. We
+Given the estimate of the hazard functions obtained using case-base
+sampling, we can compute the cumulative incidence curve for a fixed
+covariate profile. We perform this computation for a 35 year old woman
+who received a stem-cell transplant from peripheral blood at relapse. We
 compare the absolute risk curve for such a woman with ALL with that for
 a similar woman with AML.
 
@@ -920,24 +923,35 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
                         const(Phase) + const(Source) + const(Age),
                       data = bmtcrr, cause = 1, model = "fg")
 
-# Estimate absolute risk curve
+# Estimate CI curve
 risk_fg <- predict(model_fg, newdata, times = time_points)
+\end{Sinput}
+\end{Schunk}
+
+We can also estimate the CI for relapse using the Cox model and the
+Aalen-Johansen estimator:
+
+\begin{Schunk}
+\begin{Sinput}
+# Estimate absolute risk curve
+risk_cox <- survfit(model_cox, newdata = newdata)
 \end{Sinput}
 \end{Schunk}
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./bmtcrr-risk-1} \caption{\label{fig:compAbsrisk} Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.}\label{fig:bmtcrr-risk}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./bmtcrr-risk-1} \caption{\label{fig:compAbsrisk} Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.}\label{fig:bmtcrr-risk}
 \end{figure}
 \end{Schunk}
 
-Figure \ref{fig:compAbsrisk} shows the absolute risk curves for both
-case-base sampling and the Fine-Gray model. As we can see, the two
-approaches agree quite well for AML; however, there seems to be a
-difference of about 5\% between the two curves for ALL. This difference
-does not appear to be significant: the curve from case-base sampling is
-contained within a 95\% confidence band around the Fine-Gray absolute
-risk curve (figure not shown).
+Figure \ref{fig:compAbsrisk} shows the cumulative incidence curves for
+all three models. As we can see, all three approaches agree quite well
+for AML; however, for ALL, there seems to be a difference of about 5\%
+between the Fine-Gray curve and the curves estimated using case-base
+sampling and Cox regression. This difference does not appear to be
+significant: the curve from case-base sampling is contained within a
+95\% confidence band around the Fine-Gray absolute risk curve (figure
+not shown).
 
 \hypertarget{case-study-3variable-selection}{%
 \subsection{Case study 3---Variable
@@ -1038,7 +1052,7 @@ risk functions using case-base sampling. Our package also provides
 several functions to produce graphical summaries of the data and the
 results. We outlined the theoretical underpinnings of the approach, we
 provided details about our implementation, and we illustrated the merits
-of the approach and the package through three case studies.
+of the case-base framework and the package through three case studies.
 
 As a methodological framework, case-base sampling is very flexible. Some
 of this flexibility has been explored before in the literature: for
@@ -1104,29 +1118,7 @@ produce stepwise CIFs and never explicitly model the hazard function.
 Qualitatively, we showed that by using splines in the linear predictor,
 all three models yielded similar curves. However, the smooth nature of
 the output of \pkg{casebase} provides a more intuitive interpretation
-for consumers of these predictions. In Table \ref{tab:compCBvsCox}, we
-provide a side-by-side comparison between the Cox model and case-base
-sampling.
-
-\begin{widetable}
-\caption{\label{tab:compCBvsCox}Comparison between the Cox model and case-base sampling}
-\centering
-\begin{tabular}[t]{llp{5cm}}
-\toprule
-Feature & Cox model & Case-base sampling\\
-\toprule
-Model type & Semi-parametric & Fully parametric\\\midrule
-Time & Left hand side of the formula & Right hand side (allows flexible modeling of time)\\\midrule
-Survival curve & Step function & Smooth-in-time curve\\\midrule
-Non-proportional hazards & Interaction of covariates with time & Interaction of covariates with time\\\midrule
-Model testing & Likelihood-ratio tests, score tests, & Use GLM framework\\
- & information criteria & (e.g.\ LRT, AIC, BIC)\\\midrule
-\addlinespace
-Competing risks & Difficult & Cause-specific CIFs\\
-% Prediction & Kaplan-Meier-based & ROC, AUC, risk reclassification probabilities\\
-\bottomrule
-\end{tabular}
-\end{widetable}
+for consumers of these predictions.
 
 Our choice of modeling the log-hazard as a linear function of covariates
 allows us to develop a simple computational scheme for estimation.
