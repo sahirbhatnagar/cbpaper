@@ -1,0 +1,89 @@
+R journal submission 2021-45
+Title: casebase: An alternative framework for survival analysis and comparison of event rates
+Authors: Bhatnagar, Turgeon, Islam, Hanley, Saarela
+
+Comments for the authors.
+A primary critique is that after reading pages 1 and 2, I still had no idea what this
+package is doing nor a good feel for why it needs to exist.  This is coming from someone
+who has worked in survival analysis for over 3 decades.  This is not meant to be mean: if
+we assume that the package is worthwhile and you want people to use it, this needs to be
+addressed up front.   Let me break down the issue into more practical advice.
+
+1. The introduction put me off with things that were incorrect and/or "fluff".  Overdone
+salesman pitches sometimes show up in the innovation and significance sections of grant
+applications, but even there they tend to decrease rather than increase the reader's
+enthusiasm.
+
+  a. "... stepwise estimates of the survival function that can be difficult to
+interpret".  Since the entire research world seems to handle Kaplan-Meier curves just
+fine, this is a statment that has no face validity.  I've never heard that complaint from
+an actual user.  Actually, the KM may sometimes be preferred to smooth estimates, since
+the 'bumps' provide a visual estimate of precision; when there are multiple curves
+explicit confidence bands often make a plot too busy.
+
+  b. "... opens the door to an extensive array of modeling tools. Indeed, lasso and
+elastic-net regression can be used..."   Both of these apply directly to survival data/
+Cox models.  Read the help page for glmnet.
+
+  Turn down the rhetoric.
+
+  2. The package is based on a 2009 paper by Hanly and Miettinen, and here lies one of the
+issues.  It is difficult to argue with the strong impact OM has had on the epidemiologic
+literature, for the good, but a significant downside to his work is the use of an
+alternate and unique vocabulary. For instance, all of us are familiar with the cumlative
+distribution function F(t) = Pr(X <=t) and it's compliment the survival curve S(t) = 1-
+F(t).  In the OM world F(t) is now the "cumulative incidence function" CI(t); a completely
+unnecessary substitution. (Also a very confusing one, since the CIF is not the integral of
+the incidence).  The words "case", "base", "person-moments" are likewise something quite
+peculiar.  The overall title of casebase will possibly be confused with "case only" study
+designs in genetics (someone reads it as "case based"). If you want people to know what's
+up you will need to provide a translation service.
+
+  I took the time to read the 2009 paper, and I still don't know what this sentence means
+(page 2 of submission) "with the person-moments where dR_i(t)=1 constituting the base
+series."  What is R counting? When would dR be zero?  Nor is rho or Q clear to me.  The
+author's need to give actual, clear definitions.
+
+  3.The H and M paper includes a valid justification which is missing here.  That is that
+the users of Cox models rarely provide the necessary information to compute absolute
+risk.  This is a major gap in reporting; absolute risk is as important as relative risk,
+maybe more so in fact.  There are 2 solutions.  i. Train users to include that information
+(it's an extra computing step for a Cox model, but not diffucult) or ii. use an
+alternative model where the baseline hazard has a simple parametric form (and train
+authors to report those coefficients).
+
+  Aside: Short of the journals making it a requirement, I have low expectations for any
+"train users" plan.  Page limit are often so severe that any sentence which can be omitted
+is leapt upon like a press gang seizing a drunk.  (This particular personal pessimism
+should not count against the paper.)
+
+4. On a statistical front, there already exist simple methods for substituting in a smooth
+hazard.  See Whitehead (Applied Statisics 1980, 268-275) for instance: A quick look at the
+KM normally allows one to break it into 3-4 segments over which log(S(t)) is approximately
+linear.  Split the follow-up time into epochs based on those cutpoints (survSplit will do
+this), and fit simple Poisson regression to the result with one intercept per epoch.  One
+can even use many splits and model time as a spline, but this conflicts with the "simple
+reporting" goal.
+  In what ways is this approach better?  (There may be several, I don't know.)
+
+  5. In the comparisons with other packages, the authors overlooked that the standard
+survival::survfit function provides Aalen-Johansen estimates; both the KM and competing
+risks are special cases of the AJ.
+
+More importantly, the competing risks literature defines "cumulative incidence" as
+something quite different than Hanley and Miettinen's definition (equation 2 of 2009
+paper.)  If casebase is implementing H&M, then this whole discussion of the CI is very
+confusing.
+
+  6. Page 5.  "The case based approach described in section 2.2 can be visualized as
+..."   There is no section 2.2.  (Other than figures and tables there are no numbers in
+this reviewer's copy at all.)
+
+  7. Page 6. I am very confused by this plot.  In the ERSPC data there is no date of
+enrollment, and a subject's follow-up times ends at prostate cancer (PCA) death, other
+death, or last follow-up.  How then can a data point for a case be within the gray area. 
+For example, died of PCA at 5 years, but the gray for this person extends out to 10. 
+Labeling a subject as a case before the actual occurence of PCA death is an example of
+immortal time bias, a source of many false inference schemes.
+
+

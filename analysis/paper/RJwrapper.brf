@@ -1,7 +1,13 @@
-\backcite {cox1972regression}{{1}{2.1}{section.2.1}}
+\backcite {reid1994conversation}{{1}{2.1}{section.2.1}}
+\backcite {hernan2010hazards}{{1}{2.1}{section.2.1}}
 \backcite {breslow1972discussion}{{1}{2.1}{section.2.1}}
+\backcite {whitehead1980fitting}{{1}{2.1}{section.2.1}}
+\backcite {copenhagen2012needs}{{1}{2.1}{section.2.1}}
+\backcite {arjas1987logistic}{{1}{2.1}{section.2.1}}
+\backcite {efron1988logistic}{{1}{2.1}{section.2.1}}
+\backcite {kalbfleisch2011statistical}{{1}{2.1}{section.2.1}}
 \backcite {hanley2009fitting}{{1}{2.1}{section.2.1}}
-\backcite {cox1972regression}{{1}{2.1}{section.2.1}}
+\backcite {hanley2009fitting}{{1}{2.1}{section.2.1}}
 \backcite {casebase-package}{{1}{2.1}{section.2.1}}
 \backcite {hanley2009fitting}{{1}{2.1}{section.2.1}}
 \backcite {hanley2009fitting}{{2}{2.2}{section.2.2}}
@@ -43,7 +49,7 @@
 \backcite {fine1999proportional}{{12}{2.5.2}{table.caption.8}}
 \backcite {timereg}{{12}{2.5.2}{table.caption.8}}
 \backcite {knaus1995support}{{13}{2.5.3}{subsection.2.5.3}}
-\backcite {graf1999ass}{{14}{2.5.3}{subsection.2.5.3}}
+\backcite {graf1999ass}{{13}{2.5.3}{subsection.2.5.3}}
 \backcite {saarela2015case}{{15}{2.6}{section.2.6}}
 \backcite {saarela2015non}{{15}{2.6}{section.2.6}}
 \backcite {clark1971cardiac}{{15}{2.6}{section.2.6}}

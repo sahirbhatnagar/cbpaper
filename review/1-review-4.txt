@@ -1,0 +1,55 @@
+Overview
+
+This article provides an overview of the {casebase} package and a comparison with other survival packages.  The package's main goal is to analyze survival data allowing users to estimate smooth baseline hazards over time. Their claim is that these results are easier to interpret.  The methods for this approach have been published previously and are sound.  Whether this approach is useful in practice is less clear based on the examples shown in the paper.
+
+Specific comments
+
+* In several spots the authors claim that a smoothed estimate of absolute risk is easier to interpret, however by smoothing the data, they are also losing information.  Specifically, the height of the steps provides a quick way to determine a crude estimate of the variability.  Additionally, in Figure 5 the smoothed curve overestimates the relapse risk at the beginning of the time interval (this was not mentioned as a possible problem with their approach). 
+
+* A small point, but in the paper the code uses categorical values for ScrArm but in the dataset it is coded as 0/1
+  new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+  
+* In Example 1 the code shows how to estimate the hazard ratio as function of time. If part of the goal of the paper is to provide comparisons with other survival packages, it might be useful to note that it is easy to estimate the HR within 
+periods of time using the coxph function.  This also "fixes" the problem that they are trying to solve. 
+
+ERSPC2 <- survSplit(Surv(Follow.Up.Time, DeadOfPrCa) ~ ScrArm, data= ERSPC,
+              cut=c(4,8), episode='period')
+
+coxph(Surv(tstart,Follow.Up.Time,DeadOfPrCa)~strata(period)/ScrArm, data=ERSPC2)
+
+
+* Table 4 states that it is difficult to estimate absolute risk from a Cox model if there are competing risks, and perhaps that was true at one point, but the survival package has been updated for several years now and the statement is no longer correct.
+This approach should be shown in Example 2 and the statement in Table 4 should be modified.  In Example 2 it is unclear what "newdata" values were used for the curves, but the following code illustrates the necessary steps.
+
+newdat <- expand.grid(D=c('ALL','AML'), Sex='F', Phase='Relapse',Age=30, Source='PB')
+
+## Cox model for competing risk
+cfit <- coxph(Surv(ftime, factor(Status)) ~ Sex + D + Phase + 
+                Source + Age, data=bmtcrr, id=id)
+
+## Aalen-Johansen estimate of absolute risk
+plot(survfit(cfit, newdata=newdat)[,2], ylim=c(0,1), col=1:2, xmax=60)				  
+					  
+## Fine-Grey estimate
+fgdata <- finegray(Surv(ftime, factor(Status)) ~ Sex + D + Phase +
+                     Source + Age, data=bmtcrr, id=id)
+
+fgfit <- coxph(Surv(fgstart,fgstop,fgstatus) ~ Sex + D + Phase +
+                 Source + Age, data=fgdata, weight=fgwt)
+				 
+plot(survfit(fgfit, newdata=newdat), ylim=c(0,1), col=1:2, fun='event', xmax=60)
+	 
+## casebase approach
+model_cb <- fitSmoothHazard(Status ~ ftime + Sex + D + Phase + Source + Age, 
+                            data=bmtcrr, time='ftime')
+cbfit <- absoluteRisk(object = model_cb,newdata = newdat,
+                      time=0:60)
+matplot(cbfit[,1], cbfit[,2:3], col=1:2)
+
+
+* In Example 3, it isn't clear that the casebase approach calls cv.glmnet behind the scenes - that would be easy to mention.  Based on this example, the results are virtual identical to just directly calling cv.glmnet so it is unclear what the benefit is to using {casebase} here, except to show that the code runs.  
+
+
+Notes about the software code:
+
+I think inclusion of gbm is extremely dangerous given all the hyperparameters that need to be evaluated. A better approach, if possible, would be to create the appropriate dataset that can then be analyzed with gbm. 
