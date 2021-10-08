@@ -49,7 +49,6 @@
 \citation{saarela2015non}
 \citation{saarela2016case}
 \citation{saarela2016case}
-\citation{saarela2016case}
 \@writefile{toc}{\contentsline {section}{\numberline {2.2}Theoretical details}{2}{section.2.2}\protected@file@percent }
 \newlabel{theory}{{2.2}{2}{Theoretical details}{section.2.2}{}}
 \@writefile{brf}{\backcite{hanley2009fitting}{{2}{2.2}{section.2.2}}}
@@ -59,11 +58,12 @@
 \@writefile{brf}{\backcite{saarela2015non}{{2}{2.2.1}{subsection.2.2.1}}}
 \@writefile{brf}{\backcite{saarela2016case}{{2}{2.2.1}{subsection.2.2.1}}}
 \@writefile{brf}{\backcite{saarela2016case}{{2}{2.2.1}{subsection.2.2.1}}}
-\newlabel{eq:lik-function}{{1}{2}{Likelihood and estimating function}{equation.2.2.1}{}}
+\citation{saarela2016case}
 \citation{hanley2009fitting}
 \citation{saarela2015non}
 \citation{kalbfleisch2011statistical}
 \citation{kalbfleisch2011statistical}
+\newlabel{eq:lik-function}{{1}{3}{Likelihood and estimating function}{equation.2.2.1}{}}
 \@writefile{brf}{\backcite{saarela2016case}{{3}{2.2.1}{equation.2.2.1}}}
 \@writefile{brf}{\backcite{hanley2009fitting}{{3}{2.2.1}{equation.2.2.1}}}
 \@writefile{brf}{\backcite{saarela2015non}{{3}{2.2.1}{equation.2.2.1}}}
@@ -75,9 +75,6 @@
 \newlabel{eq:weibull}{{4}{3}{Common parametric models}{equation.2.2.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}Competing-risk analysis}{3}{subsection.2.2.3}\protected@file@percent }
 \newlabel{competing-risk-analysis}{{2.2.3}{3}{Competing-risk analysis}{subsection.2.2.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Variable selection}{3}{subsection.2.2.4}\protected@file@percent }
-\newlabel{variable-selection}{{2.2.4}{3}{Variable selection}{subsection.2.2.4}{}}
-\newlabel{eq:penest}{{5}{3}{Variable selection}{equation.2.2.5}{}}
 \@writefile{brf}{\backcite{kalbfleisch2011statistical}{{3}{1}{equation.2.2.2}}}
 \citation{survTaskView}
 \citation{mahani2015bayesian}
@@ -95,6 +92,9 @@
 \citation{survival-package}
 \citation{mahani2015bayesian}
 \citation{fine1999proportional}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Variable selection}{4}{subsection.2.2.4}\protected@file@percent }
+\newlabel{variable-selection}{{2.2.4}{4}{Variable selection}{subsection.2.2.4}{}}
+\newlabel{eq:penest}{{5}{4}{Variable selection}{equation.2.2.5}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}Comparison with existing packages}{4}{section.2.3}\protected@file@percent }
 \newlabel{comparison-with-existing-packages}{{2.3}{4}{Comparison with existing packages}{section.2.3}{}}
 \@writefile{brf}{\backcite{survTaskView}{{4}{2.3}{section.2.3}}}
@@ -116,9 +116,9 @@
 \citation{ggplot2}
 \citation{schroder2009screening}
 \citation{liu2014recovering}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of various R packages for survival analysis based on several defining features. \textbf  {Competing Risks}: whether or not an implementation for competing risks is present. \textbf  {Allows Non PH}: permits models for non-proportional hazards. \textbf  {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf  {Splines}: permits a flexible fit on time through the use of splines. \textbf  {Parametric}: implementation for parametric models. \textbf  {Semi-parametric}: implementation for semi-parametric models. \textbf  {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf  {Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.\relax }}{5}{table.caption.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of various R packages for survival analysis based on several defining features. \textbf  {Competing Risks}: whether or not an implementation for competing risks is present. \textbf  {Allows Non PH}: permits models for non-proportional hazards. \textbf  {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf  {Splines}: permits a flexible fit on time through the use of splines. \textbf  {Parametric}: implementation for parametric models. \textbf  {Semi-parametric}: implementation for semi-parametric models. \textbf  {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf  {Risk estimates}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.\relax }}{5}{table.caption.2}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:surv-pkgs}{{1}{5}{Comparison of various R packages for survival analysis based on several defining features. \textbf {Competing Risks}: whether or not an implementation for competing risks is present. \textbf {Allows Non PH}: permits models for non-proportional hazards. \textbf {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf {Splines}: permits a flexible fit on time through the use of splines. \textbf {Parametric}: implementation for parametric models. \textbf {Semi-parametric}: implementation for semi-parametric models. \textbf {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf {Absolute Risk}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.\relax }{table.caption.2}{}}
+\newlabel{tab:surv-pkgs}{{1}{5}{Comparison of various R packages for survival analysis based on several defining features. \textbf {Competing Risks}: whether or not an implementation for competing risks is present. \textbf {Allows Non PH}: permits models for non-proportional hazards. \textbf {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf {Splines}: permits a flexible fit on time through the use of splines. \textbf {Parametric}: implementation for parametric models. \textbf {Semi-parametric}: implementation for semi-parametric models. \textbf {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf {Risk estimates}: computation for survival curves, cumulative incidence or cumulative hazard is readily available.\relax }{table.caption.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.4}Implementation details}{5}{section.2.4}\protected@file@percent }
 \newlabel{implementation-details}{{2.4}{5}{Implementation details}{section.2.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Population-time plots}{5}{subsection.2.4.1}\protected@file@percent }
@@ -141,105 +141,98 @@
 \@writefile{brf}{\backcite{friedman2010jss}{{7}{2.4.2}{Item.5}}}
 \@writefile{brf}{\backcite{hastie1987generalized}{{7}{2.4.2}{Item.5}}}
 \newlabel{eqn:surv}{{6}{7}{Parametric modeling}{equation.2.4.6}{}}
-\newlabel{eqn:CI}{{7}{7}{Parametric modeling}{equation.2.4.7}{}}
+\newlabel{eqn:CDF}{{7}{7}{Parametric modeling}{equation.2.4.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.5}Illustration of package}{8}{section.2.5}\protected@file@percent }
 \newlabel{illustration-of-package}{{2.5}{8}{Illustration of package}{section.2.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5.1}Case study 1---Modeling different functions of time and non-proportional hazards}{8}{subsection.2.5.1}\protected@file@percent }
 \newlabel{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}{{2.5.1}{8}{Case study 1---Modeling different functions of time and non-proportional hazards}{subsection.2.5.1}{}}
 \citation{hanley2010mortality}
-\@writefile{brf}{\backcite{hanley2010mortality}{{9}{2.5.1}{table.caption.5}}}
 \citation{scrucca2010regression}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code  {survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.\relax }}{10}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:erspc-cox-cif}{{2}{10}{CIFs for control and screening groups in the ERSPC data. In each of the panels, we plot the CIF from the Cox model using \code {survival::survfit} (solid line) and the CIF from the case-base sampling scheme (dashed line) with different functional forms of time. (1) The time variable is excluded (exponential). (2) Linear function of time (Gompertz). (3) The natural logarithm (Weibull). (4) Cubic B-spline expansion of time.\relax }{figure.caption.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comparison of estimated hazard ratios and 95\% confidence intervals for ERSPC data.\relax }}{10}{table.caption.5}\protected@file@percent }
-\newlabel{tab:print-erspc-estimates}{{2}{10}{Comparison of estimated hazard ratios and 95\% confidence intervals for ERSPC data.\relax }{table.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \code  {survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time.\relax }}{10}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:erspc-cox-cif}{{2}{10}{Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \code {survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time.\relax }{figure.caption.4}{}}
+\@writefile{brf}{\backcite{hanley2010mortality}{{10}{2.5.1}{figure.caption.5}}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5.2}Case study 2---Competing risk analysis}{10}{subsection.2.5.2}\protected@file@percent }
 \newlabel{case-study-2competing-risk-analysis}{{2.5.2}{10}{Case study 2---Competing risk analysis}{subsection.2.5.2}{}}
 \@writefile{brf}{\backcite{scrucca2010regression}{{10}{2.5.2}{subsection.2.5.2}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Estimated hazard ratio and 95\% confidence interval for screening vs}}{11}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:interaction-ERSPC}{{3}{11}{Estimated hazard ratio and 95\% confidence interval for screening vs}{figure.caption.6}{}}
 \citation{fine1999proportional}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands}}{11}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:erspc-cif-conf}{{3}{11}{Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands}{figure.caption.5}{}}
 \citation{timereg}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Population-time plot for the stem-cell transplant study with both relapse and competing events}}{12}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:compPop}{{4}{12}{Population-time plot for the stem-cell transplant study with both relapse and competing events}{figure.caption.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.\relax }}{12}{table.caption.8}\protected@file@percent }
-\newlabel{tab:bmtcrr-cis}{{3}{12}{Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.\relax }{table.caption.8}{}}
+\citation{knaus1995support}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Estimated hazard ratio and 95\% confidence interval for screening vs}}{12}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:interaction-ERSPC}{{4}{12}{Estimated hazard ratio and 95\% confidence interval for screening vs}{figure.caption.6}{}}
 \@writefile{brf}{\backcite{fine1999proportional}{{12}{2.5.2}{table.caption.8}}}
 \@writefile{brf}{\backcite{timereg}{{12}{2.5.2}{table.caption.8}}}
-\citation{knaus1995support}
-\citation{graf1999ass}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.\relax }}{13}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:compAbsrisk}{{5}{13}{Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.\relax }{figure.caption.9}{}}
-\newlabel{fig:bmtcrr-risk}{{5}{13}{Absolute risk curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Kaplan-Meier estimate.\relax }{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Population-time plot for the stem-cell transplant study with both relapse and competing events}}{13}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:compPop}{{5}{13}{Population-time plot for the stem-cell transplant study with both relapse and competing events}{figure.caption.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.\relax }}{13}{table.caption.8}\protected@file@percent }
+\newlabel{tab:bmtcrr-cis}{{2}{13}{Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented.\relax }{table.caption.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5.3}Case study 3---Variable selection}{13}{subsection.2.5.3}\protected@file@percent }
 \newlabel{case-study-3variable-selection}{{2.5.3}{13}{Case study 3---Variable selection}{subsection.2.5.3}{}}
 \@writefile{brf}{\backcite{knaus1995support}{{13}{2.5.3}{subsection.2.5.3}}}
-\@writefile{brf}{\backcite{graf1999ass}{{13}{2.5.3}{subsection.2.5.3}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Coefficient estimates from the Cox model (Cox), penalized Cox model using the {\normalfont  \fontseries  {b}\selectfont  glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }}{14}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:cs3lolliPlot}{{6}{14}{Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg {glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }{figure.caption.10}{}}
-\newlabel{fig:coefplots}{{6}{14}{Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg {glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }{figure.caption.10}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2.6}Discussion}{14}{section.2.6}\protected@file@percent }
-\newlabel{discussion}{{2.6}{14}{Discussion}{section.2.6}{}}
+\citation{graf1999ass}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces  Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.\relax }}{14}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:compAbsrisk}{{6}{14}{Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.\relax }{figure.caption.9}{}}
+\newlabel{fig:bmtcrr-risk}{{6}{14}{Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.\relax }{figure.caption.9}{}}
+\@writefile{brf}{\backcite{graf1999ass}{{14}{2.5.3}{subsection.2.5.3}}}
 \citation{saarela2015case}
 \citation{saarela2015non}
 \citation{clark1971cardiac}
 \citation{crowley1977covariance}
-\citation{hanley2009fitting}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }}{15}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:cs3FinalBrier}{{7}{15}{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }{figure.caption.11}{}}
-\newlabel{fig:riskregressionBrier}{{7}{15}{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces  Coefficient estimates from the Cox model (Cox), penalized Cox model using the {\normalfont  \fontseries  {b}\selectfont  glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }}{15}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:cs3lolliPlot}{{7}{15}{Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg {glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }{figure.caption.10}{}}
+\newlabel{fig:coefplots}{{7}{15}{Coefficient estimates from the Cox model (Cox), penalized Cox model using the \pkg {glmnet} package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell _1$ penalty.\relax }{figure.caption.10}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2.6}Discussion}{15}{section.2.6}\protected@file@percent }
+\newlabel{discussion}{{2.6}{15}{Discussion}{section.2.6}{}}
 \@writefile{brf}{\backcite{saarela2015case}{{15}{2.6}{section.2.6}}}
 \@writefile{brf}{\backcite{saarela2015non}{{15}{2.6}{section.2.6}}}
 \@writefile{brf}{\backcite{clark1971cardiac}{{15}{2.6}{section.2.6}}}
 \@writefile{brf}{\backcite{crowley1977covariance}{{15}{2.6}{section.2.6}}}
-\@writefile{brf}{\backcite{hanley2009fitting}{{15}{2.6}{section.2.6}}}
+\citation{hanley2009fitting}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces  Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }}{16}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:cs3FinalBrier}{{8}{16}{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }{figure.caption.11}{}}
+\newlabel{fig:riskregressionBrier}{{8}{16}{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A) Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.\relax }{figure.caption.11}{}}
+\@writefile{brf}{\backcite{hanley2009fitting}{{16}{2.6}{section.2.6}}}
 \citation{saarela2015non}
 \citation{saarela2015non}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Comparison between the Cox model and case-base sampling\relax }}{16}{table.caption.12}\protected@file@percent }
-\newlabel{tab:compCBvsCox}{{4}{16}{Comparison between the Cox model and case-base sampling\relax }{table.caption.12}{}}
-\@writefile{brf}{\backcite{saarela2015non}{{16}{2.6}{table.caption.12}}}
 \bibdata{bhatnagar-turgeon-islam-hanley-saarela.bib}
 \bibcite{aalen2008survival}{{1}{2008}{{Aalen et~al.}}{{Aalen, Borgan, and Gjessing}}}
 \bibcite{survTaskView}{{2}{2019}{{Allignol and Latouche}}{{}}}
-\bibcite{arjas1987logistic}{{3}{1987}{{Arjas and Haara}}{{}}}
-\bibcite{casebase-package}{{4}{2021}{{Bhatnagar et~al.}}{{Bhatnagar, Turgeon, Islam, Saarela, and Hanley}}}
-\bibcite{breslow1972discussion}{{5}{1972}{{Breslow}}{{}}}
-\bibcite{copenhagen2012needs}{{6}{2019}{{Carstensen}}{{}}}
-\bibcite{clark1971cardiac}{{7}{1971}{{Clark et~al.}}{{Clark, Stinson, Griepp, Schroeder, Shumway, and Harrison}}}
-\bibcite{clements_liu}{{8}{2019}{{Clements and Liu}}{{}}}
-\bibcite{crowley1977covariance}{{9}{1977}{{Crowley and Hu}}{{}}}
-\bibcite{efron1988logistic}{{10}{1988}{{Efron}}{{}}}
-\bibcite{fine1999proportional}{{11}{1999}{{Fine and Gray}}{{}}}
-\bibcite{friedman2010jss}{{12}{2010}{{Friedman et~al.}}{{Friedman, Hastie, and Tibshirani}}}
-\bibcite{gerds_blanche}{{13}{2020}{{Gerds and Ozenne}}{{}}}
-\bibcite{l1penal}{{14}{2010}{{Goeman}}{{}}}
-\bibcite{graf1999ass}{{15}{1999}{{Graf et~al.}}{{Graf, Schmoor, Sauerbrei, and Schumacher}}}
-\bibcite{hanley2010mortality}{{16}{2010}{{Hanley}}{{}}}
-\@writefile{brf}{\backcite{saarela2015non}{{17}{2.6}{table.caption.12}}}
+\bibcite{casebase-package}{{3}{2021}{{Bhatnagar et~al.}}{{Bhatnagar, Turgeon, Islam, Saarela, and Hanley}}}
+\bibcite{breslow1972discussion}{{4}{1972}{{Breslow}}{{}}}
+\bibcite{clark1971cardiac}{{5}{1971}{{Clark et~al.}}{{Clark, Stinson, Griepp, Schroeder, Shumway, and Harrison}}}
+\bibcite{clements_liu}{{6}{2019}{{Clements and Liu}}{{}}}
+\bibcite{cox1972regression}{{7}{1972}{{Cox}}{{}}}
+\bibcite{crowley1977covariance}{{8}{1977}{{Crowley and Hu}}{{}}}
+\bibcite{fine1999proportional}{{9}{1999}{{Fine and Gray}}{{}}}
+\bibcite{friedman2010jss}{{10}{2010}{{Friedman et~al.}}{{Friedman, Hastie, and Tibshirani}}}
+\@writefile{brf}{\backcite{saarela2015non}{{17}{2.6}{section.2.6}}}
+\@writefile{brf}{\backcite{saarela2015non}{{17}{2.6}{section.2.6}}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.7}Acknowledgments}{17}{section.2.7}\protected@file@percent }
 \newlabel{acknowledgments}{{2.7}{17}{Acknowledgments}{section.2.7}{}}
-\bibcite{hanley2009fitting}{{17}{2009}{{Hanley and Miettinen}}{{}}}
-\bibcite{hastie1987generalized}{{18}{1987}{{Hastie and Tibshirani}}{{}}}
-\bibcite{hernan2010hazards}{{19}{2010}{{Hern{\'a}n}}{{}}}
-\bibcite{flexsurv}{{20}{2016}{{Jackson}}{{}}}
-\bibcite{kalbfleisch2011statistical}{{21}{2011}{{Kalbfleisch and Prentice}}{{}}}
-\bibcite{knaus1995support}{{22}{1995}{{Knaus et~al.}}{{Knaus, Harrell, Lynn, Goldman, Phillips, Connors, Dawson, Fulkerson, Califf, Desbiens, et~al.}}}
-\bibcite{liu2014recovering}{{23}{2014}{{Liu et~al.}}{{Liu, Rich, and Hanley}}}
-\bibcite{mahani2015bayesian}{{24}{2019}{{Mahani and Sharabiani}}{{}}}
-\bibcite{park_hastie}{{25}{2018}{{Park and Hastie}}{{}}}
-\bibcite{reid1994conversation}{{26}{1994}{{Reid}}{{}}}
-\bibcite{saarela2016case}{{27}{2016}{{Saarela}}{{}}}
-\bibcite{saarela2015non}{{28}{2015}{{Saarela and Arjas}}{{}}}
-\bibcite{saarela2015case}{{29}{2015}{{Saarela and Hanley}}{{}}}
-\bibcite{timereg}{{30}{2011}{{Scheike and Zhang}}{{}}}
-\bibcite{scheike2014estimating}{{31}{2014}{{Scheike et~al.}}{{Scheike, Holst, and Hjelmborg}}}
-\bibcite{schroder2009screening}{{32}{2009}{{Schr{\"o}der et~al.}}{{Schr{\"o}der, Hugosson, Roobol, Tammela, Ciatto, Nelen, Kwiatkowski, Lujan, Lilja, Zappa, et~al.}}}
-\bibcite{scrucca2010regression}{{33}{2010}{{Scrucca et~al.}}{{Scrucca, Santucci, and Aversa}}}
-\bibcite{regpathcox}{{34}{2011}{{Simon et~al.}}{{Simon, Friedman, Hastie, and Tibshirani}}}
-\bibcite{survival-package}{{35}{2015}{{Therneau}}{{}}}
-\bibcite{smoothHazard}{{36}{2017}{{Touraine et~al.}}{{Touraine, Gerds, and Joly}}}
-\bibcite{whitehead1980fitting}{{37}{1980}{{Whitehead}}{{}}}
-\bibcite{ggplot2}{{38}{2016}{{Wickham}}{{}}}
-\bibcite{zou2005regularization}{{39}{2005}{{Zou and Hastie}}{{}}}
+\bibcite{gerds_blanche}{{11}{2020}{{Gerds and Ozenne}}{{}}}
+\bibcite{l1penal}{{12}{2010}{{Goeman}}{{}}}
+\bibcite{graf1999ass}{{13}{1999}{{Graf et~al.}}{{Graf, Schmoor, Sauerbrei, and Schumacher}}}
+\bibcite{hanley2010mortality}{{14}{2010}{{Hanley}}{{}}}
+\bibcite{hanley2009fitting}{{15}{2009}{{Hanley and Miettinen}}{{}}}
+\bibcite{hastie1987generalized}{{16}{1987}{{Hastie and Tibshirani}}{{}}}
+\bibcite{flexsurv}{{17}{2016}{{Jackson}}{{}}}
+\bibcite{kalbfleisch2011statistical}{{18}{2011}{{Kalbfleisch and Prentice}}{{}}}
+\bibcite{knaus1995support}{{19}{1995}{{Knaus et~al.}}{{Knaus, Harrell, Lynn, Goldman, Phillips, Connors, Dawson, Fulkerson, Califf, Desbiens, et~al.}}}
+\bibcite{liu2014recovering}{{20}{2014}{{Liu et~al.}}{{Liu, Rich, and Hanley}}}
+\bibcite{mahani2015bayesian}{{21}{2019}{{Mahani and Sharabiani}}{{}}}
+\bibcite{park_hastie}{{22}{2018}{{Park and Hastie}}{{}}}
+\bibcite{saarela2016case}{{23}{2016}{{Saarela}}{{}}}
+\bibcite{saarela2015non}{{24}{2015}{{Saarela and Arjas}}{{}}}
+\bibcite{saarela2015case}{{25}{2015}{{Saarela and Hanley}}{{}}}
+\bibcite{timereg}{{26}{2011}{{Scheike and Zhang}}{{}}}
+\bibcite{scheike2014estimating}{{27}{2014}{{Scheike et~al.}}{{Scheike, Holst, and Hjelmborg}}}
+\bibcite{schroder2009screening}{{28}{2009}{{Schr{\"o}der et~al.}}{{Schr{\"o}der, Hugosson, Roobol, Tammela, Ciatto, Nelen, Kwiatkowski, Lujan, Lilja, Zappa, et~al.}}}
+\bibcite{scrucca2010regression}{{29}{2010}{{Scrucca et~al.}}{{Scrucca, Santucci, and Aversa}}}
+\bibcite{regpathcox}{{30}{2011}{{Simon et~al.}}{{Simon, Friedman, Hastie, and Tibshirani}}}
+\bibcite{survival-package}{{31}{2015}{{Therneau}}{{}}}
+\bibcite{smoothHazard}{{32}{2017}{{Touraine et~al.}}{{Touraine, Gerds, and Joly}}}
+\bibcite{ggplot2}{{33}{2016}{{Wickham}}{{}}}
+\bibcite{zou2005regularization}{{34}{2005}{{Zou and Hastie}}{{}}}
 \ttl@finishall
 \gdef \@abspage@last{19}
