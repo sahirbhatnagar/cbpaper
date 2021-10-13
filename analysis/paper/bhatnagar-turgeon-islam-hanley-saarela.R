@@ -52,50 +52,99 @@ q4 <- qualitative_hcl(4, palette = "Dark 3")
 names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 
-## ----erspc-data, eval = eval_cs1, echo = c(-1:-3)-----------------------------
+## ----erspc-data-mutate, eval = eval_cs1, echo = FALSE-------------------------
 data("ERSPC")
 ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
                        levels = c(0,1), 
                        labels = c("Control group", "Screening group"))
 
+
+## ----erspc-data, eval = eval_cs1----------------------------------------------
 pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
                                event = "DeadOfPrCa", exposure = "ScrArm")
 inherits(pt_object, "popTime")
 attr(pt_object, "exposure")
 
 
+## ----plot-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for the ERSPC dataset. \\textbf{A}: The gray area can be thought of as N = 159,893 infinitely thin horizontal rectangles ordered by length of follow-up. \\textbf{B}: The red points correspond to when death has occurred for any one of those infinitely thin rectangles. \\textbf{C}: To improve visibility, these red points are randomly redistributed along their respective x-coordinates, providing a visualization of incidence density. More events are observed at later follow-up times, motivating the use of non-constant hazard models. \\textbf{D}: The base series, a representative sample of the entire grey area, is represented by the green points."----
+# For increased visibility, remove some cases
+toRemove <- sample(which(ERSPC$DeadOfPrCa == 1), 
+                   round(length(which(ERSPC$DeadOfPrCa == 1))*0.7))
+# Create new dataset for illustration
+ERSPC_sub <- ERSPC
+ERSPC_sub$DeadOfPrCa[toRemove] <- 0
+
+a <- casebase::popTime(ERSPC_sub, time = "Follow.Up.Time",
+                       event = "DeadOfPrCa")
+
+plota <- emptyPlot <- plot(a, add.case.series = FALSE, 
+                           legend = FALSE) + 
+  scale_y_continuous(labels = label_number_si())
+
+plotb <- emptyPlot + geom_point(data = dplyr::filter(a, event == 1),
+                                aes(x = time, y = ycoord, 
+                                    color = "Case series",
+                                    fill = "Case series"), 
+                                show.legend = FALSE, size = 1.5, 
+                                alpha = 0.5, shape = 21) + 
+  theme(legend.position = "none") + 
+  scale_y_continuous(labels = label_number_si())
+
+plotc <- plot(a, add.case.series = TRUE, legend = FALSE) +
+  scale_y_continuous(labels = label_number_si())
+
+#TEMP MAINLY NEED FOR LEGEND
+plotd <- plot(a, add.base.series = TRUE) +
+  scale_y_continuous(labels = label_number_si())
+
+legend_b <- get_legend(
+  plotd + 
+    guides(color = guide_legend(nrow = 1)) +
+     theme(legend.direction = "horizontal",
+           legend.justification = "center",
+           legend.box.just = "bottom")
+)
+
+#remove legend
+plotd <- plotd + theme(legend.position = "none")
+plotspop <- cowplot::plot_grid(plota, plotb, plotc, plotd,
+                               labels = c("A", "B", "C", "D"))
+g <- plot_grid(plotspop, legend_b, ncol = 1, rel_heights = c(1, .1))
+g
+
+
 ## ----plot-stratified-erspc-data-code, eval = FALSE, echo = TRUE---------------
 #> plot(pt_object, add.base.series = TRUE)
 
 
-## ----plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models."----
-label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
-    sep <- if (is.null(unit)) 
-        ""
-    else " "
-    scales:::force_all(accuracy, ...)
-    function(x) {
-        breaks <- c(0, 10^c(K = 3, M = 6, B = 9, T = 12))
-        n_suffix <- cut(abs(x), breaks = c(unname(breaks), Inf), 
-            labels = c(names(breaks)), right = FALSE)
-        n_suffix[is.na(n_suffix)] <- ""
-        suffix <- paste0(sep, n_suffix, unit)
-        scale <- 1/breaks[n_suffix]
-        scale[which(scale %in% c(Inf, NA))] <- 1
-        number(x, accuracy = accuracy, scale = unname(scale), 
-            suffix = suffix, ...)
-    }
-}
-plot(pt_object, 
-     add.base.series = TRUE,
-     ratio = 0.7,
-     facet.params = list(ncol = 2),
-     ribbon.params = list(fill = "gray50"),
-     case.params = list(size = 0.8),
-     base.params = list(size = 0.8)) + 
-  paper_gg_theme +  
-  scale_y_continuous(labels = label_number_si()) + 
-  ylab("Population Size")
+## ----plot-stratified-erspc-data, eval = FALSE, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models."----
+#> label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
+#>     sep <- if (is.null(unit))
+#>         ""
+#>     else " "
+#>     scales:::force_all(accuracy, ...)
+#>     function(x) {
+#>         breaks <- c(0, 10^c(K = 3, M = 6, B = 9, T = 12))
+#>         n_suffix <- cut(abs(x), breaks = c(unname(breaks), Inf),
+#>             labels = c(names(breaks)), right = FALSE)
+#>         n_suffix[is.na(n_suffix)] <- ""
+#>         suffix <- paste0(sep, n_suffix, unit)
+#>         scale <- 1/breaks[n_suffix]
+#>         scale[which(scale %in% c(Inf, NA))] <- 1
+#>         number(x, accuracy = accuracy, scale = unname(scale),
+#>             suffix = suffix, ...)
+#>     }
+#> }
+#> plot(pt_object,
+#>      add.base.series = TRUE,
+#>      ratio = 0.7,
+#>      facet.params = list(ncol = 2),
+#>      ribbon.params = list(fill = "gray50"),
+#>      case.params = list(size = 0.8),
+#>      base.params = list(size = 0.8)) +
+#>   paper_gg_theme +
+#>   scale_y_continuous(labels = label_number_si()) +
+#>   ylab("Population Size")
 
 
 ## ---- eval = eval_cs1, echo = -1----------------------------------------------
@@ -400,7 +449,7 @@ table_cb %>%
   )) %>%
   knitr::kable(
     format = "latex", booktabs = TRUE,
-    col.names = c("Covariates", "HR", "95% CI", "HR", "95% CI"),
+    col.names = c("Covariates", "HR", "95% Conf.", "HR", "95% Conf."),
     caption = "Estimates and confidence intervals for the hazard ratios for each coefficient. Both estimates from case-base sampling and Cox regression are presented."
   ) %>%
   kable_styling() %>%
