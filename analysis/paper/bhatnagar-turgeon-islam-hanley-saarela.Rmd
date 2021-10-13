@@ -99,7 +99,7 @@ eval_introduction <- TRUE
 eval_theory <- TRUE
 eval_implementation <- TRUE
 eval_cs1 <- TRUE
-eval_cs2 <- TRUE
+eval_cs2 <- F
 eval_cs3 <- TRUE
 eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
@@ -321,13 +321,54 @@ inherits(pt_object, "popTime")
 attr(pt_object, "exposure")
 ```
 
+
+
+```{r  plot-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plot for the ERSPC dataset. A: The gray area can be thought of as N = 159,893 infinitely thin horizontal rectangles ordered by length of follow-up. B: The red points correspond to when death has occurred for any one of those infinitely thin rectangles. C: To improve visibility, these red points are randomly redistributed along their respective x-coordinates, providing a visualization of incidence density. More events are observed at later follow-up times, motivating the use of non-constant hazard models. D: The base series, a representative sample of the entire grey area, is represented by the green points."}
+
+data("ERSPC")
+#ogERSPC<-ERSPC
+ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+                       levels = c(0,1), 
+                       labels = c("Control group", "Screening group"))
+
+
+toRemove<-sample(which(ERSPC$DeadOfPrCa==1),round(length(which(ERSPC$DeadOfPrCa==1))*0.7))
+ERSPC$DeadOfPrCa[toRemove]<-0
+
+a <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
+                               event = "DeadOfPrCa")
+
+plota<-emptyPlot<-plot(a,add.case.series=F,legend=F) +scale_y_continuous(labels = label_number_si())
+
+plotb<-emptyPlot+geom_point(aes(x=a$time,y=a$ycoord, color = "Case series", fill = "Case series"), show.legend = F, size = 1.5, alpha = 0.5, shape = 21)+ theme(legend.position="none") +scale_y_continuous(labels = label_number_si())
+
+plotc<-plot(a,add.case.series=T,legend=F) +scale_y_continuous(labels = label_number_si())
+
+#TEMP MAINLY NEED FOR LEGEND
+plotd<-plot(a,add.base.series=T) +scale_y_continuous(labels = label_number_si())
+
+legend_b <- get_legend(
+  plotd + 
+    guides(color = guide_legend(nrow = 1)) +
+     theme(legend.direction = "horizontal",legend.justification="center" ,legend.box.just = "bottom")
+)
+
+#remove legend
+plotd<-plotd + theme(legend.position="none")
+plotspop<-cowplot::plot_grid(plota,plotb,plotc,plotd,labels=c("A","B","C","D"))
+g<-plot_grid(plotspop, legend_b, ncol = 1, rel_heights = c(1, .1))
+g
+
+```
+
+
 We then pass this object to the corresponding \code{plot} method:
 
 ```{r plot-stratified-erspc-data-code, eval = FALSE, echo = TRUE}
 plot(pt_object, add.base.series = TRUE)
 ```
 
-```{r plot-stratified-erspc-data, eval = eval_cs1, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models."}
+```{r plot-stratified-erspc-data, eval = F, echo = FALSE, fig.width=7, fig.height=5, fig.asp=0.75, fig.cap="Population time plots for both treatment arms in the ERSPC dataset. The gray area can be thought of as N=88,232 (control group) and N=71,661 (screening group) rows of infinitely thin rectangles (person-moments). More events are observed at later follow-up times, motivating the use of non-constant hazard models."}
 label_number_si <- function (accuracy = 1, unit = NULL, sep = NULL, ...) {
     sep <- if (is.null(unit)) 
         ""
@@ -357,9 +398,9 @@ plot(pt_object,
   ylab("Population Size")
 ```
 
-Figure \ref{fig:plot-stratified-erspc-data} is built sequentially by first adding a layer for the area representing the population time in gray, with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive *stepwise shape* in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e. from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e. from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment in December 2003, the minimum potential follow-up is three years. Tracked further forwards in time (i.e. after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
+Figure \ref{fig:plot-erspc-data} is built sequentially by first adding a layer for the area representing the population time in gray (Figure \ref{fig:plot-erspc-data} A), with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive *stepwise shape* in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e. from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e. from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment in December 2003, the minimum potential follow-up is three years. Tracked further forwards in time (i.e. after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
 
-Next, layers for the case series and base series are added. The y-axis location of each case moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-stratified-erspc-data}, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time. The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
+Next, layers for the case series and base series are added. The y-axis location of each case moment  is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area (Figure \ref{fig:plot-erspc-data} B). By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-erspc-data} C, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled horizontally with sampling weight proportional to their follow-up time (Figure \ref{fig:plot-erspc-data} D). The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
 
 ## Parametric modeling
 
@@ -1148,6 +1189,8 @@ In this article, we presented the R package \pkg{casebase}, which provides funct
 As a methodological framework, case-base sampling is very flexible. Some of this flexibility has been explored before in the literature: for example, Saarela and Hanley [-@saarela2015case] used case-base sampling to model a time-dependent exposure variable in a vaccine safety study. As another example, Saarela and Arjas [-@saarela2015non] combined case-base sampling and a Bayesian non-parametric framework to compute individualized risk assessments for chronic diseases. In the case studies above, we further explored this flexibility along two fronts. On the one hand, we showed how splines could be used as part of the linear predictor to model the effect of time on the hazard. This strategy yielded estimates of the survival function that were qualitatively similar to semiparametric estimates derived from Cox regression; however, case-base sampling led to estimates of the survival function that *vary smoothly in time* and are thus easier to interpret. On the other hand, we also displayed the flexibility of case-base sampling by showing how it could be combined with penalized logistic regression to perform variable selection. Furthermore, the second case study showed how case-base sampling can be applied to competing risks settings. It should be noted that the three case studies presented above only considered covariates that were fixed at baseline. In one of the package vignettes, we use the Stanford Heart Transplant data [@clark1971cardiac,@crowley1977covariance] to show how case-base sampling can also be used in the context of time-dependent exposure. In this study, the exposure period was defined as the week following vaccination. Hence, the main covariate of interest, i.e. exposure to the vaccine, was changing over time. In this context, case-base sampling offers an efficient alternative to nested case-control designs or self-matching.
 
 Even though we did not illustrate it in this article, case-base sampling can also be combined with the framework of *generalized additive models*. This functionality has already been implemented in the package. Similarly, case-base sampling can be combined with quasi-likelihood estimation to fit survival models that can account for the presence of over-dispersion. All of these examples illustrate how the case-base sampling framework in general, and the package \pkg{casebase} in particular, allows the user to fit a broad and flexible family of survival functions. 
+
+\textcolor{red}{Poisson regression can be used to estimate the full hazard. However, this method requires the user to decide on the number of intervals. Too fine the intervals may result in many empty bins. This may cause the commonly used Newton-Raphson procedure to fail to converge [@kalbfleisch2011statistical]. If the intervals are too wide, the nonlinear trends that are present in the hazard may be masked. Rather than discretizing time like in Poisson regression, we sample person-specific moments which have been experienced during the study.}
 
 As presented in Hanley & Miettinen [-@hanley2009fitting], case-base sampling is comprised of three steps: 1) sampling a case series and a base series from the study; 2) fit the log-hazard as a linear function of predictors (including time); and 3) use the fitted hazard to estimate the risk function. Accordingly, our package provides functions for each step. Moreover, the simple interface of the \code{fittingSmoothHazard} function resembles the \code{glm} interface. This interface should look familiar to new users. Our modular approach also provides a convenient way to extend our package for new sampling or fitting strategies.
 
