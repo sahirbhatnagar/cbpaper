@@ -66,8 +66,9 @@ potential issue with these approaches is that the number of time bins
 need to be chosen by the data analyst. On the one hand, a fine grouping
 of times may result in few (or none) events per interval, which then
 leads to instability in the Newton-Raphson procedure for estimation
-\citep{kalbfleisch2011statistical}. On the other hand, a coarse grouping
-could potentially mask nonlinear trends in the hazard function.
+\citep[Section 4.8]{kalbfleisch2011statistical}. On the other hand, a
+coarse grouping could potentially mask nonlinear trends in the hazard
+function.
 
 Rather than discretizing time, Hanley \& Miettinen
 \citeyearpar{hanley2009fitting} selected a discrete set of person-time
@@ -902,13 +903,13 @@ model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% Conf. & HR & 95\% Conf.\\
 \midrule
-Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.21)\\
-Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.28, 0.94)\\
-Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.47, 3.09)\\
-Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.46, 6.08)\\
-Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (1.98, 10.46)\\
+Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.19)\\
+Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.29, 0.93)\\
+Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.48, 3.02)\\
+Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.43, 6.5)\\
+Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (2.09, 9.9)\\
 \addlinespace
-Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.53)\\
+Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.54)\\
 Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
@@ -1236,9 +1237,9 @@ Sahir Rai Bhatnagar*\\
 McGill University\\%
 1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
 %
-\url{http://sahirbhatnagar.com/}\\%
+\url{http://sahirbhatnagar.com/}%
 %
-\email{sahir.bhatnagar@mcgill.ca}%
+\\\email{sahir.bhatnagar@mcgill.ca}
 }
 
 \address{%
@@ -1246,9 +1247,9 @@ Maxime Turgeon*\\
 University of Manitoba\\%
 186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
 %
-\url{https://maxturgeon.ca/}\\%
+\url{https://maxturgeon.ca/}%
 %
-\email{max.turgeon@umanitoba.ca}%
+\\\email{max.turgeon@umanitoba.ca}
 }
 
 \address{%
@@ -1258,7 +1259,7 @@ McGill University\\%
 %
 %
 %
-\email{jesse.islam@mail.mcgill.ca}%
+\\\email{jesse.islam@mail.mcgill.ca}
 }
 
 \address{%
@@ -1266,9 +1267,9 @@ James A. Hanley\\
 McGill University\\%
 1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
 %
-\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\%
+\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}%
 %
-\email{james.hanley@mcgill.ca}%
+\\\email{james.hanley@mcgill.ca}
 }
 
 \address{%
@@ -1277,7 +1278,7 @@ University of Toronto\\%
 Dalla Lana School of Public Health, 155 College Street, 6th floor,
 Toronto, Ontario M5T 3M7, Canada\\
 %
-\url{http://individual.utoronto.ca/osaarela/}\\%
+\url{http://individual.utoronto.ca/osaarela/}%
 %
-\email{olli.saarela@utoronto.ca}%
+\\\email{olli.saarela@utoronto.ca}
 }

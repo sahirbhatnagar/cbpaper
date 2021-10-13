@@ -73,6 +73,7 @@ knitr::opts_chunk$set(
 
 options(kableExtra.latex.load_packages = FALSE)
 library(casebase)
+library(ggplot2)
 library(colorspace)
 library(cowplot)
 library(data.table)
@@ -105,9 +106,9 @@ eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
 echo_plot_code <- TRUE
 # Define theme for plots
-paper_gg_theme <- theme_bw(base_size = 10) + theme(legend.position = "bottom")
+paper_gg_theme <- ggplot2::theme_bw(base_size = 10) + ggplot2::theme(legend.position = "bottom")
 # Define colour palette for CS 3
-q4 <- qualitative_hcl(4, palette = "Dark 3")
+q4 <- colorspace::qualitative_hcl(4, palette = "Dark 3")
 names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 ```
 
@@ -143,7 +144,8 @@ discrete hazard rate. A potential issue with these approaches is that the
 number of time bins need to be chosen by the data analyst. On the one hand, a fine grouping 
 of times may result in few (or none) events per interval, which then leads 
 to instability in the Newton-Raphson procedure for estimation 
-[@kalbfleisch2011statistical]. On the other hand, a coarse grouping could potentially mask 
+[@kalbfleisch2011statistical, Section 4.8]. 
+On the other hand, a coarse grouping could potentially mask 
 nonlinear trends in the hazard function. 
 
 Rather than discretizing time, Hanley & Miettinen [-@hanley2009fitting] 
