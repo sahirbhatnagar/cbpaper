@@ -1,17 +1,17 @@
-\BOOKMARK [0][-]{section*.1}{casebase: An Alternative Framework For Survival Analysis and Comparison of Event Rates}{}% 1
-\BOOKMARK [1][-]{section.2.1}{Introduction}{section*.1}% 2
-\BOOKMARK [1][-]{section.2.2}{Theoretical details}{section*.1}% 3
-\BOOKMARK [2][-]{subsection.2.2.1}{Likelihood and estimating function}{section.2.2}% 4
-\BOOKMARK [2][-]{subsection.2.2.2}{Common parametric models}{section.2.2}% 5
-\BOOKMARK [2][-]{subsection.2.2.3}{Competing-risk analysis}{section.2.2}% 6
-\BOOKMARK [2][-]{subsection.2.2.4}{Variable selection}{section.2.2}% 7
-\BOOKMARK [1][-]{section.2.3}{Comparison with existing packages}{section*.1}% 8
-\BOOKMARK [1][-]{section.2.4}{Implementation details}{section*.1}% 9
-\BOOKMARK [2][-]{subsection.2.4.1}{Population-time plots}{section.2.4}% 10
-\BOOKMARK [2][-]{subsection.2.4.2}{Parametric modeling}{section.2.4}% 11
-\BOOKMARK [1][-]{section.2.5}{Illustration of package}{section*.1}% 12
-\BOOKMARK [2][-]{subsection.2.5.1}{Case study 1\204Modeling different functions of time and non-proportional hazards}{section.2.5}% 13
-\BOOKMARK [2][-]{subsection.2.5.2}{Case study 2\204Competing risk analysis}{section.2.5}% 14
-\BOOKMARK [2][-]{subsection.2.5.3}{Case study 3\204Variable selection}{section.2.5}% 15
-\BOOKMARK [1][-]{section.2.6}{Discussion}{section*.1}% 16
-\BOOKMARK [1][-]{section.2.7}{Acknowledgments}{section*.1}% 17
+\BOOKMARK [0][-]{section*.1}{\376\377\000c\000a\000s\000e\000b\000a\000s\000e\000:\000\040\000A\000n\000\040\000A\000l\000t\000e\000r\000n\000a\000t\000i\000v\000e\000\040\000F\000r\000a\000m\000e\000w\000o\000r\000k\000\040\000F\000o\000r\000\040\000S\000u\000r\000v\000i\000v\000a\000l\000\040\000A\000n\000a\000l\000y\000s\000i\000s\000\040\000a\000n\000d\000\040\000C\000o\000m\000p\000a\000r\000i\000s\000o\000n\000\040\000o\000f\000\040\000E\000v\000e\000n\000t\000\040\000R\000a\000t\000e\000s}{}% 1
+\BOOKMARK [1][-]{section.2.1}{\376\377\000I\000n\000t\000r\000o\000d\000u\000c\000t\000i\000o\000n}{section*.1}% 2
+\BOOKMARK [1][-]{section.2.2}{\376\377\000T\000h\000e\000o\000r\000e\000t\000i\000c\000a\000l\000\040\000d\000e\000t\000a\000i\000l\000s}{section*.1}% 3
+\BOOKMARK [2][-]{subsection.2.2.1}{\376\377\000L\000i\000k\000e\000l\000i\000h\000o\000o\000d\000\040\000a\000n\000d\000\040\000e\000s\000t\000i\000m\000a\000t\000i\000n\000g\000\040\000f\000u\000n\000c\000t\000i\000o\000n}{section.2.2}% 4
+\BOOKMARK [2][-]{subsection.2.2.2}{\376\377\000C\000o\000m\000m\000o\000n\000\040\000p\000a\000r\000a\000m\000e\000t\000r\000i\000c\000\040\000m\000o\000d\000e\000l\000s}{section.2.2}% 5
+\BOOKMARK [2][-]{subsection.2.2.3}{\376\377\000C\000o\000m\000p\000e\000t\000i\000n\000g\000-\000r\000i\000s\000k\000\040\000a\000n\000a\000l\000y\000s\000i\000s}{section.2.2}% 6
+\BOOKMARK [2][-]{subsection.2.2.4}{\376\377\000V\000a\000r\000i\000a\000b\000l\000e\000\040\000s\000e\000l\000e\000c\000t\000i\000o\000n}{section.2.2}% 7
+\BOOKMARK [1][-]{section.2.3}{\376\377\000C\000o\000m\000p\000a\000r\000i\000s\000o\000n\000\040\000w\000i\000t\000h\000\040\000e\000x\000i\000s\000t\000i\000n\000g\000\040\000p\000a\000c\000k\000a\000g\000e\000s}{section*.1}% 8
+\BOOKMARK [1][-]{section.2.4}{\376\377\000I\000m\000p\000l\000e\000m\000e\000n\000t\000a\000t\000i\000o\000n\000\040\000d\000e\000t\000a\000i\000l\000s}{section*.1}% 9
+\BOOKMARK [2][-]{subsection.2.4.1}{\376\377\000P\000o\000p\000u\000l\000a\000t\000i\000o\000n\000-\000t\000i\000m\000e\000\040\000p\000l\000o\000t\000s}{section.2.4}% 10
+\BOOKMARK [2][-]{subsection.2.4.2}{\376\377\000P\000a\000r\000a\000m\000e\000t\000r\000i\000c\000\040\000m\000o\000d\000e\000l\000i\000n\000g}{section.2.4}% 11
+\BOOKMARK [1][-]{section.2.5}{\376\377\000I\000l\000l\000u\000s\000t\000r\000a\000t\000i\000o\000n\000\040\000o\000f\000\040\000p\000a\000c\000k\000a\000g\000e}{section*.1}% 12
+\BOOKMARK [2][-]{subsection.2.5.1}{\376\377\000C\000a\000s\000e\000\040\000s\000t\000u\000d\000y\000\040\0001\040\024\000M\000o\000d\000e\000l\000i\000n\000g\000\040\000d\000i\000f\000f\000e\000r\000e\000n\000t\000\040\000f\000u\000n\000c\000t\000i\000o\000n\000s\000\040\000o\000f\000\040\000t\000i\000m\000e\000\040\000a\000n\000d\000\040\000n\000o\000n\000-\000p\000r\000o\000p\000o\000r\000t\000i\000o\000n\000a\000l\000\040\000h\000a\000z\000a\000r\000d\000s}{section.2.5}% 13
+\BOOKMARK [2][-]{subsection.2.5.2}{\376\377\000C\000a\000s\000e\000\040\000s\000t\000u\000d\000y\000\040\0002\040\024\000C\000o\000m\000p\000e\000t\000i\000n\000g\000\040\000r\000i\000s\000k\000\040\000a\000n\000a\000l\000y\000s\000i\000s}{section.2.5}% 14
+\BOOKMARK [2][-]{subsection.2.5.3}{\376\377\000C\000a\000s\000e\000\040\000s\000t\000u\000d\000y\000\040\0003\040\024\000V\000a\000r\000i\000a\000b\000l\000e\000\040\000s\000e\000l\000e\000c\000t\000i\000o\000n}{section.2.5}% 15
+\BOOKMARK [1][-]{section.2.6}{\376\377\000D\000i\000s\000c\000u\000s\000s\000i\000o\000n}{section*.1}% 16
+\BOOKMARK [1][-]{section.2.7}{\376\377\000A\000c\000k\000n\000o\000w\000l\000e\000d\000g\000m\000e\000n\000t\000s}{section*.1}% 17
