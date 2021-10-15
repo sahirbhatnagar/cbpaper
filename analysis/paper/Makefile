@@ -1,5 +1,5 @@
-# from the cbpaper/analysis/paper/rjournal directory
-# usage: make filename="001-introduction" path="001-introduction"
+# from the cbpaper/analysis/paper/ directory
+# usage: make
 
 
 all: totex rjournal
@@ -10,7 +10,7 @@ all: totex rjournal
 #	rm *.aux *.blg *.out *.bbl *.log
 
 totex:
-	Rscript -e "rmarkdown::render(input = 'bhatnagar-turgeon-islam-hanley-saarela.Rmd', clean = FALSE)"
+	Rscript -e "rmarkdown::render(input = 'bhatnagar-turgeon-islam-hanley-saarela.Rmd', clean = TRUE)"
 
 rjournal:
 	bibexport -o bhatnagar-turgeon-islam-hanley-saarela.bib RJwrapper.aux
