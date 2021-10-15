@@ -601,11 +601,12 @@ head(risk)
 ```{r erspc-cox, eval = eval_cs1, echo=FALSE}
 surv_obj <- with(ERSPC, Surv(Follow.Up.Time, DeadOfPrCa))
 cox_model <- survival::coxph(surv_obj ~ ScrArm, data = ERSPC)
+cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+myCols <- cbPalette[c(4,7)]
 ```
 
 ```{r erspc-cox-cif, eval = FALSE, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \\code{survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time."}
-cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-myCols <- cbPalette[c(4,7)]
+
 
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 new_time <- seq(0,14,0.1)
@@ -747,9 +748,6 @@ do.call("lines",
 )
 ```
 
-```{r}
-knitr::knit_exit()
-```
 
 
 ## Case study 2---Competing risk analysis
