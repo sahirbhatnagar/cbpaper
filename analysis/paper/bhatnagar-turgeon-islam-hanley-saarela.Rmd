@@ -1291,7 +1291,7 @@ In conclusion, we presented the R package \pkg{casebase} which implements case-b
 
 # Acknowledgments
 
-We would like to thank the anonymous reviewers for their insightful comments and criticisms. We would also like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
+We would like to thank the anonymous reviewers for their insightful comments and criticisms. We would also like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC), RGPIN-2020-05133.
 
 <!-- # Environment Details -->
 

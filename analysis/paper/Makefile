@@ -10,7 +10,7 @@ all: totex rjournal
 #	rm *.aux *.blg *.out *.bbl *.log
 
 totex:
-	Rscript -e "rmarkdown::render(input = 'bhatnagar-turgeon-islam-hanley-saarela.Rmd', clean = TRUE)"
+	Rscript -e "rmarkdown::render(input = 'bhatnagar-turgeon-islam-hanley-saarela.Rmd', clean = FALSE)"
 
 rjournal:
 	bibexport -o bhatnagar-turgeon-islam-hanley-saarela.bib RJwrapper.aux

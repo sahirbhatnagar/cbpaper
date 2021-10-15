@@ -1,0 +1,17 @@
+\BOOKMARK [0][-]{section*.1}{casebase: An Alternative Framework For Survival Analysis and Comparison of Event Rates}{}% 1
+\BOOKMARK [1][-]{section.2.1}{Introduction}{section*.1}% 2
+\BOOKMARK [1][-]{section.2.2}{Theoretical details}{section*.1}% 3
+\BOOKMARK [2][-]{subsection.2.2.1}{Likelihood and estimating function}{section.2.2}% 4
+\BOOKMARK [2][-]{subsection.2.2.2}{Common parametric models}{section.2.2}% 5
+\BOOKMARK [2][-]{subsection.2.2.3}{Competing-risk analysis}{section.2.2}% 6
+\BOOKMARK [2][-]{subsection.2.2.4}{Variable selection}{section.2.2}% 7
+\BOOKMARK [1][-]{section.2.3}{Comparison with existing packages}{section*.1}% 8
+\BOOKMARK [1][-]{section.2.4}{Implementation details}{section*.1}% 9
+\BOOKMARK [2][-]{subsection.2.4.1}{Population-time plots}{section.2.4}% 10
+\BOOKMARK [2][-]{subsection.2.4.2}{Parametric modeling}{section.2.4}% 11
+\BOOKMARK [1][-]{section.2.5}{Illustration of package}{section*.1}% 12
+\BOOKMARK [2][-]{subsection.2.5.1}{Case study 1\204Modeling different functions of time and non-proportional hazards}{section.2.5}% 13
+\BOOKMARK [2][-]{subsection.2.5.2}{Case study 2\204Competing risk analysis}{section.2.5}% 14
+\BOOKMARK [2][-]{subsection.2.5.3}{Case study 3\204Variable selection}{section.2.5}% 15
+\BOOKMARK [1][-]{section.2.6}{Discussion}{section*.1}% 16
+\BOOKMARK [1][-]{section.2.7}{Acknowledgments}{section*.1}% 17
