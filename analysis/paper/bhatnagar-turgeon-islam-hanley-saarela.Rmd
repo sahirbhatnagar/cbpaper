@@ -149,7 +149,7 @@ On the other hand, a coarse grouping could potentially mask
 nonlinear trends in the hazard function. 
 
 Rather than discretizing time, Hanley & Miettinen [-@hanley2009fitting] 
-selected a discrete set of person-time coordinates (`person-moments') in 
+selected a discrete set of person-time coordinates ("person-moments") in 
 continuous time from all observed follow-up experience constituting the 
 study base. By doing so, they obtained a likelihood expression for the hazard 
 function that is equivalent to that of logistic regression. More specifically, all person-moments when the event of interest 
@@ -310,9 +310,12 @@ We first create the necessary dataset for producing the population time plot usi
 
 ```{r erspc-data-mutate, eval = eval_cs1, echo = FALSE}
 data("ERSPC")
-ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+# ERSPC$ScrArm was turned to factor in 0.10.1
+if (utils::packageVersion("casebase") < package_version("0.10.1")) {
+  ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
                        levels = c(0,1), 
                        labels = c("Control group", "Screening group"))
+}
 ```
 
 
@@ -1291,7 +1294,7 @@ In conclusion, we presented the R package \pkg{casebase} which implements case-b
 
 # Acknowledgments
 
-We would like to thank the anonymous reviewers for their insightful comments and criticisms. We would also like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} gratefully acknowledges funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC), RGPIN-2020-05133.
+We would like to thank the anonymous reviewers for their insightful comments and criticisms. We would also like to thank Yi Yang for helpful discussions on penalized regression models. \mbox{Bhatnagar} and \mbox{Turgeon} both gratefully acknowledge funding via a Discovery Grant from the Natural Sciences and Engineering Research Council of Canada (NSERC).
 
 <!-- # Environment Details -->
 

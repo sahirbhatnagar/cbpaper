@@ -54,9 +54,12 @@ names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 ## ----erspc-data-mutate, eval = eval_cs1, echo = FALSE-------------------------
 data("ERSPC")
-ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
+# ERSPC$ScrArm was turned to factor in 0.10.1
+if (utils::packageVersion("casebase") < package_version("0.10.1")) {
+  ERSPC$ScrArm <- factor(ERSPC$ScrArm, 
                        levels = c(0,1), 
                        labels = c("Control group", "Screening group"))
+}
 
 
 ## ----erspc-data, eval = eval_cs1----------------------------------------------
