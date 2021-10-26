@@ -87,17 +87,18 @@ well-understood logistic regression for directly modeling the hazard
 function, without requiring a discrete-time model.
 
 In this article, we present the \CRANpkg{casebase} R package
-\citep{casebase-package} which implements the Hanley \& Miettinen
-\citeyearpar{hanley2009fitting} approach for fitting fully parametric
-hazard models and covariate-adjusted survival curves using the familiar
-interface of the \code{glm} function. Our implementation allows for
-straightforward extensions to other models such as penalized regression
-for variable selection and competing-risk analysis. In addition, we
-provide functions for exploratory data analysis and visualizing the
-estimated quantities such as the hazard function, survival curve, and
-their standard errors. The ultimate goal of our package is to make
-fitting flexible hazards accessible to more end users with the hope that
-they will favor reporting absolute risks over hazard ratios.
+\citep{casebase-package} which implements and extends the Hanley \&
+Miettinen \citeyearpar{hanley2009fitting} approach for fitting fully
+parametric hazard models and covariate-adjusted survival curves using
+the familiar interface of the \code{glm} function. Our implementation
+includes extensions to other models such as penalized regression for
+variable selection and competing-risk analysis. In addition, we provide
+functions for exploratory data analysis and visualizing the estimated
+quantities such as the hazard function, survival curve, and their
+standard errors. The ultimate goal of our package is to make fitting
+flexible hazards accessible to more end users with the hope that they
+will favor reporting absolute risks and survival curves over hazard
+ratios.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
@@ -116,20 +117,20 @@ of the results and of future directions.
 
 As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
 key idea behind case-base sampling is to consider the entire study base
-as an infinite collection of \emph{person moments}. These person moments
+as an infinite collection of \emph{person-moments}. These person-moments
 are indexed by both an individual in the study and a time point, and
-therefore each person moment has a covariate profile, an exposure
+therefore each person-moment has a covariate profile, an exposure
 status, and an outcome status (i.e.~whether the event happened) attached
-to it. By comparing person moments at which an event occurred with
-person moments at which no event occurred, we can extract information
+to it. By comparing person-moments at which an event occurred with
+person-moments at which no event occurred, we can extract information
 about hazards and survival.
 
-Therefore, we start by sampling all person moments at which the event
-occurred; this collection of person moments is what Hanley \& Miettinen
+Therefore, we start by sampling all person-moments at which the event
+occurred; this collection of person-moments is what Hanley \& Miettinen
 call the \emph{case series}. The incidence of the case series is
 dictated by the hazard function of interest. Next, we sample a finite
-number of person moments at which no event occurred; this second
-collection of person moment is what Hanley \& Miettinen call the
+number of person-moments at which no event occurred; this second
+collection of person-moment is what Hanley \& Miettinen call the
 \emph{base series}. The sampling mechanism for the base series is left
 at the discretion of the user, but in practice we find that sampling
 uniformly from the study base provides both simplicity and good
@@ -156,9 +157,9 @@ implies that the counting process jumps are less than or equal to one.
 We are interested in modeling the hazard functions \(\lambda_{i}(t)\) of
 the processes \(N_i(t)\), and which satisfy
 \[\lambda_{i}(t) dt = E[dN_{i}(t)\mid \mathrm{past}].\] The processes
-\(N_i(t)\) count the person moments from the \emph{case series}.
+\(N_i(t)\) count the person-moments from the \emph{case series}.
 
-To complement the case series, we sample person moments for the base
+To complement the case series, we sample person-moments for the base
 series. To do so, we model the base series sampling mechanism using
 non-homogeneous Poisson processes \(R_i(t) \in \{0, 1, 2, \ldots\}\);
 the person-moments where \(dR_i(t) = 1\) constitute the base series. We
@@ -1317,9 +1318,9 @@ Sahir Rai Bhatnagar*\\
 McGill University\\%
 1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
 %
-\url{http://sahirbhatnagar.com/}%
+\url{http://sahirbhatnagar.com/}\\%
 %
-\\\email{sahir.bhatnagar@mcgill.ca}
+\email{sahir.bhatnagar@mcgill.ca}%
 }
 
 \address{%
@@ -1327,9 +1328,9 @@ Maxime Turgeon*\\
 University of Manitoba\\%
 186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
 %
-\url{https://maxturgeon.ca/}%
+\url{https://maxturgeon.ca/}\\%
 %
-\\\email{max.turgeon@umanitoba.ca}
+\email{max.turgeon@umanitoba.ca}%
 }
 
 \address{%
@@ -1339,7 +1340,7 @@ McGill University\\%
 %
 %
 %
-\\\email{jesse.islam@mail.mcgill.ca}
+\email{jesse.islam@mail.mcgill.ca}%
 }
 
 \address{%
@@ -1347,9 +1348,9 @@ James A. Hanley\\
 McGill University\\%
 1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
 %
-\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}%
+\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\%
 %
-\\\email{james.hanley@mcgill.ca}
+\email{james.hanley@mcgill.ca}%
 }
 
 \address{%
@@ -1358,7 +1359,7 @@ University of Toronto\\%
 Dalla Lana School of Public Health, 155 College Street, 6th floor,
 Toronto, Ontario M5T 3M7, Canada\\
 %
-\url{http://individual.utoronto.ca/osaarela/}%
+\url{http://individual.utoronto.ca/osaarela/}\\%
 %
-\\\email{olli.saarela@utoronto.ca}
+\email{olli.saarela@utoronto.ca}%
 }

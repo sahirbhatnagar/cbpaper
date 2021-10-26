@@ -1,4 +1,4 @@
-## ----setup, echo=FALSE, message=FALSE, warning=FALSE--------------------------
+## ----setup, echo=FALSE, message=FALSE, warning=FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE,
@@ -53,7 +53,7 @@ q4 <- colorspace::qualitative_hcl(4, palette = "Dark 3")
 names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 
-## ----erspc-data-mutate, eval = eval_cs1, echo = FALSE-------------------------
+## ----erspc-data-mutate, eval = eval_cs1, echo = FALSE--------------------------------------------------
 data("ERSPC")
 # ERSPC$ScrArm was turned to factor in 0.10.1
 if (utils::packageVersion("casebase") < package_version("0.10.1")) {
@@ -63,7 +63,7 @@ if (utils::packageVersion("casebase") < package_version("0.10.1")) {
 }
 
 
-## ----erspc-data, eval = eval_cs1, echo=TRUE-----------------------------------
+## ----erspc-data, eval = eval_cs1, echo=TRUE------------------------------------------------------------
 pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
                                event = "DeadOfPrCa", exposure = "ScrArm")
 inherits(pt_object, "popTime")
@@ -117,7 +117,7 @@ g <- plot_grid(plotspop, legend_b, ncol = 1, rel_heights = c(1, .1))
 g
 
 
-## ----plot-stratified-erspc-data-code, eval = FALSE, echo = TRUE---------------
+## ----plot-stratified-erspc-data-code, eval = FALSE, echo = TRUE----------------------------------------
 #> plot(pt_object, add.base.series = TRUE)
 
 
@@ -151,21 +151,21 @@ g
 #>   ylab("Population Size")
 
 
-## ---- eval = eval_cs1, echo = -1----------------------------------------------
+## ---- eval = eval_cs1, echo = -1-----------------------------------------------------------------------
 set.seed(1953)
 fit <- fitSmoothHazard(DeadOfPrCa ~ pspline(Follow.Up.Time, df = 2) * ScrArm, 
                        data = ERSPC, ratio = 100)
 
 
-## ---- eval = eval_cs1, echo = TRUE--------------------------------------------
+## ---- eval = eval_cs1, echo = TRUE---------------------------------------------------------------------
 summary(fit) 
 
 
-## ----erscp-compare, eval = eval_cs1, echo = TRUE------------------------------
+## ----erscp-compare, eval = eval_cs1, echo = TRUE-------------------------------------------------------
 anova(fit, test = "LRT")
 
 
-## ---- echo = TRUE, eval = FALSE-----------------------------------------------
+## ---- echo = TRUE, eval = FALSE------------------------------------------------------------------------
 #> new_time <- seq(1, 12, by  = 0.1)
 #> new_data <- data.frame(ScrArm = factor("Control group",
 #>                                          levels = c("Control group","Screening group")),
@@ -210,27 +210,26 @@ lines(tt$Follow.Up.Time, tt$hazard_ratio, lwd = 2, lty = 1)
 mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, outer = TRUE, line = -1, at = 0.7)
 
 
-## ----cs1hazard, eval=eval_cs1, echo=TRUE, fig.cap='Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combinations of covariates along with confidence bands.'----
+## ----cs1hazard, eval=eval_cs1, echo=TRUE, fig.cap='Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combination of covariates along with confidence bands.'----
 plot(fit, type = "hazard",
      hazard.params = list(xvar = "Follow.Up.Time",
                           by = "ScrArm"))
 
 
-## ---- eval=eval_cs1, echo=TRUE------------------------------------------------
+## ---- eval=eval_cs1, echo=TRUE-------------------------------------------------------------------------
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 new_time <- seq(0,14,0.1)
 risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
-head(risk)
 
 
-## ----erspc-cox, eval = eval_cs1, echo=FALSE-----------------------------------
+## ----erspc-cox, eval = eval_cs1, echo=FALSE------------------------------------------------------------
 surv_obj <- with(ERSPC, Surv(Follow.Up.Time, DeadOfPrCa))
 cox_model <- survival::coxph(surv_obj ~ ScrArm, data = ERSPC)
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 myCols <- cbPalette[c(4,7)]
 
 
-## ----eval = eval_cs1, echo = TRUE---------------------------------------------
+## ----eval = eval_cs1, echo = TRUE----------------------------------------------------------------------
 conf_ints <- confint(risk, fit)
 head(conf_ints)
 
@@ -338,7 +337,7 @@ do.call("lines",
 )
 
 
-## ----bmtcrr-data, eval = eval_cs2, message = FALSE----------------------------
+## ----bmtcrr-data, eval = eval_cs2, message = FALSE-----------------------------------------------------
 data(bmtcrr)
 
 
@@ -355,7 +354,7 @@ plot(popTimeData,
   scale_y_continuous(labels = label_number_si())
 
 
-## ----bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2, echo = TRUE----
+## ----bmtcrr-casebase-weibull, warning = FALSE, eval = eval_cs2, echo = TRUE----------------------------
 model_cb <- fitSmoothHazard(
   Status ~ ftime + Sex + D + Phase + Source + Age,
   data = bmtcrr,
@@ -364,7 +363,7 @@ model_cb <- fitSmoothHazard(
 )
 
 
-## ----bmtcrr-cox, echo = TRUE, eval = eval_cs2---------------------------------
+## ----bmtcrr-cox, echo = TRUE, eval = eval_cs2----------------------------------------------------------
 library(survival)
 # Prepare data for coxph
 bmtcrr_cox <- transform(bmtcrr, 
@@ -375,7 +374,7 @@ model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
                    data = bmtcrr_cox, id = id)
 
 
-## ----bmtcrr-cis, echo=FALSE, eval = eval_cs2----------------------------------
+## ----bmtcrr-cis, echo=FALSE, eval = eval_cs2-----------------------------------------------------------
 # Table of coefficients
 library(glue)
 z_value <- qnorm(0.975)
@@ -432,7 +431,7 @@ table_cb %>%
   add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
 
 
-## ----cb_risk, warning = FALSE, cache = FALSE, eval = eval_cs2-----------------
+## ----cb_risk, warning = FALSE, cache = FALSE, eval = eval_cs2------------------------------------------
 # Pick 100 equidistant points between 0 and 60 months
 time_points <- seq(0, 60, length.out = 50)
 
@@ -458,7 +457,7 @@ risk_cb <- absoluteRisk(
 )
 
 
-## ----fg_risk, eval = eval_cs2, echo = TRUE------------------------------------
+## ----fg_risk, eval = eval_cs2, echo = TRUE-------------------------------------------------------------
 library(timereg)
 model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
                         const(Phase) + const(Source) + const(Age),
@@ -468,7 +467,7 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
 risk_fg <- predict(model_fg, newdata, times = time_points)
 
 
-## ----cox_risk, eval = eval_cs2, echo = TRUE-----------------------------------
+## ----cox_risk, eval = eval_cs2, echo = TRUE------------------------------------------------------------
 # Estimate absolute risk curve
 risk_cox <- survfit(model_cox, newdata = newdata)
 
@@ -532,7 +531,7 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
   ylab("Relapse risk")
 
 
-## ----supportData, eval = eval_cs3---------------------------------------------
+## ----supportData, eval = eval_cs3----------------------------------------------------------------------
 library(riskRegression)
 scaleFUNy <- function(x) sprintf("%.2f", x)
 scaleFUNx <- function(x) sprintf("%.0f", x)
@@ -548,13 +547,13 @@ train <- support[train_index,]
 test <- support[test_index,]
 
 
-## ----supportCox_fit, eval=eval_cs3, echo=FALSE, cache=FALSE-------------------
+## ----supportCox_fit, eval=eval_cs3, echo=FALSE, cache=FALSE--------------------------------------------
 # Cox with everything but sps and aps
 cox <- survival::coxph(Surv(time = d.time, event = death) ~ . - aps - sps,
                            data = train, x = TRUE)
 
 
-## ----supportCB_fit, eval=eval_cs3, echo=TRUE, cache=FALSE---------------------
+## ----supportCB_fit, eval=eval_cs3, echo=TRUE, cache=FALSE----------------------------------------------
 # Create matrices for inputs
 x <- model.matrix(death ~ . - d.time - aps - sps, 
                   data = train)[, -c(1)] # Remove intercept
@@ -570,7 +569,7 @@ pen_cb <- casebase::fitSmoothHazard.fit(x, y,
 )
 
 
-## ----coxHazAbsolute, echo = FALSE, eval = eval_cs3----------------------------
+## ----coxHazAbsolute, echo = FALSE, eval = eval_cs3-----------------------------------------------------
 # Create survival object for fitting Coxnet
 u <- with(train, survival::Surv(time = d.time, event = death))
 coxNet <- glmnet::cv.glmnet(x = x, y = u, family = "cox", alpha = 1, standardize = TRUE)
@@ -645,7 +644,7 @@ dwplot(lolliplotDots) +
   scale_color_manual(values = q4)
 
 
-## ----support_abs, eval=eval_cs3, echo=FALSE-----------------------------------
+## ----support_abs, eval=eval_cs3, echo=FALSE------------------------------------------------------------
 # Absolute Risks
 newx <- model.matrix(death ~ . - d.time - aps - sps,
                      data = test)[, -c(1)]
@@ -684,7 +683,7 @@ data_absRisk <- bind_rows(
   mutate(Model = factor(Model, levels = names(q4)))
 
 
-## ----absRiskPlot, echo=FALSE, eval=eval_cs3-----------------------------------
+## ----absRiskPlot, echo=FALSE, eval=eval_cs3------------------------------------------------------------
 reg_ci <- ggplot(data_absRisk, aes(Time, Prob)) +
   geom_line(aes(colour = Model)) +
   labs(y = "Probability of death", x = "Follow-up time (years)", color = "Models") +
@@ -695,7 +694,7 @@ reg_ci <- ggplot(data_absRisk, aes(Time, Prob)) +
   scale_y_continuous(labels = scaleFUNy, n.breaks = 9)
 
 
-## ----eval = eval_cs3, echo = FALSE, warning = FALSE---------------------------
+## ----eval = eval_cs3, echo = FALSE, warning = FALSE----------------------------------------------------
 # We need this chunk until this method reaches the CRAN version of riskRegression
 predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
   if (!is.null(object$matrix.fit)) {
@@ -739,7 +738,7 @@ predictRisk.singleEventCB <- function(object, newdata, times, cause, ...) {
 }
 
 
-## ----support_Brier, eval=eval_cs3, echo=FALSE---------------------------------
+## ----support_Brier, eval=eval_cs3, echo=FALSE----------------------------------------------------------
 # Brier score
 # 1. Unpenalized models
 # First fix NA coefficients, then compute Brier score
@@ -794,13 +793,13 @@ legend_reg <- cowplot::get_legend(
 cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 
 
-## ----colophon, eval = eval_colophon, cache = FALSE----------------------------
+## ----colophon, eval = eval_colophon, cache = FALSE-----------------------------------------------------
 #> # which R packages and versions?
 #> # devtools::session_info()
 #> sessionInfo()
 
 
-## ---- eval = eval_colophon----------------------------------------------------
+## ---- eval = eval_colophon-----------------------------------------------------------------------------
 #> # what commit is this file at?
 #> git2r::repository(here::here())
 
