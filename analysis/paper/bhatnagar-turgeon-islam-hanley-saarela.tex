@@ -66,8 +66,9 @@ potential issue with these approaches is that the number of time bins
 need to be chosen by the data analyst. On the one hand, a fine grouping
 of times may result in few (or none) events per interval, which then
 leads to instability in the Newton-Raphson procedure for estimation
-\citep{kalbfleisch2011statistical}. On the other hand, a coarse grouping
-could potentially mask nonlinear trends in the hazard function.
+\citep[Section 4.8]{kalbfleisch2011statistical}. On the other hand, a
+coarse grouping could potentially mask nonlinear trends in the hazard
+function.
 
 Rather than discretizing time, Hanley \& Miettinen
 \citeyearpar{hanley2009fitting} selected a discrete set of person-time
@@ -86,17 +87,18 @@ well-understood logistic regression for directly modeling the hazard
 function, without requiring a discrete-time model.
 
 In this article, we present the \CRANpkg{casebase} R package
-\citep{casebase-package} which implements the Hanley \& Miettinen
-\citeyearpar{hanley2009fitting} approach for fitting fully parametric
-hazard models and covariate-adjusted survival curves using the familiar
-interface of the \code{glm} function. Our implementation allows for
-straightforward extensions to other models such as penalized regression
-for variable selection and competing-risk analysis. In addition, we
-provide functions for exploratory data analysis and visualizing the
-estimated quantities such as the hazard function, survival curve, and
-their standard errors. The ultimate goal of our package is to make
-fitting flexible hazards accessible to more end users with the hope that
-they will favor reporting absolute risks over hazard ratios.
+\citep{casebase-package} which implements and extends the Hanley \&
+Miettinen \citeyearpar{hanley2009fitting} approach for fitting fully
+parametric hazard models and covariate-adjusted survival curves using
+the familiar interface of the \code{glm} function. Our implementation
+includes extensions to other models such as penalized regression for
+variable selection and competing-risk analysis. In addition, we provide
+functions for exploratory data analysis and visualizing the estimated
+quantities such as the hazard function, survival curve, and their
+standard errors. The ultimate goal of our package is to make fitting
+flexible hazards accessible to more end users with the hope that they
+will favor reporting absolute risks and survival curves over hazard
+ratios.
 
 In what follows, we first recall some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
@@ -115,20 +117,20 @@ of the results and of future directions.
 
 As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
 key idea behind case-base sampling is to consider the entire study base
-as an infinite collection of \emph{person moments}. These person moments
+as an infinite collection of \emph{person-moments}. These person-moments
 are indexed by both an individual in the study and a time point, and
-therefore each person moment has a covariate profile, an exposure
+therefore each person-moment has a covariate profile, an exposure
 status, and an outcome status (i.e.~whether the event happened) attached
-to it. By comparing person moments at which an event occurred with
-person moments at which no event occurred, we can extract information
+to it. By comparing person-moments at which an event occurred with
+person-moments at which no event occurred, we can extract information
 about hazards and survival.
 
-Therefore, we start by sampling all person moments at which the event
-occurred; this collection of person moments is what Hanley \& Miettinen
+Therefore, we start by sampling all person-moments at which the event
+occurred; this collection of person-moments is what Hanley \& Miettinen
 call the \emph{case series}. The incidence of the case series is
 dictated by the hazard function of interest. Next, we sample a finite
-number of person moments at which no event occurred; this second
-collection of person moment is what Hanley \& Miettinen call the
+number of person-moments at which no event occurred; this second
+collection of person-moment is what Hanley \& Miettinen call the
 \emph{base series}. The sampling mechanism for the base series is left
 at the discretion of the user, but in practice we find that sampling
 uniformly from the study base provides both simplicity and good
@@ -155,9 +157,9 @@ implies that the counting process jumps are less than or equal to one.
 We are interested in modeling the hazard functions \(\lambda_{i}(t)\) of
 the processes \(N_i(t)\), and which satisfy
 \[\lambda_{i}(t) dt = E[dN_{i}(t)\mid \mathrm{past}].\] The processes
-\(N_i(t)\) count the person moments from the \emph{case series}.
+\(N_i(t)\) count the person-moments from the \emph{case series}.
 
-To complement the case series, we sample person moments for the base
+To complement the case series, we sample person-moments for the base
 series. To do so, we model the base series sampling mechanism using
 non-homogeneous Poisson processes \(R_i(t) \in \{0, 1, 2, \ldots\}\);
 the person-moments where \(dR_i(t) = 1\) constitute the base series. We
@@ -449,9 +451,17 @@ plot by treatment group. The resulting object inherits from class
 \code{popTime} and stores the exposure variable as an attribute:
 
 \begin{Schunk}
+\begin{Sinput}
+pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
+                               event = "DeadOfPrCa", exposure = "ScrArm")
+inherits(pt_object, "popTime")
+\end{Sinput}
 \begin{Soutput}
 #> [1] TRUE
 \end{Soutput}
+\begin{Sinput}
+attr(pt_object, "exposure")
+\end{Sinput}
 \begin{Soutput}
 #> [1] "ScrArm"
 \end{Soutput}
@@ -627,27 +637,35 @@ single-event setting.
 
 In this section, we illustrate the main functions of the \pkg{casebase}
 package through three case studies. Each one showcases a different type
-of analysis. First, we show how to model time flexibly as well as
-non-proportional hazards. Then we perform a competing-risk analysis and
-compare our results with the Cox model and the Fine-Gray model. The
-third case study illustrates how to perform variable selection in
-high-dimensional datasets.
+of analysis. First, we show how to model non-constant and
+non-proportional hazards through a flexible specification of time. Then
+we perform a competing-risk analysis and compare our results with the
+Cox model and the Fine-Gray model. The third case study illustrates how
+to perform variable selection in high-dimensional datasets.
 
-\hypertarget{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}{%
-\subsection{Case study 1---Modeling different functions of time and
-non-proportional
-hazards}\label{case-study-1modeling-different-functions-of-time-and-non-proportional-hazards}}
+\hypertarget{case-study-1flexible-modeling-of-the-hazard-function}{%
+\subsection{Case study 1---Flexible modeling of the hazard
+function}\label{case-study-1flexible-modeling-of-the-hazard-function}}
 
 For our first case study, we return to the ERSPC study and investigate
-the differences in risk between the control and screening arms. We fit a
-flexible hazard by using a smooth function of time modeled with cubic
-B-splines. The model is fit using \code{fitSmoothHazard} with the
-familiar formula interface:
+the differences in risk between the control and screening arms. Previous
+re-analyses of these data suggest that the 20\% reduction in prostate
+cancer death due to screening was an underestimate
+\citep{hanley2010mortality}. The estimated 20\% (from a proportional
+hazards model) did not account for the delay between screening and the
+time the effect is expected to be observed. As a result, the null
+effects in years 1--7 masked the substantial reductions that began to
+appear from year 8 onward. This motivates the use of a time-dependent
+hazard ratio which can easily be fit with the \pkg{casebase} package by
+including an interaction term with time in the model. We fit a flexible
+hazard by using a smooth function of time modeled with a penalized cubic
+spline basis with 2 degrees of freedom (implemented in the
+\code{survival::pspline} function). The model is fit using
+\code{fitSmoothHazard} with the familiar formula interface:
 
 \begin{Schunk}
 \begin{Sinput}
-library(splines)
-fit <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
+fit <- fitSmoothHazard(DeadOfPrCa ~ pspline(Follow.Up.Time, df = 2) * ScrArm, 
                        data = ERSPC, ratio = 100)
 \end{Sinput}
 \end{Schunk}
@@ -670,60 +688,68 @@ summary(fit)
 #> ----
 #> 
 #> Call:
-#> fitSmoothHazard(formula = DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
-#>     data = ERSPC, ratio = 100)
+#> fitSmoothHazard(formula = DeadOfPrCa ~ pspline(Follow.Up.Time, 
+#>     df = 2) * ScrArm, data = ERSPC, ratio = 100)
 #> 
 #> Deviance Residuals: 
 #>    Min      1Q  Median      3Q     Max  
-#> -0.403  -0.172  -0.135  -0.085   3.801  
+#> -0.477  -0.164  -0.140  -0.084   3.882  
 #> 
 #> Coefficients:
-#>                       Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)           -10.2533     0.3168  -32.36  < 2e-16 ***
-#> bs(Follow.Up.Time)1     4.2544     0.7976    5.33  9.6e-08 ***
-#> bs(Follow.Up.Time)2     2.1371     0.4720    4.53  5.9e-06 ***
-#> bs(Follow.Up.Time)3     4.5339     0.6889    6.58  4.7e-11 ***
-#> ScrArmScreening group  -0.2481     0.0886   -2.80   0.0051 ** 
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#>                                                        Estimate Std. Error
+#> (Intercept)                                             -12.613      9.756
+#> pspline(Follow.Up.Time, df = 2)1                          1.320     10.705
+#> pspline(Follow.Up.Time, df = 2)2                          5.190      9.526
+#> pspline(Follow.Up.Time, df = 2)3                          4.481      9.866
+#> pspline(Follow.Up.Time, df = 2)4                          6.060      9.690
+#> pspline(Follow.Up.Time, df = 2)5                          5.231      9.851
+#> pspline(Follow.Up.Time, df = 2)6                          9.176      9.749
+#> pspline(Follow.Up.Time, df = 2)7                         -0.434     19.572
+#> ScrArmScreening group                                     7.900     13.050
+#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group   -7.962     14.507
+#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group   -8.351     12.690
+#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group   -7.787     13.224
+#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group   -8.098     12.942
+#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -9.389     13.223
+#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group   -7.385     13.114
+#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group  -17.380     30.806
+#>                                                        z value Pr(>|z|)
+#> (Intercept)                                              -1.29     0.20
+#> pspline(Follow.Up.Time, df = 2)1                          0.12     0.90
+#> pspline(Follow.Up.Time, df = 2)2                          0.54     0.59
+#> pspline(Follow.Up.Time, df = 2)3                          0.45     0.65
+#> pspline(Follow.Up.Time, df = 2)4                          0.63     0.53
+#> pspline(Follow.Up.Time, df = 2)5                          0.53     0.60
+#> pspline(Follow.Up.Time, df = 2)6                          0.94     0.35
+#> pspline(Follow.Up.Time, df = 2)7                         -0.02     0.98
+#> ScrArmScreening group                                     0.61     0.54
+#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group   -0.55     0.58
+#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group   -0.66     0.51
+#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group   -0.59     0.56
+#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group   -0.63     0.53
+#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -0.71     0.48
+#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group   -0.56     0.57
+#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group   -0.56     0.57
 #> 
 #> (Dispersion parameter for binomial family taken to be 1)
 #> 
 #>     Null deviance: 6059.0  on 54539  degrees of freedom
-#> Residual deviance: 5787.6  on 54535  degrees of freedom
-#> AIC: 5798
+#> Residual deviance: 5772.7  on 54524  degrees of freedom
+#> AIC: 5805
 #> 
-#> Number of Fisher Scoring iterations: 8
+#> Number of Fisher Scoring iterations: 9
 \end{Soutput}
 \end{Schunk}
 
-Next, the \code{absoluteRisk} function takes as input the
-\code{singleEventCB} object and returns a matrix where each column
-corresponds to the covariate profiles specified in the \code{newdata}
-argument, and each row corresponds to time points specified by the
-\code{time} argument:
+As noted in the Theoretical Details section, the usual asymptotic
+results hold for likelihood ratio tests built using case-base sampling
+models. Therefore, we can easily test the significance of the spline
+term and its interaction with time:
 
 \begin{Schunk}
 \begin{Sinput}
-new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
-new_time <- c(0, 1)
-
-absoluteRisk(fit, time = new_time, newdata = new_data)
+anova(fit, test = "LRT")
 \end{Sinput}
-\begin{Soutput}
-#>  time                
-#>     0 0.0e+00 0.0e+00
-#>     1 5.4e-05 4.2e-05
-\end{Soutput}
-\end{Schunk}
-
-In Figure \ref{fig:erspc-cox-cif}, we overlay the estimated risk
-function from \pkg{casebase} on the Cox model estimate. As noted in the
-Theoretical Details section, the usual asymptotic results hold for
-likelihood ratio tests built using case-base sampling models. Therefore,
-we can easily test the significance of the spline model:
-
-\begin{Schunk}
 \begin{Soutput}
 #> Analysis of Deviance Table
 #> 
@@ -734,84 +760,67 @@ we can easily test the significance of the spline model:
 #> Terms added sequentially (first to last)
 #> 
 #> 
-#>                    Df Deviance Resid. Df Resid. Dev Pr(>Chi)    
-#> NULL                               54539       6059             
-#> bs(Follow.Up.Time)  3      263     54536       5796   <2e-16 ***
-#> ScrArm              1        8     54535       5788   0.0048 ** 
+#>                                        Df Deviance Resid. Df Resid. Dev
+#> NULL                                                   54539       6059
+#> pspline(Follow.Up.Time, df = 2)         7    269.1     54532       5790
+#> ScrArm                                  1      8.0     54531       5782
+#> pspline(Follow.Up.Time, df = 2):ScrArm  7      9.1     54524       5773
+#>                                        Pr(>Chi)    
+#> NULL                                               
+#> pspline(Follow.Up.Time, df = 2)          <2e-16 ***
+#> ScrArm                                   0.0046 ** 
+#> pspline(Follow.Up.Time, df = 2):ScrArm   0.2454    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{Soutput}
 \end{Schunk}
 
-The null hypothesis is rejected in favor of the spline model. Similarly,
-to compare different models (e.g.~time modeled linearly), we could
-compute Akaike's Information Criterion (AIC) for each model and compare
-them.
+Similarly, to compare different models (e.g.~time modeled linearly), we
+could compute Akaike's Information Criterion (AIC) for each model.
+
+\hypertarget{time-dependent-hazard-ratios}{%
+\subsubsection{Time-dependent hazard
+ratios}\label{time-dependent-hazard-ratios}}
+
+In what follows, the hazard ratio for a variable \(X\) is defined as
+
+\[
+\frac{\lambda\left(t | X=x_1, \mathbf{Z}=\mathbf{z_1} ; \hat{\beta}\right)}{\lambda(t | X=x_0, \mathbf{Z}=\mathbf{z_0} ; \hat{\beta})}
+\] where \(\lambda(t|\cdot;\hat{\beta})\) is the hazard rate as a
+function of the variable \(t\) (which is usually time, but can be any
+other continuous variable), \(x_1\) is the value of \(X\) for the
+exposed group, \(x_0\) is the value of \(X\) for the unexposed group,
+\(\mathbf{Z}\) are other covariates in the model which are equal to
+\(\mathbf{z_1}\) in the exposed and \(\mathbf{z_0}\) in the unexposed
+group, and \(\hat{\beta}\) are the estimated regression coefficients. As
+indicated by the formula above, it is most instructive to plot the
+hazard ratio as a function of a variable \(t\) only if there is an
+interaction between \(t\) and \(X\). Otherwise, the resulting plot will
+simply be a horizontal line across time.
+
+The \code{plot} method with \code{type="hr"} for objects of class
+\code{singleEventCB} can be used to compute time-dependent hazard ratios
+and confidence intervals. In Figure \ref{fig:interaction-ERSPC}, we show
+the estimated hazard ratio and 95\% confidence interval for screening
+vs.~control group as a function of time. Note that we must specify the
+covariate profile for the reference group and times for the predicted
+hazards.
+
+\begin{Schunk}
+\begin{Sinput}
+new_time <- seq(1, 12, by  = 0.1)
+new_data <- data.frame(ScrArm = factor("Control group",
+                                         levels = c("Control group","Screening group")),
+                      Follow.Up.Time = new_time)
+plot(fit, type = "hr", newdata = new_data,
+     var = "ScrArm", xvar = "Follow.Up.Time", ci = T)
+\end{Sinput}
+\end{Schunk}
 
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cox-cif-1} \caption{Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \code{survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time.}\label{fig:erspc-cox-cif}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./interaction-ERSPC-1} \caption[Estimated hazard ratio and 95\% confidence interval for screening vs]{Estimated hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
 \end{figure}
-\end{Schunk}
-
-Next, we can compute confidence intervals for the risk function using
-the method \code{confint.absRiskCB}.
-
-\begin{Schunk}
-\begin{Sinput}
-risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
-conf_ints <- confint(risk, fit)
-conf_ints
-\end{Sinput}
-\begin{Soutput}
-#>   time estimate conf.low conf.high        cov_prof
-#> 1    0  0.0e+00  0.0e+00   0.0e+00   Control group
-#> 2    1  5.4e-05  3.5e-05   9.3e-05   Control group
-#> 3    0  0.0e+00  0.0e+00   0.0e+00 Screening group
-#> 4    1  4.2e-05  2.7e-05   7.3e-05 Screening group
-\end{Soutput}
-\end{Schunk}
-
-These point-wise confidence intervals are constructed using parametric
-bootstrap; the validity of this approach relies on the asymptotic
-normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the
-95\% confidence bands around the estimates.
-
-\begin{Schunk}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cif-conf-1} \caption[Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands]{Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands.}\label{fig:erspc-cif-conf}
-\end{figure}
-\end{Schunk}
-
-Previous re-analyses of these data suggest that the 20\% reduction in
-prostate cancer death due to screening was an underestimate
-\citep{hanley2010mortality}. The estimated 20\% (from a proportional
-hazards model) did not account for the delay between screening and the
-time the effect is expected to be observed. As a result, the null
-effects in years 1--7 masked the substantial reductions that began to
-appear from year 8 onward. This motivates the use of a time-dependent
-hazard ratio which can easily be fit with the \pkg{casebase} package by
-including an interaction term with time in the model:
-
-\begin{Schunk}
-\begin{Sinput}
-fit_inter <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) * ScrArm, 
-                             data = ERSPC)
-\end{Sinput}
-\end{Schunk}
-
-Note that we did not have to specify any cut points, as would be the
-case with the \code{survSplit} function in the \pkg{survival} package.
-In Figure \ref{fig:interaction-ERSPC}, we have the estimated hazard
-ratio and 95\% confidence interval for screening vs.~control group as a
-function of time using the \code{plot} method for objects of class
-\code{singleEventCB}:
-
-\begin{Schunk}
-\begin{Sinput}
-plot(fit_inter, type = "hr", newdata = new_data,
-     var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
-\end{Sinput}
 \end{Schunk}
 
 The plot shows that the effect of screening only becomes statistically
@@ -819,9 +828,81 @@ apparent by year 7 and later. The 25-60\% reductions seen in years 8-12
 of the study suggests a much higher reduction in prostate cancer due to
 screening than the single overall 20\% reported in the original article.
 
+\hypertarget{hazard-functions}{%
+\subsubsection{Hazard functions}\label{hazard-functions}}
+
+Modeling the hazard function directly allows us to easily visualize it
+with the \code{plot} method and \code{type="hazard"} for objects of
+class \code{singleEventCB}. We plot the hazard functions for both
+treatment arms in Figure \ref{fig:cs1hazard}. The pattern we see is
+consistent with the population-time plot shown in Figure
+\ref{fig:plot-erspc-data} C, where more events are observed at later
+follow-up times. The drop at the end can be explained by the fact that
+very few observations were followed for the entire 15 year period.
+
+\begin{Schunk}
+\begin{Sinput}
+plot(fit, type = "hazard",
+     hazard.params = list(xvar = "Follow.Up.Time",
+                          by = "ScrArm"))
+\end{Sinput}
+\begin{Soutput}
+#> Conditions used in construction of plot
+#> ScrArm: Control group / Screening group
+#> offset: 0
+\end{Soutput}
+\begin{figure}[ht]
+\includegraphics[width=\textwidth,keepaspectratio=true]{./cs1hazard-1} \caption[Estimated hazard functions for control and screening groups in the ERSPC dataset]{Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combination of covariates along with confidence bands.}\label{fig:cs1hazard}
+\end{figure}
+\end{Schunk}
+
+\FloatBarrier
+
+\hypertarget{absolute-risk}{%
+\subsubsection{Absolute risk}\label{absolute-risk}}
+
+Next, the \code{absoluteRisk} function takes as input the
+\code{singleEventCB} object and returns a matrix where each column
+corresponds to the covariate profiles specified in the \code{newdata}
+argument, and each row corresponds to time points specified by the
+\code{time} argument:
+
+\begin{Schunk}
+\begin{Sinput}
+new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+new_time <- seq(0,14,0.1)
+risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+\end{Sinput}
+\end{Schunk}
+
+We can subsequently compute confidence intervals for the risk function
+using the method \code{confint.absRiskCB}:
+
+\begin{Schunk}
+\begin{Sinput}
+conf_ints <- confint(risk, fit)
+head(conf_ints)
+\end{Sinput}
+\begin{Soutput}
+#>   time estimate conf.low conf.high      cov_prof
+#> 1  0.0  0.0e+00  0.0e+00   0.0e+00 Control group
+#> 2  0.1  2.0e-06  2.5e-07   1.6e-05 Control group
+#> 3  0.2  4.2e-06  6.1e-07   3.0e-05 Control group
+#> 4  0.3  6.6e-06  1.1e-06   4.2e-05 Control group
+#> 5  0.4  9.2e-06  1.8e-06   5.2e-05 Control group
+#> 6  0.5  1.2e-05  2.8e-06   6.2e-05 Control group
+\end{Soutput}
+\end{Schunk}
+
+These point-wise confidence intervals are constructed using parametric
+bootstrap; the validity of this approach relies on the asymptotic
+normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the
+95\% confidence bands around the estimates. We also overlay the
+Kaplan-Meier curves as a reference.
+
 \begin{Schunk}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./interaction-ERSPC-1} \caption[Estimated hazard ratio and 95\% confidence interval for screening vs]{Estimated hazard ratio and 95\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\% reported in the original article.}\label{fig:interaction-ERSPC}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cif-conf-1} \caption[Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands]{Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands.}\label{fig:erspc-cif-conf}
 \end{figure}
 \end{Schunk}
 
@@ -876,7 +957,7 @@ model_cb <- fitSmoothHazard(
 \end{Schunk}
 
 We want to compare our hazard ratio estimates to that obtained from a
-Cox regression.
+Cox regression (using the \pkg{survival} package version 3.2-13).
 
 \begin{Schunk}
 \begin{Sinput}
@@ -902,14 +983,14 @@ model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% Conf. & HR & 95\% Conf.\\
 \midrule
-Sex & 0.74 & (0.43, 1.3) & 0.68 & (0.39, 1.21)\\
-Disease & 0.52 & (0.29, 0.94) & 0.52 & (0.28, 0.94)\\
-Phase (CR2 vs. CR1) & 1.20 & (0.48, 3) & 1.21 & (0.47, 3.09)\\
-Phase (CR3 vs. CR1) & 1.59 & (0.41, 6.17) & 1.67 & (0.46, 6.08)\\
-Phase (Relapse vs. CR1) & 4.09 & (1.9, 8.81) & 4.55 & (1.98, 10.46)\\
+Sex & 0.75 & (0.43, 1.31) & 0.68 & (0.39, 1.21)\\
+Disease & 0.55 & (0.3, 0.99) & 0.52 & (0.28, 0.94)\\
+Phase (CR2 vs. CR1) & 1.10 & (0.44, 2.74) & 1.21 & (0.47, 3.09)\\
+Phase (CR3 vs. CR1) & 1.75 & (0.45, 6.78) & 1.67 & (0.46, 6.08)\\
+Phase (Relapse vs. CR1) & 4.23 & (1.96, 9.14) & 4.55 & (1.98, 10.46)\\
 \addlinespace
-Source & 1.70 & (0.55, 5.23) & 1.46 & (0.47, 4.53)\\
-Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
+Source & 1.61 & (0.53, 4.91) & 1.46 & (0.47, 4.53)\\
+Age & 1.00 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1225,10 +1306,10 @@ documentation and vignettes.
 
 We would like to thank the anonymous reviewers for their insightful
 comments and criticisms. We would also like to thank Yi Yang for helpful
-discussions on penalized regression models. \mbox{Bhatnagar} and
-\mbox{Turgeon} both gratefully acknowledge funding via a Discovery Grant
-from the Natural Sciences and Engineering Research Council of Canada
-(NSERC).
+discussions on penalized regression models. \mbox{Bhatnagar}
+(RGPIN-2020-05133) and \mbox{Turgeon} (RGPIN-2021-04073) both gratefully
+acknowledge funding via a Discovery Grant from the Natural Sciences and
+Engineering Research Council of Canada (NSERC), RGPIN.
 
 \bibliography{bhatnagar-turgeon-islam-hanley-saarela.bib}
 
