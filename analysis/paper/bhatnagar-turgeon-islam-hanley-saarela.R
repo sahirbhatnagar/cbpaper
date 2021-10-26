@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
 
 options(kableExtra.latex.load_packages = FALSE)
 library(casebase)
+library(survival)
+library(splines)
+library(ggplot2)
 library(colorspace)
 library(cowplot)
 library(data.table)
@@ -21,11 +24,9 @@ library(glmnet)
 library(kableExtra)
 library(magrittr)
 library(pracma)
-library(flexsurv) 
+library(flexsurv)
 library(prodlim)
-library(riskRegression)
-library(splines)
-library(survival)
+# library(riskRegression)
 library(tibble)
 library(visreg)
 library(lubridate)
@@ -46,9 +47,9 @@ eval_cs4 <- FALSE
 eval_colophon <- FALSE # Only for draft
 echo_plot_code <- TRUE
 # Define theme for plots
-paper_gg_theme <- theme_bw(base_size = 10) + theme(legend.position = "bottom")
+paper_gg_theme <- ggplot2::theme_bw(base_size = 10) + ggplot2::theme(legend.position = "bottom")
 # Define colour palette for CS 3
-q4 <- qualitative_hcl(4, palette = "Dark 3")
+q4 <- colorspace::qualitative_hcl(4, palette = "Dark 3")
 names(q4) <- c("Cox", "Pen. Cox", "Pen. CB", "K-M")
 
 
@@ -62,7 +63,7 @@ if (utils::packageVersion("casebase") < package_version("0.10.1")) {
 }
 
 
-## ----erspc-data, eval = eval_cs1----------------------------------------------
+## ----erspc-data, eval = eval_cs1, echo=TRUE-----------------------------------
 pt_object <- casebase::popTime(ERSPC, time = "Follow.Up.Time",
                                event = "DeadOfPrCa", exposure = "ScrArm")
 inherits(pt_object, "popTime")
@@ -151,9 +152,8 @@ g
 
 
 ## ---- eval = eval_cs1, echo = -1----------------------------------------------
-set.seed(12)
-library(splines)
-fit <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm, 
+set.seed(1953)
+fit <- fitSmoothHazard(DeadOfPrCa ~ pspline(Follow.Up.Time, df = 2) * ScrArm, 
                        data = ERSPC, ratio = 100)
 
 
@@ -161,65 +161,85 @@ fit <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) + ScrArm,
 summary(fit) 
 
 
-## ---- eval=eval_cs1, echo=echo_plot_code--------------------------------------
-new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
-new_time <- c(0, 1)
-
-absoluteRisk(fit, time = new_time, newdata = new_data)
-
-
-## ----erscp-compare, eval = eval_cs1, echo = FALSE-----------------------------
+## ----erscp-compare, eval = eval_cs1, echo = TRUE------------------------------
 anova(fit, test = "LRT")
+
+
+## ---- echo = TRUE, eval = FALSE-----------------------------------------------
+#> new_time <- seq(1, 12, by  = 0.1)
+#> new_data <- data.frame(ScrArm = factor("Control group",
+#>                                          levels = c("Control group","Screening group")),
+#>                       Follow.Up.Time = new_time)
+#> plot(fit, type = "hr", newdata = new_data,
+#>      var = "ScrArm", xvar = "Follow.Up.Time", ci = T)
+
+
+## ----interaction-ERSPC, eval = eval_cs1, fig.width=8, fig.height=6, fig.cap='Estimated hazard ratio and 95\\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. 95\\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\\% reported in the original article.'----
+new_time <- seq(1, 12, by  = 0.1)
+new_data <- data.frame(ScrArm = factor("Control group",
+                                         levels = c("Control group","Screening group")),
+                      Follow.Up.Time = new_time)
+
+par(oma = c(0,1,0,8))
+tt <- plot(fit,
+     type = "hr",
+     newdata = new_data,
+     var = "ScrArm",
+     increment = 1,
+     xvar = "Follow.Up.Time",
+     ci = T,
+     xlab = "Follow-up time (years)",
+     ylab = "Death from prostate cancer hazard ratio",
+     ylim = c(0,1.50),
+     yaxt = 'n',
+     xaxt = "n",
+     rug = TRUE)
+
+axis(2, at = seq(0,1.50, by=0.25), las = 2)
+axis(1, at = seq(min(new_time),max(new_time), by=1))
+for( i in seq(0,1.50, by=0.25)) {
+  abline(h = i, lty = 1, col = "lightgrey")
+}
+for( i in seq(min(new_time),max(new_time), by=1)) {
+  abline(v = i, lty = 1, col = "lightgrey")
+}
+for(i in seq_along(seq(0, 0.75, by = 0.25))) {
+  mtext(paste0(seq(0, 0.75, by = 0.25)[i]*100,"%"), side = 4, las = 2, adj = 1, outer = TRUE, line = 2, at = c(0.63-0.11*(i-1)))
+}
+lines(tt$Follow.Up.Time, tt$hazard_ratio, lwd = 2, lty = 1)
+mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, outer = TRUE, line = -1, at = 0.7)
+
+
+## ----cs1hazard, eval=eval_cs1, echo=TRUE, fig.cap='Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combinations of covariates along with confidence bands.'----
+plot(fit, type = "hazard",
+     hazard.params = list(xvar = "Follow.Up.Time",
+                          by = "ScrArm"))
+
+
+## ---- eval=eval_cs1, echo=TRUE------------------------------------------------
+new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
+new_time <- seq(0,14,0.1)
+risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+head(risk)
 
 
 ## ----erspc-cox, eval = eval_cs1, echo=FALSE-----------------------------------
 surv_obj <- with(ERSPC, Surv(Follow.Up.Time, DeadOfPrCa))
 cox_model <- survival::coxph(surv_obj ~ ScrArm, data = ERSPC)
-
-
-## ----erspc-cox-cif, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk functions for control and screening groups in the ERSPC data. We plot the estimate from the Cox model using \\code{survival::survfit} (solid line) and the estimate from case-base sampling (dashed line). We used a cubic B-spline expansion of time."----
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 myCols <- cbPalette[c(4,7)]
 
-new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
-new_time <- seq(0,14,0.1)
-# Recompute with more time points
-risk_mp <- absoluteRisk(fit, time = new_time, newdata = new_data)
 
-plot(survfit(cox_model, newdata = new_data),
-     ylab = "Risk probability (%)",
-     xlab = "Years since randomization",
-     fun = "event",
-     xmax = max(new_time),
-     conf.int = FALSE, col = myCols, 
-     lwd = 2,
-     yscale = 100,
-     xaxt = 'n')
-legend("topleft", 
-       legend = c("Control (Cox)","Control (Case-base)",
-                  "Screening (Cox)", "Screening (Case-base)"), 
-       col = rep(myCols, each = 2),
-       lty = c(1, 2, 1, 2), 
-       lwd = 2,
-       cex = 1.1,
-       bg = "gray90")
-lines(risk_mp[,1], risk_mp[,2], col = myCols[1], lty = 2, lwd = 2)
-lines(risk_mp[,1], risk_mp[,3], col = myCols[2], lty = 2, lwd = 2)
-
-
-## ----eval = eval_cs1, echo = -1-----------------------------------------------
-new_time <- c(0, 1)
-risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
+## ----eval = eval_cs1, echo = TRUE---------------------------------------------
 conf_ints <- confint(risk, fit)
-conf_ints
+head(conf_ints)
 
 
 ## ----erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."----
-# confidence interval
-tt <- confint(risk_mp, fit)
+
+tt <- conf_ints
 
 # plot absrisk and 95% CI
-new_time <- seq(0,14,0.1)
 i.backw <- order(new_time, decreasing = TRUE)
 i.forw <- order(new_time)
 
@@ -316,53 +336,6 @@ do.call("lines",
             col = myCols[1]
         )
 )
-
-
-## ---- echo=-1, eval = eval_cs1------------------------------------------------
-set.seed(12)
-fit_inter <- fitSmoothHazard(DeadOfPrCa ~ bs(Follow.Up.Time) * ScrArm, 
-                             data = ERSPC)
-
-
-## ---- echo = TRUE, eval = FALSE-----------------------------------------------
-#> plot(fit_inter, type = "hr", newdata = new_data,
-#>      var = "ScrArm", xvar = "Follow.Up.Time", ci = TRUE)
-
-
-## ----interaction-ERSPC, eval = eval_cs1, fig.width=8, fig.height=6, fig.cap='Estimated hazard ratio and 95\\% confidence interval for screening vs. control group as a function of time in the ERSPC dataset. Hazard ratios are estimated from fitting a parametric hazard model as a function of the interaction between a cubic B-spline basis of follow-up time and treatment arm. 95\\% confidence intervals are calculated using the delta method. The plot shows that the effect of screening only begins to become statistically apparent by year 7. The 25-60\\% reductions seen in years 8-12 of the study suggests a much higher reduction in prostate cancer due to screening than the single overall 20\\% reported in the original article.'----
-new_time <- seq(1, 12, by  = 0.1)
-new_data <- data.frame(ScrArm = factor("Control group",
-                                         levels = c("Control group","Screening group")),
-                      Follow.Up.Time = new_time)
-
-par(oma = c(0,1,0,8))
-tt <- plot(fit_inter,
-     type = "hr",
-     newdata = new_data,
-     var = "ScrArm",
-     increment = 1,
-     xvar = "Follow.Up.Time",
-     ci = T,
-     xlab = "Follow-up time (years)",
-     ylab = "Death from prostate cancer hazard ratio",
-     ylim = c(0,1.50),
-     yaxt = 'n',
-     xaxt = "n",
-     rug = TRUE)
-
-axis(2, at = seq(0,1.50, by=0.25), las = 2)
-axis(1, at = seq(min(new_time),max(new_time), by=1))
-for( i in seq(0,1.50, by=0.25)) {
-  abline(h = i, lty = 1, col = "lightgrey")
-}
-for( i in seq(min(new_time),max(new_time), by=1)) {
-  abline(v = i, lty = 1, col = "lightgrey")
-}
-for(i in seq_along(seq(0, 0.75, by = 0.25))) {
-  mtext(paste0(seq(0, 0.75, by = 0.25)[i]*100,"%"), side = 4, las = 2, adj = 1, outer = TRUE, line = 2, at = c(0.63-0.11*(i-1)))
-}
-lines(tt$Follow.Up.Time, tt$hazard_ratio, lwd = 2, lty = 1)
-mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, outer = TRUE, line = -1, at = 0.7)
 
 
 ## ----bmtcrr-data, eval = eval_cs2, message = FALSE----------------------------
@@ -560,6 +533,7 @@ ggplot(risk_all, aes(x = Time, y = Risk, colour = Method)) +
 
 
 ## ----supportData, eval = eval_cs3---------------------------------------------
+library(riskRegression)
 scaleFUNy <- function(x) sprintf("%.2f", x)
 scaleFUNx <- function(x) sprintf("%.0f", x)
 data(support)
