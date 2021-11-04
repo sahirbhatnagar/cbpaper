@@ -211,6 +211,17 @@ When a logarithmic link function is used for modeling the hazard function, the a
 
 In Hanley & Miettinen [-@hanley2009fitting], the authors suggest sampling the base series *uniformly* from the study base. In terms of Poisson processes, their sampling strategy corresponds essentially to a time-homogeneous Poisson process with hazard equal to $\rho_i(t) = b/B$, where $b$ is the number of sampled observations in the base series, and $B$ is the total population-time for the study base (e.g. the sum of all individual follow-up times). More complex examples are also possible; see for example Saarela & Arjas [-@saarela2015non], where the intensity functions for the sampling mechanism are proportional to the cardiovascular disease event rate given by the Framingham score. Non-uniform sampling mechanisms can increase the efficiency of the case-base estimators.
 
+## Variance estimates
+
+The asymptotic normality of $\hat{\theta}$ gives us an efficient way to estimate the variance of various estimators derived from the hazard function. For example, to construct confidence bands around risk functions and survival functions, we can use the following procedure:
+ 
+  1. Compute $\hat{\theta}$ and its variance-covariance matrix $V(\theta)$.
+  2. Sample $B$ times from a multivariate normal $N\left(\hat{\theta}, V(\theta)\right)$.
+  3. For each sample, compute the survival function using Equation \ref{eqn:surv} below.
+  4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function.
+  
+This procedure is similar to parametric bootstrap [@efron1994introduction, Section 6.5], but it can be more accurately described as a form of approximate Bayesian computation. As such, the validity of the confidence bands relies on the Bernstein-von Mises theorem [@van2000asymptotic, Chapter 10].
+
 ## Common parametric models
 
 Let $g(t; X)$ be the linear predictor such that $\log(\lambda(t;X)) = g(t; X)$. Different functions of $t$ lead to different parametric hazard models. The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$:
@@ -460,7 +471,7 @@ By integrating these subdensities, we obtain the event-specific CI functions:
 $$ CI_j(t) = \int_0^t f_j(u)du.$$
 Again, the integrals are computed using either numerical integration (via the trapezoidal rule) or Monte Carlo integration. This option is controlled by the argument \code{method} of the \code{absoluteRisk} function.
 
-Finally, the output from \code{absoluteRisk} can be passed to a method \code{confint} to compute confidence bands around the survival function. These bands are computed using parametric bootstrap, and therefore are only valid when \code{family = "glm"} as it relies on the asymptotic normality of the estimator. Currently, this is only available for the single-event setting.
+Finally, the output from \code{absoluteRisk} can be passed to a method \code{confint} to compute confidence bands around the survival function, as described in the Theoretical Details section. These bands are only valid when \code{family = "glm"} as it relies on the asymptotic normality of the estimator. Currently, this is only available for the single-event setting.
 
 # Illustration of package
 
@@ -632,8 +643,7 @@ conf_ints <- confint(risk, fit)
 head(conf_ints)
 ```
 
-These point-wise confidence intervals are constructed using parametric bootstrap; 
-the validity of this approach relies on the asymptotic normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the 95% confidence bands around the estimates. 
+In Figure \ref{fig:erspc-cif-conf}, we see the 95% confidence bands around the estimates. 
 We also overlay the Kaplan-Meier curves as a reference. 
 
 ```{r erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."}
