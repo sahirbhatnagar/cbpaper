@@ -121,9 +121,9 @@ as an infinite collection of \emph{person-moments}. These person-moments
 are indexed by both an individual in the study and a time point, and
 therefore each person-moment has a covariate profile, an exposure
 status, and an outcome status (i.e.~whether the event happened) attached
-to it. By comparing person-moments at which an event occurred with
-person-moments at which no event occurred, we can extract information
-about hazards and survival.
+to it. By estimating the probability of an event occurring at a
+particular person-moment, we can extract information about hazards and
+survival.
 
 Therefore, we start by sampling all person-moments at which the event
 occurred; this collection of person-moments is what Hanley \& Miettinen
@@ -212,6 +212,38 @@ examples are also possible; see for example Saarela \& Arjas
 sampling mechanism are proportional to the cardiovascular disease event
 rate given by the Framingham score. Non-uniform sampling mechanisms can
 increase the efficiency of the case-base estimators.
+
+\hypertarget{variance-estimates}{%
+\subsection{Variance estimates}\label{variance-estimates}}
+
+The asymptotic normality of \(\hat{\theta}\) gives us an efficient way
+to estimate the variance of various estimators derived from the hazard
+function. For example, to construct confidence bands around risk
+functions and survival functions, we can use the following procedure:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Compute \(\hat{\theta}\) and its variance-covariance matrix
+  \(V(\theta)\).
+\item
+  Sample \(B\) times from a multivariate normal
+  \(N\left(\hat{\theta}, V(\theta)\right)\).
+\item
+  For each sample, compute the survival function using Equation
+  \ref{eqn:surv} below.
+\item
+  Use the pointwise quantiles of these survival function estimates to
+  construct a pointwise confidence band for the survival function of
+  interest.
+\end{enumerate}
+
+This procedure is similar to parametric bootstrap \citep[Section
+6.5]{efron1994introduction}, but it can be more accurately described as
+a form of approximate Bayesian computation. As such, the validity of the
+confidence bands relies on the Bernstein-von Mises theorem
+\citep[Chapter 10]{van2000asymptotic}.
 
 \hypertarget{common-parametric-models}{%
 \subsection{Common parametric models}\label{common-parametric-models}}
@@ -626,9 +658,9 @@ Carlo integration. This option is controlled by the argument
 \code{method} of the \code{absoluteRisk} function.
 
 Finally, the output from \code{absoluteRisk} can be passed to a method
-\code{confint} to compute confidence bands around the survival function.
-These bands are computed using parametric bootstrap, and therefore are
-only valid when \code{family = "glm"} as it relies on the asymptotic
+\code{confint} to compute confidence bands around the survival function,
+as described in the Theoretical Details section. These bands are only
+valid when \code{family = "glm"} as it relies on the asymptotic
 normality of the estimator. Currently, this is only available for the
 single-event setting.
 
@@ -894,11 +926,9 @@ head(conf_ints)
 \end{Soutput}
 \end{Schunk}
 
-These point-wise confidence intervals are constructed using parametric
-bootstrap; the validity of this approach relies on the asymptotic
-normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the
-95\% confidence bands around the estimates. We also overlay the
-Kaplan-Meier curves as a reference.
+In Figure \ref{fig:erspc-cif-conf}, we see the 95\% confidence bands
+around the estimates. We also overlay the Kaplan-Meier curves as a
+reference.
 
 \begin{Schunk}
 \begin{figure}[ht]

@@ -186,7 +186,7 @@ discussion of the results and of future directions.
 
 # Theoretical details {#theory}
 
-As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile and an outcome status (i.e. whether the event happened) attached to it. By comparing person-moments at which an event occurred with person-moments at which no event occurred, we can extract information about hazards and survival.
+As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile, an exposure status, and an outcome status (i.e. whether the event happened) attached to it. By estimating the probability of an event occurring at a particular person-moment, we can extract information about hazards and survival.
 
 Therefore, we start by sampling all person-moments at which the event occurred; this collection of person-moments is what Hanley & Miettinen call the *case series*. The incidence of the case series is dictated by the hazard function of interest. Next, we sample a finite number of person-moments at which no event occurred; this second collection of person-moment is what Hanley & Miettinen call the *base series*. The sampling mechanism for the base series is left at the discretion of the user, but in practice we find that sampling uniformly from the study base provides both simplicity and good performance. This is the default sampling mechanism in the package.
 
@@ -210,6 +210,17 @@ L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \the
 When a logarithmic link function is used for modeling the hazard function, the above expression is of a logistic regression form with an offset term $\log(1/\rho_i(t))$. Note that the sampling units selected in the case-base sampling mechanism are person-moments, rather than individuals, and the parameters to be estimated are hazards or hazard ratios rather than odds or odds ratios. Generally, an individual can contribute more than one person-moment, and thus the terms in the product integral are not independent. Nonetheless, Saarela [-@saarela2016case] showed that the corresponding partial likelihood score function has mean zero at the true value $\theta=\theta_0$, and that the resulting estimator $\hat{\theta}$ is asymptotically normally distributed.
 
 In Hanley & Miettinen [-@hanley2009fitting], the authors suggest sampling the base series *uniformly* from the study base. In terms of Poisson processes, their sampling strategy corresponds to a time-homogeneous Poisson process with intensity equal to $\rho_i(t) = b/B$, where $b$ is the number of sampled base series *person-moments*, and $B$ is the total population-time for the study base (e.g. the sum of all individual follow-up times). More complex examples are also possible; see for example Saarela & Arjas [-@saarela2015non], where the intensity functions for the sampling mechanism are proportional to the cardiovascular disease event rate given by the Framingham score. Non-uniform sampling mechanisms can increase the efficiency of the resulting maximum partial likelihood estimators.
+
+## Variance estimates
+
+The asymptotic normality of $\hat{\theta}$ gives us an efficient way to estimate the variance of various estimators derived from the hazard function. For example, to construct confidence bands around risk functions and survival functions, we can use the following procedure:
+ 
+  1. Compute $\hat{\theta}$ and its variance-covariance matrix $V(\theta)$.
+  2. Sample $B$ times from a multivariate normal $N\left(\hat{\theta}, V(\theta)\right)$.
+  3. For each sample, compute the survival function using Equation \ref{eqn:surv} below.
+  4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function of interest.
+  
+This procedure is similar to parametric bootstrap [@efron1994introduction, Section 6.5], but it can be more accurately described as a form of approximate Bayesian computation. As such, the validity of the confidence bands relies on the Bernstein-von Mises theorem [@van2000asymptotic, Chapter 10].
 
 ## Common parametric models
 
@@ -460,7 +471,7 @@ By integrating these subdensities, we obtain the cause-specific CI functions:
 $$ CI_j(t) = \int_0^t f_j(u)du.$$
 Again, the integrals are computed using either numerical integration (via the trapezoidal rule) or Monte Carlo integration. This option is controlled by the argument \code{method} of the \code{absoluteRisk} function.
 
-Finally, the output from \code{absoluteRisk} can be passed to a method \code{confint} to compute confidence bands around the survival function. These bands are computed using parametric bootstrap, and therefore are only valid when \code{family = "glm"} as it relies on the asymptotic normality of the estimator. Currently, this is only available for the single-event setting.
+Finally, the output from \code{absoluteRisk} can be passed to a method \code{confint} to compute confidence bands around the survival function, as described in the Theoretical Details section. These bands are only valid when \code{family = "glm"} as it relies on the asymptotic normality of the estimator. Currently, this is only available for the single-event setting.
 
 # Illustration of package
 
@@ -632,8 +643,7 @@ conf_ints <- confint(risk, fit)
 head(conf_ints)
 ```
 
-These point-wise confidence intervals are constructed using parametric bootstrap; 
-the validity of this approach relies on the asymptotic normality of the MLE. In Figure \ref{fig:erspc-cif-conf}, we see the 95% confidence bands around the estimates. 
+In Figure \ref{fig:erspc-cif-conf}, we see the 95% confidence bands around the estimates. 
 We also overlay the Kaplan-Meier curves as a reference. 
 
 ```{r erspc-cif-conf, eval = eval_cs1, fig.align='h', echo = FALSE, fig.width=8, fig.height=6, fig.cap="Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\\% confidence bands."}
