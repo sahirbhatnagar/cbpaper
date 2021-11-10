@@ -18,7 +18,6 @@
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \bibstyle{abbrvnat}
 \citation{reid1994conversation}
-\citation{hernan2010hazards}
 \citation{breslow1972discussion}
 \citation{whitehead1980fitting}
 \citation{copenhagen2012needs}
@@ -33,7 +32,6 @@
 \@writefile{toc}{\contentsline {section}{\numberline {2.1}Introduction}{1}{section.2.1}\protected@file@percent }
 \newlabel{introduction}{{2.1}{1}{Introduction}{section.2.1}{}}
 \@writefile{brf}{\backcite{reid1994conversation}{{1}{2.1}{section.2.1}}}
-\@writefile{brf}{\backcite{hernan2010hazards}{{1}{2.1}{section.2.1}}}
 \@writefile{brf}{\backcite{breslow1972discussion}{{1}{2.1}{section.2.1}}}
 \@writefile{brf}{\backcite{whitehead1980fitting}{{1}{2.1}{section.2.1}}}
 \@writefile{brf}{\backcite{copenhagen2012needs}{{1}{2.1}{section.2.1}}}
@@ -77,8 +75,6 @@
 \newlabel{common-parametric-models}{{2.2.3}{3}{Common parametric models}{subsection.2.2.3}{}}
 \newlabel{eq:exp}{{2}{3}{Common parametric models}{equation.2.2.2}{}}
 \newlabel{eq:gomp}{{3}{3}{Common parametric models}{equation.2.2.3}{}}
-\@writefile{brf}{\backcite{kalbfleisch2011statistical}{{3}{2.2.3}{equation.2.2.3}}}
-\newlabel{eq:weibull}{{4}{3}{Common parametric models}{equation.2.2.4}{}}
 \@writefile{brf}{\backcite{kalbfleisch2011statistical}{{3}{1}{equation.2.2.2}}}
 \citation{survTaskView}
 \citation{mahani2015bayesian}
@@ -88,14 +84,10 @@
 \citation{scheike2014estimating}
 \citation{survival-package}
 \citation{smoothHazard}
-\citation{regpathcox}
-\citation{park_hastie}
-\citation{l1penal}
-\citation{gerds_blanche}
-\citation{clements_liu}
-\citation{survival-package}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Competing-risk analysis}{4}{subsection.2.2.4}\protected@file@percent }
-\newlabel{competing-risk-analysis}{{2.2.4}{4}{Competing-risk analysis}{subsection.2.2.4}{}}
+\@writefile{brf}{\backcite{kalbfleisch2011statistical}{{4}{2.2.3}{equation.2.2.3}}}
+\newlabel{eq:weibull}{{4}{4}{Common parametric models}{equation.2.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Competing risk analysis}{4}{subsection.2.2.4}\protected@file@percent }
+\newlabel{competing-risk-analysis}{{2.2.4}{4}{Competing risk analysis}{subsection.2.2.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.5}Variable selection}{4}{subsection.2.2.5}\protected@file@percent }
 \newlabel{variable-selection}{{2.2.5}{4}{Variable selection}{subsection.2.2.5}{}}
 \newlabel{eq:penest}{{5}{4}{Variable selection}{equation.2.2.5}{}}
@@ -109,14 +101,20 @@
 \@writefile{brf}{\backcite{scheike2014estimating}{{4}{2.3}{section.2.3}}}
 \@writefile{brf}{\backcite{survival-package}{{4}{2.3}{section.2.3}}}
 \@writefile{brf}{\backcite{smoothHazard}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{regpathcox}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{park_hastie}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{l1penal}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{gerds_blanche}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{clements_liu}{{4}{2.3}{section.2.3}}}
-\@writefile{brf}{\backcite{survival-package}{{4}{2.3}{section.2.3}}}
+\citation{regpathcox}
+\citation{park_hastie}
+\citation{l1penal}
+\citation{gerds_blanche}
+\citation{clements_liu}
+\citation{survival-package}
 \citation{mahani2015bayesian}
 \citation{fine1999proportional}
+\@writefile{brf}{\backcite{regpathcox}{{5}{2.3}{section.2.3}}}
+\@writefile{brf}{\backcite{park_hastie}{{5}{2.3}{section.2.3}}}
+\@writefile{brf}{\backcite{l1penal}{{5}{2.3}{section.2.3}}}
+\@writefile{brf}{\backcite{gerds_blanche}{{5}{2.3}{section.2.3}}}
+\@writefile{brf}{\backcite{clements_liu}{{5}{2.3}{section.2.3}}}
+\@writefile{brf}{\backcite{survival-package}{{5}{2.3}{section.2.3}}}
 \@writefile{brf}{\backcite{mahani2015bayesian}{{5}{2.3}{section.2.3}}}
 \@writefile{brf}{\backcite{fine1999proportional}{{5}{2.3}{section.2.3}}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of various R packages for survival analysis. \textbf  {Competing Risks}: whether an implementation for competing risks is present. \textbf  {Allows Non PH}: includes models for non-proportional hazards. \textbf  {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf  {Splines}: allows a flexible fit on time through the use of splines. \textbf  {Parametric}: implementation for parametric models. \textbf  {Semi-parametric}: implementation for semi-parametric models. \textbf  {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf  {Risk estimates}: estimation of survival curve and cumulative incidence is available.\relax }}{5}{table.caption.2}\protected@file@percent }
@@ -124,20 +122,20 @@
 \newlabel{tab:surv-pkgs}{{1}{5}{Comparison of various R packages for survival analysis. \textbf {Competing Risks}: whether an implementation for competing risks is present. \textbf {Allows Non PH}: includes models for non-proportional hazards. \textbf {Penalized Regression}: allows for a penalty term on the regression coefficients when estimating hazards (e.g. lasso or ridge). \textbf {Splines}: allows a flexible fit on time through the use of splines. \textbf {Parametric}: implementation for parametric models. \textbf {Semi-parametric}: implementation for semi-parametric models. \textbf {Interval/left censoring}: models for interval and left-censoring. If this is not selected, the package only handles right-censoring. \textbf {Risk estimates}: estimation of survival curve and cumulative incidence is available.\relax }{table.caption.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.4}Implementation details}{5}{section.2.4}\protected@file@percent }
 \newlabel{implementation-details}{{2.4}{5}{Implementation details}{section.2.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Population-time plots}{5}{subsection.2.4.1}\protected@file@percent }
-\newlabel{population-time-plots}{{2.4.1}{5}{Population-time plots}{subsection.2.4.1}{}}
 \citation{ggplot2}
 \citation{schroder2009screening}
 \citation{liu2014recovering}
-\citation{saarela2016case}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.1}Population-time plots}{6}{subsection.2.4.1}\protected@file@percent }
+\newlabel{population-time-plots}{{2.4.1}{6}{Population-time plots}{subsection.2.4.1}{}}
 \@writefile{brf}{\backcite{ggplot2}{{6}{2.4.1}{Item.6}}}
 \@writefile{brf}{\backcite{schroder2009screening}{{6}{2.4.1}{Item.6}}}
 \@writefile{brf}{\backcite{liu2014recovering}{{6}{2.4.1}{Item.6}}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Parametric modeling}{6}{subsection.2.4.2}\protected@file@percent }
-\newlabel{parametric-modeling}{{2.4.2}{6}{Parametric modeling}{subsection.2.4.2}{}}
+\citation{saarela2016case}
 \citation{hanley2009fitting}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Population time plot for the ERSPC dataset. \textbf  {A}: The gray area can be thought of as N = 159,893 infinitely thin horizontal rectangles ordered by length of follow-up. \textbf  {B}: The red points correspond to when death has occurred for any one of those infinitely thin rectangles. \textbf  {C}: To improve visibility, these red points are randomly redistributed along their respective x-coordinates, providing a visualization of incidence density. More events are observed at later follow-up times, motivating the use of non-constant hazard models. \textbf  {D}: The base series, a representative sample of the entire grey area, is represented by the green points.\relax }}{7}{figure.caption.3}\protected@file@percent }
 \newlabel{fig:plot-erspc-data}{{1}{7}{Population time plot for the ERSPC dataset. \textbf {A}: The gray area can be thought of as N = 159,893 infinitely thin horizontal rectangles ordered by length of follow-up. \textbf {B}: The red points correspond to when death has occurred for any one of those infinitely thin rectangles. \textbf {C}: To improve visibility, these red points are randomly redistributed along their respective x-coordinates, providing a visualization of incidence density. More events are observed at later follow-up times, motivating the use of non-constant hazard models. \textbf {D}: The base series, a representative sample of the entire grey area, is represented by the green points.\relax }{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4.2}Parametric modeling}{7}{subsection.2.4.2}\protected@file@percent }
+\newlabel{parametric-modeling}{{2.4.2}{7}{Parametric modeling}{subsection.2.4.2}{}}
 \@writefile{brf}{\backcite{saarela2016case}{{7}{2.4.2}{Item.9}}}
 \@writefile{brf}{\backcite{hanley2009fitting}{{7}{2.4.2}{Item.9}}}
 \citation{zou2005regularization}
@@ -153,7 +151,7 @@
 \newlabel{illustration-of-package}{{2.5}{8}{Illustration of package}{section.2.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.5.1}Case study 1---Flexible modeling of the hazard function}{8}{subsection.2.5.1}\protected@file@percent }
 \newlabel{case-study-1flexible-modeling-of-the-hazard-function}{{2.5.1}{8}{Case study 1---Flexible modeling of the hazard function}{subsection.2.5.1}{}}
-\@writefile{brf}{\backcite{hanley2010mortality}{{8}{2.5.1}{subsection.2.5.1}}}
+\@writefile{brf}{\backcite{hanley2010mortality}{{9}{2.5.1}{subsection.2.5.1}}}
 \@writefile{toc}{\contentsline {subsubsection}{Time-dependent hazard ratios}{10}{subsection.2.5.1}\protected@file@percent }
 \newlabel{time-dependent-hazard-ratios}{{2.5.1}{10}{Time-dependent hazard ratios}{subsection.2.5.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Estimated hazard ratio and 95\% confidence interval for screening vs}}{11}{figure.caption.4}\protected@file@percent }
@@ -233,27 +231,26 @@
 \bibcite{hastie1987generalized}{{19}{1987}{{Hastie and Tibshirani}}{{}}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.7}Acknowledgments}{19}{section.2.7}\protected@file@percent }
 \newlabel{acknowledgments}{{2.7}{19}{Acknowledgments}{section.2.7}{}}
-\bibcite{hernan2010hazards}{{20}{2010}{{Hern{\'a}n}}{{}}}
-\bibcite{flexsurv}{{21}{2016}{{Jackson}}{{}}}
-\bibcite{kalbfleisch2011statistical}{{22}{2011}{{Kalbfleisch and Prentice}}{{}}}
-\bibcite{knaus1995support}{{23}{1995}{{Knaus et~al.}}{{Knaus, Harrell, Lynn, Goldman, Phillips, Connors, Dawson, Fulkerson, Califf, Desbiens, et~al.}}}
-\bibcite{liu2014recovering}{{24}{2014}{{Liu et~al.}}{{Liu, Rich, and Hanley}}}
-\bibcite{mahani2015bayesian}{{25}{2019}{{Mahani and Sharabiani}}{{}}}
-\bibcite{park_hastie}{{26}{2018}{{Park and Hastie}}{{}}}
-\bibcite{reid1994conversation}{{27}{1994}{{Reid}}{{}}}
-\bibcite{saarela2016case}{{28}{2016}{{Saarela}}{{}}}
-\bibcite{saarela2015non}{{29}{2015}{{Saarela and Arjas}}{{}}}
-\bibcite{saarela2015case}{{30}{2015}{{Saarela and Hanley}}{{}}}
-\bibcite{timereg}{{31}{2011}{{Scheike and Zhang}}{{}}}
-\bibcite{scheike2014estimating}{{32}{2014}{{Scheike et~al.}}{{Scheike, Holst, and Hjelmborg}}}
-\bibcite{schroder2009screening}{{33}{2009}{{Schr{\"o}der et~al.}}{{Schr{\"o}der, Hugosson, Roobol, Tammela, Ciatto, Nelen, Kwiatkowski, Lujan, Lilja, Zappa, et~al.}}}
-\bibcite{scrucca2010regression}{{34}{2010}{{Scrucca et~al.}}{{Scrucca, Santucci, and Aversa}}}
-\bibcite{regpathcox}{{35}{2011}{{Simon et~al.}}{{Simon, Friedman, Hastie, and Tibshirani}}}
-\bibcite{survival-package}{{36}{2015}{{Therneau}}{{}}}
-\bibcite{smoothHazard}{{37}{2017}{{Touraine et~al.}}{{Touraine, Gerds, and Joly}}}
-\bibcite{van2000asymptotic}{{38}{2000}{{Van~der Vaart}}{{}}}
-\bibcite{whitehead1980fitting}{{39}{1980}{{Whitehead}}{{}}}
-\bibcite{ggplot2}{{40}{2016}{{Wickham}}{{}}}
-\bibcite{zou2005regularization}{{41}{2005}{{Zou and Hastie}}{{}}}
+\bibcite{flexsurv}{{20}{2016}{{Jackson}}{{}}}
+\bibcite{kalbfleisch2011statistical}{{21}{2011}{{Kalbfleisch and Prentice}}{{}}}
+\bibcite{knaus1995support}{{22}{1995}{{Knaus et~al.}}{{Knaus, Harrell, Lynn, Goldman, Phillips, Connors, Dawson, Fulkerson, Califf, Desbiens, et~al.}}}
+\bibcite{liu2014recovering}{{23}{2014}{{Liu et~al.}}{{Liu, Rich, and Hanley}}}
+\bibcite{mahani2015bayesian}{{24}{2019}{{Mahani and Sharabiani}}{{}}}
+\bibcite{park_hastie}{{25}{2018}{{Park and Hastie}}{{}}}
+\bibcite{reid1994conversation}{{26}{1994}{{Reid}}{{}}}
+\bibcite{saarela2016case}{{27}{2016}{{Saarela}}{{}}}
+\bibcite{saarela2015non}{{28}{2015}{{Saarela and Arjas}}{{}}}
+\bibcite{saarela2015case}{{29}{2015}{{Saarela and Hanley}}{{}}}
+\bibcite{timereg}{{30}{2011}{{Scheike and Zhang}}{{}}}
+\bibcite{scheike2014estimating}{{31}{2014}{{Scheike et~al.}}{{Scheike, Holst, and Hjelmborg}}}
+\bibcite{schroder2009screening}{{32}{2009}{{Schr{\"o}der et~al.}}{{Schr{\"o}der, Hugosson, Roobol, Tammela, Ciatto, Nelen, Kwiatkowski, Lujan, Lilja, Zappa, et~al.}}}
+\bibcite{scrucca2010regression}{{33}{2010}{{Scrucca et~al.}}{{Scrucca, Santucci, and Aversa}}}
+\bibcite{regpathcox}{{34}{2011}{{Simon et~al.}}{{Simon, Friedman, Hastie, and Tibshirani}}}
+\bibcite{survival-package}{{35}{2015}{{Therneau}}{{}}}
+\bibcite{smoothHazard}{{36}{2017}{{Touraine et~al.}}{{Touraine, Gerds, and Joly}}}
+\bibcite{van2000asymptotic}{{37}{2000}{{Van~der Vaart}}{{}}}
+\bibcite{whitehead1980fitting}{{38}{1980}{{Whitehead}}{{}}}
+\bibcite{ggplot2}{{39}{2016}{{Wickham}}{{}}}
+\bibcite{zou2005regularization}{{40}{2005}{{Zou and Hastie}}{{}}}
 \ttl@finishall
 \gdef \@abspage@last{21}

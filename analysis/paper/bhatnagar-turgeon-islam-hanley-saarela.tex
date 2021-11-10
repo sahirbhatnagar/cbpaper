@@ -7,20 +7,20 @@ Hanley, and Olli Saarela}
 \maketitle
 
 \abstract{%
-In epidemiological studies of time-to-event data, a quantity of interest
-to the clinician is their patient's risk of an event. However, methods
-relying on time matching or risk-set sampling (including Cox regression)
+In clinical studies of time-to-event data, a quantity of interest to the
+clinician is their patient's risk of an event. However, methods relying
+on time matching or risk-set sampling (including Cox regression)
 eliminate the baseline hazard from the estimating function. As a
 consequence, the focus has been on reporting hazard ratios instead of
-survival curves. Indeed, reporting patient risk requires a separate
-estimation of the baseline hazard. Using case-base sampling, Hanley \&
-Miettinen (2009) explained how parametric hazard functions can be
-estimated in continuous-time using logistic regression. Their approach
-naturally leads to estimates of the survival function that are
-smooth-in-time.\\
+survival or cumulative incidence curves. Indeed, reporting patient risk
+or cumulative incidence requires a separate estimation of the baseline
+hazard. Using case-base sampling, Hanley \& Miettinen (2009) explained
+how parametric hazard functions can be estimated in continuous-time
+using logistic regression. Their approach naturally leads to estimates
+of the survival or risk function that are smooth-in-time.\\
 In this paper, we present the \CRANpkg{casebase} R package, a
 comprehensive and flexible toolkit for parametric survival analysis. We
-describe how the case-base framework can be used in more complex
+describe how the case-base framework can also be used in more complex
 settings: non-linear functions of time and non-proportional hazards,
 competing risks, and variable selection. Our package also includes an
 extensive array of visualization tools to complement the analysis. We
@@ -41,23 +41,21 @@ like predict the outcome for a particular patient, it's much more
 convenient to do that parametrically'' \citep{reid1994conversation}.
 Indeed, the most relevant quantity in a clinical setting is often the 5-
 or 10-year risk of experiencing a certain event given the patient's
-particular circumstances. Unfortunately, the most reported metric from a
-Cox model is the (potentially time-dependent) hazard ratio (HR), which
-ignores the duration of follow-up and is subject to selection bias
-\citep{hernan2010hazards}. The covariate-adjusted survival curve
-overcomes these limitations, and it is arguably a more important summary
-measure to report than the HR. While stepwise survival curves can be
-computed with the Cox model, they require a second step to separately
-estimate the baseline hazard \citep{breslow1972discussion}.
+particular profile. However, the most reported metric from a Cox model
+is the (potentially time-dependent) hazard ratio (HR). The
+covariate-conditional survival curve is arguably a more important
+summary measure to report than the HR. While stepwise survival curves
+can be computed with the Cox model, they require a second step to
+separately estimate the baseline hazard \citep{breslow1972discussion}.
 
 Several authors have since pursued fully parametric approaches that made
-the fitting of smooth survival curves much more transparent and
-intuitive through generalized linear models. The key feature of these
-procedures is splitting the time axis into discrete intervals. Whitehead
+the fitting of smooth survival curves more transparent and intuitive
+through generalized linear models. The key feature of these procedures
+is splitting the time axis into discrete intervals. Whitehead
 \citeyearpar{whitehead1980fitting} showed the equivalence between a Cox
 model and a Poisson regression with a parameter for each event time;
-Carstensen \citeyearpar{copenhagen2012needs} provides a nice exposition
-of this equivalence with a real data example and supporting R code for
+Carstensen \citeyearpar{copenhagen2012needs} provides an exposition of
+this equivalence with a real data example and supporting R code for
 computing standard errors. Arjas \& Haara
 \citeyearpar{arjas1987logistic} and Efron
 \citeyearpar{efron1988logistic} treated each patient-day as a Bernoulli
@@ -66,44 +64,44 @@ potential issue with these approaches is that the number of time bins
 need to be chosen by the data analyst. On the one hand, a fine grouping
 of times may result in few (or none) events per interval, which then
 leads to instability in the Newton-Raphson procedure for estimation
-\citep[Section 4.8]{kalbfleisch2011statistical}. On the other hand, a
-coarse grouping could potentially mask nonlinear trends in the hazard
-function.
+\citep[Section 4.8]{kalbfleisch2011statistical}, and large long-format
+datasets. On the other hand, a coarse grouping could potentially mask
+nonlinear trends in the hazard function.
 
 Rather than discretizing time, Hanley \& Miettinen
 \citeyearpar{hanley2009fitting} selected a discrete set of person-time
 coordinates (``person-moments'') in continuous time from all observed
 follow-up experience constituting the study base. By doing so, they
 obtained a likelihood expression for the hazard function that is
-equivalent to that of logistic regression. More specifically, all
-person-moments when the event of interest occurred are selected as the
-case series, complemented by a randomly sampled base series of
-person-moments serving as controls. This approach allows flexible
-modeling of the hazard function by including time as a covariate
-(e.g.~using splines or general additive models). Furthermore,
-time-dependent covariates can be modeled through interactions with time.
-In short, Hanley \& Miettinen \citeyearpar{hanley2009fitting} use the
-well-understood logistic regression for directly modeling the hazard
-function, without requiring a discrete-time model.
+equivalent to that of logistic regression with an offset term. More
+specifically, all person-moments when the event of interest occurred are
+selected as the case series, complemented by a randomly sampled base
+series of person-moments serving as controls. This approach allows
+flexible modeling of the hazard function by including functions of time
+as covariates (e.g.~using splines or generalized additive models).
+Furthermore, time-dependent covariates can be modeled through
+interactions with time. In short, Hanley \& Miettinen
+\citeyearpar{hanley2009fitting} use the well-understood logistic
+regression for directly modeling the hazard function, without requiring
+a discrete-time model.
 
 In this article, we present the \CRANpkg{casebase} R package
 \citep{casebase-package} which implements and extends the Hanley \&
 Miettinen \citeyearpar{hanley2009fitting} approach for fitting fully
-parametric hazard models and covariate-adjusted survival curves using
+parametric hazard models and covariate-conditional survival curves using
 the familiar interface of the \code{glm} function. Our implementation
 includes extensions to other models such as penalized regression for
-variable selection and competing-risk analysis. In addition, we provide
+variable selection and competing risk analysis. In addition, we provide
 functions for exploratory data analysis and visualizing the estimated
 quantities such as the hazard function, survival curve, and their
 standard errors. The ultimate goal of our package is to make fitting
-flexible hazards accessible to more end users with the hope that they
-will favor reporting absolute risks and survival curves over hazard
-ratios.
+flexible hazards accessible to end users who favor reporting absolute
+risks and survival curves over hazard ratios.
 
-In what follows, we first recall some theoretical details on case-base
+In what follows, we first recap some theoretical details on case-base
 sampling and its use for estimating parametric hazard functions. We then
 give a short review of existing R packages that implement comparable
-features as \pkg{casebase}. Next, we provide some details about the
+features to \pkg{casebase}. Next, we provide some details about the
 implementation of case-base sampling in our package, and we give a brief
 survey of its main functions. This is followed by three case studies
 that illustrate the flexibility and capabilities of \pkg{casebase}. We
@@ -119,18 +117,17 @@ As discussed in Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the
 key idea behind case-base sampling is to consider the entire study base
 as an infinite collection of \emph{person-moments}. These person-moments
 are indexed by both an individual in the study and a time point, and
-therefore each person-moment has a covariate profile, an exposure
-status, and an outcome status (i.e.~whether the event happened) attached
-to it. By estimating the probability of an event occurring at a
-particular person-moment, we can extract information about hazards and
-survival.
+therefore each person-moment has a covariate profile and an outcome
+status (i.e.~whether the event happened) attached to it. By estimating
+the probability of an event occurring at a particular person-moment, we
+can extract information about hazards and survival.
 
-Therefore, we start by sampling all person-moments at which the event
+Therefore, we start by assembling all person-moments at which the event
 occurred; this collection of person-moments is what Hanley \& Miettinen
 call the \emph{case series}. The incidence of the case series is
 dictated by the hazard function of interest. Next, we sample a finite
-number of person-moments at which no event occurred; this second
-collection of person-moment is what Hanley \& Miettinen call the
+number of person-moments (blinded to case moments); this second
+collection of person-moments is what Hanley \& Miettinen call the
 \emph{base series}. The sampling mechanism for the base series is left
 at the discretion of the user, but in practice we find that sampling
 uniformly from the study base provides both simplicity and good
@@ -151,42 +148,44 @@ Arjas \citeyearpar{saarela2015non} and Saarela
 counting processes corresponding to the event of interest for individual
 \(i=1, \ldots,n\). For simplicity, we will consider Type I censoring due
 to the end of follow-up at time \(\tau\) (the general case of
-non-informative censoring is treated in Saarela
+independent censoring is treated in Saarela
 \citeyearpar{saarela2016case}). We assume a continuous time model, which
 implies that the counting process jumps are less than or equal to one.
 We are interested in modeling the hazard functions \(\lambda_{i}(t)\) of
 the processes \(N_i(t)\), and which satisfy
-\[\lambda_{i}(t) dt = E[dN_{i}(t)\mid \mathrm{past}].\] The processes
-\(N_i(t)\) count the person-moments from the \emph{case series}.
+\[\lambda_{i}(t)\,\textrm dt = E[\,\textrm dN_{i}(t)\mid \mathrm{past}].\]
+The processes \(N_i(t)\) count the person-moments from the \emph{case
+series}.
 
 To complement the case series, we sample person-moments for the base
-series. To do so, we model the base series sampling mechanism using
+series. To do so, we specify the base series sampling mechanism as
 non-homogeneous Poisson processes \(R_i(t) \in \{0, 1, 2, \ldots\}\);
-the person-moments where \(dR_i(t) = 1\) constitute the base series. We
-note that the same individual can contribute multiple person-moments to
-the base series. The process \(Q_{i}(t) = R_i(t) + N_{i}(t)\) then
-counts both the case and base series person-moments contributed by
-individual \(i\). As mentioned above, the processes \(R_i(t)\) are
-typically defined by the user via its intensity function \(\rho_i(t)\).
-The process \(Q_{i}(t)\) is characterized by
-\(E[dQ_{i}(t)\mid\mathrm{past}] = \lambda_{i}(t)dt + \rho_i(t)dt\).
+the person-moments where \(\,\textrm dR_i(t) = 1\) constitute the base
+series. We note that the same individual can contribute multiple
+person-moments to the base series. The process
+\(Q_{i}(t) = R_i(t) + N_{i}(t)\) then counts both the case and base
+series person-moments contributed by individual \(i\). As mentioned
+above, the processes \(R_i(t)\) are specified by the user via its
+intensity function \(\rho_i(t)\). The process \(Q_{i}(t)\) is
+characterized by
+\(E[\,\textrm dQ_{i}(t)\mid\mathrm{past}] = \lambda_{i}(t)\,\textrm dt + \rho_i(t)\,\textrm dt\).
 
 If the hazard function \(\lambda_{i}(t; \theta)\) is parametrized in
 terms of \(\theta\), we can define an estimator \(\hat{\theta}\) by
 maximization of the likelihood expression
-\[L_0(\theta) = \prod_{i=1}^n \exp\left\{ -\int_0^{\min(t_i,\tau)} \lambda_i(t; \theta) dt \right\} \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \lambda_{i}(t;\theta)^{dN_{i}(t)},\]
+\[L_0(\theta) = \prod_{i=1}^n \exp\left\{ -\int_0^{\min(t_i,\tau)} \lambda_i(t; \theta)\,\textrm dt \right\} \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \lambda_{i}(t;\theta)^{\,\textrm dN_{i}(t)},\]
 where \(\prod_{t\in[0,u)}\) represents a product integral from \(0\) to
 \(u\), and where \(t_i\) is the event time for individual \(i\).
 However, the integral over time makes the computation and maximization
-of \(L_0(\theta)\) challenging.
+of \(L_0(\theta)\) challenging using standard software.
 
 Case-base sampling allows us to avoid this integral. By conditioning on
-a sampled person-moment, we get individual likelihood contributions of
-the form
-\[P(dN_{i}(t) \mid dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.\]
-Therefore, we can define an estimating function for \(\theta\) as
-follows: \begin{equation}
-L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{dQ_i(t)}. \label{eq:lik-function}
+a sampled person-moment, we get individual partial likelihood
+contributions of the form
+\[P(\,\textrm dN_{i}(t) \mid \,\textrm dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.\]
+Therefore, an estimating function for \(\theta\) can be composed of
+these contributions as: \begin{equation}
+L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{\,\textrm dQ_i(t)}. \label{eq:lik-function}
 \end{equation} When a logarithmic link function is used for modeling the
 hazard function, the above expression is of a logistic regression form
 with an offset term \(\log(1/\rho_i(t))\). Note that the sampling units
@@ -195,23 +194,24 @@ than individuals, and the parameters to be estimated are hazards or
 hazard ratios rather than odds or odds ratios. Generally, an individual
 can contribute more than one person-moment, and thus the terms in the
 product integral are not independent. Nonetheless, Saarela
-\citeyearpar{saarela2016case} showed that the logarithm of this
-estimating function has mean zero at the true value \(\theta=\theta_0\),
-and that the resulting estimator \(\hat{\theta}\) is asymptotically
-normally distributed.
+\citeyearpar{saarela2016case} showed that the corresponding partial
+likelihood score function has mean zero at the true value
+\(\theta=\theta_0\), and that the resulting estimator \(\hat{\theta}\)
+is asymptotically normally distributed.
 
 In Hanley \& Miettinen \citeyearpar{hanley2009fitting}, the authors
 suggest sampling the base series \emph{uniformly} from the study base.
-In terms of Poisson processes, their sampling strategy corresponds
-essentially to a time-homogeneous Poisson process with hazard equal to
-\(\rho_i(t) = b/B\), where \(b\) is the number of sampled observations
-in the base series, and \(B\) is the total population-time for the study
-base (e.g.~the sum of all individual follow-up times). More complex
-examples are also possible; see for example Saarela \& Arjas
+In terms of Poisson processes, their sampling strategy corresponds to a
+time-homogeneous Poisson process with intensity equal to
+\(\rho_i(t) = b/B\), where \(b\) is the number of sampled base series
+\emph{person-moments}, and \(B\) is the total population-time for the
+study base (e.g.~the sum of all individual follow-up times). More
+complex examples are also possible; see for example Saarela \& Arjas
 \citeyearpar{saarela2015non}, where the intensity functions for the
 sampling mechanism are proportional to the cardiovascular disease event
 rate given by the Framingham score. Non-uniform sampling mechanisms can
-increase the efficiency of the case-base estimators.
+increase the efficiency of the resulting maximum partial likelihood
+estimators.
 
 \hypertarget{variance-estimates}{%
 \subsection{Variance estimates}\label{variance-estimates}}
@@ -248,11 +248,13 @@ confidence bands relies on the Bernstein-von Mises theorem
 \hypertarget{common-parametric-models}{%
 \subsection{Common parametric models}\label{common-parametric-models}}
 
-Let \(g(t; X)\) be the linear predictor such that
-\(\log(\lambda(t;X)) = g(t; X)\). Different functions of \(t\) lead to
-different parametric hazard models. The simplest of these models is the
-one-parameter exponential distribution which is obtained by taking the
-hazard function to be constant over the range of \(t\):
+Here we show that certain named distributions such as exponential,
+Weibull or Gompertz can be fit using our framework, though we are not
+restricted to such models. Let \(g(t; X)\) be the linear predictor such
+that \(\log(\lambda(t;X)) = g(t; X)\). Different functions of \(t\) lead
+to different parametric hazard models. The simplest of these models is
+the one-parameter exponential distribution which is obtained by taking
+the hazard function to be constant over the range of \(t\):
 
 \begin{equation}
 \log(\lambda(t; X)) = \beta_0 + \beta_1 X. \label{eq:exp}
@@ -274,18 +276,20 @@ dependence of the hazard on time \citep{kalbfleisch2011statistical}:
 \end{equation}
 
 \hypertarget{competing-risk-analysis}{%
-\subsection{Competing-risk analysis}\label{competing-risk-analysis}}
+\subsection{Competing risk analysis}\label{competing-risk-analysis}}
 
-Case-base sampling can also be used in the context of competing-risk
+Case-base sampling can also be used in the context of competing risk
 analysis. Assuming there are \(J\) competing events, we can show that
-each person-moment's contribution to the likelihood is of the form
+each sampled person-moment's contribution to the partial likelihood is
+of the form
 
-\[\frac{\lambda_j(t)^{dN_j(t)}}{\rho(t) + \sum_{j=1}^J\lambda_j(t)},\]
+\[\frac{\lambda_j(t)^{\,\textrm dN_j(t)}}{\rho(t) + \sum_{j=1}^J\lambda_j(t)},\]
 where \(N_j(t)\) is the counting process associated with the event of
 type \(j\) and \(\lambda_j(t)\) is the corresponding cause-specific
 hazard function. As may be expected, this functional form is similar to
 the terms appearing in the likelihood function for multinomial
-regression.\footnote{Specifically, it corresponds to the following parametrization: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j, \qquad j = 1,\ldots, J-1.\end{align*}}
+regression with an offset
+term.\footnote{Specifically, it corresponds to the following parametrization  for a multinomial random variable $Y$: \begin{align*} \log\left(\frac{P(Y=j \mid X)}{P(Y = J \mid X)}\right) = X^T\beta_j + log(1/\rho), \qquad j = 1,\ldots, J-1.\end{align*}}
 
 \hypertarget{variable-selection}{%
 \subsection{Variable selection}\label{variable-selection}}
@@ -293,10 +297,10 @@ regression.\footnote{Specifically, it corresponds to the following parametrizati
 To perform variable selection on the regression parameters
 \(\theta \in \mathbb{R}^p\) of the hazard function, we can add a penalty
 to the likelihood and optimise the following equation: \begin{equation}
-\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j P(\theta_j;\lambda,\alpha) \label{eq:penest}
+\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j p_{\lambda,\alpha}(\theta_j) \label{eq:penest}
 \end{equation} where \(\ell\left(\theta\right) = \log L(\theta)\) is the
 log of the likelihood function given in \eqref{eq:lik-function},
-\(P(\theta_j;\lambda,\alpha)\) is a penalty term controlled by the
+\(p_{\lambda,\alpha}(\theta_j)\) is a penalty term controlled by the
 non-negative regularization parameters \(\lambda\) and \(\alpha\), and
 \(w_j\) is the penalty factor for the \(j\)th covariate. These penalty
 factors serve as a way of allowing parameters to be penalized
@@ -365,7 +369,7 @@ functionality.
 Next, several R packages implement methodologies for competing risk
 analysis; for a different perspective on this topic, see Mahani \&
 Sharabiani \citeyearpar{mahani2015bayesian}. The package \pkg{survival}
-provides functionality for competing-risk analysis and multistate
+provides functionality for competing risk analysis and multistate
 modelling. The package \CRANpkg{cmprsk} provides methods for
 cause-specific subdistribution hazards, such as in the Fine-Gray model
 \citeyearpar{fine1999proportional}. On the other hand, the package
@@ -385,7 +389,7 @@ the CI can be obtained using their functional relationships (see
 Equations \ref{eqn:surv} and \ref{eqn:CDF} below). Packages providing
 this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and
 \pkg{survival}. Our package \pkg{casebase} also follows this approach
-for both single-event and competing-risk analyses. The second category
+for both single-event and competing risk analyses. The second category
 outlined above broadly corresponds to semi-parametric models. These
 models do not model the full hazard function, and therefore the baseline
 hazard needs to be estimated separately in order to estimate the
@@ -441,12 +445,13 @@ can be seen in the coding choices we made and the unit tests we wrote.
 \subsection{Population-time plots}\label{population-time-plots}}
 
 Population-time plots are a descriptive visualization of incidence
-density, where the study base is represented by area and events by
-points within the area. The case-base sampling approach described above
-can be visualized in the form of a population time plot. These plots are
-informative graphical displays of survival data and should be one of the
-first steps in an exploratory data analysis. The \code{popTime} function
-and \code{plot} method facilitate this task:
+density, where the population time that constitutes the study base is
+represented by area, and events by points within the area. The case-base
+sampling approach described above can be visualized in the form of a
+population time plot. These plots are informative graphical displays of
+survival data and should be one of the first steps in an exploratory
+data analysis. The \code{popTime} function and \code{plot} method
+facilitate this task:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -473,9 +478,9 @@ Randomized Study of Prostate Cancer Screening (ERSPC)
 \citep{schroder2009screening} which was extracted using the approach
 described in Liu \emph{et al.} \citeyearpar{liu2014recovering}. This
 dataset is available through the \pkg{casebase} package. It contains the
-individual observations for 159,893 men from seven European countries,
-who were between the ages of 55 and 69 years when recruited for the
-trial.
+recreated individual observations for 159,893 men from seven European
+countries, who were between the ages of 55 and 69 years when recruited
+for the trial.
 
 We first create the necessary dataset for producing the population time
 plot using the \code{popTime} function. In this example, we stratify the
@@ -645,11 +650,11 @@ computed using the following procedure: first, we compute the overall
 survival function (i.e.~for all event types):
 
 \[ S(t) = \exp\left(-\int_0^t \lambda(u;X) du\right),\qquad \lambda(t;X) = \sum_{j=1}^J \lambda_j(t;X).\]
-From this, we can derive the event-specific subdensities:
+From this, we can derive the cause-specific subdensities:
 
 \[ f_j(t) = \lambda_j(t)S(t).\]
 
-By integrating these subdensities, we obtain the event-specific CI
+By integrating these subdensities, we obtain the cause-specific CI
 functions:
 
 \[ CI_j(t) = \int_0^t f_j(u)du.\] Again, the integrals are computed
@@ -671,7 +676,7 @@ In this section, we illustrate the main functions of the \pkg{casebase}
 package through three case studies. Each one showcases a different type
 of analysis. First, we show how to model non-constant and
 non-proportional hazards through a flexible specification of time. Then
-we perform a competing-risk analysis and compare our results with the
+we perform a competing risk analysis and compare our results with the
 Cox model and the Fine-Gray model. The third case study illustrates how
 to perform variable selection in high-dimensional datasets.
 
@@ -698,7 +703,7 @@ spline basis with 2 degrees of freedom (implemented in the
 \begin{Schunk}
 \begin{Sinput}
 fit <- fitSmoothHazard(DeadOfPrCa ~ pspline(Follow.Up.Time, df = 2) * ScrArm, 
-                       data = ERSPC, ratio = 100)
+                       data = ERSPC, ratio = 10)
 \end{Sinput}
 \end{Schunk}
 
@@ -716,60 +721,60 @@ summary(fit)
 #> 
 #> Sample size: 159893 
 #> Number of events: 540 
-#> Number of base moments: 54000 
+#> Number of base moments: 5400 
 #> ----
 #> 
 #> Call:
 #> fitSmoothHazard(formula = DeadOfPrCa ~ pspline(Follow.Up.Time, 
-#>     df = 2) * ScrArm, data = ERSPC, ratio = 100)
+#>     df = 2) * ScrArm, data = ERSPC, ratio = 10)
 #> 
 #> Deviance Residuals: 
 #>    Min      1Q  Median      3Q     Max  
-#> -0.477  -0.164  -0.140  -0.084   3.882  
+#> -1.168  -0.486  -0.414  -0.215   3.262  
 #> 
 #> Coefficients:
 #>                                                        Estimate Std. Error
-#> (Intercept)                                             -12.613      9.756
-#> pspline(Follow.Up.Time, df = 2)1                          1.320     10.705
-#> pspline(Follow.Up.Time, df = 2)2                          5.190      9.526
-#> pspline(Follow.Up.Time, df = 2)3                          4.481      9.866
-#> pspline(Follow.Up.Time, df = 2)4                          6.060      9.690
-#> pspline(Follow.Up.Time, df = 2)5                          5.231      9.851
-#> pspline(Follow.Up.Time, df = 2)6                          9.176      9.749
-#> pspline(Follow.Up.Time, df = 2)7                         -0.434     19.572
-#> ScrArmScreening group                                     7.900     13.050
-#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group   -7.962     14.507
-#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group   -8.351     12.690
-#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group   -7.787     13.224
-#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group   -8.098     12.942
-#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -9.389     13.223
-#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group   -7.385     13.114
-#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group  -17.380     30.806
+#> (Intercept)                                              -13.81       9.98
+#> pspline(Follow.Up.Time, df = 2)1                           2.66      10.96
+#> pspline(Follow.Up.Time, df = 2)2                           6.43       9.73
+#> pspline(Follow.Up.Time, df = 2)3                           5.57      10.10
+#> pspline(Follow.Up.Time, df = 2)4                           7.27       9.90
+#> pspline(Follow.Up.Time, df = 2)5                           6.54      10.10
+#> pspline(Follow.Up.Time, df = 2)6                          10.82      10.03
+#> pspline(Follow.Up.Time, df = 2)7                         -11.74      30.13
+#> ScrArmScreening group                                      9.22      13.35
+#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group    -9.25      14.85
+#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group    -9.80      12.97
+#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group    -9.04      13.54
+#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group    -9.39      13.23
+#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -10.65      13.55
+#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group    -8.86      13.46
+#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group   -11.58      36.92
 #>                                                        z value Pr(>|z|)
-#> (Intercept)                                              -1.29     0.20
-#> pspline(Follow.Up.Time, df = 2)1                          0.12     0.90
-#> pspline(Follow.Up.Time, df = 2)2                          0.54     0.59
-#> pspline(Follow.Up.Time, df = 2)3                          0.45     0.65
-#> pspline(Follow.Up.Time, df = 2)4                          0.63     0.53
-#> pspline(Follow.Up.Time, df = 2)5                          0.53     0.60
-#> pspline(Follow.Up.Time, df = 2)6                          0.94     0.35
-#> pspline(Follow.Up.Time, df = 2)7                         -0.02     0.98
-#> ScrArmScreening group                                     0.61     0.54
-#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group   -0.55     0.58
-#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group   -0.66     0.51
-#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group   -0.59     0.56
-#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group   -0.63     0.53
-#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -0.71     0.48
-#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group   -0.56     0.57
-#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group   -0.56     0.57
+#> (Intercept)                                              -1.38     0.17
+#> pspline(Follow.Up.Time, df = 2)1                          0.24     0.81
+#> pspline(Follow.Up.Time, df = 2)2                          0.66     0.51
+#> pspline(Follow.Up.Time, df = 2)3                          0.55     0.58
+#> pspline(Follow.Up.Time, df = 2)4                          0.73     0.46
+#> pspline(Follow.Up.Time, df = 2)5                          0.65     0.52
+#> pspline(Follow.Up.Time, df = 2)6                          1.08     0.28
+#> pspline(Follow.Up.Time, df = 2)7                         -0.39     0.70
+#> ScrArmScreening group                                     0.69     0.49
+#> pspline(Follow.Up.Time, df = 2)1:ScrArmScreening group   -0.62     0.53
+#> pspline(Follow.Up.Time, df = 2)2:ScrArmScreening group   -0.76     0.45
+#> pspline(Follow.Up.Time, df = 2)3:ScrArmScreening group   -0.67     0.50
+#> pspline(Follow.Up.Time, df = 2)4:ScrArmScreening group   -0.71     0.48
+#> pspline(Follow.Up.Time, df = 2)5:ScrArmScreening group   -0.79     0.43
+#> pspline(Follow.Up.Time, df = 2)6:ScrArmScreening group   -0.66     0.51
+#> pspline(Follow.Up.Time, df = 2)7:ScrArmScreening group   -0.31     0.75
 #> 
 #> (Dispersion parameter for binomial family taken to be 1)
 #> 
-#>     Null deviance: 6059.0  on 54539  degrees of freedom
-#> Residual deviance: 5772.7  on 54524  degrees of freedom
-#> AIC: 5805
+#>     Null deviance: 3619.1  on 5939  degrees of freedom
+#> Residual deviance: 3359.1  on 5924  degrees of freedom
+#> AIC: 3391
 #> 
-#> Number of Fisher Scoring iterations: 9
+#> Number of Fisher Scoring iterations: 7
 \end{Soutput}
 \end{Schunk}
 
@@ -793,15 +798,15 @@ anova(fit, test = "LRT")
 #> 
 #> 
 #>                                        Df Deviance Resid. Df Resid. Dev
-#> NULL                                                   54539       6059
-#> pspline(Follow.Up.Time, df = 2)         7    269.1     54532       5790
-#> ScrArm                                  1      8.0     54531       5782
-#> pspline(Follow.Up.Time, df = 2):ScrArm  7      9.1     54524       5773
+#> NULL                                                    5939       3619
+#> pspline(Follow.Up.Time, df = 2)         7    246.6      5932       3373
+#> ScrArm                                  1      5.6      5931       3367
+#> pspline(Follow.Up.Time, df = 2):ScrArm  7      7.9      5924       3359
 #>                                        Pr(>Chi)    
 #> NULL                                               
 #> pspline(Follow.Up.Time, df = 2)          <2e-16 ***
-#> ScrArm                                   0.0046 ** 
-#> pspline(Follow.Up.Time, df = 2):ScrArm   0.2454    
+#> ScrArm                                    0.018 *  
+#> pspline(Follow.Up.Time, df = 2):ScrArm    0.343    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{Soutput}
@@ -817,18 +822,18 @@ ratios}\label{time-dependent-hazard-ratios}}
 In what follows, the hazard ratio for a variable \(X\) is defined as
 
 \[
-\frac{\lambda\left(t | X=x_1, \mathbf{Z}=\mathbf{z_1} ; \hat{\beta}\right)}{\lambda(t | X=x_0, \mathbf{Z}=\mathbf{z_0} ; \hat{\beta})}
+\frac{\lambda\left(t | X=x_1, \mathbf{Z}=\mathbf{z} ; \hat{\beta}\right)}{\lambda(t | X=x_0, \mathbf{Z}=\mathbf{z} ; \hat{\beta})}
 \] where \(\lambda(t|\cdot;\hat{\beta})\) is the hazard rate as a
 function of the variable \(t\) (which is usually time, but can be any
 other continuous variable), \(x_1\) is the value of \(X\) for the
 exposed group, \(x_0\) is the value of \(X\) for the unexposed group,
 \(\mathbf{Z}\) are other covariates in the model which are equal to
-\(\mathbf{z_1}\) in the exposed and \(\mathbf{z_0}\) in the unexposed
-group, and \(\hat{\beta}\) are the estimated regression coefficients. As
-indicated by the formula above, it is most instructive to plot the
-hazard ratio as a function of a variable \(t\) only if there is an
-interaction between \(t\) and \(X\). Otherwise, the resulting plot will
-simply be a horizontal line across time.
+\(\mathbf{z}\) in both the exposed and unexposed group, and
+\(\hat{\beta}\) are the estimated regression coefficients. As indicated
+by the formula above, it is most instructive to plot the hazard ratio as
+a function of a variable \(t\) only if there is an interaction between
+\(t\) and \(X\). Otherwise, the resulting plot will simply be a
+horizontal line across time.
 
 The \code{plot} method with \code{type="hr"} for objects of class
 \code{singleEventCB} can be used to compute time-dependent hazard ratios
@@ -918,11 +923,11 @@ head(conf_ints)
 \begin{Soutput}
 #>   time estimate conf.low conf.high      cov_prof
 #> 1  0.0  0.0e+00  0.0e+00   0.0e+00 Control group
-#> 2  0.1  2.0e-06  2.5e-07   1.6e-05 Control group
-#> 3  0.2  4.2e-06  6.1e-07   3.0e-05 Control group
-#> 4  0.3  6.6e-06  1.1e-06   4.2e-05 Control group
-#> 5  0.4  9.2e-06  1.8e-06   5.2e-05 Control group
-#> 6  0.5  1.2e-05  2.8e-06   6.2e-05 Control group
+#> 2  0.1  1.8e-06  1.9e-07   1.2e-05 Control group
+#> 3  0.2  3.9e-06  4.8e-07   2.2e-05 Control group
+#> 4  0.3  6.1e-06  9.0e-07   3.2e-05 Control group
+#> 5  0.4  8.7e-06  1.5e-06   4.1e-05 Control group
+#> 6  0.5  1.2e-05  2.3e-06   5.0e-05 Control group
 \end{Soutput}
 \end{Schunk}
 
@@ -941,7 +946,7 @@ reference.
 analysis}\label{case-study-2competing-risk-analysis}}
 
 In this case study, we show how case-base sampling can be used in the
-context of a competing-risk analysis. For illustrative purposes, we use
+context of a competing risk analysis. For illustrative purposes, we use
 the same data that was used in Scrucca \emph{et al}
 \citeyearpar{scrucca2010regression}. The data was downloaded from the
 first author's website, and it is now available as part of the
@@ -1013,14 +1018,14 @@ model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
 Covariates & HR & 95\% Conf. & HR & 95\% Conf.\\
 \midrule
-Sex & 0.75 & (0.43, 1.31) & 0.68 & (0.39, 1.21)\\
-Disease & 0.55 & (0.3, 0.99) & 0.52 & (0.28, 0.94)\\
-Phase (CR2 vs. CR1) & 1.10 & (0.44, 2.74) & 1.21 & (0.47, 3.09)\\
-Phase (CR3 vs. CR1) & 1.75 & (0.45, 6.78) & 1.67 & (0.46, 6.08)\\
-Phase (Relapse vs. CR1) & 4.23 & (1.96, 9.14) & 4.55 & (1.98, 10.46)\\
+Sex & 0.73 & (0.42, 1.27) & 0.68 & (0.39, 1.21)\\
+Disease & 0.54 & (0.3, 0.98) & 0.52 & (0.28, 0.94)\\
+Phase (CR2 vs. CR1) & 1.19 & (0.48, 2.97) & 1.21 & (0.47, 3.09)\\
+Phase (CR3 vs. CR1) & 1.44 & (0.37, 5.64) & 1.67 & (0.46, 6.08)\\
+Phase (Relapse vs. CR1) & 4.22 & (1.95, 9.12) & 4.55 & (1.98, 10.46)\\
 \addlinespace
-Source & 1.61 & (0.53, 4.91) & 1.46 & (0.47, 4.53)\\
-Age & 1.00 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
+Source & 1.46 & (0.48, 4.46) & 1.46 & (0.47, 4.53)\\
+Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1346,11 +1351,11 @@ Engineering Research Council of Canada (NSERC), RGPIN.
 \address{%
 Sahir Rai Bhatnagar*\\
 McGill University\\%
-1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+2001 McGill College Avenue Montreal, QC, Canada H3A 1G1\\
 %
-\url{http://sahirbhatnagar.com/}\\%
+\url{http://sahirbhatnagar.com/}%
 %
-\email{sahir.bhatnagar@mcgill.ca}%
+\\\email{sahir.bhatnagar@mcgill.ca}
 }
 
 \address{%
@@ -1358,29 +1363,29 @@ Maxime Turgeon*\\
 University of Manitoba\\%
 186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
 %
-\url{https://maxturgeon.ca/}\\%
+\url{https://maxturgeon.ca/}%
 %
-\email{max.turgeon@umanitoba.ca}%
+\\\email{max.turgeon@umanitoba.ca}
 }
 
 \address{%
 Jesse Islam\\
 McGill University\\%
-1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+2001 McGill College Avenue Montreal, QC, Canada H3A 1G1\\
 %
 %
 %
-\email{jesse.islam@mail.mcgill.ca}%
+\\\email{jesse.islam@mail.mcgill.ca}
 }
 
 \address{%
 James A. Hanley\\
 McGill University\\%
-1020 Pine Avenue West Montreal, QC, Canada H3A 1A2\\
+2001 McGill College Avenue Montreal, QC, Canada H3A 1G1\\
 %
-\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\%
+\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}%
 %
-\email{james.hanley@mcgill.ca}%
+\\\email{james.hanley@mcgill.ca}
 }
 
 \address{%
@@ -1389,7 +1394,7 @@ University of Toronto\\%
 Dalla Lana School of Public Health, 155 College Street, 6th floor,
 Toronto, Ontario M5T 3M7, Canada\\
 %
-\url{http://individual.utoronto.ca/osaarela/}\\%
+\url{http://individual.utoronto.ca/osaarela/}%
 %
-\email{olli.saarela@utoronto.ca}%
+\\\email{olli.saarela@utoronto.ca}
 }

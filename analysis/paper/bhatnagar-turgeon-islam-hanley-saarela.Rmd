@@ -38,7 +38,7 @@ author:
     url: http://individual.utoronto.ca/osaarela/
 title: "\\pkg{casebase}: An Alternative Framework For Survival Analysis and Comparison of Event Rates"
 abstract: |
-  | In clinical studies of time-to-event data, a quantity of interest to the clinician is their patient's risk of an event. However, methods relying on time matching or risk-set sampling (including Cox regression) eliminate the baseline hazard from the estimating function. As a consequence, the focus has been on reporting hazard ratios instead of survival curves. Indeed, reporting patient risk or cumulative incidence requires a separate estimation of the baseline hazard. Using case-base sampling, Hanley & Miettinen (2009) explained how parametric hazard functions can be estimated in continuous-time using logistic regression. Their approach naturally leads to estimates of the survival or risk function that are smooth-in-time.
+  | In clinical studies of time-to-event data, a quantity of interest to the clinician is their patient's risk of an event. However, methods relying on time matching or risk-set sampling (including Cox regression) eliminate the baseline hazard from the estimating function. As a consequence, the focus has been on reporting hazard ratios instead of survival or cumulative incidence curves. Indeed, reporting patient risk or cumulative incidence requires a separate estimation of the baseline hazard. Using case-base sampling, Hanley & Miettinen (2009) explained how parametric hazard functions can be estimated in continuous-time using logistic regression. Their approach naturally leads to estimates of the survival or risk function that are smooth-in-time.
   | In this paper, we present the \CRANpkg{casebase} R package, a comprehensive and flexible toolkit for parametric survival analysis. We describe how the case-base framework can also be used in more complex settings: non-linear functions of time and non-proportional hazards, competing risks, and variable selection. Our package also includes an extensive array of visualization tools to complement the analysis. We illustrate all these features through three different case studies.
   | * SRB and MT contributed equally to this work.
 preamble: >
@@ -122,7 +122,7 @@ think I would normally want to tackle problems parametrically ... and if you wan
 to do things like predict the outcome for a particular patient, it's much more 
 convenient to do that parametrically" [@reid1994conversation]. Indeed, the most 
 relevant quantity in a clinical setting is often the 5- or 10-year risk of 
-experiencing a certain event given the patient's particular circumstances. 
+experiencing a certain event given the patient's particular profile. 
 However, the most reported metric from a Cox model is the (potentially 
 time-dependent) hazard ratio (HR). The covariate-conditional
 survival curve is arguably a more important 
@@ -175,7 +175,7 @@ over hazard ratios.
 
 In what follows, we first recap some theoretical details on case-base sampling 
 and its use for estimating parametric hazard functions. We then give a short 
-review of existing R packages that implement comparable features as \pkg{casebase}. 
+review of existing R packages that implement comparable features to \pkg{casebase}. 
 Next, we provide some details about the implementation of case-base sampling in 
 our package, and we give a brief survey of its main functions. This is followed 
 by three case studies that illustrate the flexibility and capabilities of 
@@ -186,9 +186,9 @@ discussion of the results and of future directions.
 
 # Theoretical details {#theory}
 
-As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile, an exposure status, and an outcome status (i.e. whether the event happened) attached to it. By estimating the probability of an event occurring at a particular person-moment, we can extract information about hazards and survival.
+As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile and an outcome status (i.e. whether the event happened) attached to it. By estimating the probability of an event occurring at a particular person-moment, we can extract information about hazards and survival.
 
-Therefore, we start by sampling all person-moments at which the event occurred; this collection of person-moments is what Hanley & Miettinen call the *case series*. The incidence of the case series is dictated by the hazard function of interest. Next, we sample a finite number of person-moments at which no event occurred; this second collection of person-moment is what Hanley & Miettinen call the *base series*. The sampling mechanism for the base series is left at the discretion of the user, but in practice we find that sampling uniformly from the study base provides both simplicity and good performance. This is the default sampling mechanism in the package.
+Therefore, we start by assembling all person-moments at which the event occurred; this collection of person-moments is what Hanley & Miettinen call the *case series*. The incidence of the case series is dictated by the hazard function of interest. Next, we sample a finite number of person-moments (blinded to case moments); this second collection of person-moments is what Hanley & Miettinen call the *base series*. The sampling mechanism for the base series is left at the discretion of the user, but in practice we find that sampling uniformly from the study base provides both simplicity and good performance. This is the default sampling mechanism in the package.
 
 ## Likelihood and estimating function
 
@@ -224,7 +224,7 @@ This procedure is similar to parametric bootstrap [@efron1994introduction, Secti
 
 ## Common parametric models
 
-Let $g(t; X)$ be the linear predictor such that $\log(\lambda(t;X)) = g(t; X)$. Different functions of $t$ lead to different parametric hazard models. The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$:
+Here we show that certain named distributions such as exponential, Weibull or Gompertz can be fit using our framework, though we are not restricted to such models. Let $g(t; X)$ be the linear predictor such that $\log(\lambda(t;X)) = g(t; X)$. Different functions of $t$ lead to different parametric hazard models. The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$:
 
 \begin{equation}
 \log(\lambda(t; X)) = \beta_0 + \beta_1 X. \label{eq:exp}
@@ -242,6 +242,8 @@ Use of $\log(t)$ yields the Weibull hazard which allows for a power dependence o
 \begin{equation}
 \log(\lambda(t; X)) = \beta_0 + \beta_1 \log(t) + \beta_2 X. \label{eq:weibull}
 \end{equation}
+
+
 
 ## Competing risk analysis
 
@@ -308,14 +310,14 @@ The functions in the \pkg{casebase} package can be divided into two categories: 
 
 ## Population-time plots
 
-Population-time plots are a descriptive visualization of incidence density, where the study base is represented by area and events by points within the area. The case-base sampling approach described above can be visualized in the form of a population time plot. These plots are informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
+Population-time plots are a descriptive visualization of incidence density, where the population time that constitutes the study base is represented by area, and events by points within the area. The case-base sampling approach described above can be visualized in the form of a population time plot. These plots are informative graphical displays of survival data and should be one of the first steps in an exploratory data analysis. The \code{popTime} function and \code{plot} method facilitate this task:
 
 1. The \code{casebase::popTime} function takes as input the original dataset along with the column names corresponding to the timescale, the event status and an exposure group of interest (optional). This will create an object of class \code{popTime}.  
 2. The corresponding \code{plot} method for the object created in Step 1 can be called to create the population time plot with several options for customizing the aesthetics.  
 
 By splitting these tasks, we give flexibility to the user. While the method call in Step 2 allows further customization by using the \CRANpkg{ggplot2} [@ggplot2] family of functions, users may choose the graphics system of their choice to create population-time plots from the object created in Step 1.
 
-To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering]. This dataset is available through the \pkg{casebase} package. It contains the individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
+To illustrate these functions, we will use data from the European Randomized Study of Prostate Cancer Screening (ERSPC) [@schroder2009screening] which was extracted using the approach described in Liu *et al.* [-@liu2014recovering]. This dataset is available through the \pkg{casebase} package. It contains the recreated individual observations for 159,893 men  from seven European countries, who were between the ages of 55 and 69 years when recruited for the trial. 
 
 We first create the necessary dataset for producing the population time plot using the \code{popTime} function. In this example, we stratify the plot by treatment group. The resulting object inherits from class \code{popTime} and stores the exposure variable as an attribute:
 
@@ -497,7 +499,7 @@ with the familiar formula interface:
 ```{r, eval = eval_cs1, echo = -1}
 set.seed(1953)
 fit <- fitSmoothHazard(DeadOfPrCa ~ pspline(Follow.Up.Time, df = 2) * ScrArm, 
-                       data = ERSPC, ratio = 100)
+                       data = ERSPC, ratio = 10)
 ```
 
 <!--Note that we did not have to specify any cut points, as would be the case 
