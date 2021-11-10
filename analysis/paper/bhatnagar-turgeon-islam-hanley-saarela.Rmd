@@ -186,7 +186,7 @@ discussion of the results and of future directions.
 
 # Theoretical details {#theory}
 
-As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile, an exposure status, and an outcome status (i.e. whether the event happened) attached to it. By comparing person-moments at which an event occurred with person-moments at which no event occurred, we can extract information about hazards and survival.
+As discussed in Hanley & Miettinen [-@hanley2009fitting], the key idea behind case-base sampling is to consider the entire study base as an infinite collection of *person-moments*. These person-moments are indexed by both an individual in the study and a time point, and therefore each person-moment has a covariate profile, an exposure status, and an outcome status (i.e. whether the event happened) attached to it. By estimating the probability of an event occurring at a particular person-moment, we can extract information about hazards and survival.
 
 Therefore, we start by sampling all person-moments at which the event occurred; this collection of person-moments is what Hanley & Miettinen call the *case series*. The incidence of the case series is dictated by the hazard function of interest. Next, we sample a finite number of person-moments at which no event occurred; this second collection of person-moment is what Hanley & Miettinen call the *base series*. The sampling mechanism for the base series is left at the discretion of the user, but in practice we find that sampling uniformly from the study base provides both simplicity and good performance. This is the default sampling mechanism in the package.
 
@@ -218,7 +218,7 @@ The asymptotic normality of $\hat{\theta}$ gives us an efficient way to estimate
   1. Compute $\hat{\theta}$ and its variance-covariance matrix $V(\theta)$.
   2. Sample $B$ times from a multivariate normal $N\left(\hat{\theta}, V(\theta)\right)$.
   3. For each sample, compute the survival function using Equation \ref{eqn:surv} below.
-  4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function.
+  4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function of interest.
   
 This procedure is similar to parametric bootstrap [@efron1994introduction, Section 6.5], but it can be more accurately described as a form of approximate Bayesian computation. As such, the validity of the confidence bands relies on the Bernstein-von Mises theorem [@van2000asymptotic, Chapter 10].
 

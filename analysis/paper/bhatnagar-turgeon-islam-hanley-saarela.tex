@@ -121,9 +121,9 @@ as an infinite collection of \emph{person-moments}. These person-moments
 are indexed by both an individual in the study and a time point, and
 therefore each person-moment has a covariate profile, an exposure
 status, and an outcome status (i.e.~whether the event happened) attached
-to it. By comparing person-moments at which an event occurred with
-person-moments at which no event occurred, we can extract information
-about hazards and survival.
+to it. By estimating the probability of an event occurring at a
+particular person-moment, we can extract information about hazards and
+survival.
 
 Therefore, we start by sampling all person-moments at which the event
 occurred; this collection of person-moments is what Hanley \& Miettinen
@@ -235,7 +235,8 @@ functions and survival functions, we can use the following procedure:
   \ref{eqn:surv} below.
 \item
   Use the pointwise quantiles of these survival function estimates to
-  construct a pointwise confidence band for the survival function.
+  construct a pointwise confidence band for the survival function of
+  interest.
 \end{enumerate}
 
 This procedure is similar to parametric bootstrap \citep[Section
