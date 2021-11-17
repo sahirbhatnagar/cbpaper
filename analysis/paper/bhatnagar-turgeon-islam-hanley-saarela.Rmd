@@ -215,8 +215,8 @@ In Hanley & Miettinen [-@hanley2009fitting], the authors suggest sampling the ba
 
 The asymptotic normality of $\hat{\theta}$ gives us an efficient way to estimate the variance of various estimators derived from the hazard function. For example, to construct confidence bands around risk functions and survival functions, we can use the following procedure:
  
-  1. Compute $\hat{\theta}$ and its variance-covariance matrix $V(\theta)$.
-  2. Sample $B$ times from a multivariate normal $N\left(\hat{\theta}, V(\theta)\right)$.
+  1. Compute $\hat{\theta}$ and its variance-covariance matrix $V(\hat \theta)$ which is obtained as part of the logistic regression output.
+  2. Sample $B$ times from a multivariate normal $N\left(\hat{\theta}, V(\hat\theta)\right)$.
   3. For each sample, compute the survival function using Equation \ref{eqn:surv} below.
   4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function of interest.
   

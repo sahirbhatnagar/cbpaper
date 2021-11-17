@@ -22,12 +22,14 @@ rjournal:
 	RJwrapper.tex \
 	RJwrapper.pdf \
 	bhatnagar-turgeon-islam-hanley-saarela.tex \
-	cover-letter.pdf \
+	#cover-letter.pdf \
+	casebase_response_to_reviewers.pdf \
 	bmtcrr-risk-1.pdf \
 	coefplots-1.pdf \
 	compPop-1.pdf \
-	erspc-cox-cif-1.pdf \
+	cs1hazard-1.pdf \
+	erspc-cif-conf-1.pdf \
 	interaction-ERSPC-1.pdf \
-	plot-stratified-erspc-data-1.pdf \
+	plot-erspc-data-1.pdf \
 	riskregressionBrier-1.pdf
 

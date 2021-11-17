@@ -226,10 +226,11 @@ functions and survival functions, we can use the following procedure:
 \tightlist
 \item
   Compute \(\hat{\theta}\) and its variance-covariance matrix
-  \(V(\theta)\).
+  \(V(\hat \theta)\) which is obtained as part of the logistic
+  regression output.
 \item
   Sample \(B\) times from a multivariate normal
-  \(N\left(\hat{\theta}, V(\theta)\right)\).
+  \(N\left(\hat{\theta}, V(\hat\theta)\right)\).
 \item
   For each sample, compute the survival function using Equation
   \ref{eqn:surv} below.
