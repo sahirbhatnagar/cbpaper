@@ -1,0 +1,11 @@
+- avoid comparing cases and control
+- sampling is completely blind. in a continuous time model
+- royston and parmar
+- numerical integration is easily.. integration the smoothness doesnt matter either.  differentiation is hard
+- the contrast is cox semi parametrically
+- cox separates time from everything else
+- theres no reason for this distinction
+- we do everthing parametrically
+- Make it look like its Cox saying it. If we go parametric then we can get the asymptotic normality of the betas
+- the step funtions will not be more informative than the confidence bands
+- bernstein von misses theorem
