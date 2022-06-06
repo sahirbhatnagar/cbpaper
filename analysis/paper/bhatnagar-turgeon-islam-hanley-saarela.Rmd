@@ -192,7 +192,7 @@ Therefore, we start by assembling all person-moments at which the event occurred
 
 ## Likelihood and estimating function
 
-To describe the theoretical foundations of case-base sampling, we use the framework of counting processes. In what follows, we abuse notation slightly and omit any mention of $\sigma$-algebras. Instead, following Aalen \textit{et al} [-@aalen2008survival], we use the placeholder "past" to denote the past history of the corresponding process. The reader interested in more details can refer to Saarela & Arjas [-@saarela2015non] and Saarela [-@saarela2016case]. First, let $N_{i}(t) \in \{0, 1\}$ be counting processes corresponding to the event of interest for individual $i=1, \ldots,n$. For simplicity, we will consider Type I censoring due to the end of follow-up at time $\tau$ (the general case of independent censoring is treated in Saarela [-@saarela2016case]). We assume a continuous time model, which implies that the counting process jumps are less than or equal to one. We are interested in modeling the hazard functions $\lambda_{i}(t)$ of the processes $N_i(t)$, and which satisfy
+To describe the theoretical foundations of case-base sampling, we use the framework of counting processes. In what follows, we abuse notation slightly and omit any mention of $\sigma$-algebras. Instead, following Aalen \textit{et al} [-@aalen2008survival], we use the placeholder "past" to denote the past history of the corresponding process. The reader interested in more details can refer to Saarela & Arjas [-@saarela2015non] and Saarela [-@saarela2016case]. First, let $N_{i}(t) \in \{0, 1\}$ be counting processes corresponding to the event of interest for individual $i=1, \ldots,n$. For simplicity, we will consider Type I censoring due to the end of follow-up at time $\tau$ (the general case of independent censoring is treated in Saarela [-@saarela2016case]). We are interested in modeling the hazard functions $\lambda_{i}(t)$ of the processes $N_i(t)$, and which satisfy
 $$\lambda_{i}(t)\,\textrm dt = E[\,\textrm dN_{i}(t)\mid \mathrm{past}].$$  The processes $N_i(t)$ count the person-moments from the *case series*.
 
 To complement the case series, we sample person-moments for the base series. To do so, we specify the base series sampling mechanism as non-homogeneous Poisson processes $R_i(t) \in \{0, 1, 2, \ldots\}$; the person-moments where $\,\textrm dR_i(t) = 1$ constitute the base series. We note that the same individual can contribute multiple person-moments to the base series. The process $Q_{i}(t) = R_i(t) + N_{i}(t)$ then counts both the case and base series person-moments contributed by individual $i$. As mentioned above, the processes $R_i(t)$ are specified by the user via its intensity function $\rho_i(t)$. The process $Q_{i}(t)$ is characterized by $E[\,\textrm dQ_{i}(t)\mid\mathrm{past}] = \lambda_{i}(t)\,\textrm dt + \rho_i(t)\,\textrm dt$. 
@@ -203,7 +203,7 @@ where $\prod_{t\in[0,u)}$ represents a product integral from $0$ to $u$, and whe
 
 Case-base sampling allows us to avoid this integral. By conditioning on a sampled person-moment, we get individual partial likelihood contributions of the form
 $$P(\,\textrm dN_{i}(t) \mid \,\textrm dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.$$
-Therefore, an estimating function for $\theta$ can be composed of these contributions as:
+By using the symbol $\stackrel{\theta}{\propto}$, we mean that both sides of the expression are equal up to multiplicative factors that do not depend on $\theta$. Therefore, an estimating function for $\theta$ can be composed of these contributions as:
 \begin{equation}
 L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{\,\textrm dQ_i(t)}. \label{eq:lik-function}
 \end{equation}
@@ -363,10 +363,22 @@ plotb <- emptyPlot + geom_point(data = dplyr::filter(a, event == 1),
                                 show.legend = FALSE, size = 1.5, 
                                 alpha = 0.5, shape = 21) + 
   theme(legend.position = "none") + 
-  scale_y_continuous(labels = label_number_si())
+  scale_y_continuous(labels = label_number_si()) +
+  scale_color_manual(values = c("#AB3A59"),
+                     limits = c("Case series"),
+                     name = "") +
+  scale_fill_manual(values = c("#E16A86"),
+                    limits = c("Case series"),
+                    name = "")
 
 plotc <- plot(a, add.case.series = TRUE, legend = FALSE) +
-  scale_y_continuous(labels = label_number_si())
+  scale_y_continuous(labels = label_number_si()) +
+  scale_color_manual(values = c("#AB3A59"),
+                     limits = c("Case series"),
+                     name = "") +
+  scale_fill_manual(values = c("#E16A86"),
+                    limits = c("Case series"),
+                    name = "")
 
 #TEMP MAINLY NEED FOR LEGEND
 plotd <- plot(a, add.base.series = TRUE) +
@@ -374,10 +386,17 @@ plotd <- plot(a, add.base.series = TRUE) +
 
 legend_b <- get_legend(
   plotd + 
-    guides(color = guide_legend(nrow = 1)) +
-     theme(legend.direction = "horizontal",
+    theme(legend.direction = "horizontal",
            legend.justification = "center",
-           legend.box.just = "bottom")
+           legend.box.just = "bottom") +
+    scale_color_manual(values = c("#AB3A59", "#347004"),
+                       limits = c("Case series", "Base series"),
+                       name = "") +
+    scale_fill_manual(values = c("#E16A86", "#50A315"),
+                      limits = c("Case series", "Base series"),
+                      name = "") +
+      guides(color = guide_legend(nrow = 1),
+             fill = guide_legend(nrow = 1))
 )
 
 #remove legend
@@ -859,7 +878,7 @@ table_cb %>%
   add_header_above(c(" " = 1, "Case-Base" = 2, "Cox" = 2))
 ```
 
-From the fit object, we can extract both the hazard ratios and their corresponding confidence intervals. These quantities appear in Table \ref{tab:bmtcrr-cis}. As we can see, the type of disease corresponds to a significant hazard ratio: the hazard for AML is 48% lower than that for ALL. Moreover, being in relapse at transplant is associated with a hazard ratio of 4.09 when compared to CR1.
+From the fit object, we can extract both the hazard ratios and their corresponding confidence intervals. These quantities appear in Table \ref{tab:bmtcrr-cis}. As we can see, the type of disease corresponds to a significant hazard ratio: the hazard for AML is about half that for ALL. Moreover, being in relapse at transplant is associated with a hazard ratio of 4.22 when compared to CR1.
 
 Given the estimate of the hazard functions obtained using case-base sampling, we can compute the cumulative incidence curve for a fixed covariate profile. We perform this computation for a 35 year old woman who received a stem-cell transplant from peripheral blood at relapse. We compare the absolute risk curve for such a woman with ALL with that for a similar woman with AML.
 

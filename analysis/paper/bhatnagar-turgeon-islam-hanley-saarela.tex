@@ -149,10 +149,9 @@ counting processes corresponding to the event of interest for individual
 \(i=1, \ldots,n\). For simplicity, we will consider Type I censoring due
 to the end of follow-up at time \(\tau\) (the general case of
 independent censoring is treated in Saarela
-\citeyearpar{saarela2016case}). We assume a continuous time model, which
-implies that the counting process jumps are less than or equal to one.
-We are interested in modeling the hazard functions \(\lambda_{i}(t)\) of
-the processes \(N_i(t)\), and which satisfy
+\citeyearpar{saarela2016case}). We are interested in modeling the hazard
+functions \(\lambda_{i}(t)\) of the processes \(N_i(t)\), and which
+satisfy
 \[\lambda_{i}(t)\,\textrm dt = E[\,\textrm dN_{i}(t)\mid \mathrm{past}].\]
 The processes \(N_i(t)\) count the person-moments from the \emph{case
 series}.
@@ -183,8 +182,10 @@ Case-base sampling allows us to avoid this integral. By conditioning on
 a sampled person-moment, we get individual partial likelihood
 contributions of the form
 \[P(\,\textrm dN_{i}(t) \mid \,\textrm dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.\]
-Therefore, an estimating function for \(\theta\) can be composed of
-these contributions as: \begin{equation}
+By using the symbol \(\stackrel{\theta}{\propto}\), we mean that both
+sides of the expression are equal up to multiplicative factors that do
+not depend on \(\theta\). Therefore, an estimating function for
+\(\theta\) can be composed of these contributions as: \begin{equation}
 L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{\,\textrm dQ_i(t)}. \label{eq:lik-function}
 \end{equation} When a logarithmic link function is used for modeling the
 hazard function, the above expression is of a logistic regression form
@@ -1036,9 +1037,9 @@ Age & 0.99 & (0.97, 1.02) & 0.99 & (0.97, 1.02)\\
 From the fit object, we can extract both the hazard ratios and their
 corresponding confidence intervals. These quantities appear in Table
 \ref{tab:bmtcrr-cis}. As we can see, the type of disease corresponds to
-a significant hazard ratio: the hazard for AML is 48\% lower than that
-for ALL. Moreover, being in relapse at transplant is associated with a
-hazard ratio of 4.09 when compared to CR1.
+a significant hazard ratio: the hazard for AML is about half that for
+ALL. Moreover, being in relapse at transplant is associated with a
+hazard ratio of 4.22 when compared to CR1.
 
 Given the estimate of the hazard functions obtained using case-base
 sampling, we can compute the cumulative incidence curve for a fixed
@@ -1354,9 +1355,9 @@ Sahir Rai Bhatnagar*\\
 McGill University\\%
 2001 McGill College Avenue Montreal, QC, Canada H3A 1G1\\
 %
-\url{http://sahirbhatnagar.com/}%
+\url{http://sahirbhatnagar.com/}\\%
 %
-\\\email{sahir.bhatnagar@mcgill.ca}
+\email{sahir.bhatnagar@mcgill.ca}%
 }
 
 \address{%
@@ -1364,9 +1365,9 @@ Maxime Turgeon*\\
 University of Manitoba\\%
 186 Dysart Road Winnipeg, MB, Canada R3T 2N2\\
 %
-\url{https://maxturgeon.ca/}%
+\url{https://maxturgeon.ca/}\\%
 %
-\\\email{max.turgeon@umanitoba.ca}
+\email{max.turgeon@umanitoba.ca}%
 }
 
 \address{%
@@ -1376,7 +1377,7 @@ McGill University\\%
 %
 %
 %
-\\\email{jesse.islam@mail.mcgill.ca}
+\email{jesse.islam@mail.mcgill.ca}%
 }
 
 \address{%
@@ -1384,9 +1385,9 @@ James A. Hanley\\
 McGill University\\%
 2001 McGill College Avenue Montreal, QC, Canada H3A 1G1\\
 %
-\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}%
+\url{http://www.medicine.mcgill.ca/epidemiology/hanley/}\\%
 %
-\\\email{james.hanley@mcgill.ca}
+\email{james.hanley@mcgill.ca}%
 }
 
 \address{%
@@ -1395,7 +1396,7 @@ University of Toronto\\%
 Dalla Lana School of Public Health, 155 College Street, 6th floor,
 Toronto, Ontario M5T 3M7, Canada\\
 %
-\url{http://individual.utoronto.ca/osaarela/}%
+\url{http://individual.utoronto.ca/osaarela/}\\%
 %
-\\\email{olli.saarela@utoronto.ca}
+\email{olli.saarela@utoronto.ca}%
 }
