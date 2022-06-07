@@ -880,7 +880,7 @@ model using our package; for example:
 \begin{Schunk}
 \begin{Sinput}
 fitSmoothHazard(DeadOfPrCa ~ as.integer(Follow.Up.Time >= t0) :
-                    I(Follow.Up.Time - t0) : ScrArm,
+                    ScrArm : I(Follow.Up.Time - t0),
                 data = ERSPC)
 \end{Sinput}
 \end{Schunk}
@@ -891,8 +891,10 @@ write the two cases of our formula above in a more compact way. We also
 use the function \texttt{I()}, which allows us to specify new variables
 within the formula using normal \texttt{R} code. This is required, as
 otherwise the symbol \texttt{-} would be interpreted as a formula
-operator. Finally, we use the operator \texttt{:} instead of \texttt{*}
-in order to only include the interaction term, not the main effects.
+operator. Finally, the term \texttt{ScrArm\ :\ I(Follow.Up.Time\ -\ t0)}
+represents the product \(Z (t - t_0)\) in the equation above. We use the
+operator \texttt{:} instead of \texttt{*} in order to only include the
+interaction term, not the main effects.
 
 Alternatively, the breakpoint \(t_0\) could also be estimated by
 combining case-base sampling with segmented regression. However, this

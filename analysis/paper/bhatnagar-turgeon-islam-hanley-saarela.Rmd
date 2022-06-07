@@ -623,11 +623,11 @@ where $t_0 \approx 7$ years. This model corresponds to a hazard ratio that is co
 
 ```{r, echo = TRUE, eval = FALSE}
 fitSmoothHazard(DeadOfPrCa ~ as.integer(Follow.Up.Time >= t0) :
-                    I(Follow.Up.Time - t0) : ScrArm,
+                    ScrArm : I(Follow.Up.Time - t0),
                 data = ERSPC)
 ```
 
-\noindent Here, we use the binary variable `as.integer(Follow.Up.Time >= t0)` in order to write the two cases of our formula above in a more compact way. We also use the function `I()`, which allows us to specify new variables within the formula using normal `R` code. This is required, as otherwise the symbol `-` would be interpreted as a formula operator. Finally, we use the operator `:` instead of `*` in order to only include the interaction term, not the main effects.
+\noindent Here, we use the binary variable `as.integer(Follow.Up.Time >= t0)` in order to write the two cases of our formula above in a more compact way. We also use the function `I()`, which allows us to specify new variables within the formula using normal `R` code. This is required, as otherwise the symbol `-` would be interpreted as a formula operator. Finally, the term `ScrArm : I(Follow.Up.Time - t0)` represents the product $Z (t - t_0)$ in the equation above. We use the operator `:` instead of `*` in order to only include the interaction term, not the main effects.
 
 Alternatively, the breakpoint $t_0$ could also be estimated by combining case-base sampling with segmented regression. However, this extension is beyond the current scope of `casebase`.
 
