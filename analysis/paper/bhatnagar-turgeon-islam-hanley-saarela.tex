@@ -867,6 +867,37 @@ apparent by year 7 and later. The 25-60\% reductions seen in years 8-12
 of the study suggests a much higher reduction in prostate cancer due to
 screening than the single overall 20\% reported in the original article.
 
+A more parsimonious model based on these results could be constructed as
+follows:
+
+\[ \log \lambda\left(t \mid \mathbf{Z}\right) = \begin{cases} \alpha, &\quad t < t_0\\
+\alpha + \beta Z(t - t_0), &\quad t \geq t_0\end{cases},\] where
+\(t_0 \approx 7\) years. This model corresponds to a hazard ratio that
+is constant and equal to 1 until \(t = t_0\), after which it decreases
+exponentially. If we fix the value \(t_0\), we can easily implement this
+model using our package; for example:
+
+\begin{Schunk}
+\begin{Sinput}
+fitSmoothHazard(DeadOfPrCa ~ as.integer(Follow.Up.Time >= t0) :
+                    I(Follow.Up.Time - t0) : ScrArm,
+                data = ERSPC)
+\end{Sinput}
+\end{Schunk}
+
+\noindent Here, we use the binary variable
+\texttt{as.integer(Follow.Up.Time\ \textgreater{}=\ t0)} in order to
+write the two cases of our formula above in a more compact way. We also
+use the function \texttt{I()}, which allows us to specify new variables
+within the formula using normal \texttt{R} code. This is required, as
+otherwise the symbol \texttt{-} would be interpreted as a formula
+operator. Finally, we use the operator \texttt{:} instead of \texttt{*}
+in order to only include the interaction term, not the main effects.
+
+Alternatively, the breakpoint \(t_0\) could also be estimated by
+combining case-base sampling with segmented regression. However, this
+extension is beyond the current scope of \texttt{casebase}.
+
 \hypertarget{hazard-functions}{%
 \subsubsection{Hazard functions}\label{hazard-functions}}
 
