@@ -207,7 +207,7 @@ Case-base sampling allows us to avoid this integral. By conditioning on a sample
 $$P(\,\textrm dN_{i}(t) \mid \,\textrm dQ_{i}(t) = 1,\mathrm{past}) \stackrel{\theta}{\propto} \frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}.$$
 By using the symbol $\stackrel{\theta}{\propto}$, we mean that both sides of the expression are equal up to multiplicative factors that do not depend on $\theta$. Therefore, an estimating function for $\theta$ can be composed of these contributions as:
 \begin{equation}
-L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{\,\textrm dQ_i(t)}. \label{eq:lik-function}
+L(\theta) = \prod_{i=1}^{n} \prod_{t\in[0,\tau)} \left(\frac{\lambda_{i}(t; \theta)^{\,\textrm dN_{i}(t)}}{\rho_i(t) + \lambda_{i}(t;\theta)}\right)^{\,\textrm dQ_i(t)}. (\#eq:lik-function)
 \end{equation}
 When a logarithmic link function is used for modeling the hazard function, the above expression is of a logistic regression form with an offset term $\log(1/\rho_i(t))$. Note that the sampling units selected in the case-base sampling mechanism are person-moments, rather than individuals, and the parameters to be estimated are hazards or hazard ratios rather than odds or odds ratios. Generally, an individual can contribute more than one person-moment, and thus the terms in the product integral are not independent. Nonetheless, Saarela [-@saarela2016case] showed that the corresponding partial likelihood score function has mean zero at the true value $\theta=\theta_0$, and that the resulting estimator $\widehat{\theta}$ is asymptotically normally distributed.
 
@@ -219,7 +219,7 @@ The asymptotic normality of $\widehat{\theta}$ gives us an efficient way to esti
  
   1. Compute $\widehat{\theta}$ and its variance-covariance matrix $V(\widehat \theta)$ which is obtained as part of the logistic regression output.
   2. Sample $B$ times from a multivariate normal $N\left(\widehat{\theta}, V(\widehat\theta)\right)$.
-  3. For each sample, compute the survival function using Equation \ref{eqn:surv} below.
+  3. For each sample, compute the survival function using Equation \@ref(eq:surv) below.
   4. Use the pointwise quantiles of these survival function estimates to construct a pointwise confidence band for the survival function of interest.
   
 This procedure is similar to parametric bootstrap [@efron1994introduction, Section 6.5], but it can be more accurately described as a form of approximate Bayesian computation. As such, the validity of the confidence bands relies on the Bernstein-von Mises theorem [@van2000asymptotic, Chapter 10].
@@ -229,23 +229,21 @@ This procedure is similar to parametric bootstrap [@efron1994introduction, Secti
 Here we show that certain named distributions such as exponential, Weibull or Gompertz can be fit using our framework, though we are not restricted to such models. Let $g(t; X)$ be the linear predictor such that $\log(\lambda(t;X)) = g(t; X)$. Different functions of $t$ lead to different parametric hazard models. The simplest of these models is the one-parameter exponential distribution which is obtained by taking the hazard function to be constant over the range of $t$:
 
 \begin{equation}
-\log(\lambda(t; X)) = \beta_0 + \beta_1 X. \label{eq:exp}
+\log(\lambda(t; X)) = \beta_0 + \beta_1 X. (\#eq:exp)
 \end{equation}
 In this model, the instantaneous failure rate is independent of $t$.^[The conditional chance of failure in a time interval of specified length is the same regardless of how long the individual has been in the study. This is also known as the *memoryless property* [@kalbfleisch2011statistical].]
 
 The Gompertz hazard model is given by including a linear term for time:
 
 \begin{equation}
-\log(\lambda(t; X)) = \beta_0 + \beta_1 t + \beta_2 X. \label{eq:gomp}
+\log(\lambda(t; X)) = \beta_0 + \beta_1 t + \beta_2 X. (\#eq:gomp)
 \end{equation}
 
 Use of $\log(t)$ yields the Weibull hazard which allows for a power dependence of the hazard on time [@kalbfleisch2011statistical]:
 
 \begin{equation}
-\log(\lambda(t; X)) = \beta_0 + \beta_1 \log(t) + \beta_2 X. \label{eq:weibull}
+\log(\lambda(t; X)) = \beta_0 + \beta_1 \log(t) + \beta_2 X. (\#eq:weibull)
 \end{equation}
-
-
 
 ## Competing risk analysis
 
@@ -258,9 +256,9 @@ where $N_j(t)$ is the counting process associated with the event of type $j$ and
 
 To perform variable selection on the regression parameters $\theta \in \mathbb{R}^p$ of the hazard function, we can add a penalty to the likelihood and optimise the following equation:
 \begin{equation}
-\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j p_{\lambda,\alpha}(\theta_j) \label{eq:penest}
+\min _{\theta \in \mathbb{R}^{p}}\,\,-\ell\left(\theta\right)+\sum_{j=1}^p w_j p_{\lambda,\alpha}(\theta_j) (\#eq:penest)
 \end{equation}
-where $\ell\left(\theta\right) = \log L(\theta)$ is the log of the likelihood function given in \eqref{eq:lik-function}, $p_{\lambda,\alpha}(\theta_j)$ is a penalty term controlled by the non-negative regularization parameters $\lambda$ and $\alpha$, and $w_j$ is the penalty factor for the $j$th covariate. These penalty factors serve as a way of allowing parameters to be penalized differently. For example, we could set the penalty factor for time to be 0 to ensure it is always included in the selected model. 
+where $\ell\left(\theta\right) = \log L(\theta)$ is the log of the likelihood function given in \@ref(eq:lik-function), $p_{\lambda,\alpha}(\theta_j)$ is a penalty term controlled by the non-negative regularization parameters $\lambda$ and $\alpha$, and $w_j$ is the penalty factor for the $j$th covariate. These penalty factors serve as a way of allowing parameters to be penalized differently. For example, we could set the penalty factor for time to be 0 to ensure it is always included in the selected model. 
 
 # Comparison with existing packages
 
@@ -274,7 +272,7 @@ Several packages implement penalized estimation for the Cox model: \CRANpkg{glmn
 
 Next, several R packages implement methodologies for competing risk analysis; for a different perspective on this topic, see Mahani & Sharabiani [-@mahani2015bayesian]. The package \pkg{survival} provides functionality for competing risk analysis and multistate modelling. The package \CRANpkg{cmprsk} provides methods for cause-specific subdistribution hazards, such as in the Fine-Gray model [-@fine1999proportional]. On the other hand, the package \pkg{CFC} estimates cause-specific CIs from unadjusted, non-parametric survival functions. Our package \pkg{casebase} also provides functionalities for competing risk analysis by estimating parametrically the cause-specific hazards. From these quantities, we can then estimate the cause-specific CIs. 
 
-Finally, several packages include functions to estimate the survival function and the CI. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CI can be obtained using their functional relationships (see Equations \ref{eqn:surv} and \ref{eqn:CDF} below). Packages providing this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{riskRegression}, \pkg{rstpm2}, \pkg{survival}, and \pkg{glmnet}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the survival function, whereas the second category often produces estimates in the form of stepwise functions. 
+Finally, several packages include functions to estimate the survival function and the CI. The corresponding methods generally fall into two categories: transformation of the estimated hazard function, and semi-parametric estimation of the baseline hazard. The first category broadly corresponds to parametric survival models, where the full hazard is explicitly modeled. Using this estimate, the survival function and the CI can be obtained using their functional relationships (see Equations \@ref(eq:surv) and \@ref(eq:CDF) below). Packages providing this functionality include \pkg{CFC}, \pkg{flexsurv}, \pkg{mets}, and \pkg{survival}. Our package \pkg{casebase} also follows this approach for both single-event and competing risk analyses. The second category outlined above broadly corresponds to semi-parametric models. These models do not model the full hazard function, and therefore the baseline hazard needs to be estimated separately in order to estimate the survival function. This is achieved using semi-parametric estimators (e.g. Breslow's estimator) or parametric estimators (e.g. spline functions). Packages that implement this approach include \pkg{riskRegression}, \pkg{rstpm2}, \pkg{survival}, and \pkg{glmnet}. As mentioned in the introduction, a key distinguishing factor between these two approaches is that the first category leads to smooth estimates of the survival function, whereas the second category often produces estimates in the form of stepwise functions. 
 
 ```{r surv-pkgs, echo = FALSE}
 if (knitr::is_latex_output()) {
@@ -485,12 +483,13 @@ To fit the hazard function, we provide several approaches that are available via
 In the case of multiple competing events, the hazard is fitted via multinomial regression as performed by the \CRANpkg{VGAM} package. We selected this package for its ability to fit multinomial regression models with an offset.
 
 Once a model-fit object has been returned by `fitSmoothHazard`, all the familiar summary and diagnostic functions are available: `print`, `summary`, `predict`, `plot`, etc. Our package provides one more functionality: it computes risk functions from the model fit. For the case of a single event, it uses the familiar identity
-\begin{equation}\label{eqn:surv}
-S(t) = \exp\left(-\int_0^t \lambda(u;X) du\right).
+\begin{equation}
+S(t) = \exp\left(-\int_0^t \lambda(u;X) du\right). 
+(\#eq:surv)
 \end{equation}
 The integral is computed using either the numerical or Monte-Carlo integration. The risk function (or cumulative distribution function) is then defined as
-\begin{equation}\label{eqn:CDF}
-F(t) = 1 - S(t).
+\begin{equation}
+F(t) = 1 - S(t). (\#eq:CDF)
 \end{equation}
 
 For the case of a competing-event analysis, the event-specific risk is computed using the following procedure: first, we compute the overall survival function (i.e. for all event types):
@@ -611,16 +610,16 @@ tt <- plot(fit,
      xaxt = "n",
      rug = TRUE)
 
-axis(2, at = seq(0,1.50, by=0.25), las = 2)
-axis(1, at = seq(min(new_time),max(new_time), by=1))
-for( i in seq(0,1.50, by=0.25)) {
+axis(2, at = seq(0,1.50, by = 0.25), las = 2)
+axis(1, at = seq(min(new_time),max(new_time), by = 1))
+for (i in seq(0,1.50, by = 0.25)) {
   abline(h = i, lty = 1, col = "lightgrey")
 }
-for( i in seq(min(new_time),max(new_time), by=1)) {
+for (i in seq(min(new_time),max(new_time), by = 1)) {
   abline(v = i, lty = 1, col = "lightgrey")
 }
-for(i in seq_along(seq(0, 0.75, by = 0.25))) {
-  mtext(paste0(seq(0, 0.75, by = 0.25)[i]*100,"%"), side = 4, las = 2, adj = 1, outer = TRUE, line = 2, at = c(0.63-0.11*(i-1)))
+for (i in seq_along(seq(0, 0.75, by = 0.25))) {
+  mtext(paste0(seq(0, 0.75, by = 0.25)[i]*100,"%"), side = 4, las = 2, adj = 1, outer = TRUE, line = 2, at = c(0.63 - 0.11*(i - 1)))
 }
 lines(tt$Follow.Up.Time, tt$hazard_ratio, lwd = 2, lty = 1)
 mtext("% reduction in\nprostate cancer\nmortality rate", side = 4, las = 2, outer = TRUE, line = -1, at = 0.7)
@@ -639,8 +638,7 @@ fitSmoothHazard(DeadOfPrCa ~ as.integer(Follow.Up.Time >= t0) :
                     ScrArm : I(Follow.Up.Time - t0),
                 data = ERSPC)
 ```
-
-\noindent Here, we use the binary variable `as.integer(Follow.Up.Time >= t0)` in order to write the two cases of our formula above in a more compact way. We also use the function `I()`, which allows us to specify new variables within the formula using normal `R` code. This is required, as otherwise the symbol `-` would be interpreted as a formula operator. Finally, the term `ScrArm : I(Follow.Up.Time - t0)` represents the product $Z (t - t_0)$ in the equation above. We use the operator `:` instead of `*` in order to only include the interaction term, not the main effects.
+Here, we use the binary variable `as.integer(Follow.Up.Time >= t0)` in order to write the two cases of our formula above in a more compact way. We also use the function `I()`, which allows us to specify new variables within the formula using normal `R` code. This is required, as otherwise the symbol `-` would be interpreted as a formula operator. Finally, the term `ScrArm : I(Follow.Up.Time - t0)` represents the product $Z (t - t_0)$ in the equation above. We use the operator `:` instead of `*` in order to only include the interaction term, not the main effects.
 
 Alternatively, the breakpoint $t_0$ could also be estimated by combining case-base sampling with segmented regression. However, this extension is beyond the current scope of `casebase`.
 
@@ -1015,9 +1013,9 @@ Figure \@ref(fig:compAbsrisk) shows the CI curves for all three models. As we ca
 
 ## Case study 3---Variable selection
 
-For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function as given by Equation \ref{eq:penest}. We note that this is different than the semiparametric model Coxnet, which regularizes the Cox partial likelihood. To illustrate this functionality, we use the dataset from the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) [@knaus1995support].^[The original data is available online from the Department of Biostatistics at Vanderbilt University: https://biostat.app.vumc.org/wiki/Main/SupportDesc] The SUPPORT dataset tracks death in five American hospitals within individuals who are considered seriously ill. The cleaned and imputed data consists of 9104 observations and 30 variables, and it is available as part of the \pkg{casebase} package. In the comparisons below, all covariates except `sps` and `aps` were used. These two variables correspond to scores for predicting the outcome that were developed as part of the original study. For more information about this dataset, the reader is encouraged to look at the documentation in our package. 
+For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function as given by Equation \@ref(eq:penest). We note that this is different than the semiparametric model Coxnet, which regularizes the Cox partial likelihood. To illustrate this functionality, we use the dataset from the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) [@knaus1995support].^[The original data is available online from the Department of Biostatistics at Vanderbilt University: https://biostat.app.vumc.org/wiki/Main/SupportDesc] The SUPPORT dataset tracks death in five American hospitals within individuals who are considered seriously ill. The cleaned and imputed data consists of 9104 observations and 30 variables, and it is available as part of the \pkg{casebase} package. In the comparisons below, all covariates except `sps` and `aps` were used. These two variables correspond to scores for predicting the outcome that were developed as part of the original study. For more information about this dataset, the reader is encouraged to look at the documentation in our package. 
 
-For our penalized case-base model, we opt for the natural log of time which corresponds to a Weibull distribution. For fitting the penalized hazard, we use `fitSmoothHazard.fit`, which is a matrix interface to the `fitSmoothHazard` function. The `fitSmoothHazard` and `fitSmoothHazard.fit` functions sample the case and base series, calculate the required offset, and transform the data to match the expected input of the \pkg{glmnet} package. The penalized logistic regression is then fit for multiple values of the tuning parameter using the function `glmnet::cv.glmnet` and the binomial family. To `fitSmoothHazard.fit`, we supply both a matrix `y` containing the time and event variables, and a matrix `x` containing all other covariates. We apply the lasso penalty by setting `alpha = 1` and assign a `penalty.factor` ($w_j$; cf. Equation \ref{eq:penest}) of 0 to the time variable to ensure it is in the selected model. We compare our approach to both Cox regression, and lasso penalized Cox regression (fitted via the \pkg{glmnet} package and using the Cox family). 
+For our penalized case-base model, we opt for the natural log of time which corresponds to a Weibull distribution. For fitting the penalized hazard, we use `fitSmoothHazard.fit`, which is a matrix interface to the `fitSmoothHazard` function. The `fitSmoothHazard` and `fitSmoothHazard.fit` functions sample the case and base series, calculate the required offset, and transform the data to match the expected input of the \pkg{glmnet} package. The penalized logistic regression is then fit for multiple values of the tuning parameter using the function `glmnet::cv.glmnet` and the binomial family. To `fitSmoothHazard.fit`, we supply both a matrix `y` containing the time and event variables, and a matrix `x` containing all other covariates. We apply the lasso penalty by setting `alpha = 1` and assign a `penalty.factor` ($w_j$; cf. Equation \@ref(eq:penest)) of 0 to the time variable to ensure it is in the selected model. We compare our approach to both Cox regression, and lasso penalized Cox regression (fitted via the \pkg{glmnet} package and using the Cox family). 
 
 To compare the performance of our models, we split the data into 95% training and 5% test sets. To assess both discrimination and calibration, we use a time-dependent version of the classical Brier score that is adjusted for censoring [@graf1999ass]. The Brier score can be used with both parametric and semi-parametric models. We use the \pkg{riskRegression} package to compute these scores for all models.
 
@@ -1286,7 +1284,6 @@ legend_reg <- cowplot::get_legend(
 
 cowplot::plot_grid(plot_row_reg, legend_reg, rel_heights = c(3, .4), nrow = 2)
 ```
-
 
 # Discussion
 
