@@ -258,9 +258,9 @@ We then pass this object to the corresponding \texttt{plot} method:
 plot(pt_object, add.base.series = TRUE)
 \end{verbatim}
 
-Figure \ref{fig:plot-erspc-data} depicts the process of creating a population-time plot. It is built sequentially by first adding a layer for the area representing the population time in gray (Figure \ref{fig:plot-erspc-data} A), with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive \emph{stepwise shape} in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e.~from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e.~from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment in December 2003, the minimum potential follow-up is three years. Tracked further forwards in time (i.e.~after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
+Figure \ref{fig:plot-erspc-data} depicts the process of creating a population-time plot. It is built sequentially by first adding a layer for the area representing the population time in gray (Figure \ref{fig:plot-erspc-data}A), with subjects having the least amount of observation time plotted at the top of the y-axis. We immediately notice a distinctive \emph{stepwise shape} in the population time area. This is due to the randomization of the Finnish cohorts which were carried out on January 1 of each of year from 1996 to 1999. Coupled with the uniform December 31 2006 censoring date, this led to large numbers of men with exactly 11, 10, 9 or 8 years of follow-up. Tracked backwards in time (i.e.~from right to left), the population-time plot shows the recruitment pattern from its beginning in 1991, and the January 1 entries in successive years. Tracked forwards in time (i.e.~from left to right), the plot for the first three years shows attrition due entirely to death (mainly from other causes). Since the Swedish and Belgian centres were the last to complete recruitment in December 2003, the minimum potential follow-up is three years. Tracked further forwards in time (i.e.~after year 3) the attrition is a combination of deaths and staggered entries. As we can see, population-time plots summarise a wealth of information about the study into a simple graph.
 
-Next, layers for the case series and base series are added. The y-axis location of each case moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area (Figure \ref{fig:plot-erspc-data} B). By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-erspc-data} C, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled uniformly from the study base (Figure \ref{fig:plot-erspc-data} D). The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
+Next, layers for the case series and base series are added. The y-axis location of each case moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area (Figure \ref{fig:plot-erspc-data}B). By randomly distributing the cases, we can get a sense of the incidence density. In Figure \ref{fig:plot-erspc-data}C, we see that more events are observed at later follow-up times. Therefore, a constant hazard model would not be appropriate in this instance as it would overestimate the incidence earlier on in time, and underestimate it later on. Finally, the base series is sampled uniformly from the study base (Figure \ref{fig:plot-erspc-data}D). The reader should refer to the package vignettes for more examples and a detailed description of how to modify the aesthetics of a population-time plot.
 
 \hypertarget{parametric-modeling}{%
 \subsection{Parametric modeling}\label{parametric-modeling}}
@@ -330,7 +330,7 @@ Finally, the output from \texttt{absoluteRisk} can be passed to a method \texttt
 In this section, we illustrate the main functions of the \pkg{casebase} package through three case studies. Each one showcases a different type of analysis. First, we show how to model non-constant and non-proportional hazards through a flexible specification of time. Then we perform a competing risk analysis and compare our results with the Cox model and the Fine-Gray model. The third case study illustrates how to perform variable selection in high-dimensional datasets.
 
 \hypertarget{case-study-1flexible-modeling-of-the-hazard-function}{%
-\subsection{Case study 1---Flexible modeling of the hazard function}\label{case-study-1flexible-modeling-of-the-hazard-function}}
+\subsection{Case study 1---flexible modeling of the hazard function}\label{case-study-1flexible-modeling-of-the-hazard-function}}
 
 For our first case study, we return to the ERSPC study and investigate the
 differences in risk between the control and screening arms. Previous re-analyses
@@ -512,39 +512,47 @@ Alternatively, the breakpoint \(t_0\) could also be estimated by combining case-
 Modeling the hazard function directly allows us to easily visualize it with
 the \texttt{plot} method and \texttt{type="hazard"} for objects of class \texttt{singleEventCB}.
 We plot the hazard functions for both treatment arms in Figure \ref{fig:cs1hazard}.
-The pattern we see is consistent with the population-time plot shown in Figure \ref{fig:plot-erspc-data} C, where more events are observed at later follow-up times.
+The pattern we see is consistent with the population-time plot shown in Figure \ref{fig:plot-erspc-data}C, where more events are observed at later follow-up times.
 The drop at the end can be explained by the fact that very few observations were followed for the entire 15 year period.
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 plot(fit, type = "hazard",
      hazard.params = list(xvar = "Follow.Up.Time",
                           by = "ScrArm"))
+\end{Sinput}
+\begin{Soutput}
 #> Conditions used in construction of plot
 #> ScrArm: Control group / Screening group
 #> offset: 0
-\end{verbatim}
-
+\end{Soutput}
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./cs1hazard-1} \caption{Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combination of covariates along with confidence bands.}\label{fig:cs1hazard}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./cs1hazard-1} \caption[Estimated hazard functions for control and screening groups in the ERSPC dataset]{Estimated hazard functions for control and screening groups in the ERSPC dataset. Hazards are estimated from fitting a parametric model with casebase sampling as a function of the interaction between a cubic pspline basis (df=2) of follow-up time and treatment arm. The package vignettes provide a detailed description of how to plot hazard functions for any combination of covariates along with confidence bands.}\label{fig:cs1hazard}
 \end{figure}
+\end{Schunk}
 
 \hypertarget{absolute-risk}{%
 \subsubsection{Absolute risk}\label{absolute-risk}}
 
 Next, the \texttt{absoluteRisk} function takes as input the \texttt{singleEventCB} object and returns a matrix where each column corresponds to the covariate profiles specified in the \texttt{newdata} argument, and each row corresponds to time points specified by the \texttt{time} argument:
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 new_data <- data.frame(ScrArm = c("Control group", "Screening group"))
 new_time <- seq(0,14,0.1)
 risk <- absoluteRisk(fit, time = new_time, newdata = new_data)
-\end{verbatim}
+\end{Sinput}
+\end{Schunk}
 
 We can subsequently compute confidence intervals for the risk function using
 the method \texttt{confint.absRiskCB}:
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 conf_ints <- confint(risk, fit)
 head(conf_ints)
+\end{Sinput}
+\begin{Soutput}
 #>   time estimate conf.low conf.high      cov_prof
 #> 1  0.0  0.0e+00  0.0e+00   0.0e+00 Control group
 #> 2  0.1  1.8e-06  1.9e-07   1.2e-05 Control group
@@ -552,42 +560,46 @@ head(conf_ints)
 #> 4  0.3  6.1e-06  9.0e-07   3.2e-05 Control group
 #> 5  0.4  8.7e-06  1.5e-06   4.1e-05 Control group
 #> 6  0.5  1.2e-05  2.3e-06   5.0e-05 Control group
-\end{verbatim}
+\end{Soutput}
+\end{Schunk}
 
 In Figure \ref{fig:erspc-cif-conf}, we see the 95\% confidence bands around the estimates.
 We also overlay the Kaplan-Meier curves as a reference.
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cif-conf-1} \caption{Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands.}\label{fig:erspc-cif-conf}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./erspc-cif-conf-1} \caption{Risk function estimates for control and screening groups in the ERSPC data using case-base sampling and Kaplan-Meier, along with 95\% confidence bands. The smooth curve (case-base sampling) vs. step function (Cox model) highlight one of the main differences between the two approaches. The larger confidence bands in the later years is due to the relatively few number of individuals who were followed for more than 12 years.}\label{fig:erspc-cif-conf}
 \end{figure}
 
 \hypertarget{case-study-2competing-risk-analysis}{%
-\subsection{Case study 2---Competing risk analysis}\label{case-study-2competing-risk-analysis}}
+\subsection{Case study 2---competing risk analysis}\label{case-study-2competing-risk-analysis}}
 
 In this case study, we show how case-base sampling can be used in the context of a competing risk analysis. For illustrative purposes, we use the same data that was used in Scrucca \emph{et al} (2010). The data was downloaded from the first author's website, and it is now available as part of the \pkg{casebase} package.
 
 The data contains information on 177 patients who received a stem-cell transplant for acute leukemia. The event of interest is relapse, but other competing causes (e.g.~death, progression, graft failure, graft-versus-host disease) were also recorded. Several covariates were captured at baseline: sex, disease type (acute lymphoblastic or myeloblastic leukemia, abbreviated as ALL and AML, respectively), disease phase at transplant (Relapse, CR1, CR2, CR3), source of stem cells (bone marrow and peripheral blood, coded as BM+PB, or only peripheral blood, coded as PB), and age.
 
-First, we look at a population-time plot to visualize the incidence density of both relapse and the competing events. In Figure \ref{fig:compPop}, failure times are highlighted on the plot using red dots for the event of interest (panel A) and blue dots for competing events (panel B). In both panels, we see evidence of a non-constant hazard function: the density of points is larger at the beginning of follow-up than at the end.
+First, we look at a population-time plot to visualize the incidence density of both relapse and the competing events. In Figure \ref{fig:compPop}, failure times are highlighted on the plot using red dots for the event of interest and blue dots for competing events. In this plot, we see evidence of a non-constant hazard function: the density of points is larger at the beginning of follow-up than at the end.
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./compPop-1} \caption{Population-time plot for the stem-cell transplant study with both relapse and competing events.}\label{fig:compPop}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./compPop-1} \caption{Population-time plot for the stem-cell transplant study with both relapse and competing events. The area representing the population time is shown in gray, with subjects having the least amount of observation time plotted at the top of the y-axis. The y-axis location of each case series and competing event moment is sampled at random vertically on the plot to avoid having all points along the upper edge of the gray area. The density of points at the beginning of follow-up relative to the end indicates a non-constant hazard function.}\label{fig:compPop}
 \end{figure}
 
 Our main objective is to compute the cumulative incidence of relapse for a given set of covariates. We start by fitting a smooth hazard to the data using a linear term for time:
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 model_cb <- fitSmoothHazard(
   Status ~ ftime + Sex + D + Phase + Source + Age,
   data = bmtcrr,
   ratio = 100,
   time = "ftime"
 )
-\end{verbatim}
+\end{Sinput}
+\end{Schunk}
 
 We want to compare our hazard ratio estimates to that obtained from a Cox regression (using the \pkg{survival} package version 3.2-13).
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 library(survival)
 # Prepare data for coxph
 bmtcrr_cox <- transform(bmtcrr, 
@@ -596,7 +608,8 @@ bmtcrr_cox <- transform(bmtcrr,
 
 model_cox <- coxph(Surv(ftime, Status) ~ Sex + D + Phase + Source + Age,
                    data = bmtcrr_cox, id = id)
-\end{verbatim}
+\end{Sinput}
+\end{Schunk}
 
 \begin{table}
 
@@ -628,7 +641,8 @@ Next, we compare our estimates to that obtained from a corresponding Fine-Gray m
 \[CI_j(t) = 1 - \exp\left( - \int_0^t d_j(u) \textrm{d}u \right),\]
 where \(CI_j(t)\) is the cause-specific CI. The Fine-Gray model allows to directly assess the effect of a covariate on the subdistribution hazard, as opposed to the cause-specific hazard. For the computation, we use the \CRANpkg{timereg} package (Thomas H. Scheike and Zhang 2011):
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 library(timereg)
 model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
                         const(Phase) + const(Source) + const(Age),
@@ -636,23 +650,26 @@ model_fg <- comp.risk(Event(ftime, Status) ~ const(Sex) + const(D) +
 
 # Estimate CI curve
 risk_fg <- predict(model_fg, newdata, times = time_points)
-\end{verbatim}
+\end{Sinput}
+\end{Schunk}
 
 We can also estimate the CI for relapse using the Cox model and the Aalen-Johansen estimator:
 
-\begin{verbatim}
+\begin{Schunk}
+\begin{Sinput}
 # Estimate absolute risk curve
 risk_cox <- survfit(model_cox, newdata = newdata)
-\end{verbatim}
+\end{Sinput}
+\end{Schunk}
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./compAbsrisk-1} \caption{Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates.}\label{fig:compAbsrisk}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./compAbsrisk-1} \caption{Cumulative Incidence curve for a fixed covariate profile and the two disease groups. The estimate obtained from case-base sampling is compared to the Fine-Gray and Aalen-Johansen estimates. In general, the three approaches agree quite well for AML, while there seems to be a difference of about 5\% between the Fine-Gray curve and the curves estimated using case-base sampling and Cox regression for ALL. However, this difference does not appear to be significant as the curve from case-base sampling is contained within a 95\% confidence band around the Fine-Gray absolute risk curve (figure not shown).}\label{fig:compAbsrisk}
 \end{figure}
 
 Figure \ref{fig:compAbsrisk} shows the CI curves for all three models. As we can see, all three approaches agree quite well for AML; however, for ALL, there seems to be a difference of about 5\% between the Fine-Gray curve and the curves estimated using case-base sampling and Cox regression. This difference does not appear to be significant: the curve from case-base sampling is contained within a 95\% confidence band around the Fine-Gray absolute risk curve (figure not shown).
 
 \hypertarget{case-study-3variable-selection}{%
-\subsection{Case study 3---Variable selection}\label{case-study-3variable-selection}}
+\subsection{Case study 3---variable selection}\label{case-study-3variable-selection}}
 
 For the third case study, we show how \pkg{casebase} can also be used for variable selection through regularized estimation of the hazard function as given by Equation \eqref{eq:penest}. We note that this is different than the semiparametric model Coxnet, which regularizes the Cox partial likelihood. To illustrate this functionality, we use the dataset from the Study to Understand Prognoses Preferences Outcomes and Risks of Treatment (SUPPORT) (Knaus et al. 1995).\footnote{The original data is available online from the Department of Biostatistics at Vanderbilt University: \url{https://biostat.app.vumc.org/wiki/Main/SupportDesc}} The SUPPORT dataset tracks death in five American hospitals within individuals who are considered seriously ill.~The cleaned and imputed data consists of 9104 observations and 30 variables, and it is available as part of the \pkg{casebase} package. In the comparisons below, all covariates except \texttt{sps} and \texttt{aps} were used. These two variables correspond to scores for predicting the outcome that were developed as part of the original study. For more information about this dataset, the reader is encouraged to look at the documentation in our package.
 
@@ -682,10 +699,10 @@ In Figure \ref{fig:cs3lolliPlot}, we show the coefficient estimates for covariat
 \includegraphics[width=\textwidth,keepaspectratio=true]{./cs3lolliPlot-1} \caption{Coefficient estimates from the Cox model (Cox), penalized Cox model using the glmnet package (Pen. Cox), and our approach using penalized case-base sampling (Pen. CB). Only the covariates that were selected by both penalized approaches are shown. The shrinkage of the coefficient estimates for Pen. Cox and Pen. CB occurs due to the $\ell_1$ penalty.}\label{fig:cs3lolliPlot}
 \end{figure}
 
-We then compare the risk estimation over the test set. The probabilities over time for each observation are averaged, resulting in the absolute risk curves shown in Figure \ref{fig:cs3FinalBrier} (A). We can see some minimal differences between the three models, with the Kaplan-Meier giving the lowest estimates across follow-up-time. Note that the apparent smoothness of the Cox and penalized Cox curves is due to the large number of observations in the training set, which is used to derive the Breslow estimate of the baseline hazard. As described above, we compare the performance between the models by computing the Brier scores over time. In Figure \ref{fig:cs3FinalBrier} (B), we can see that the Brier score is larger for the Kaplan-Meier estimate than for the other three models. On the other hand, the differences between these three models are minimal.
+We then compare the risk estimation over the test set. The probabilities over time for each observation are averaged, resulting in the absolute risk curves shown in Figure \ref{fig:cs3FinalBrier}A. We can see some minimal differences between the four models, with the Cox model giving the lowest estimates across follow-up-time. Note that the apparent smoothness of the Cox and penalized Cox curves is due to the large number of observations in the training set, which is used to derive the Breslow estimate of the baseline hazard. As described above, we compare the performance between the models by computing the Brier scores over time. In Figure \ref{fig:cs3FinalBrier}B, we can see that the Brier score is larger for the Kaplan-Meier estimate than for the other three models. On the other hand, the differences between the three adjusted models are minimal.
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth,keepaspectratio=true]{./cs3FinalBrier-1} \caption{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace.}\label{fig:cs3FinalBrier}
+\includegraphics[width=\textwidth,keepaspectratio=true]{./cs3FinalBrier-1} \caption{Comparison of Cox regression (Cox), penalized Cox regression (Pen. Cox), penalized case-base sampling estimation (Pen. CB), and Kaplan-Meier (K-M). (A)  Probability of death as a function of follow-up time. (B) Brier score as a function of follow-up time, where a lower score corresponds to better performace. The unadjusted Kaplan-Meier gives the lowest risk estimates across follow-up-time and highest Brier scores, while we can see minimal differences between the three adjusted models across both metrics. Note that the apparent smoothness of the Cox and penalized Cox curves is due to the large number of observations in the training set, which is used to derive the Breslow estimate of the baseline hazard.}\label{fig:cs3FinalBrier}
 \end{figure}
 
 \hypertarget{discussion}{%
